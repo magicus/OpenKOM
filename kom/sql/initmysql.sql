@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS messages
 	thread BIGINT,
 	kind SMALLINT NOT NULL,
 	subject VARCHAR(80) NOT NULL,
-	body TEXT NOT NULL,
+	body LONGTEXT NOT NULL,
 	PRIMARY KEY(id),
 	INDEX msgauthor_ix(author),
 	FOREIGN KEY (author) REFERENCES users(id) ON DELETE SET NULL,
@@ -104,7 +104,7 @@ CREATE TABLE messagesearch
 (
 	id BIGINT(20) NOT NULL,
 	subject VARCHAR(80) NOT NULL,
-	body TEXT NOT NULL,
+	body LONGTEXT NOT NULL,
 	PRIMARY KEY (id),
 	FULLTEXT KEY search_ix (subject,body)
 ) TYPE=MyISAM; 
