@@ -11,11 +11,15 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMRuntimeException;
+import nu.rydin.kom.exceptions.LineEditingInterruptedException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
+import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
+import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageOccurrence;
@@ -129,4 +133,25 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 	{
 	    m_context.setReplyTo(replyTo);
 	}
+
+    protected void handleLineEditingInterruptedException(EditorContext context, LineEditingInterruptedException e)
+    throws InterruptedException, OperationInterruptedException, IOException
+    {
+        // If user has written no more than three lines, abort immediately.
+        if (context.getBuffer().size() <= 3)
+        {
+            throw e;
+        }
+        
+        // Otherwise, ask user if he wants to abort.
+	    MessageFormatter formatter = context.getMessageFormatter();
+	    KOMWriter out = context.getOut();
+	    LineEditor in = context.getIn();
+	    out.print(formatter.format("simple.editor.abortquestion"));
+	    out.flush();
+	    String answer = in.readLine();
+	    if (answer.equals(formatter.format("misc.y"))) {
+	        throw e;
+	    }
+    }
 }

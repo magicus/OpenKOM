@@ -21,12 +21,10 @@ import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.parser.Parser;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -61,6 +59,9 @@ public abstract class AbstractEditor
 	}
 	
 	protected abstract void refresh() throws KOMException;
+	
+    protected abstract void handleLineEditingInterruptedException(EditorContext context, LineEditingInterruptedException e)
+    throws InterruptedException, OperationInterruptedException, IOException;
 	
 	protected void mainloop(boolean stopOnEmpty)
 	throws InterruptedException, OperationInterruptedException, UnexpectedException, IOException
@@ -175,13 +176,7 @@ public abstract class AbstractEditor
 			        // Only add extra line in ctrl-c case. (Sorry för fulkoden. /Ihse)
 			        out.println();
 			    }
-			    MessageFormatter formatter = m_context.getMessageFormatter();
-			    out.print(formatter.format("simple.editor.abortquestion"));
-			    out.flush();
-			    String answer = in.readLine();
-			    if (answer.equals(formatter.format("misc.y"))) {
-			        throw e;
-			    }
+			    handleLineEditingInterruptedException(m_context, e);
 			}
 			catch(LineOverflowException e)
 			{
