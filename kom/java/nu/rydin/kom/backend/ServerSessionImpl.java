@@ -268,6 +268,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
+	public Envelope readLastMessage()
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		return this.innerReadMessage(this.m_lastReadMessageId);
+	}
+	
 	public Envelope innerReadMessage(long messageId)
 	throws ObjectNotFoundException, UnexpectedException
 	{

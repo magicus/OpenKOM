@@ -145,6 +145,18 @@ public interface ServerSession
 	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
+	 * Re-read the last read message.
+	 * 
+	 * @param messageId
+	 * @return
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	
+	public Envelope readLastMessage()
+	throws ObjectNotFoundException, UnexpectedException;
+
+	/**
 	 * Retrievs a message and marks it as unread
 	 * 
 	 * @param localnum Local number in the current conference
