@@ -196,8 +196,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				
 			// Go to first conference with unread messages
 			//
-			long firstConf = m_memberships.getNextConferenceWithUnreadMessages(
-				userId, da.getConferenceManager());
+			long firstConf = m_memberships.getFirstConferenceWithUnreadMessages(
+				da.getConferenceManager());
 			this.setCurrentConferenceId(firstConf != -1 ? firstConf : userId);
 			
 			// Invalidate DataAccess
@@ -1291,6 +1291,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    long user = this.getLoggedInUserId();
 	    try
 	    {
+	        // Check if we're actually member of the two given conferences.
+	        //
 	        if (!m_da.getMembershipManager().isMember(user, conference))
 	        {
 	            throw new NotMemberException(new Object[] { this.getCensoredName(conference).getName() });
@@ -1299,7 +1301,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        {
 	            throw new NotMemberException(new Object[] { this.getCensoredName(targetconference).getName() });
 	        }
-	        return m_da.getMembershipManager().prioritizeConference(user, conference, targetconference);
+	        
+	        // Shufflepuck café
+	        //
+	        long result = m_da.getMembershipManager().prioritizeConference(user, conference, targetconference);
+	        
+			// Flush membership cache
+			//
+	        this.reloadMemberships();
+	        return result;
 	     }
 	    catch(SQLException e)
 	    {
