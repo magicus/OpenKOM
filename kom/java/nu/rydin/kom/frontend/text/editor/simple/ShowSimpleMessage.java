@@ -15,6 +15,8 @@ import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.Message;
+import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
@@ -45,6 +47,36 @@ public class ShowSimpleMessage extends AbstractCommand
 		//
 		dc.messageHeader();
 		out.println(formatter.format("simple.editor.author", context.getCachedUserInfo().getName()));
+		
+		// FIXME EDITREFACTOR: This whole thing does very unneccessary lookups since the editor doesn't hold enough information about the message being replied to.
+		// Handle reply
+		//
+		if(edContext.getReplyTo() != -1)
+		{
+		    // Fetch reply-to
+		    //
+		    Message oldMessage = edContext.getSession().innerReadMessage(edContext.getReplyTo()).getMessage();
+		    MessageOccurrence oldMessageOcc = edContext.getSession().getMostRelevantOccurrence(edContext.getSession().getCurrentConferenceId(), edContext.getReplyTo()); 
+		    
+			if(edContext.getRecipient().getId() == oldMessageOcc.getConference())
+			{
+				// Simple case: Original text is in same conference
+				//
+				out.println(formatter.format("CompactMessagePrinter.reply.to.same.conference", 
+					new Object[] { new Long(oldMessageOcc.getLocalnum()), 
+				        edContext.formatObjectName(oldMessage.getAuthorName(), oldMessage.getAuthor()) } ));		
+			}
+			else
+			{
+				// Complex case: Original text was in a different conference
+				//
+				out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
+					new Object[] { new Long(oldMessageOcc.getLocalnum()),
+				        edContext.formatObjectName(edContext.getSession().getConference(oldMessageOcc.getConference()).getName(),
+				        oldMessageOcc.getConference()), 
+				        edContext.formatObjectName(oldMessage.getAuthorName(), oldMessage.getAuthor()) }));
+			}
+		}
 		
 		// Print recipient
 		//
