@@ -66,7 +66,7 @@ public abstract class AbstractEditor implements MessageEditor
 			dc.messageHeader();
 			PrintUtils.printRightJustified(out, Integer.toString(buffer.size() + 1), 4);
 			out.print(':');
-			dc.normal();
+			dc.input();
 			out.flush();
 			String line = null;
 			try

@@ -81,7 +81,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	private WordWrapperFactory m_wordWrapperFactory = new StandardWordWrapper.Factory();
 	private int m_windowHeight = -1;
 	private int m_windowWidth = -1;
-
+	private EventPrinter eventPrinter = new EventPrinter();
 	
 	// This could be read from some kind of user config if the
 	// user wants an alternate message printer. 
@@ -104,6 +104,62 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			int top = cmds.length;
 			for(int idx = 0; idx < top; ++idx)
 				out.println(cmds[idx].getFullName());
+		}
+	}
+	
+	private class EventPrinter implements EventTarget
+	{
+		public void onEvent(Event event) {
+		}
+
+		public void onEvent(ChatMessageEvent event) {
+			getDisplayController().normal();
+			m_out.print(m_formatter.format("event.chat", new Object[] { event.getUserName() }));
+			getDisplayController().chatMessageBody();
+			m_out.println(event.getMessage());
+//			m_out.println();
+		}
+
+		public void onEvent(BroadcastMessageEvent event) {
+			getDisplayController().normal();
+			m_out.print(m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() }));
+			getDisplayController().broadcastMessageBody();
+			m_out.println(event.getMessage());
+//			m_out.println();
+		}
+
+		public void onEvent(ChatAnonymousMessageEvent event) {
+			getDisplayController().normal();
+			m_out.print(m_formatter.format("event.broadcast.anonymous"));
+			getDisplayController().broadcastMessageBody();
+			m_out.println(event.getMessage());
+			m_out.println();			
+		}
+
+		public void onEvent(BroadcastAnonymousMessageEvent event) {
+			getDisplayController().normal();
+			m_out.print(m_formatter.format("event.broadcast.anonymous"));
+			getDisplayController().broadcastMessageBody();
+			m_out.println(event.getMessage());
+			m_out.println();			
+		}
+
+		public void onEvent(NewMessageEvent event) {
+			//This event should not be handled here
+		}
+
+		public void onEvent(UserAttendanceEvent event) {
+			getDisplayController().normal();
+			m_out.println(m_formatter.format("event.attendance." + event.getType(), new Object[] { event.getUserName() }));
+			m_out.println();
+		}
+
+		public void onEvent(ReloadUserProfileEvent event) {
+			//This event should not be handled here
+		}
+
+		public void onEvent(MessageDeletedEvent event) {
+			//This event should not be handled here
 		}
 	}
 	
@@ -351,21 +407,23 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 				{
 					while(!m_displayMessageQueue.isEmpty())
 					{
-					    dc.chatMessage();
-					    WordWrapper ww = this.getWordWrapper((String) m_displayMessageQueue.removeFirst(), 
-					            this.getTerminalSettings().getWidth());
-					    String line = null;
-					    while((line = ww.nextLine()) != null)
-					        m_out.println(line);
+						Event ev = (Event)m_displayMessageQueue.removeFirst();
+						ev.dispatch(eventPrinter);
+						
+//					    WordWrapper ww = this.getWordWrapper((String) m_displayMessageQueue.removeFirst(), 
+//					            this.getTerminalSettings().getWidth());
+//					    String line = null;
+//					    while((line = ww.nextLine()) != null)
+//					        m_out.println(line);
 						// m_out.println((String) m_displayMessageQueue.removeFirst());
-						m_out.println();
+//						m_out.println();
 					}
 				}
 				Command defaultCommand = this.getDefaultCommand();
 				dc.prompt();
 				String prompt = defaultCommand.getFullName() + " - "; 
 				m_out.print(prompt);
-				dc.normal();
+				dc.input();
 				m_out.flush();
 				
 				// Read command
@@ -602,7 +660,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		// Determine name of conference. Give a generic name
 		// to mailboxes.
 		//
-	    this.getDisplayController().normal();
+	    this.getDisplayController().input();
 		ConferenceInfo conf = m_session.getCurrentConference();
 		long id = conf.getId();
 		String confName = id == m_session.getLoggedInUserId()
@@ -720,8 +778,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		//
 		synchronized(m_displayMessageQueue)
 		{
-			m_displayMessageQueue.addLast(m_formatter.format("event.chat", 
-								new Object[] { event.getUserName(), event.getMessage() }));
+			m_displayMessageQueue.addLast(event);
 		}		
 	}
 
@@ -731,8 +788,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		//
 		synchronized(m_displayMessageQueue)
 		{
-			m_displayMessageQueue.addLast(m_formatter.format("event.broadcast.default", 
-								new Object[] { event.getUserName(), event.getMessage() }));
+			m_displayMessageQueue.addLast(event);
 		}		
 	}
 
@@ -742,8 +798,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		//
 		synchronized(m_displayMessageQueue)
 		{
-			m_displayMessageQueue.addLast(m_formatter.format("event.broadcast.anonymous", 
-								new Object[] { event.getMessage() }));
+			m_displayMessageQueue.addLast(event);
 		}		
 	}
 
@@ -753,8 +808,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		//
 		synchronized(m_displayMessageQueue)
 		{
-			m_displayMessageQueue.addLast(m_formatter.format("event.broadcast.anonymous", 
-								new Object[] { event.getMessage() }));
+			m_displayMessageQueue.addLast(event);
 		}		
 	}
 	
@@ -764,8 +818,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		//
 		synchronized(m_displayMessageQueue)
 		{
-			m_displayMessageQueue.addLast(m_formatter.format("event.attendance." + event.getType(), 
-								new Object[] { event.getUserName() }));
+			m_displayMessageQueue.addLast(event);
 		}				
 	}
 	

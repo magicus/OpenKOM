@@ -15,7 +15,7 @@ public class DummyDisplayController implements DisplayController
     {
     }
 
-    public void genericHeader()
+    public void normal()
     {
     }
     
@@ -27,15 +27,15 @@ public class DummyDisplayController implements DisplayController
     {
     }
     
-    public void chatMessage() 
+    public void chatMessageBody() 
     {
     }
 
-    public void broadcastMessage() 
+    public void broadcastMessageBody() 
     {
     }
 
-    public void normal() 
+    public void input() 
     {
     }
 

@@ -62,7 +62,7 @@ public class SendChatMessage extends AbstractCommand
 		if("*".equals(parameters[0]))
 		{
 		    //Print beginning of prompt for message to all users.
-			dc.genericHeader();
+			dc.normal();
 		    out.println(context.getMessageFormatter().format("chat.saytoall"));
 		}
 		else
@@ -129,7 +129,7 @@ public class SendChatMessage extends AbstractCommand
 			{
 			    recipients = recipients.substring(2);
 			}
-			dc.genericHeader();
+			dc.normal();
 		    out.println(context.getMessageFormatter().format("chat.saytouser", recipients));
 
 		}

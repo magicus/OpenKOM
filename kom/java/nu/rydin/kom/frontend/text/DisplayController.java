@@ -13,7 +13,7 @@ public interface DisplayController
 {
     public void prompt();
     
-    public void genericHeader();
+    public void normal();
     
     public void messageHeader();
     
@@ -25,11 +25,11 @@ public interface DisplayController
     
     public void editorLineNumber();
     
-    public void chatMessage();
+    public void chatMessageBody();
     
-    public void broadcastMessage();
+    public void broadcastMessageBody();
     
-    public void normal();
+    public void input();
     
     public void highlight();
 }

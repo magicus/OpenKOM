@@ -63,12 +63,12 @@ public class SimpleMessageEditor extends AbstractEditor
 			//
 			String subjLine = formatter.format("simple.editor.subject");
 			out.print(subjLine);
-			dc.normal();
+			dc.input();
 			out.flush();
 			context.setSubject(in.readLine(oldSubject));
 			dc.messageHeader();
 			PrintUtils.printRepeated(out, '-', subjLine.length() + context.getSubject().length());
-			dc.normal();
+			dc.input();
 			out.println();
 						
 			// Enter the main editor loop

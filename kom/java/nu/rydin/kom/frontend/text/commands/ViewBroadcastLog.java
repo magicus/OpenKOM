@@ -27,7 +27,7 @@ public class ViewBroadcastLog extends ViewMessageLog
     throws KOMException, IOException, InterruptedException	
     {	
     	DisplayController dc = context.getDisplayController();
-    	dc.broadcastMessage();
+    	dc.broadcastMessageBody();
         this.innerExecute(context, parameters, MessageLogKinds.BROADCAST);
     }
 }
