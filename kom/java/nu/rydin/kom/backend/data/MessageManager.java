@@ -156,7 +156,7 @@ public class MessageManager
 			 "select message " + 
 			 "from messageoccurrences as mo " +
 			 "join memberships as ms on mo.conference = ms.conference " +
-			 "join Messages on mo.message = messages.id " +
+			 "join messages on mo.message = messages.id " +
 			 "where ms.user = ? and subject = ?");
 		m_getLocalBySubjectStmt = conn.prepareStatement(
 		     "select localnum " +
@@ -172,18 +172,18 @@ public class MessageManager
 			 "delete from conferences where id = ?");
 		m_findLastOccurrenceInConferenceWithAttrStmt = conn.prepareStatement(
 			 "select localnum " +
-			 "from MessageOccurrences as MO " +
-			 "join MessageAttributes as MA on MO.Message = MA.Message " +
-			 "where MA.kind = ? and MO.conference = ? " +
-			 "order by MO.Message desc " +
+			 "from messageoccurrences as mo " +
+			 "join messageattributes as ma on mo.message = ma.message " +
+			 "where ma.kind = ? and mo.conference = ? " +
+			 "order by mo.message desc " +
 			 "limit 1 offset 0");
 		m_getLatestMagicMessageStmt = conn.prepareStatement(
-			 "select MO.Message " +
-			 "from MessageOccurrences as MO " +
-			 "join MagicConferences as MC on MO.Conference = MC.Conference " +
-			 "join MessageAttributes as MA on MO.Message = MA.Message " +
-			 "where MO.Conference = ? and MA.Kind = ? and MA.Value = ? " +
-			 "order by MO.Message desc " +
+			 "select mo.message " +
+			 "from messageoccurrences as mo " +
+			 "join magicconferences as mc on mo.conference = mc.conference " +
+			 "join messageattributes as ma on mo.message = ma.message " +
+			 "where mo.conference = ? and ma.kind = ? and ma.value = ? " +
+			 "order by mo.message desc " +
 			 "limit 1 offset 0");
 		
 		//What happens if there are two occurences with kind = ACTION_CREATED
