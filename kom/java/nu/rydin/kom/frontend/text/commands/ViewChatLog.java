@@ -26,7 +26,7 @@ public class ViewChatLog extends ViewMessageLog
             throws KOMException
     {
     	DisplayController dc = context.getDisplayController();
-    	dc.chatMessageBody();
+    	dc.output();
         this.innerExecute(context, parameterArray);
     }
     

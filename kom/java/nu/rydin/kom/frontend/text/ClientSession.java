@@ -136,9 +136,9 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	
 		public void onEvent(ChatMessageEvent event) 
 		{
-			getDisplayController().normal();
 			this.beepMaybe(UserFlags.BEEP_ON_CHAT);
 			String header = m_formatter.format("event.chat", new Object[] { event.getUserName() }); 
+			getDisplayController().chatMessageHeader();
 			m_out.print(header);
 			getDisplayController().chatMessageBody();
 			printWrapped(event.getMessage(), header.length());
@@ -147,11 +147,11 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 
 		public void onEvent(BroadcastMessageEvent event) 
 		{
-			getDisplayController().normal();
 			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
 			String header = event.getKind() == MessageLogKinds.BROADCAST 
 			    ? m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() })
 			    : event.getUserName() + ' ';
+			getDisplayController().broadcastMessageHeader();
 			m_out.print(header);
 			getDisplayController().broadcastMessageBody();
 			printWrapped(event.getMessage(), header.length());
@@ -160,20 +160,20 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 
 		public void onEvent(ChatAnonymousMessageEvent event) 
 		{
-			getDisplayController().normal();
 			this.beepMaybe(UserFlags.BEEP_ON_CHAT);
-			String header = m_formatter.format("event.broadcast.anonymous");
+			String header = m_formatter.format("event.chat.anonymous");
+			getDisplayController().chatMessageHeader();
 			m_out.print(header);
-			getDisplayController().broadcastMessageBody();
+			getDisplayController().chatMessageBody();
 			printWrapped(event.getMessage(), header.length());
 			m_out.println();			
 		}
 
 		public void onEvent(BroadcastAnonymousMessageEvent event) 
 		{
-			getDisplayController().normal();
 			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
 			String header = m_formatter.format("event.broadcast.anonymous");
+			getDisplayController().broadcastMessageHeader();
 			m_out.print(header);
 			getDisplayController().broadcastMessageBody();
 			printWrapped(event.getMessage(), header.length());
@@ -187,7 +187,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 
 		public void onEvent(UserAttendanceEvent event) 
 		{
-			getDisplayController().normal();
+			getDisplayController().broadcastMessageHeader();
 			this.beepMaybe(UserFlags.BEEP_ON_ATTENDANCE);			
 			m_out.println(m_formatter.format("event.attendance." + event.getType(), new Object[] { event.getUserName() }));
 			m_out.println();
@@ -918,7 +918,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
         {
 	        return (this.getCachedUserInfo().getFlags1() & UserFlags.ANSI_ATTRIBUTES) != 0
 	        	? (DisplayController) new ANSIDisplayController(m_out)
-	        	: (DisplayController) new DummyDisplayController();
+	        	: (DisplayController) new DummyDisplayController(m_out);
         }
         catch(UnexpectedException e)
         {

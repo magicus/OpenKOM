@@ -27,11 +27,19 @@ public interface DisplayController
     
     public void editorLineNumber();
     
+    public void chatMessageHeader();
+    
+    public void broadcastMessageHeader();
+
     public void chatMessageBody();
     
     public void broadcastMessageBody();
-    
+
     public void input();
+
+    public void output();
     
     public void highlight();
+    
+    public void reset();
 }

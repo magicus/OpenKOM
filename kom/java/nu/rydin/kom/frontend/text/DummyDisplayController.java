@@ -6,11 +6,22 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.PrintWriter;
+
+import nu.rydin.kom.frontend.text.ansi.ANSISequences;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class DummyDisplayController implements DisplayController 
-	{
+{
+    private final PrintWriter m_writer;
+    
+    public DummyDisplayController(PrintWriter writer)
+    {
+        m_writer = writer;
+    }
+    
     public void prompt() 
     {
     }
@@ -31,6 +42,14 @@ public class DummyDisplayController implements DisplayController
     {
     }
     
+    public void chatMessageHeader() 
+    {
+    }
+
+    public void broadcastMessageHeader() 
+    {
+    }
+
     public void chatMessageBody() 
     {
     }
@@ -38,11 +57,15 @@ public class DummyDisplayController implements DisplayController
     public void broadcastMessageBody() 
     {
     }
-
+    
     public void input() 
     {
     }
 
+    public void output() 
+    {
+    }
+    
     public void highlight() 
     {
     }
@@ -58,4 +81,9 @@ public class DummyDisplayController implements DisplayController
 	public void editorLineNumber() 
 	{
 	}
+
+    public void reset()
+    {
+        m_writer.print(ANSISequences.RESET_ATTRIBUTES);
+    }
 }

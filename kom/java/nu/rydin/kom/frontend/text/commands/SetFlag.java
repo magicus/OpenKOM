@@ -34,12 +34,18 @@ public class SetFlag extends AbstractCommand
         long[] reset = new long[UserFlags.NUM_FLAG_WORD];
         set[flagNumber / 64] = 1 << (flagNumber % 64);
         context.getSession().changeUserFlags(set, reset);
-        context.getOut().println(
-                context.getMessageFormatter().format("set.flag.confirmation",
-                        context.getFlagLabels()[flagNumber]));
 
         // Clear cache
         //
         context.clearUserInfoCache();
+        
+        // Only necessary if flag set was ANSI...
+        context.getDisplayController().output();
+        
+        // Display confirmation
+        //
+        context.getOut().println(
+                context.getMessageFormatter().format("set.flag.confirmation",
+                        context.getFlagLabels()[flagNumber]));
     }
 }
