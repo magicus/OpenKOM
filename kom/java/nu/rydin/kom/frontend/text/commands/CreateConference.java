@@ -13,7 +13,7 @@ import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.data.UserManager;
+import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -90,7 +90,7 @@ public class CreateConference extends AbstractCommand
 				out.flush();
 				String line = in.readLine();
 				replyConf = line.length() != 0
-					? NamePicker.resolveName(line, UserManager.USER_KIND, context)
+					? NamePicker.resolveName(line, ConferenceManager.CONFERENCE_KIND, context)
 					: -1; 
 				break;
 			}
