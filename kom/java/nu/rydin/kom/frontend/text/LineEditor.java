@@ -126,7 +126,7 @@ public class LineEditor implements NewlineListener
 	
 	private final KeystrokeTokenizer m_tokenizer;
 	
-	private final ReaderProxy m_in;
+	final ReaderProxy m_in;
 	
 	private final InputStream m_inStream;
 	
@@ -134,7 +134,7 @@ public class LineEditor implements NewlineListener
 	
 	private final EventTarget m_target;
 	
-	private ServerSession m_session;
+	ServerSession m_session;
 	
 	private boolean m_dontCount = false;
 	
@@ -542,7 +542,6 @@ public class LineEditor implements NewlineListener
 			m_out.print(prompt);
 			m_out.flush();
 			String tmp = this.readLine(defaultString).toUpperCase();
-			int choice = -1;
 			if(tmp.length() > 0)
 			{
 				for(int idx = 0; idx < top; ++idx)
@@ -715,9 +714,6 @@ public class LineEditor implements NewlineListener
 			m_out.flush();
 			cursorpos = defaultString.length();
 		}
-				
-		boolean escapemode = false;
-		String escapecode = "";
 		
 		boolean editing = true;
 		while(editing)

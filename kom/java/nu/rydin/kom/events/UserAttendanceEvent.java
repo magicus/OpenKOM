@@ -29,7 +29,7 @@ public class UserAttendanceEvent extends Event
 	
 	public void dispatch(EventTarget target)
 	{
-		target.onEvent((UserAttendanceEvent) this);
+		target.onEvent(this);
 	}
 	
 	public String getUserName()

@@ -34,7 +34,7 @@ public class SessionManager
 	/**
 	 * Queue of events to be broadcasted
 	 */
-	private LinkedList m_broadcastQueue = new LinkedList();
+	LinkedList m_broadcastQueue = new LinkedList();
 	
 	private class Broadcaster extends Thread
 	{

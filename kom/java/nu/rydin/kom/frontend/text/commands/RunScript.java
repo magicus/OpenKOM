@@ -7,7 +7,6 @@
 package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
@@ -34,7 +33,6 @@ public class RunScript extends AbstractCommand
             throws KOMException, IOException, InterruptedException
     {
         ServerSession session = context.getSession();
-        PrintWriter out = context.getOut();
         
         // Extract data from parameters
         //

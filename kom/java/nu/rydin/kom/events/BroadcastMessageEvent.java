@@ -30,7 +30,7 @@ public class BroadcastMessageEvent extends Event
 	
 	public void dispatch(EventTarget target)
 	{
-		target.onEvent((BroadcastMessageEvent) this);
+		target.onEvent(this);
 	}
 	
 	public String getUserName()

@@ -34,16 +34,16 @@ public class UserLogManager
     throws SQLException
     {
         m_conn = conn;
-        m_storeStmt = conn.prepareStatement(
+        m_storeStmt = m_conn.prepareStatement(
                 "INSERT INTO userlog(user, logged_in, logged_out, num_posted, num_read, num_chat_messages, num_broadcasts, " +
                 "num_copies) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
-        m_getByDateStmt = conn.prepareStatement(
+        m_getByDateStmt = m_conn.prepareStatement(
                 "SELECT l.user, n.fullname, l.logged_in, l.logged_out, l.num_posted, l.num_read, " +
                 "l.num_chat_messages, l.num_broadcasts, l.num_copies " +
                 "FROM userlog l, names n " +
                 "WHERE l.user = n.id AND l.logged_in > ? AND l.logged_in < ? " +
                 "ORDER BY l.logged_in DESC LIMIT ? OFFSET ?");
-        m_getByUserStmt = conn.prepareStatement(
+        m_getByUserStmt = m_conn.prepareStatement(
                 "SELECT l.user, n.fullname, l.logged_in, l.logged_out, l.num_posted, l.num_read, " +
                 "l.num_chat_messages, l.num_broadcasts, l.num_copies " +
                 "FROM userlog l, names n " +

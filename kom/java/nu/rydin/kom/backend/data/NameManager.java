@@ -10,8 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.KOMCache;
@@ -42,8 +40,9 @@ public class NameManager
 	private final PreparedStatement m_getNamesByPatternStmt;
 	private final PreparedStatement m_getIdsByPatternAndKindStmt;
 	private final PreparedStatement m_getNamesByPatternAndKindStmt;	
-	private final PreparedStatement m_getNamesByPatternAndKindAndDateStmt;	
-	private final PreparedStatement m_getNamesByPatternAndKindAndNameStmt;	
+//DEAD CODE
+//	private final PreparedStatement m_getNamesByPatternAndKindAndDateStmt;	
+//	private final PreparedStatement m_getNamesByPatternAndKindAndNameStmt;	
 	private final PreparedStatement m_addNameStmt;
 	private final PreparedStatement m_getAssociationsByPatternStmt;
 	private final PreparedStatement m_getAssociationsByPatternAndKindStmt;
@@ -70,12 +69,13 @@ public class NameManager
 			"SELECT id FROM names WHERE norm_name LIKE ? AND kind = ?");
 		m_getNamesByPatternAndKindStmt = conn.prepareStatement(
 			"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +			"ORDER BY fullname");
-		m_getNamesByPatternAndKindAndNameStmt = conn.prepareStatement(
-				"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +
-				"ORDER BY fullname");
-		m_getNamesByPatternAndKindAndDateStmt = conn.prepareStatement(
-				"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +
-				"ORDER BY lastdate");
+//DEAD CODE
+//		m_getNamesByPatternAndKindAndNameStmt = conn.prepareStatement(
+//				"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +
+//				"ORDER BY fullname");
+//		m_getNamesByPatternAndKindAndDateStmt = conn.prepareStatement(
+//				"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +
+//				"ORDER BY lastdate");
 		m_addNameStmt  = conn.prepareStatement(
 			"INSERT INTO names(norm_name, fullname, kind, visibility) VALUES(?, ?, ?, ?)");
 		m_getAssociationsByPatternStmt = conn.prepareStatement(
@@ -237,7 +237,6 @@ public class NameManager
 		ResultSet rs = null;
 		try
 		{
-			List list = new ArrayList(100);
 			rs = m_getAssociationsByPatternAndKindStmt.executeQuery();
 			return SQLUtils.extractNames(rs, 1, 2, 3, pattern);
 		}

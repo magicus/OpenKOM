@@ -31,7 +31,6 @@ public class ChangeTimeZone extends AbstractCommand
             throws KOMException, IOException, InterruptedException
     {
         KOMWriter out = context.getOut();
-        LineEditor in = context.getIn();
         MessageFormatter formatter = context.getMessageFormatter();
         
         // Get timezone string

@@ -42,10 +42,8 @@ public class SendChatMessage extends AbstractCommand
 		// Set up
 		//
 		DisplayController dc = context.getDisplayController();
-		LineEditor in = context.getIn();
 		PrintWriter out = context.getOut();
 		ServerSession session = context.getSession();
-		String me = session.getLoggedInUser().getName();
 		MessageFormatter formatter = context.getMessageFormatter();
 		
 		//Retrieve array of id's of receivers.

@@ -7,7 +7,6 @@
 package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
@@ -16,7 +15,6 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.FilenameParameter;
 import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -26,16 +24,14 @@ public class DeleteFile extends AbstractCommand
 {
     public DeleteFile(Context context, String fullname)
     {
-        super(fullname, new CommandLineParameter[] {
-                new FilenameParameter(true), new NamedObjectParameter(false) });
+        super(fullname, new CommandLineParameter[]
+            { new FilenameParameter(true), new NamedObjectParameter(false) });
     }
 
     public void execute(Context context, Object[] parameters)
             throws KOMException, IOException, InterruptedException
     {
         ServerSession session = context.getSession();
-        PrintWriter out = context.getOut();
-        MessageFormatter formatter = context.getMessageFormatter();
 
         // Extract data from parameters
         //

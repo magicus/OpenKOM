@@ -122,7 +122,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	/**
 	 * Timestamp of last heartbeat
 	 */
-	private long m_lastHeartbeat = System.currentTimeMillis();
+	protected long m_lastHeartbeat = System.currentTimeMillis();
 	
 	/**
 	 * Usage statistics
@@ -767,7 +767,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				object = this.getLoggedInUserId();
 			}
 		    short kind = this.getObjectKind(object);
-		    UserInfo ui = this.getLoggedInUser();
 		    if(!this.canManipulateObject(object))
 		        throw new AuthorizationException();
 			long conference = m_da.getSettingManager().getNumber(
@@ -907,8 +906,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			this.assertConferencePermission(targetConf, ConferencePermissions.WRITE_PERMISSION);
 
 			MessageManager mm = m_da.getMessageManager(); 
-
-			long me = this.getLoggedInUserId();
 
 			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructNoCommentPayload(this.getLoggedInUser()));
 		}
@@ -1275,7 +1272,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			NameManager nm = m_da.getNameManager();
 			MembershipInfo[] mi = m_da.getMembershipManager().listMembershipsByUser(userId);
 			int top = mi.length;
 			NameAssociation[] answer = new NameAssociation[top];
@@ -1378,7 +1374,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    try
 	    {
 	        ConferenceManager cm = m_da.getConferenceManager();
-	        NameManager nm = m_da.getNameManager();
 	        MembershipManager mm = m_da.getMembershipManager();
 	        MembershipInfo[] m = mm.listMembershipsByUser(userId);
 	        MembershipList ml = new MembershipList(m);
@@ -1425,7 +1420,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		try
 		{
 			ConferenceManager cm = m_da.getConferenceManager();
-			NameManager nm = m_da.getNameManager();
 			MembershipInfo[] m = m_memberships.getMemberships();
 			int top = m.length;
 			List list = new ArrayList(top);
@@ -1463,8 +1457,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	throws UnexpectedException
 	{
 		ServerSession[] sessions = m_sessions.listSessions();
-		UserManager um = m_da.getUserManager();
-		NameManager nm = m_da.getNameManager();
 		int top = sessions.length;
 		UserListItem[] answer = new UserListItem[top];
 		for(int idx = 0; idx < top; ++idx)
@@ -1519,7 +1511,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public synchronized Event pollEvent(int timeoutMs)
 	throws InterruptedException
 	{
-		Event e = null;
 		if(m_incomingEvents.isEmpty())
 			this.wait(timeoutMs);
 		if(m_incomingEvents.isEmpty())
@@ -1811,7 +1802,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			ServerSession session = m_sessions.getSession(user);
 			MembershipManager mm = m_da.getMembershipManager();
 			
 			// Get hold of conference permission set and calculate negation mask.
@@ -2085,7 +2075,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		try
 		{
 			MessageManager mm = m_da.getMessageManager();
-			MembershipManager msm = m_da.getMembershipManager();
 			
 			if (skipGlobal)
 			{
@@ -2394,7 +2383,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     {
 	    try
 	    {
-	        FileManager fm = m_da.getFileManager();
 	        this.assertConferencePermission(parent, ConferencePermissions.WRITE_PERMISSION);
 	        m_da.getFileManager().delete(parent, name);
 	    }
@@ -2548,7 +2536,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			long conf = this.getCurrentConferenceId();
 			MessageManager mm = m_da.getMessageManager();
 			ConferenceManager cm = m_da.getConferenceManager();
-			NameManager nm = m_da.getNameManager();
 			Message message = mm.loadMessage(primaryOcc.getConference(), primaryOcc.getLocalnum());
 			long replyToId = message.getReplyTo();
 			Envelope.RelatedMessage replyTo = null;

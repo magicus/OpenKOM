@@ -20,7 +20,7 @@ public class BroadcastAnonymousMessageEvent extends Event
 	
 	public void dispatch(EventTarget target)
 	{
-		target.onEvent((BroadcastAnonymousMessageEvent) this);
+		target.onEvent(this);
 	}
 	
 	public String getMessage()

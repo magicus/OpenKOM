@@ -34,19 +34,19 @@ public class MessageLogManager
     throws SQLException
     {
         m_conn = conn;
-        m_storeMessageStmt = conn.prepareStatement(
+        m_storeMessageStmt = m_conn.prepareStatement(
                 "INSERT INTO messagelog(body, created, author, author_name) VALUES(?, ?, ?, ?)");
-        m_storeMessagePointerStmt = conn.prepareStatement(
+        m_storeMessagePointerStmt = m_conn.prepareStatement(
                 "INSERT INTO messagelogpointers(recipient, logid, sent, kind) VALUES(?, ?, ?, ?)");
-        m_listBroadcastMessagesStmt = conn.prepareStatement(
+        m_listBroadcastMessagesStmt = m_conn.prepareStatement(
                 "SELECT ml.id, mlp.kind, ml.author, ml.author_name, ml.created, mlp.sent, ml.body " +
                 "FROM messagelog ml, messagelogpointers mlp WHERE mlp.logid = ml.id AND " +
                 "mlp.recipient = ? AND mlp.kind > 0 ORDER BY ml.id DESC LIMIT ? OFFSET 0");
-        m_listChatMessagesStmt = conn.prepareStatement(
+        m_listChatMessagesStmt = m_conn.prepareStatement(
                 "SELECT ml.id, mlp.kind, ml.author, ml.author_name, ml.created, mlp.sent, ml.body " +
                 "FROM messagelog ml, messagelogpointers mlp WHERE mlp.logid = ml.id AND " +
                 "mlp.recipient = ? AND mlp.kind = 0 ORDER BY ml.id DESC LIMIT ? OFFSET 0");
-        m_listRecipientsStmt = conn.prepareStatement(
+        m_listRecipientsStmt = m_conn.prepareStatement(
                 "SELECT mlp.recipient, n.fullname, n.visibility FROM messagelogpointers mlp, names n " +
                 "WHERE n.id = mlp.recipient AND mlp.logid = ? AND mlp.sent = 0");
     }

@@ -87,76 +87,76 @@ public class MessageManager
 	throws SQLException
 	{
 		m_conn = conn;
-		m_loadMessageStmt = conn.prepareStatement(
+		m_loadMessageStmt = m_conn.prepareStatement(
 			"SELECT created, author, author_name, reply_to, subject, body FROM messages WHERE id = ?");
-		m_loadMessageInConfStmt = conn.prepareStatement(
+		m_loadMessageInConfStmt = m_conn.prepareStatement(
 			"SELECT m.id, m.created, m.author, m.author_name, m.reply_to, m.subject, m.body " +			"FROM messages m, messageoccurrences mo " +			"WHERE m.id = mo.message AND mo.conference = ? AND mo.localnum = ?");
-		m_loadMessageHeaderStmt = conn.prepareStatement(
+		m_loadMessageHeaderStmt = m_conn.prepareStatement(
 			"SELECT created, author, author_name, reply_to, subject FROM messages WHERE id = ?");			
-		m_loadMessageOccurrenceStmt = conn.prepareStatement(
+		m_loadMessageOccurrenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name FROM messages " +
 			"WHERE conference = ? AND localNum = ?");
-		m_getNextNumStmt = conn.prepareStatement(			"SELECT MAX(localnum) FROM messageoccurrences WHERE conference = ? FOR UPDATE");
-		m_addMessageStmt = conn.prepareStatement(
+		m_getNextNumStmt = m_conn.prepareStatement(			"SELECT MAX(localnum) FROM messageoccurrences WHERE conference = ? FOR UPDATE");
+		m_addMessageStmt = m_conn.prepareStatement(
 			"INSERT INTO messages(created, author, author_name, reply_to, subject, body) " +			"VALUES(?, ?, ?, ?, ?, ?)");
-		m_addMessageSearchStmt = conn.prepareStatement(
+		m_addMessageSearchStmt = m_conn.prepareStatement(
 			"REPLACE INTO messagesearch(id, subject, body) " +
 			"VALUES(?, ?, ?)");
-		m_addMessageOccurrenceStmt = conn.prepareStatement(
+		m_addMessageOccurrenceStmt = m_conn.prepareStatement(
 			"INSERT INTO messageoccurrences(message, action_ts, kind, user, user_name, conference, localnum) " +
 			"VALUES(?, ?, ?, ?, ?, ?, ?)");
-		m_updateConferenceLasttext = conn.prepareStatement(
+		m_updateConferenceLasttext = m_conn.prepareStatement(
 			"UPDATE conferences SET lasttext=? WHERE id=?");
-		m_listOccurrencesStmt = conn.prepareStatement(
+		m_listOccurrencesStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name, conference, localnum FROM messageoccurrences " +			"WHERE message = ? ORDER BY action_ts");
-		m_getOccurrenceInConferenceStmt = conn.prepareStatement(
+		m_getOccurrenceInConferenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name, conference, localnum FROM messageoccurrences " +
 			"WHERE conference = ? AND message = ?");
 			
 		// TODO: Probably slow...
 		//
-		m_getFirstOccurrenceStmt = conn.prepareStatement(
+		m_getFirstOccurrenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name, conference, localnum FROM messageoccurrences " +
 			"WHERE message = ? ORDER BY action_ts LIMIT 1");
-		m_getGlobalIdStmt = conn.prepareStatement(
+		m_getGlobalIdStmt = m_conn.prepareStatement(
 			"SELECT message FROM messageoccurrences WHERE conference = ? AND localnum = ?");
-		m_getRepliesStmt = conn.prepareStatement(
+		m_getRepliesStmt = m_conn.prepareStatement(
 			"SELECT id, created, author, author_name, reply_to, subject FROM messages " +			"WHERE reply_to = ?");
-		m_getReplyIdsStmt = conn.prepareStatement(
+		m_getReplyIdsStmt = m_conn.prepareStatement(
 			"SELECT id FROM messages WHERE reply_to = ?");
-		m_loadOccurrenceStmt = conn.prepareStatement(
+		m_loadOccurrenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, conference, localnum FROM messageoccurrences " +
 			"WHERE conference = ? AND localnum = ?");
-		m_getVisibleOccurrencesStmt = conn.prepareStatement(
+		m_getVisibleOccurrencesStmt = m_conn.prepareStatement(
 			"SELECT o.message, o.action_ts, o.kind, o.user, o.user_name, o.conference, o.localnum " +			"FROM messageoccurrences o, memberships m " +			"WHERE o.conference = m.conference AND m.user = ? AND o.message = ?");
-		m_getMessageAttributesStmt = conn.prepareStatement(
+		m_getMessageAttributesStmt = m_conn.prepareStatement(
 		    "SELECT message, kind, created, value " +
 		    "FROM messageattributes " +
 		    "WHERE message = ? " +
 			"order by created asc");
-		m_addMessageAttributeStmt = conn.prepareStatement(
+		m_addMessageAttributeStmt = m_conn.prepareStatement(
 		    "INSERT INTO messageattributes (message, kind, created, value) " +
 		    "VALUES (?, ?, ?, ?)");
-		m_dropMessageOccurrenceStmt = conn.prepareStatement(
+		m_dropMessageOccurrenceStmt = m_conn.prepareStatement(
 			"delete from messageoccurrences " +
 			"where localnum = ? and conference = ?");
-		m_countMessageOccurrencesStmt = conn.prepareStatement(
+		m_countMessageOccurrencesStmt = m_conn.prepareStatement(
 			 "select count(*) from messageoccurrences " +
 			 "where message = ?");
-		m_dropMessageStmt = conn.prepareStatement(
+		m_dropMessageStmt = m_conn.prepareStatement(
 			 "delete from messages " + 
 			 "where id = ?");
 
 		// Ooooh! There's room for optimization here :-) I suggest we optimize by moving to an
 		// RDBMS that supports indexed views (not to mention stored procedures..)
 		//		
-		m_getGlobalBySubjectStmt = conn.prepareStatement(
+		m_getGlobalBySubjectStmt = m_conn.prepareStatement(
 			 "select message " + 
 			 "from messageoccurrences as mo " +
 			 "join memberships as ms on mo.conference = ms.conference " +
 			 "join messages on mo.message = messages.id " +
 			 "where ms.user = ? and subject = ?");
-		m_getLocalBySubjectStmt = conn.prepareStatement(
+		m_getLocalBySubjectStmt = m_conn.prepareStatement(
 		     "select localnum " +
 		     "from messageoccurrences as mo " +
 		     "join messages as m on m.id = mo.message " +
@@ -164,25 +164,25 @@ public class MessageManager
 		
 		// To speed things up, a special version to just retrieve the local ID.
 		//
-		m_getLocalIdsInConfStmt = conn.prepareStatement(
+		m_getLocalIdsInConfStmt = m_conn.prepareStatement(
 			 "select localnum from messageoccurrences where conference = ?");
-		m_dropConferenceStmt = conn.prepareStatement(
+		m_dropConferenceStmt = m_conn.prepareStatement(
 			 "delete from conferences where id = ?");
-		m_findLastOccurrenceInConferenceWithAttrStmt = conn.prepareStatement(
+		m_findLastOccurrenceInConferenceWithAttrStmt = m_conn.prepareStatement(
 			 "select localnum " +
 			 "from messageoccurrences as mo " +
 			 "join messageattributes as ma on mo.message = ma.message " +
 			 "where ma.kind = ? and mo.conference = ? " +
 			 "order by mo.message desc " +
 			 "limit 1 offset 0");
-		m_getLatestMagicMessageStmt = conn.prepareStatement(
+		m_getLatestMagicMessageStmt = m_conn.prepareStatement(
 			 "select m.id " +
 			 "from messages as m, messageattributes ma " +
 			 "where ma.kind = ? and ma.value = ? and ma.message = m.id " +
 			 "order by m.created desc " +
 			 "limit 1 offset 0");
 				
-		m_searchMessagesLocally = conn.prepareStatement(
+		m_searchMessagesLocally = m_conn.prepareStatement(
 				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
 				"FROM messagesearch ms, messageoccurrences mo " +
 				"WHERE ms.id = mo.message AND mo.conference = ? AND MATCH(subject, body) AGAINST (? IN BOOLEAN MODE) " +
@@ -191,17 +191,17 @@ public class MessageManager
 		
 		// Selecting from messagesearch is a couple of 1000 times faster. InnoDB...
 		//
-		m_countStmt = conn.prepareStatement(
+		m_countStmt = m_conn.prepareStatement(
 		        "SELECT COUNT(*) FROM messagesearch");
 
-		m_grepMessagesLocally = conn.prepareStatement(
+		m_grepMessagesLocally = m_conn.prepareStatement(
 				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
 				"FROM messagesearch ms, messageoccurrences mo " +
 				"WHERE ms.id = mo.message AND mo.conference = ? AND (subject LIKE ? OR body LIKE ?)" +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
 		
-		m_listAllMessagesLocally = conn.prepareStatement(
+		m_listAllMessagesLocally = m_conn.prepareStatement(
 		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject " +
 		        "FROM messages m JOIN messageoccurrences mo " +
 		        "ON m.id = mo.message " +
@@ -209,7 +209,7 @@ public class MessageManager
 		        "ORDER BY localnum DESC " +
 		        "LIMIT ? OFFSET ?");
 		
-		m_listMessagesLocallyByAuthor = conn.prepareStatement(
+		m_listMessagesLocallyByAuthor = m_conn.prepareStatement(
 		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject " +
 		        "FROM messages m JOIN messageoccurrences mo " +
 		        "ON m.id = mo.message " +
@@ -217,14 +217,14 @@ public class MessageManager
 		        "ORDER BY localnum DESC " +
 		        "LIMIT ? OFFSET ?");
 		
-		m_listMessagesGloballyByAuthor = conn.prepareStatement(
+		m_listMessagesGloballyByAuthor = m_conn.prepareStatement(
 		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject " +
 		        "FROM messages m, messageoccurrences mo, names n " +
 		        "WHERE m.id = mo.message AND n.id = mo.conference AND mo.user = ? AND n.id = mo.conference " +
 		        "ORDER BY mo.action_ts DESC " +
 		        "LIMIT ? OFFSET ?");
 		
-		m_searchMessagesGlobally = conn.prepareStatement(
+		m_searchMessagesGlobally = m_conn.prepareStatement(
 		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject " +
 		        "FROM messagesearch m, messageoccurrences mo, names n " +
 		        "WHERE m.id = mo.message AND n.id = mo.conference " +
@@ -583,7 +583,6 @@ public class MessageManager
 		ResultSet rs = null;
 		try
 		{
-			List list = new ArrayList();
 			rs = m_getFirstOccurrenceStmt.executeQuery();
 			if(!rs.next())
 				throw new ObjectNotFoundException("Message id=" + messageId);
@@ -623,7 +622,6 @@ public class MessageManager
 		ResultSet rs = null;
 		try
 		{
-			List list = new ArrayList();
 			rs = m_getGlobalIdStmt.executeQuery();
 			if(!rs.next())
 				throw new ObjectNotFoundException("Message conference=" + conference + " localnum=" + localnum);
@@ -692,7 +690,6 @@ public class MessageManager
 		ResultSet rs = null;
 		try
 		{
-			List list = new ArrayList();
 			rs = m_getOccurrenceInConferenceStmt.executeQuery();
 			if(!rs.next())
 				throw new ObjectNotFoundException("Message id=" + messageId);
@@ -830,7 +827,6 @@ public class MessageManager
 	public long[] getReplyIds(long originalId)
 	throws SQLException
 	{
-		List list = new ArrayList();
 		m_getReplyIdsStmt.clearParameters();
 		m_getReplyIdsStmt.setLong(1, originalId);
 		ResultSet rs = null;

@@ -17,7 +17,6 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
@@ -45,7 +44,6 @@ public class Reply extends AbstractCommand
 		// Parse parameters. No parameters means we're replying to the
 		// last text read.
 		//
-		MessageFormatter formatter = context.getMessageFormatter();
 		ServerSession session = context.getSession();
 
 		long replyToId = -1;

@@ -41,11 +41,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	private static final int MAX_LOGIN_RETRIES = 3;
 	private static final String DEFAULT_CHARSET = "ISO-8859-1";
 	
-	private LineEditor m_in;
-	private KOMWriter m_out;
+	LineEditor m_in;
+	KOMWriter m_out;
 	private final InputStream m_rawIn;
 	private final OutputStream m_rawOut; 
-	private MessageFormatter m_formatter = new MessageFormatter(Locale.getDefault());
+	MessageFormatter m_formatter = new MessageFormatter(Locale.getDefault());
 	private ServerSession m_session;
 	private long m_userId;
 	private LinkedList m_displayMessageQueue = new LinkedList();

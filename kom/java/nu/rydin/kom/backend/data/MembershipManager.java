@@ -52,37 +52,37 @@ public class MembershipManager
 	throws SQLException
 	{
 		m_conn = conn;
-		m_listMbrForUserStmt = conn.prepareStatement(
+		m_listMbrForUserStmt = m_conn.prepareStatement(
 			"SELECT user, conference, active, priority, flags, markers, permissions, negation_mask " +
 			"FROM memberships WHERE user = ? AND active = 1 ORDER BY priority");
-		m_listMbrForConfStmt = conn.prepareStatement(
+		m_listMbrForConfStmt = m_conn.prepareStatement(
 			"SELECT user, conference, active, priority, flags, markers, permissions, negation_mask " +
 			"FROM memberships WHERE conference = ? AND active = 1");
-		m_loadMembershipStmt = conn.prepareStatement(
+		m_loadMembershipStmt = m_conn.prepareStatement(
 			"SELECT user, conference, active, priority, flags, markers, permissions, negation_mask " +			"FROM memberships WHERE user = ? AND conference = ?");
-		m_addMembershipStmt = conn.prepareStatement(
+		m_addMembershipStmt = m_conn.prepareStatement(
 			"INSERT INTO memberships(user, conference, active, priority, flags, markers, permissions, negation_mask) " +
 			"VALUES(?, ?, ?, ?, ?, NULL, ?, ?)");
-		m_signoffStmt = conn.prepareStatement(
+		m_signoffStmt = m_conn.prepareStatement(
 			"UPDATE memberships SET active = 0 WHERE user = ? AND conference = ?");
-		m_getLastPriorityStmt = conn.prepareStatement(
+		m_getLastPriorityStmt = m_conn.prepareStatement(
 			"SELECT MAX(priority) FROM memberships WHERE user = ?");
-		m_updateMarkersStmt = conn.prepareStatement(
+		m_updateMarkersStmt = m_conn.prepareStatement(
 			"UPDATE memberships SET markers = ? WHERE user = ? AND conference = ?");	
-		m_updatePermissionsStmt = conn.prepareStatement(
+		m_updatePermissionsStmt = m_conn.prepareStatement(
 			"UPDATE memberships SET permissions = ?, negation_mask = ? WHERE user = ? AND conference = ?");
-		m_getPermissionsStmt = conn.prepareStatement(
+		m_getPermissionsStmt = m_conn.prepareStatement(
 			"SELECT m.permissions, m.negation_mask, c.permissions " +
 			"FROM conferences c, memberships m " +
 			"WHERE m.user = ? AND c.id = ? AND m.conference = c.id");
-		m_listPermissionsStmt = conn.prepareStatement(
+		m_listPermissionsStmt = m_conn.prepareStatement(
 			"SELECT m.user, n.fullname, n.visibility, m.permissions, m.negation_mask FROM memberships m, users u " +
 			"WHERE m.user = n.id AND c.conference = ?");			
-		m_activateMembershipStmt = conn.prepareStatement(
+		m_activateMembershipStmt = m_conn.prepareStatement(
 			"UPDATE memberships SET active = 1 WHERE user = ? AND conference = ?");
-		m_getDefaultPermissionsStmt = conn.prepareStatement(
+		m_getDefaultPermissionsStmt = m_conn.prepareStatement(
 			"SELECT permissions FROM conferences WHERE id = ?");
-		m_getNonmemberPermissionsStmt = conn.prepareStatement(
+		m_getNonmemberPermissionsStmt = m_conn.prepareStatement(
 		    "SELECT nonmember_permissions FROM conferences WHERE id = ?");
 	}	
 	

@@ -6,15 +6,12 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.PrintWriter;
-
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.RightParameter;
 import nu.rydin.kom.frontend.text.parser.UserParameter;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -33,9 +30,7 @@ public class SubtractPermission extends AbstractCommand
     {
         NameAssociation nameAssoc = (NameAssociation) parameters[0]; 
         long user = nameAssoc.getId();
-        int flagNumber = ((Integer) parameters[1]).intValue();
-		PrintWriter out = context.getOut();
-		MessageFormatter formatter = context.getMessageFormatter();		
+        int flagNumber = ((Integer) parameters[1]).intValue();	
 		context.getSession().changeUserPermissions(user, 0, 1 << flagNumber);
 		context.getOut().println(context.getMessageFormatter().format("subtract.permission.confirmation", 
 			new Object[] { context.getRightsLabels()[flagNumber], nameAssoc.getName() } ));

@@ -23,7 +23,6 @@ import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.parser.Parser;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -67,7 +66,6 @@ public abstract class AbstractEditor
 		DisplayController dc = m_context.getDisplayController();
 		PrintWriter out = m_context.getOut();
 		LineEditor in = m_context.getIn();
-		MessageFormatter formatter = m_context.getMessageFormatter();
 		Buffer buffer = m_context.getBuffer();
 		int width = m_context.getTerminalSettings().getWidth() - 5;
 		
@@ -180,7 +178,7 @@ public abstract class AbstractEditor
 			catch(StopCharException e)
 			{
 				String s = null;
-				int i = (int) e.getStopChar();
+//				int i = (int) e.getStopChar();
 				switch(e.getStopChar())
 				{
 					case '\u0004': // Ctrl-D

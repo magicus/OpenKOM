@@ -9,7 +9,6 @@ package nu.rydin.kom.backend;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import nu.rydin.kom.backend.data.UserManager;
@@ -30,7 +29,8 @@ import nu.rydin.kom.structs.UserInfo;
  */
 public class ServerSessionFactoryImpl 
 {
-	private Connection m_conn;
+    //DEAD CODE
+	//private Connection m_conn;
 	
 	private SessionManager m_sessionManager = new SessionManager();
 
