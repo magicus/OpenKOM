@@ -10,8 +10,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import nu.rydin.kom.utils.Logger;
-
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
@@ -25,13 +23,13 @@ public class NameUtils
     {
         try
         {
-            NamePattern = Pattern.compile("^[a-zA-ZÅÄÖÜåäöü()][^\\*]*$");
-            UserNamePattern = Pattern.compile("^[a-zA-ZÅÄÖÜåäöü()][^\\*]*$");
-            ConferenceNamePattern = Pattern.compile("^[a-zA-ZÅÄÖÜåäöü()][^\\*]*$");
+            NamePattern = Pattern.compile("^[^\\*]+$");
+            UserNamePattern = Pattern.compile("^[^\\*]+$");
+            ConferenceNamePattern = Pattern.compile("^[^\\*]+$");
         } 
         catch (PatternSyntaxException e)
         {
-            Logger.fatal(new NameUtils(), "Someone needs a course in how to write regular expressions!", e);
+            throw new ExceptionInInitializerError(e);
         }
     }
     
@@ -158,7 +156,7 @@ public class NameUtils
 		String[] patternParts = splitName(normalizeName(pattern));
 		String[] candidateParts = splitName(normalizeName(candidate));
 		int pTop = patternParts.length;
-		int cTop = patternParts.length;
+		int cTop = candidateParts.length;
 		
 		// Pattern has more parts than candidate? Not a match!
 		//
