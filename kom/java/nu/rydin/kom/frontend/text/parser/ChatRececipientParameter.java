@@ -25,6 +25,8 @@ import nu.rydin.kom.structs.UserListItem;
  */
 public class ChatRececipientParameter extends NamedObjectParameter
 {
+    public final static NameAssociation ALL_USERS = new NameAssociation(-1, "alla");
+
     public ChatRececipientParameter(String missingObjectQuestionKey,
             boolean isRequired)
     {
@@ -42,6 +44,11 @@ public class ChatRececipientParameter extends NamedObjectParameter
         // First, get the list of logged in users and extract the names
         //
         String pattern = match.getMatchedString();
+        
+        if (pattern.equals("*")) {
+            return ALL_USERS;
+        }
+        
         ServerSession session = context.getSession();
         ArrayList list = new ArrayList();
         UserListItem[] users = session.listLoggedInUsers();
@@ -85,5 +92,10 @@ public class ChatRececipientParameter extends NamedObjectParameter
         	    return NamePicker.pickName(names, context);
         	}
         }
+    }
+
+    protected boolean isValidName(String name)
+    {
+        return (super.isValidName(name) || name.equals("*"));
     }
 }
