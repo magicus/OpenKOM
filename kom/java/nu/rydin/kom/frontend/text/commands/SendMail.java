@@ -39,7 +39,7 @@ public class SendMail extends AbstractCommand
 		// Get editor and execute it
 		//
 		UnstoredMessage msg = context.getMessageEditor().edit(context, -1);
-		MessageOccurrence occ = context.getSession().storeMail(msg, user);
+		MessageOccurrence occ = context.getSession().storeMail(msg, user, -1);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));
 	}

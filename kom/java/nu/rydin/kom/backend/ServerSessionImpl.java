@@ -832,7 +832,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
-	public MessageOccurrence storeMail(UnstoredMessage msg, long user)
+	public MessageOccurrence storeMail(UnstoredMessage msg, long user, long replyTo)
 	throws ObjectNotFoundException, UnexpectedException
 	{
 		try
@@ -842,7 +842,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			MessageManager mm = m_da.getMessageManager();
 			long me = this.getLoggedInUserId();
 			MessageOccurrence occ = mm.addMessage(me, m_da.getNameManager().getNameById(me), 
-				user, -1, msg.getSubject(), msg.getBody()); 
+				user, replyTo, msg.getSubject(), msg.getBody()); 
 			
 			// Store a copy in sender's mailbox
 			//
@@ -1986,6 +1986,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			//
 			long conf = this.getCurrentConferenceId();
 			MessageManager mm = m_da.getMessageManager();
+			ConferenceManager cm = m_da.getConferenceManager();
 			NameManager nm = m_da.getNameManager();
 			Message message = mm.loadMessage(primaryOcc.getConference(), primaryOcc.getLocalnum());
 			long replyToId = message.getReplyTo();
@@ -2016,14 +2017,22 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			//
 			MessageHeader[] replyHeaders = mm.getReplies(message.getId());
 			top = replyHeaders.length;
-			Envelope.RelatedMessage[] replies = new Envelope.RelatedMessage[top];
+			ArrayList list = new ArrayList(top);
+			
 			for(int idx = 0; idx < top; ++idx)
 			{
 				MessageHeader each = replyHeaders[idx];
 				MessageOccurrence replyOcc = mm.getMostRelevantOccurrence(conf, each.getId()); 
-				replies[idx] = new Envelope.RelatedMessage(replyOcc, each.getAuthor(), each.getAuthorName(),
-				        replyOcc.getConference(), nm.getNameById(replyOcc.getConference()), replyOcc.getConference() == conf);  
+				
+				// Don't show personal replies
+				//
+				if(cm.isMailbox(replyOcc.getConference()))
+				    continue;
+				list.add(new Envelope.RelatedMessage(replyOcc, each.getAuthor(), each.getAuthorName(),
+				        replyOcc.getConference(), nm.getNameById(replyOcc.getConference()), replyOcc.getConference() == conf));  
 			}
+			Envelope.RelatedMessage[] replies = new Envelope.RelatedMessage[list.size()];
+			list.toArray(replies);
 			
 			// Done assembling envelope. Now, mark the message as read in all
 			// conferences where it appears and we are members.
@@ -2320,6 +2329,33 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		return listMessagesInConference (this.getCurrentConferenceId(), start, length);
 	}
 	
+	public MessageHeader getMessageHeader(long globalId)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+	    this.assertMessageReadPermissions(globalId);
+	    try
+	    {
+	        return m_da.getMessageManager().loadMessageHeader(globalId);
+	    }
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+	
+	public MessageHeader getMessageHeaderInConference(long conference, int localNum)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+	    return this.getMessageHeader(this.localToGlobal(conference, localNum));
+	}
+	
+	public MessageHeader getMessageHeaderInCurrentConference(int localNum)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+	    return this.getMessageHeaderInConference(this.getCurrentConferenceId(), localNum);
+	}
+
+	
 	public void deleteConference (long conference)
 	throws UnexpectedException
 	{
@@ -2405,7 +2441,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	}
 	
 	public boolean isMagicConference (long conference)
-	throws UnexpectedException
+	throws UnexpectedException, ObjectNotFoundException
 	{
 		try
 		{

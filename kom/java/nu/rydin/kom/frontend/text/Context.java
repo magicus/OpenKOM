@@ -6,11 +6,16 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import nu.rydin.kom.AuthenticationException;
+import nu.rydin.kom.AuthorizationException;
+import nu.rydin.kom.BadParameterException;
+import nu.rydin.kom.MessageNotFoundException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.UserInfo;
 
 /**
@@ -126,4 +131,18 @@ public interface Context extends TerminalSettingsProvider
 	 * Returns a <tt>DisplayController</tt> according to the user preferences
 	 */
 	public DisplayController getDisplayController();
+	
+	/**
+	 * Resolves a message specifier on the form "123" for a local number
+	 * relative to the current conference, or "(123)" for a global message id.
+	 * 
+	 * @param specifier The specifier string
+	 * @return The <tt>MessageHeader</tt> of the specified message.
+	 * @throws MessageNotFoundException
+	 * @throws AuthenticationException
+	 * @throws UnexpectedException
+	 * @throws NumberFormatException
+	 */
+	public MessageHeader resolveMessageSpecifier(String specifier)
+	throws MessageNotFoundException, AuthorizationException, UnexpectedException, BadParameterException;
 }

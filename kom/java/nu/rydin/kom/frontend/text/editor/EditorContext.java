@@ -6,6 +6,9 @@
  */
 package nu.rydin.kom.frontend.text.editor;
 
+import nu.rydin.kom.AuthorizationException;
+import nu.rydin.kom.BadParameterException;
+import nu.rydin.kom.MessageNotFoundException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
@@ -17,6 +20,7 @@ import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.MessagePrinter;
 import nu.rydin.kom.frontend.text.TerminalSettings;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.UserInfo;
 
 /**
@@ -164,5 +168,11 @@ public class EditorContext implements Context
 	public DisplayController getDisplayController()
 	{
 	    return m_underlying.getDisplayController();
+	}
+	
+	public MessageHeader resolveMessageSpecifier(String specifier)
+	throws MessageNotFoundException, AuthorizationException, UnexpectedException, BadParameterException
+	{
+	    return m_underlying.resolveMessageSpecifier(specifier);
 	}
 }

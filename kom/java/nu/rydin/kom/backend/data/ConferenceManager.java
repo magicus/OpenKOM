@@ -41,6 +41,7 @@ public class ConferenceManager // extends NameManager
 	private final PreparedStatement m_getMagicConfStmt;
 	private final PreparedStatement m_setMagicConfStmt;
 	private final PreparedStatement m_isMagicConfStmt;
+	private final PreparedStatement m_isMailboxStmt;
 	
 	public ConferenceManager(Connection conn, NameManager nameManager)
 	throws SQLException
@@ -60,6 +61,8 @@ public class ConferenceManager // extends NameManager
 			 "replace into magicconferences(conference, kind) values(?, ?)");
 		m_isMagicConfStmt = conn.prepareStatement(
 			 "select count(*) from magicconferences where conference = ?");
+		m_isMailboxStmt = conn.prepareStatement(
+		     "SELECT COUNT(*) FROM users WHERE id = ?");
 	}
 	
 	public void close()
@@ -78,6 +81,8 @@ public class ConferenceManager // extends NameManager
 				m_setMagicConfStmt.close();
 			if(m_isMagicConfStmt != null)
 				m_isMagicConfStmt.close();
+			if(m_isMailboxStmt != null)
+			    m_isMailboxStmt.close();
 		}
 		catch(SQLException e)
 		{
@@ -264,7 +269,7 @@ public class ConferenceManager // extends NameManager
 	}
 	
 	public boolean isMagic(long conference)
-	throws SQLException
+	throws SQLException, ObjectNotFoundException
 	{
 		ResultSet rs = null;
 		try
@@ -272,8 +277,9 @@ public class ConferenceManager // extends NameManager
 			m_isMagicConfStmt.clearParameters();
 			m_isMagicConfStmt.setLong(1, conference);
 			rs = m_isMagicConfStmt.executeQuery();
-			rs.first();
-			return (0 != rs.getInt(1)) ? true : false;
+			if(!rs.next())
+			    throw new ObjectNotFoundException("Conf=" + conference);
+			return 0 != rs.getInt(1);
 		}
 		finally
 		{
@@ -282,5 +288,27 @@ public class ConferenceManager // extends NameManager
 				rs.close();
 			}
 		}
+	}
+	
+	public boolean isMailbox(long conference)
+	throws SQLException, ObjectNotFoundException
+	{
+		ResultSet rs = null;
+		try
+		{
+			m_isMailboxStmt.clearParameters();
+			m_isMailboxStmt.setLong(1, conference);
+			rs = m_isMailboxStmt.executeQuery();
+			if(!rs.next())
+			    throw new ObjectNotFoundException("Conf=" + conference);
+			return 0 != rs.getInt(1);
+		}
+		finally
+		{
+			if (null != rs)
+			{
+				rs.close();
+			}
+		}	    
 	}
 }

@@ -17,9 +17,11 @@ import java.util.LinkedList;
 import nu.rydin.kom.AlreadyLoggedInException;
 import nu.rydin.kom.AuthenticationException;
 import nu.rydin.kom.AuthorizationException;
+import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.EventDeliveredException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.KOMRuntimeException;
+import nu.rydin.kom.MessageNotFoundException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.UserException;
@@ -50,6 +52,7 @@ import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleMessageEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
+import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.StringUtils;
 
@@ -628,6 +631,28 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	public String[] getFlagLabels()
 	{
 		return m_flagLabels;
+	}
+	
+	public MessageHeader resolveMessageSpecifier(String specifier)
+	throws MessageNotFoundException, AuthorizationException, UnexpectedException, BadParameterException
+	{
+	    try
+	    {
+		    int top = specifier.length();
+		    if(top == 0)
+		        throw new MessageNotFoundException();
+		    return specifier.charAt(0) == '(' && specifier.charAt(top - 1) == ')'
+		        ? m_session.getMessageHeader(Long.parseLong(specifier.substring(1, top - 1)))
+		        : m_session.getMessageHeaderInCurrentConference(Integer.parseInt(specifier));
+	    }
+	    catch(ObjectNotFoundException e)
+	    {
+	        throw new MessageNotFoundException();
+	    }
+	    catch(NumberFormatException e)
+	    {
+	        throw new BadParameterException();
+	    }
 	}
 	
 	// Implementation of EventTarget

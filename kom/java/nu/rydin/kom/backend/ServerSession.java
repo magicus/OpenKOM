@@ -412,11 +412,12 @@ public interface ServerSession
 	 * 
 	 * @param msg The message
 	 * @param user The receiving user
+	 * @param replyTo Global id of message to which this is a reply, or -1 if not a reply.
 	 * @return  Newly create message occurrence
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */	
-	public MessageOccurrence storeMail(UnstoredMessage msg, long user)
+	public MessageOccurrence storeMail(UnstoredMessage msg, long user, long replyTo)
 	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
@@ -982,7 +983,7 @@ public interface ServerSession
 	throws ObjectNotFoundException, UnexpectedException;
 
 	public boolean isMagicConference (long conference)
-	throws UnexpectedException;
+	throws ObjectNotFoundException, UnexpectedException;
 	
 	public short getObjectKind (long conference)
 	throws ObjectNotFoundException;
@@ -1038,6 +1039,39 @@ public interface ServerSession
 	 */
 	public LocalMessageHeader[] listGlobalMessagesByUser(long userId, int offset, int length)
 	throws UnexpectedException;
+
+	/** 
+	 * Returns the message header for a message identified by a global id.
+	 * 
+	 * @param globalId The global id
+	 * @throws ObjectNotFoundException
+	 * @throws AuthorizationException
+	 * @throws UnexpectedException
+	 */
+	public MessageHeader getMessageHeader(long globalId)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
+	
+	/**
+	 * Returns a message header for a message identified by a conference and a local number.
+	 * @param conference The conference id
+	 * @param localNum Local message number in conference
+	 *
+	 * @throws ObjectNotFoundException
+	 * @throws AuthorizationException
+	 * @throws UnexpectedException
+	 */
+	public MessageHeader getMessageHeaderInConference(long conference, int localNum)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
+	
+	/**
+	 * Returns a message header of a message with the specified local number in the
+	 * current conference.
+	 * 
+	 * @param localNum The local message number
+	 * @return
+	 */
+	public MessageHeader getMessageHeaderInCurrentConference(int localNum)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
 
 	/**
 	 * Returns an array of messages (chat or broadcast) from the message log

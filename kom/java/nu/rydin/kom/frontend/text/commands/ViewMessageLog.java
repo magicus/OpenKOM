@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.UserException;
+import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
@@ -82,7 +83,8 @@ public abstract class ViewMessageLog extends AbstractCommand
 		    }
 		    else
 		    {
-		        sb.append("< ");
+		        if(kind == MessageLogKinds.CHAT)
+		            sb.append("< ");
 		        sb.append(each.getAuthorName());
 		    }
 		    sb.append(": ");
