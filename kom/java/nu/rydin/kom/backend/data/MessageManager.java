@@ -18,12 +18,13 @@ import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.SQLUtils;
 import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.structs.GlobalMessageSearchResult;
 import nu.rydin.kom.structs.LocalMessageHeader;
+import nu.rydin.kom.structs.LocalMessageSearchResult;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageOccurrence;
-import nu.rydin.kom.structs.MessageSearchResult;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.utils.Logger;
@@ -56,7 +57,6 @@ public class MessageManager
 	private final PreparedStatement m_dropMessageOccurrenceStmt;
 	private final PreparedStatement m_countMessageOccurrencesStmt;
 	private final PreparedStatement m_dropMessageStmt;
-	private final PreparedStatement m_listOccurrencesInConferenceStmt;
 	private final PreparedStatement m_getLocalIdsInConfStmt;
 	private final PreparedStatement m_dropConferenceStmt;
 	private final PreparedStatement m_getGlobalBySubjectStmt;
@@ -64,9 +64,11 @@ public class MessageManager
 	private final PreparedStatement m_findLastOccurrenceInConferenceWithAttrStmt;
 	private final PreparedStatement m_getLatestMagicMessageStmt;
 	private final PreparedStatement m_updateConferenceLasttext;
-    private final PreparedStatement m_listMessagesByUserStmt;
-    private final PreparedStatement m_searchMessagesInConference;
-    private final PreparedStatement m_grepMessagesInConference;
+    private final PreparedStatement m_searchMessagesLocally;
+    private final PreparedStatement m_grepMessagesLocally;
+	private final PreparedStatement m_listAllMessagesLocally;
+    private final PreparedStatement m_listMessagesLocallyByAuthor;
+    private final PreparedStatement m_listMessagesGloballyByAuthor;
 	
 	private final Connection m_conn; 
 	
@@ -143,12 +145,6 @@ public class MessageManager
 		m_dropMessageStmt = conn.prepareStatement(
 			 "delete from messages " + 
 			 "where id = ?");
-		m_listOccurrencesInConferenceStmt = conn.prepareStatement(
-			 "select mo.localnum, mo.action_ts, m.author, m.author_name, m.subject " +
-			 "from messages m join messageoccurrences mo " +
-			 "on m.id=mo.message " +
-			 "where mo.conference = ? " +
-			 "order by localnum desc limit ? offset ?;");
 
 		// Ooooh! There's room for optimization here :-) I suggest we optimize by moving to an
 		// RDBMS that supports indexed views (not to mention stored procedures..)
@@ -187,29 +183,44 @@ public class MessageManager
 			 "order by mo.message desc " +
 			 "limit 1 offset 0");
 		
-		//What happens if there are two occurences with kind = ACTION_CREATED
-		//for the same message?
-		m_listMessagesByUserStmt = conn.prepareStatement(
-				"SELECT m.id, m.created, m.author, m.author_name, m.reply_to, " +
-				"m.subject, mo.conference, mo.localnum " +
-				"FROM messageoccurrences mo JOIN messages m ON mo.message=m.id " +
-				"WHERE mo.user = ? AND mo.kind = ? " +
-				"ORDER BY m.created DESC, m.id DESC " +
-				"LIMIT ? OFFSET ?");
-		
-		m_searchMessagesInConference = conn.prepareStatement(
+		m_searchMessagesLocally = conn.prepareStatement(
 				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
 				"FROM messagesearch ms, messageoccurrences mo " +
 				"WHERE ms.id = mo.message AND mo.conference = ? AND MATCH(subject, body) AGAINST (? IN BOOLEAN MODE) " +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
 
-		m_grepMessagesInConference = conn.prepareStatement(
+		m_grepMessagesLocally = conn.prepareStatement(
 				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
 				"FROM messagesearch ms, messageoccurrences mo " +
 				"WHERE ms.id = mo.message AND mo.conference = ? AND (subject LIKE ? OR body LIKE ?)" +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
+		
+		m_listAllMessagesLocally = conn.prepareStatement(
+		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject " +
+		        "FROM messages m JOIN messageoccurrences mo " +
+		        "ON m.id = mo.message " +
+		        "WHERE mo.conference = ? " +
+		        "ORDER BY localnum DESC " +
+		        "LIMIT ? OFFSET ?");
+		
+		m_listMessagesLocallyByAuthor = conn.prepareStatement(
+		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject " +
+		        "FROM messages m JOIN messageoccurrences mo " +
+		        "ON m.id = mo.message " +
+		        "WHERE mo.conference = ? AND mo.user = ? " +
+		        "ORDER BY localnum DESC " +
+		        "LIMIT ? OFFSET ?");
+		
+		//FIXME Skrolle Check access!
+		m_listMessagesGloballyByAuthor = conn.prepareStatement(
+		        "SELECT m.id, mo.localnum, mo.conference, mo.user, mo.user_name, m.subject " +
+		        "FROM messages m JOIN messageoccurrences mo " +
+		        "ON m.id = mo.message " +
+		        "WHERE mo.user = ? " +
+		        "ORDER BY mo.action_ts DESC " +
+		        "LIMIT ? OFFSET ?");
 	}
 	
 	public void close()
@@ -249,8 +260,8 @@ public class MessageManager
 			m_countMessageOccurrencesStmt.close();
 		if(m_dropMessageStmt != null)
 			m_dropMessageStmt.close();
-		if(m_listOccurrencesInConferenceStmt != null)
-			m_listOccurrencesInConferenceStmt.close();
+		if(m_listAllMessagesLocally != null)
+			m_listAllMessagesLocally.close();
 		if(m_getLocalIdsInConfStmt != null)
 			m_getLocalIdsInConfStmt.close();
 		if(m_dropConferenceStmt != null)
@@ -930,30 +941,6 @@ public class MessageManager
 		this.m_dropMessageStmt.execute();
 	}
 	
-	public MessageHeader[] getMessageOccurrencesInConference (long conference, int start, int limit)
-	throws SQLException
-	{
-		this.m_listOccurrencesInConferenceStmt.clearParameters();
-		this.m_listOccurrencesInConferenceStmt.setLong(1, conference);
-		this.m_listOccurrencesInConferenceStmt.setInt(2, limit);
-		this.m_listOccurrencesInConferenceStmt.setInt(3, start);
-		ResultSet rs = this.m_listOccurrencesInConferenceStmt.executeQuery();
-		List l = new ArrayList();
-		while (rs.next())
-		{
-			l.add (new MessageHeader(
-					rs.getInt(1),
-					rs.getTimestamp(2),
-					rs.getLong(3),
-					new Name(rs.getString(4), Visibilities.PUBLIC),
-					-1,
-					rs.getString(5)));
-		}
-		MessageHeader[] mh = new MessageHeader[l.size()]; 
-		l.toArray(mh);
-		return mh;
-	}
-	
 	public void deleteConference (long conference)
 	throws SQLException
 	{
@@ -1033,80 +1020,102 @@ public class MessageManager
 		}
 		
 	}
-
-    public LocalMessageHeader[] getGlobalMessagesByUser(long userId, int offset, int length) 
+    
+    public LocalMessageSearchResult[] searchMessagesLocally(long conference, String searchterm, int offset, int length)
     throws SQLException
     {
-            this.m_listMessagesByUserStmt.clearParameters();
-            this.m_listMessagesByUserStmt.setLong(1, userId);
-            this.m_listMessagesByUserStmt.setLong(2, ACTION_CREATED);
-            this.m_listMessagesByUserStmt.setLong(3, length);
-            this.m_listMessagesByUserStmt.setLong(4, offset);
-            ResultSet rs = this.m_listMessagesByUserStmt.executeQuery();
-            List l = new ArrayList();
-            while (rs.next()) {
-     		   l.add(new LocalMessageHeader(
-     		   		rs.getLong(1),			// Global id
-    			   	rs.getTimestamp(2),		// created
-    			   	rs.getLong(3), 			// author
-    			   	new Name(rs.getString(4), Visibilities.PUBLIC),		// author name	
-    			   	rs.getObject(5) != null ? rs.getLong(5) : -1, // reply to
-    			   	rs.getString(6),		// subject
-					rs.getLong(7),			// conference
-					rs.getInt(8))			// localnum
-    			   	);
-            }
-            LocalMessageHeader[] result = new LocalMessageHeader[l.size()];
-			l.toArray(result);
-			return result;
+    	this.m_searchMessagesLocally.clearParameters();
+    	this.m_searchMessagesLocally.setLong(1, conference);
+    	this.m_searchMessagesLocally.setString(2, searchterm);
+        this.m_searchMessagesLocally.setLong(3, length);
+        this.m_searchMessagesLocally.setLong(4, offset);
+        
+        return innerLocalSearch(this.m_searchMessagesLocally);
+    }
+
+    public LocalMessageSearchResult[] grepMessagesLocally(long conference, String searchterm, int offset, int length)
+    throws SQLException
+    {
+    	this.m_grepMessagesLocally.clearParameters();
+    	this.m_grepMessagesLocally.setLong(1, conference);
+    	this.m_grepMessagesLocally.setString(2, "%" + searchterm + "%");
+    	this.m_grepMessagesLocally.setString(3, "%" + searchterm + "%");
+        this.m_grepMessagesLocally.setLong(4, length);
+        this.m_grepMessagesLocally.setLong(5, offset);
+        
+        return innerLocalSearch(this.m_grepMessagesLocally); 
     }
     
-    public MessageSearchResult[] searchMessagesInConference(long conference, String searchterm, int offset, int length)
-    throws SQLException
+	public LocalMessageSearchResult[] listAllMessagesLocally(long conference,
+            int offset, int length) throws SQLException
     {
-    	this.m_searchMessagesInConference.clearParameters();
-    	this.m_searchMessagesInConference.setLong(1, conference);
-    	this.m_searchMessagesInConference.setString(2, searchterm);
-        this.m_searchMessagesInConference.setLong(3, length);
-        this.m_searchMessagesInConference.setLong(4, offset);
-        ResultSet rs = this.m_searchMessagesInConference.executeQuery();
-        List l = new ArrayList();
-        while (rs.next()) {
- 		   l.add(new MessageSearchResult(
- 		   		rs.getLong(1),			// Global id
-			   	rs.getInt(2),			// Local id
-				rs.getLong(3),			// user id
-			   	new Name(rs.getString(4), Visibilities.PUBLIC),	// username
-			   	rs.getString(5))		// subject	
-			   	);
-        }
-        MessageSearchResult[] result = new MessageSearchResult[l.size()];
-		l.toArray(result);
-		return result;
+        this.m_listAllMessagesLocally.clearParameters();
+        this.m_listAllMessagesLocally.setLong(1, conference);
+        this.m_listAllMessagesLocally.setInt(2, length);
+        this.m_listAllMessagesLocally.setInt(3, offset);
+        
+        return innerLocalSearch(this.m_listAllMessagesLocally);        
     }
-
-    public MessageSearchResult[] grepMessagesInConference(long conference, String searchterm, int offset, int length)
-    throws SQLException
+	
+	public LocalMessageSearchResult[] listMessagesLocallyByAuthor(long conference, long user,
+            int offset, int length) throws SQLException
     {
-    	this.m_grepMessagesInConference.clearParameters();
-    	this.m_grepMessagesInConference.setLong(1, conference);
-    	this.m_grepMessagesInConference.setString(2, "%" + searchterm + "%");
-    	this.m_grepMessagesInConference.setString(3, "%" + searchterm + "%");
-        this.m_grepMessagesInConference.setLong(4, length);
-        this.m_grepMessagesInConference.setLong(5, offset);
-        ResultSet rs = this.m_grepMessagesInConference.executeQuery();
-        List l = new ArrayList();
-        while (rs.next()) {
- 		   l.add(new MessageSearchResult(
- 		   		rs.getLong(1),			// Global id
-			   	rs.getInt(2),			// Local id
-				rs.getLong(3),			// user id
-			   	new Name(rs.getString(4), Visibilities.PUBLIC),	// username
-			   	rs.getString(5))		// subject	
-			   	);
-        }
-        MessageSearchResult[] result = new MessageSearchResult[l.size()];
-		l.toArray(result);
-		return result;
+        this.m_listMessagesLocallyByAuthor.clearParameters();
+        this.m_listMessagesLocallyByAuthor.setLong(1, conference);
+        this.m_listMessagesLocallyByAuthor.setLong(2, user);
+        this.m_listMessagesLocallyByAuthor.setInt(3, length);
+        this.m_listMessagesLocallyByAuthor.setInt(4, offset);
+        
+        return innerLocalSearch(this.m_listMessagesLocallyByAuthor);        
     }
+	
+	private LocalMessageSearchResult[] innerLocalSearch(PreparedStatement localSearchStatement) throws SQLException
+	{
+        ResultSet rs = localSearchStatement.executeQuery();
+        List l = new ArrayList();
+        while (rs.next())
+        {
+            l.add(new LocalMessageSearchResult(
+                    rs.getLong(1), // globalid
+                    rs.getInt(2), // localid
+                    rs.getLong(3), // authorid
+                    new Name(rs.getString(4), Visibilities.PUBLIC), // authorname
+                    rs.getString(5)) // subject	
+                    );
+        }
+        LocalMessageSearchResult[] lmsr = new LocalMessageSearchResult[l.size()];
+        l.toArray(lmsr);
+        return lmsr;
+	}
+	
+	public GlobalMessageSearchResult[] listMessagesGloballyByAuthor(long user,
+            int offset, int length) throws SQLException
+    {
+        this.m_listMessagesGloballyByAuthor.clearParameters();
+        this.m_listMessagesGloballyByAuthor.setLong(1, user);
+        this.m_listMessagesGloballyByAuthor.setInt(2, length);
+        this.m_listMessagesGloballyByAuthor.setInt(3, offset);
+        
+        return innerGlobalSearch(this.m_listMessagesGloballyByAuthor);        
+    }
+	
+	private GlobalMessageSearchResult[] innerGlobalSearch(PreparedStatement globalSearchStatement) throws SQLException
+	{
+        ResultSet rs = globalSearchStatement.executeQuery();
+        List l = new ArrayList();
+        while (rs.next())
+        {
+            l.add(new GlobalMessageSearchResult(
+                    rs.getLong(1), // globalid
+                    rs.getInt(2), // localid
+                    rs.getLong(3), // conferenceid
+                    rs.getLong(4), // authorid
+                    new Name(rs.getString(5), Visibilities.PUBLIC), // authorname
+                    rs.getString(6)) // subject	
+                    );
+        }
+        GlobalMessageSearchResult[] lmsr = new GlobalMessageSearchResult[l.size()];
+        l.toArray(lmsr);
+        return lmsr;
+	}
 }

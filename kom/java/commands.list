@@ -11,7 +11,6 @@ nu.rydin.kom.frontend.text.commands.ListUsers
 nu.rydin.kom.frontend.text.commands.ListConferences
 nu.rydin.kom.frontend.text.commands.ListConferencesAlphabetically
 nu.rydin.kom.frontend.text.commands.ListMembers
-nu.rydin.kom.frontend.text.commands.ListTexts
 nu.rydin.kom.frontend.text.commands.Signup
 nu.rydin.kom.frontend.text.commands.SignOff
 nu.rydin.kom.frontend.text.commands.GotoConference
@@ -56,12 +55,13 @@ nu.rydin.kom.frontend.text.commands.ListPermissions
 nu.rydin.kom.frontend.text.commands.SetFlag
 nu.rydin.kom.frontend.text.commands.ClearFlag
 nu.rydin.kom.frontend.text.commands.Encouragement
-nu.rydin.kom.frontend.text.commands.ListOwnMessages
 nu.rydin.kom.frontend.text.commands.ViewChatLog
 nu.rydin.kom.frontend.text.commands.ViewBroadcastLog
 nu.rydin.kom.frontend.text.commands.WhoAmI
-nu.rydin.kom.frontend.text.commands.SearchMessage
+nu.rydin.kom.frontend.text.commands.SearchLocalMessage
 nu.rydin.kom.frontend.text.commands.GrepLocalMessage
+nu.rydin.kom.frontend.text.commands.ListLocalMessage
+nu.rydin.kom.frontend.text.commands.ListGlobalMessage
 nu.rydin.kom.frontend.text.commands.ChangeTimeZone
 nu.rydin.kom.frontend.text.commands.AddPermission
 nu.rydin.kom.frontend.text.commands.SubtractPermission

@@ -2751,12 +2751,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    }
 	}
 
-	public MessageHeader[] listMessagesInConference(long conference, int start, int length)
+	public LocalMessageSearchResult[] listAllMessagesLocally(long conference, int start, int length)
 	throws UnexpectedException
 	{
 		try
 		{
-			return m_da.getMessageManager().getMessageOccurrencesInConference(conference, start, length);
+			return m_da.getMessageManager().listAllMessagesLocally(conference, start, length);
 		}
 		catch (SQLException e)
 		{
@@ -2765,11 +2765,31 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		
 	}
 
-	public MessageHeader[] listMessagesInCurrentConference(int start, int length)
+	public LocalMessageSearchResult[] listMessagesLocallyByAuthor(long conference, long user, int offset, int length)
 	throws UnexpectedException
 	{
-		return listMessagesInConference (this.getCurrentConferenceId(), start, length);
+		try
+		{
+			return m_da.getMessageManager().listMessagesLocallyByAuthor(conference, user, offset, length);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
 	}
+	
+    public GlobalMessageSearchResult[] listMessagesGloballyByAuthor(long user, int offset, int length) 
+    throws UnexpectedException
+    {
+		try
+		{
+			return m_da.getMessageManager().listMessagesGloballyByAuthor(user, offset, length);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+    }
 	
 	public MessageHeader getMessageHeader(long globalId)
 	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
@@ -2907,26 +2927,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}		
 	}
-
-    public LocalMessageHeader[] listGlobalMessagesByUser(long userId, int offset, int length)
-    throws UnexpectedException 
-	{
-		try
-		{
-			return m_da.getMessageManager().getGlobalMessagesByUser(userId, offset, length);
-		}
-		catch (SQLException e)
-		{
-			throw new UnexpectedException (this.getLoggedInUserId(), e);
-		}
-	}
     
-    public MessageSearchResult[] searchMessagesInConference(long conference, String searchterm, int offset, int length)
+    public LocalMessageSearchResult[] searchMessagesLocally(long conference, String searchterm, int offset, int length)
     throws UnexpectedException
 	{
     	try
 		{
-    		return m_da.getMessageManager().searchMessagesInConference(conference, searchterm, offset, length);
+    		return m_da.getMessageManager().searchMessagesLocally(conference, searchterm, offset, length);
 		}
     	catch (SQLException e)
 		{
@@ -2934,12 +2941,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 
-    public MessageSearchResult[] grepMessagesInConference(long conference, String searchterm, int offset, int length)
+    public LocalMessageSearchResult[] grepMessagesLocally(long conference, String searchterm, int offset, int length)
     throws UnexpectedException
 	{
     	try
 		{
-    		return m_da.getMessageManager().grepMessagesInConference(conference, searchterm, offset, length);
+    		return m_da.getMessageManager().grepMessagesLocally(conference, searchterm, offset, length);
 		}
     	catch (SQLException e)
 		{

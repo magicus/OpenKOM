@@ -969,29 +969,41 @@ public interface ServerSession
 	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;	
 
 	/**
-	 * Lists the messages in the given conference. Note that not all fields in the MessageHeader
-	 * array returned contain legal values.
+	 * Lists the messages in the given conference.
 	 * 
 	 * @param conference Conference Id
 	 * @param start First row (given as offset from top) to return
 	 * @param length Number of rows to return
-	 * @return An array of MessageHeaders
+	 * @return An array of LocalMessageSearchResults
 	 * @throws UnexpectedException
 	 */
-	public MessageHeader[] listMessagesInConference(long conference, int start, int length)
+	public LocalMessageSearchResult[] listAllMessagesLocally(long conference, int start, int length)
+	throws UnexpectedException;
+
+	/**
+	 * Lists the messages in the given conference written by the given user.
+	 * 
+	 * @param conference Conference Id
+	 * @param start First row (given as offset from top) to return
+	 * @param length Number of rows to return
+	 * @return An array of LocalMessageSearchResults
+	 * @throws UnexpectedException
+	 */
+	public LocalMessageSearchResult[] listMessagesLocallyByAuthor(long conference, long user, int start, int length)
 	throws UnexpectedException;
 	
 	/**
-	 * This method lists the messages in the users current conference.
+	 * List all messages written by a given user.
 	 * 
-	 * @param start First row (given as offset from top) to return
-	 * @param length Number of rows to return
-	 * @return An array of MessageHeaders
+	 * @param user
+	 * @param offset
+	 * @param length
+	 * @return An array of GlobalMessageSearchResults
 	 * @throws UnexpectedException
 	 */
-	public MessageHeader[] listMessagesInCurrentConference(int start, int length)
+    public GlobalMessageSearchResult[] listMessagesGloballyByAuthor(long user, int offset, int length)
 	throws UnexpectedException;
-	
+    
 	/**
 	 * Returns the last message head.
 	 * 
@@ -1091,14 +1103,6 @@ public interface ServerSession
 	 */	
 	public void updateLastlogin()
 	throws ObjectNotFoundException, UnexpectedException;
-	
-	/**
-	 * List all messages by specified user
-	 * @return
-	 * @throws UnexpectedException
-	 */
-	public LocalMessageHeader[] listGlobalMessagesByUser(long userId, int offset, int length)
-	throws UnexpectedException;
 
 	/** 
 	 * Returns the message header for a message identified by a global id.
@@ -1142,7 +1146,19 @@ public interface ServerSession
 	 */
 	public MessageLogItem[] getMessagesFromLog(short kind, int limit)
 	throws UnexpectedException;
-	
+    
+    /**
+     * Does a simple grep-like search in the given conference.
+     * 
+     * @param conference
+     * @param searchterm
+     * @param offset
+     * @param length
+     * @return
+     */
+    public LocalMessageSearchResult[] grepMessagesLocally(long conference, String searchterm, int offset, int length)
+    throws UnexpectedException;
+    
 	/**
 	 * Returns an array of results from doing a search in the given conference
 	 * with the given searchterm.
@@ -1153,19 +1169,7 @@ public interface ServerSession
 	 * @param length
 	 * @throws UnexpectedException
 	 */
-    public MessageSearchResult[] searchMessagesInConference(long conference, String searchterm, int offset, int length)
-    throws UnexpectedException;
-    
-    /**
-     * Does a simple grep-like search in the given conference.
-     * 
-     * @param currentConferenceId
-     * @param searchterm
-     * @param offset
-     * @param chunk_size
-     * @return
-     */
-    public MessageSearchResult[] grepMessagesInConference(long conference, String searchterm, int offset, int length)
+    public abstract LocalMessageSearchResult[] searchMessagesLocally(long conference, String searchterm, int offset, int length)
     throws UnexpectedException;
     
     /**
