@@ -47,7 +47,7 @@ import nu.rydin.kom.frontend.text.commands.ShowTime;
 import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
-import nu.rydin.kom.frontend.text.editor.simple.SimpleEditor;
+import nu.rydin.kom.frontend.text.editor.simple.SimpleMessageEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.UserInfo;
@@ -340,7 +340,12 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 					while(!m_displayMessageQueue.isEmpty())
 					{
 					    dc.chatMessage();
-						m_out.println((String) m_displayMessageQueue.removeFirst());
+					    WordWrapper ww = this.getWordWrapper((String) m_displayMessageQueue.removeFirst(), 
+					            this.getTerminalSettings().getWidth());
+					    String line = null;
+					    while((line = ww.nextLine()) != null)
+					        m_out.println(line);
+						// m_out.println((String) m_displayMessageQueue.removeFirst());
 						m_out.println();
 					}
 				}
@@ -565,7 +570,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		//
 		try
 		{
-			return new SimpleEditor(m_formatter);
+			return new SimpleMessageEditor(m_formatter);
 		}
 		catch(IOException e)
 		{

@@ -18,6 +18,8 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.editor.simple.SimpleChatEditor;
+import nu.rydin.kom.frontend.text.editor.simple.AbstractEditor;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -99,13 +101,15 @@ public class SendChatMessage extends AbstractCommand
 		//
 	    out.println("");
 		out.print(me);
-		out.print(": ");
+		out.println(": ");
 		out.flush();
 		
 		
 		// Read message
 		//
-		String message = in.readLine();
+		AbstractEditor editor = new SimpleChatEditor(context.getMessageFormatter());
+		String message = editor.edit(context, -1).getBody();
+		// String message = in.readLine();
 		
 		// Empty message? User interrupted
 		//

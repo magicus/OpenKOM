@@ -22,7 +22,6 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
-import nu.rydin.kom.frontend.text.ansi.ANSISequences;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -49,6 +48,66 @@ public class LineEditor implements NewlineListener
 	private static final char NEWLINE			= 14;
 	private static final char RET				= 18;
 	private static final char SPACE				= 32;
+	
+	private static final int TOKEN_UP			= 1;
+	private static final int TOKEN_DOWN			= 2;
+	private static final int TOKEN_LEFT			= 3;
+	private static final int TOKEN_RIGHT		= 4;
+	private static final int TOKEN_DELETE_LINE	= 5;
+	private static final int TOKEN_DELETE_WORD	= 6;
+	private static final int TOKEN_BOL			= 7;
+	private static final int TOKEN_EOL			= 8;
+	private static final int TOKEN_BS			= 9;
+	private static final int TOKEN_CR			= 10;
+	private static final int TOKEN_SKIP			= 100;
+	
+	private static final KeystrokeTokenizerDefinition s_tokenizerDef;
+	
+	static
+	{
+	    try
+	    {
+		    s_tokenizerDef = new KeystrokeTokenizerDefinition(
+			        new String[] { 
+			                "\n",				// Newline
+			                "\r",				// CR
+			                "\u0008",			// BS
+			                "\u007f",			// DEL
+			                "\u0001",			// Ctrl-A
+			                "\u0005",			// Ctrl-E
+			                "\u0015",			// Ctrl-U
+			                "\u0018",			// Ctrl-X
+			                "\u0017",			// Ctrl-W
+			                "\u001b[A",			// <esc> [ A
+			                "\u001b[B", 		// <esc> [ B
+			                "\u001b[C", 		// <esc> [ C
+			                "\u0006", 			// Ctrl-F
+			                "\u001b[D", 		// <esc> [ D
+			                "\u0002" },			// Ctrl-B
+			        new int[] {
+			                TOKEN_SKIP,			// Newline
+			                TOKEN_CR,			// CR
+			                TOKEN_BS,			// BS
+			                TOKEN_BS,			// DEL
+			                TOKEN_BOL,			// Ctrl-A
+			                TOKEN_EOL,			// Ctrl-E
+			                TOKEN_DELETE_LINE, 	// Ctrl-U
+			                TOKEN_DELETE_LINE, 	// Ctrl-X
+			                TOKEN_DELETE_WORD, 	// Ctrl-W
+			                TOKEN_UP, 			// <esc> [ A
+			                TOKEN_DOWN, 		// <esc> [ B
+			                TOKEN_RIGHT,		// <esc> [ C
+			                TOKEN_RIGHT, 		// Ctrl-F
+			                TOKEN_LEFT, 		// <esc> [ D
+			                TOKEN_LEFT });		// Ctrl-B
+	    }
+	    catch(AmbiguousPatternException e)
+	    {
+	        throw new ExceptionInInitializerError(e);
+	    }
+	}
+	
+	private final KeystrokeTokenizer m_tokenizer;
 	
 	private final ReaderProxy m_in;
 	
@@ -259,6 +318,10 @@ public class LineEditor implements NewlineListener
 		sb.append(m_formatter.format("misc.n"));
 		sb.append(") ");
 		m_morePrompt = sb.toString();
+		
+		// Create tokenizer
+		//
+		m_tokenizer = s_tokenizerDef.createKeystrokeTokenizer();
 		
 		// Start pollers
 		//
@@ -573,231 +636,192 @@ public class LineEditor implements NewlineListener
 		{
 			// Getting here means that we have a KeyStrokeEvent. Handle it!
 			//
-		    char ch = this.innerReadCharacter(flags);
-		    
-		    if (escapemode)
+		    KeystrokeTokenizer.Token token = null;
+		    char ch = 0;
+		    while(token == null)
 		    {
-		    	if ((ch == '[') || (ch == ';') || Character.isDigit(ch))
-		    	{
-		    		//We got escape code data, store and continue.
-		    		escapecode += ch;
-		    	}
-		    	else if (Character.isLetter(ch))
-		    	{
-		    		//We got a letter, store and mark end of escape sequence.
-		    		escapecode += ch;
-		    		escapemode = false;
-		    		
-		    		//Handle escape-code
-		    		if ("[A".equals(escapecode))
+		         ch = this.innerReadCharacter(flags);
+		         token = m_tokenizer.feedCharacter(ch);
+		    }
+		    int kind = token.getKind();
+		    switch(kind)
+		    {
+		    	case TOKEN_UP:
+	    			m_out.write(BELL);
+		    		break;
+		    	case TOKEN_DOWN:
+	    			m_out.write(BELL);
+	    			break;
+	    		case TOKEN_RIGHT:
+	    		    if(cursorpos==buffer.length() || (flags & FLAG_ECHO) == 0)
 		    		{
-		    			//Arrow up
+		    			//If at end of buffer or no echo, ignore arrow and beep.
 		    			m_out.write(BELL);
-		    		}
-		    		else if ("[B".equals(escapecode))
-		    		{
-		    			//Arrow down
-		    			m_out.write(BELL);
-		    		}
-		    		else if ("[C".equals(escapecode))
-		    		{
-		    			//Arrow right
-		    			if(cursorpos==buffer.length() || (flags & FLAG_ECHO) == 0)
-		    			{
-		    				//If at end of buffer or no echo, ignore arrow and beep.
-		    				m_out.write(BELL);
-		    			}
-		    			else
-		    			{
-		    				cursorpos++;
-							m_out.write(ANSISequences.MOVE_CURSOR_RIGHT_ONE);
-		    			}
-		    		}
-		    		else if ("[D".equals(escapecode))
-		    		{
-		    			//Arrow left
-						if(cursorpos == 0 || (flags & FLAG_ECHO) == 0)
-						{
-//							If at end of buffer or no echo, ignore arrow and beep.
-							if((flags & FLAG_STOP_ON_BOL) != 0) {
-								throw new LineUnderflowException();
-							}
-							m_out.write(BELL);
-						}
-						else
-						{
-							cursorpos--;
-							m_out.write(ANSISequences.MOVE_CURSOR_LEFT_ONE);
-						}
 		    		}
 		    		else
 		    		{
-		    			//Unknown escape sequence, do nothing
+						m_out.write(buffer.charAt(cursorpos));
+						cursorpos++;
 		    		}
-		    	}
-		    	else
-		    	{
-		    		//Unexpected character in sequence, terminate.
-		    		escapemode = false;
-		    	}
-		    }
-		    else
-		    {
-				switch(ch)
-				{
-					case ESC:
-						escapemode = true;
-						escapecode = "";
-						break;
-					case '\r':
-						editing = false;
-						m_out.write('\r');					
-						m_out.write('\n');
-						break;
-					case NEWLINE:
-						// Skip
-						//
-						break;
-					case DEL:
-					case BS:
-						if(cursorpos == 0)
-						{
-							if((flags & FLAG_STOP_ON_BOL) != 0)
-								throw new LineUnderflowException();
-							m_out.write(BELL);
+	    		    break;
+	    		case TOKEN_LEFT:
+					if(cursorpos == 0 || (flags & FLAG_ECHO) == 0)
+					{
+//							If at end of buffer or no echo, ignore arrow and beep.
+						if((flags & FLAG_STOP_ON_BOL) != 0) {
+							throw new LineUnderflowException();
 						}
-						else
+						m_out.write(BELL);
+					}
+					else
+					{
+						cursorpos--;
+						m_out.write(BS);
+					}
+					break;
+				case TOKEN_CR:
+					editing = false;
+					m_out.write('\r');					
+					m_out.write('\n');
+					break;
+				case TOKEN_BS:
+					if(cursorpos == 0)
+					{
+						if((flags & FLAG_STOP_ON_BOL) != 0)
+							throw new LineUnderflowException();
+						m_out.write(BELL);
+					}
+					else
+					{
+						buffer.deleteCharAt(--cursorpos);
+						m_out.write(BS);
+						m_out.write(SPACE);
+						m_out.write(BS);
+						if (cursorpos < buffer.length())
 						{
-							buffer.deleteCharAt(--cursorpos);
+							m_out.write(buffer.substring(cursorpos));
+							m_out.write(' ');
+							PrintUtils.printRepeated(m_out, BS, buffer.length() - cursorpos + 1);
+						}
+					}	
+					break;
+				case TOKEN_BOL:
+					if(((flags & FLAG_ECHO) != 0) && cursorpos > 0)
+					{
+						//Advance cursor to beginning of line
+						PrintUtils.printRepeated(m_out, BS, cursorpos);
+						cursorpos = 0;
+					}
+					break;
+				case TOKEN_EOL:
+					if(((flags & FLAG_ECHO) != 0) && cursorpos < buffer.length())
+					{
+					    // Advance cursor to end of line
+					    //
+						m_out.write(buffer.substring(cursorpos));
+						cursorpos = buffer.length();
+					}
+					break;
+				case TOKEN_DELETE_LINE:
+					{
+						int top = buffer.length();
+						
+						// Advance cursor to end of line
+						//
+						int n = top  - cursorpos;
+						while(n-- > 0)
+							m_out.write(SPACE);
+						
+						// Delete to beginning of line
+						//
+						n = top;
+						while(n-- > 0)
+						{
 							m_out.write(BS);
 							m_out.write(SPACE);
 							m_out.write(BS);
-							if (cursorpos < buffer.length())
-							{
-								m_out.write(buffer.substring(cursorpos));
-								m_out.write(SPACE);
-								PrintUtils.printRepeated(m_out, BS, buffer.length() - cursorpos + 1);
-							}
-						}	
+						}
+						buffer.delete(0, buffer.length());
+						cursorpos = 0;						
 						break;
-					case CTRL_A:
-						if(((flags & FLAG_ECHO) != 0) && cursorpos > 0)
-						{
-							//Advance cursor to beginning of line
-							PrintUtils.printRepeated(m_out, BS, cursorpos);
-							cursorpos = 0;
-						}
-						break;
-					case CTRL_E:
-						if(((flags & FLAG_ECHO) != 0) && cursorpos < buffer.length())
-						{
-							//Advance cursor to end of line
-							m_out.write(buffer.substring(cursorpos));
-							cursorpos = buffer.length();
-						}
-						break;
-					case CTRL_X:
-					case CTRL_U:
-						{
-							int top = buffer.length();
-							
-							// Advance cursor to end of line
-							//
-							int n = top  - cursorpos;
-							while(n-- > 0)
-								m_out.write(SPACE);
-							
-							// Delete to beginning of line
-							//
-							n = top;
-							while(n-- > 0)
-							{
-								m_out.write(BS);
-								m_out.write(SPACE);
-								m_out.write(BS);
-							}
-							buffer.delete(0, buffer.length());
-							cursorpos = 0;						
-							break;
-						}
-					case CTRL_W:
-						{
-							//Move i to beginning of current word.
-							int i = cursorpos;
-							for(; i > 0 && Character.isSpaceChar(buffer.charAt(i - 1)); --i)
-							{
-							}
-							for(; i > 0 && !Character.isSpaceChar(buffer.charAt(i - 1)); --i)
-							{
-							}
-							
-							if (i != cursorpos)
-							{
-								//Delete characters in buffer from i to cursorpos.
-								buffer.delete(i, cursorpos);
-								
-								//Move back cursor to i.
-								PrintUtils.printRepeated(m_out, BS, cursorpos - i);
-								
-								//Print rest of buffer from i.
-								m_out.write(buffer.substring(i));
-								
-								//Pad with spaces.
-								PrintUtils.printRepeated(m_out, SPACE, cursorpos - i);
-								
-								//Move back cursor to i.
-								PrintUtils.printRepeated(m_out, BS, buffer.length() + (cursorpos - i) - i);
-								
-								//Set new cursorpos
-								cursorpos = i;
-							}
-							break;
-						}
-					default:	
-						// A stopchar?
-						//
-						if(stopChars != null && stopChars.indexOf(ch) != -1)
-						    throw new StopCharException(buffer.toString(), ch);
-	
-						// Are we exceeding max length?
-						//
-						if(maxLength != 0 && buffer.length() >= maxLength - 1)
-						{
-							// Break on overflow?
-							//
-							if((flags & FLAG_STOP_ON_EOL) != 0)
-							{
-								buffer.insert(cursorpos++, ch);
-								throw new LineOverflowException(buffer.toString());
-							}
-							else
-							{
-								// Don't break. Just make noise and ignore keystroke
-								//
-								m_out.write(BELL);
-								m_out.flush();
-								break; 
-							}
-						}
+					}					
+				case TOKEN_DELETE_WORD:
+				{
+					//Move i to beginning of current word.
+					int i = cursorpos;
+					for(; i > 0 && Character.isSpaceChar(buffer.charAt(i - 1)); --i)
+					{
+					}
+					for(; i > 0 && !Character.isSpaceChar(buffer.charAt(i - 1)); --i)
+					{
+					}
+					
+					if (i != cursorpos)
+					{
+						//Delete characters in buffer from i to cursorpos.
+						buffer.delete(i, cursorpos);
 						
-						// Store the character
-						//
-						buffer.insert(cursorpos++, ch);
-							
-						if((flags & FLAG_ECHO) != 0) {
-							m_out.write(ch);
-							if (cursorpos < buffer.length())
-							{
-								m_out.write(buffer.substring(cursorpos));
-								m_out.write(SPACE);
-								m_out.write(ANSISequences.moveCursorLeft(buffer.length() - cursorpos + 1));
-							}
-						}
-						else {
-							m_out.write('*');
-						}
-						break;
+						//Move back cursor to i.
+						PrintUtils.printRepeated(m_out, BS, cursorpos - i);
+						
+						//Print rest of buffer from i.
+						m_out.write(buffer.substring(i));
+						
+						//Pad with spaces.
+						PrintUtils.printRepeated(m_out, SPACE, cursorpos - i);
+						
+						//Move back cursor to i.
+						PrintUtils.printRepeated(m_out, BS, buffer.length() + (cursorpos - i) - i);
+						
+						//Set new cursorpos
+						cursorpos = i;
+					}
+					break;				
 				}
+				case TOKEN_SKIP:
+				    break;
+				case KeystrokeTokenizerDefinition.LITERAL:
+					if(stopChars != null && stopChars.indexOf(ch) != -1)
+					    throw new StopCharException(buffer.toString(), ch);
+
+					// Are we exceeding max length?
+					//
+					if(maxLength != 0 && buffer.length() >= maxLength - 1)
+					{
+						// Break on overflow?
+						//
+						if((flags & FLAG_STOP_ON_EOL) != 0)
+						{
+							buffer.insert(cursorpos++, ch);
+							throw new LineOverflowException(buffer.toString());
+						}
+						else
+						{
+							// Don't break. Just make noise and ignore keystroke
+							//
+							m_out.write(BELL);
+							m_out.flush();
+							break; 
+						}
+					}
+					
+					// Store the character
+					//
+					buffer.insert(cursorpos++, ch);
+						
+					if((flags & FLAG_ECHO) != 0) 
+					{
+						m_out.write(ch);
+						if (cursorpos < buffer.length())
+						{
+							m_out.write(buffer.substring(cursorpos));
+							m_out.write(SPACE);
+							PrintUtils.printRepeated(m_out, BS, buffer.length() - cursorpos + 1);
+						}
+					}
+					else 
+						m_out.write('*');
+					break;
 		    }
 			m_out.flush();
 		}		

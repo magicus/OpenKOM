@@ -31,12 +31,13 @@ public class UserFlags
 	public static long CLEAR_SCREEN_BEFORE_MESSAGE			= 0x00000020;
 	public static long ANSI_ATTRIBUTES						= 0x00000040; // TODO: Not supported
 	public static long SHOW_OBJECT_IDS						= 0x00000080;
+	public static long EMPTY_LINE_FINISHES_CHAT				= 0x00000100;
 
 	/**
 	 * Default value for flagword 1
 	 */
 	public static long DEFAULT_FLAGS1 = SHOW_ATTENDANCE_MESSAGES | ALLOW_BROADCAST_MESSAGES |
-		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL;
+		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT;
 	
 	/**
 	 * Default value for flagword 2

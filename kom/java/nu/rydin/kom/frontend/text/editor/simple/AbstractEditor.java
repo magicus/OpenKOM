@@ -32,54 +32,20 @@ import nu.rydin.kom.utils.PrintUtils;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class SimpleEditor implements MessageEditor
+public abstract class AbstractEditor implements MessageEditor
 {	
 	private final CommandParser m_parser;
 	
-	public SimpleEditor(MessageFormatter formatter)
+	public AbstractEditor(String commandList, MessageFormatter formatter)
 	throws IOException, UnexpectedException
 	{
-		m_parser = CommandParser.load("/editorcommands.list", formatter);
+		m_parser = CommandParser.load(commandList, formatter);
 	}
 	
-	public UnstoredMessage edit(Context underlying, long replyTo)
-		throws KOMException, InterruptedException, IOException
-	{
-		EditorContext context = new EditorContext(underlying);
-		PrintWriter out = context.getOut();
-		LineEditor in = context.getIn();
-		MessageFormatter formatter = context.getMessageFormatter();	
-		String oldSubject = null;
-		try
-		{
-			// if this is a reply, retrieve subject from original message
-			//
-			if(replyTo > 0)  
-				context.getSession().innerReadMessage(replyTo).getMessage().getSubject();
-				
-			// Print author
-			//
-			out.println(formatter.format("simple.editor.author", context.getCachedUserInfo().getName()));
-				
-			// Read subject
-			//
-			out.print(formatter.format("simple.editor.subject"));
-			out.flush();
-			context.setSubject(in.readLine(oldSubject));
-						
-			// Enter the main editor loop
-			//
-			if(!this.mainloop(context))
-				throw new OperationInterruptedException();			
-			return new UnstoredMessage(context.getSubject(), context.getBuffer().toString());
-		}
-		catch(IOException e)
-		{
-			throw new KOMException(formatter.format("error.reading.user.input"), e);		
-		}
-	}
+	public abstract UnstoredMessage edit(Context underlying, long replyTo)
+		throws KOMException, InterruptedException, IOException;
 	
-	protected boolean mainloop(EditorContext context)
+	protected boolean mainloop(EditorContext context, boolean stopOnEmpty)
 	throws InterruptedException, IOException
 	{
 		// Set up some stuff
@@ -156,12 +122,19 @@ public class SimpleEditor implements MessageEditor
 				 			out.println(e.formatMessage(context));
 				 		}
 				 		
-				 		// Don't inlude this in the buffer!
+				 		// Don't include this in the buffer!
 				 		// 
 				 		continue;
 				 	}	
 				 }
+				 
+				 // Stop on empty line if requested
+				 //
+				 if(stopOnEmpty && line.length() == 0)
+				     return true;
 				 	
+				 // Add line to buffer
+				 //
 				 line += '\n';
 				 buffer.add(line);
 				 defaultLine = null;
