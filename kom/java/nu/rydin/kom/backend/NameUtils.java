@@ -7,12 +7,34 @@
 package nu.rydin.kom.backend;
 
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import nu.rydin.kom.utils.Logger;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class NameUtils
 {
+    private static Pattern NamePattern;
+    private static Pattern UserNamePattern;
+    private static Pattern ConferenceNamePattern;
+    
+    static
+    {
+        try
+        {
+            NamePattern = Pattern.compile("^[a-zA-ZÅÄÖÜåäöü()][^\\*]*$");
+            UserNamePattern = Pattern.compile("^[a-zA-ZÅÄÖÜåäöü()][^\\*]*$");
+            ConferenceNamePattern = Pattern.compile("^[a-zA-ZÅÄÖÜåäöü()][^\\*]*$");
+        } 
+        catch (PatternSyntaxException e)
+        {
+            Logger.fatal(new NameUtils(), "Someone needs a course in how to write regular expressions!", e);
+        }
+    }
+    
     public static String normalizeNameKeepParanteses(String name)
     {
 		int top = name.length();
@@ -81,6 +103,21 @@ public class NameUtils
 			}
 		}
 		return buffer.toString();
+	}
+	
+	public static boolean isValidName(String name)
+	{
+	    return NamePattern.matcher(name).matches();
+	}
+
+	public static boolean isValidUserName(String name)
+	{
+	    return UserNamePattern.matcher(name).matches();
+	}
+	
+	public static boolean isValidConferenceName(String name)
+	{
+	    return ConferenceNamePattern.matcher(name).matches();
 	}
 	
 	public static String[] splitName(String name)

@@ -8,6 +8,7 @@ package nu.rydin.kom.frontend.text.parser;
 
 import java.io.IOException;
 
+import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
@@ -36,6 +37,12 @@ public class UserParameter extends NamedObjectParameter
                 NameManager.USER_KIND, context);
     }
 
+    private boolean isValidName(String name)
+    {
+        // TODO Auto-generated method stub
+        return NameUtils.isValidUserName(toString());
+    }
+    
     protected String getUserDescriptionKey()
     {
         return "parser.parameter.user.description";

@@ -8,6 +8,7 @@ package nu.rydin.kom.frontend.text.parser;
 
 import java.io.IOException;
 
+import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
@@ -33,7 +34,8 @@ public class NamedObjectParameter extends CommandLineParameter
     {
         String cooked = cookString(matchingPart);
 
-        if (cooked.length() > 0)
+        //TODO: Tired, stressed, does this really work?
+        if ((cooked.length() > 0) && this.isValidName(cooked))
         {
             // well, this _could_ be a name... check it later
             return new Match(true, matchingPart, remainder, cooked);
@@ -41,6 +43,12 @@ public class NamedObjectParameter extends CommandLineParameter
         {
             return new Match(false, null, null, null);
         }
+    }
+
+    private boolean isValidName(String name)
+    {
+        // TODO Auto-generated method stub
+        return NameUtils.isValidName(toString());
     }
 
     public Object resolveFoundObject(Context context, Match match)
