@@ -52,6 +52,7 @@ public class MessageManager
 	private final PreparedStatement m_getLocalIdsInConfStmt;
 	private final PreparedStatement m_dropConferenceStmt;
 	private final PreparedStatement m_getGlobalBySubjectStmt;
+	private final PreparedStatement m_findLastOccurrenceInConferenceWithAttrStmt;
 	
 	private final Connection m_conn; 
 	
@@ -61,6 +62,7 @@ public class MessageManager
 
 	public static final short ATTR_NOCOMMENT = 0;
 	public static final short ATTR_MOVEDFROM = 1;
+	public static final short ATTR_RULEPOST = 2;
 	
 	public MessageManager(Connection conn)
 	throws SQLException
@@ -143,6 +145,13 @@ public class MessageManager
 			 "select localnum from messageoccurrences where conference = ?");
 		m_dropConferenceStmt = conn.prepareStatement(
 			 "delete from conferences where id = ?");
+		m_findLastOccurrenceInConferenceWithAttrStmt = conn.prepareStatement(
+			 "select localnum " +
+			 "from MessageOccurrences as MO " +
+			 "join MessageAttributes as MA on MO.Message = MA.Message " +
+			 "where MA.kind = ? and MO.conference = ? " +
+			 "order by MO.Message desc " +
+			 "limit 1 offset 0");
 	}
 	
 	public void close()
@@ -190,6 +199,8 @@ public class MessageManager
 			m_dropConferenceStmt.close();
 		if(m_getGlobalBySubjectStmt != null)
 			m_getGlobalBySubjectStmt.close();
+		if(m_findLastOccurrenceInConferenceWithAttrStmt != null)
+			m_findLastOccurrenceInConferenceWithAttrStmt.close();
 	}
 	
 	public void finalize()
@@ -856,5 +867,19 @@ public class MessageManager
 		this.m_getGlobalBySubjectStmt.setString(2, subject);
 		ResultSet rs = this.m_getGlobalBySubjectStmt.executeQuery();
 		return SQLUtils.extractLongs(rs, 1);	
+	}
+	
+	public int findLastOccurrenceInConferenceWithAttrStmt (short attrKind, long conference)
+	throws SQLException
+	{
+		this.m_findLastOccurrenceInConferenceWithAttrStmt.clearParameters();
+		this.m_findLastOccurrenceInConferenceWithAttrStmt.setShort(1, attrKind);
+		this.m_findLastOccurrenceInConferenceWithAttrStmt.setLong(2, conference);
+		ResultSet rs = this.m_findLastOccurrenceInConferenceWithAttrStmt.executeQuery();
+		rs.first();
+		int i = rs.getInt(1);
+		rs.close();
+		rs = null;		
+		return i;
 	}
 }

@@ -28,6 +28,8 @@ nu.rydin.kom.frontend.text.commands.GenerateTestdata
 nu.rydin.kom.frontend.text.commands.GotoNextConference
 nu.rydin.kom.frontend.text.commands.ReadNextMessage
 nu.rydin.kom.frontend.text.commands.DisplayCurrentConference
+nu.rydin.kom.frontend.text.commands.ReadRules
+nu.rydin.kom.frontend.text.commands.WriteRules
 nu.rydin.kom.frontend.text.commands.ChangeUnread
 nu.rydin.kom.frontend.text.commands.ListNews
 nu.rydin.kom.frontend.text.commands.SendMail

@@ -25,6 +25,7 @@ import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.NoCurrentMessageException;
 import nu.rydin.kom.NoMoreMessagesException;
 import nu.rydin.kom.NoMoreNewsException;
+import nu.rydin.kom.NoRulesException;
 import nu.rydin.kom.NotAReplyException;
 import nu.rydin.kom.NotLoggedInException;
 import nu.rydin.kom.NotMemberException;
@@ -2103,4 +2104,37 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
+	public Envelope getLastRulePostingInConference (long conference)
+	throws ObjectNotFoundException, NoRulesException, UnexpectedException
+	{
+		try
+		{
+			return this.readLocalMessage(conference, m_da.getMessageManager().findLastOccurrenceInConferenceWithAttrStmt(MessageManager.ATTR_RULEPOST, conference));
+		}
+		catch (SQLException e)
+		{
+			throw new NoRulesException();
+		}
+	}
+	
+	public Envelope getLastRulePosting()
+	throws ObjectNotFoundException, NoRulesException, UnexpectedException
+	{
+		return getLastRulePostingInConference (this.m_currentConferenceId);
+	}
+
+	public MessageOccurrence storeRulePosting(UnstoredMessage msg)
+	throws AuthorizationException, UnexpectedException, ObjectNotFoundException
+	{
+		try
+		{
+			MessageOccurrence mo = this.storeReplyInCurrentConference(msg, -1L);
+			m_da.getMessageManager().addMessageAttribute(mo.getGlobalId(), MessageManager.ATTR_RULEPOST, null);
+			return mo;
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
 }

@@ -17,6 +17,7 @@ import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.NoCurrentMessageException;
 import nu.rydin.kom.NoMoreMessagesException;
 import nu.rydin.kom.NoMoreNewsException;
+import nu.rydin.kom.NoRulesException;
 import nu.rydin.kom.NotAReplyException;
 import nu.rydin.kom.NotLoggedInException;
 import nu.rydin.kom.NotMemberException;
@@ -941,4 +942,40 @@ public interface ServerSession
 	 */
 	public void deleteConference (long conference)
 	throws UnexpectedException;
+	
+	/**
+	 * Returns the Envelope for the last rule posting (which is the last message which has a 
+	 * MessageAttribute.Kind of ATTR_RULEPOST in the specified conference.
+	 * 
+	 * @param conference Conference ID.
+	 * @return Message envelope.
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public Envelope getLastRulePostingInConference (long conference)
+	throws ObjectNotFoundException, NoRulesException, UnexpectedException;
+
+	/**
+	 * Returns the Envelope for the last rule posting (which is the last message which has a
+	 * MessageAttribute.Kind of ATTR_RULEPOST) in the current conference.
+	 * 
+	 * @return Message envelope.
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public Envelope getLastRulePosting()
+	throws ObjectNotFoundException, NoRulesException, UnexpectedException;
+
+	/**
+	 * Store a rule posting (an ordinary message containg a message attribute of the kind
+	 * ATTR_RULEPOST) in the current conference.
+	 * 
+	 * @param msg The message to store.
+	 * @return The occurrence info (local message identifer and so on).
+	 * @throws AuthorizationException
+	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
+	 */
+	public MessageOccurrence storeRulePosting(UnstoredMessage msg)
+	throws AuthorizationException, UnexpectedException, ObjectNotFoundException;
 }
