@@ -4,27 +4,27 @@
  * Distributed under the GPL licens.
  * See http://www.gnu.org for details
  */
-package nu.rydin.kom.frontend.text.editor;
+package nu.rydin.kom.frontend.text.editor.simple;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.EventDeliveredException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.LineOverflowException;
 import nu.rydin.kom.LineUnderflowException;
-import nu.rydin.kom.MissingArgumentException;
 import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.StopCharException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.CommandParser;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
+import nu.rydin.kom.frontend.text.editor.Buffer;
+import nu.rydin.kom.frontend.text.editor.EditorContext;
+import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
@@ -34,103 +34,6 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class SimpleEditor implements MessageEditor
 {	
-	public static class ListCommands extends AbstractCommand
-	{
-		public ListCommands(String fullName)
-		{
-			super(fullName);
-		}
-		
-		public void execute(Context context, String[] args)
-		throws KOMException
-		{
-			try
-			{
-				// TODO: Avoid reloading parser every time
-				//
-				PrintWriter out = context.getOut();
-				Command[] cmds = CommandParser.load("/editorcommands.list", 
-					context.getMessageFormatter()).getCommandList();
-				int top = cmds.length;
-				for(int idx = 0; idx < top; ++idx)
-					out.println(cmds[idx].getFullName());
-			}
-			catch(IOException e)
-			{
-				throw new UnexpectedException(context.getLoggedInUserId(), e);
-			}
-		}
-	}
-
-	public static class Quit extends AbstractCommand
-	{
-		public Quit(String fullName)
-		{
-			super(fullName);
-		}
-		
-		public void execute(Context context, String[] parameters)
-		{
-			// Not much to do here
-		}
-	}
-	
-	public static class Save extends AbstractCommand
-	{
-		public Save(String fullName)
-		{
-			super(fullName);
-		}
-		
-		public void execute(Context context, String[] parameters)
-		{
-			// Not much to do here
-		}
-	}
-	
-	public static class Delete extends AbstractCommand
-	{
-		public Delete(String fullName)
-		{
-			super(fullName);
-		}
-		
-		public void execute(Context context, String[] parameters)
-		throws KOMException
-		{
-			// TODO: Support ranges
-			//
-			// Get parameter
-			//
-			if(parameters.length != 1)
-				throw new MissingArgumentException();
-			int line = -1;
-			try
-			{
-				line = Integer.parseInt(parameters[0]);
-			}
-			catch(NumberFormatException e)
-			{
-				throw new BadParameterException();
-			}
-			
-			// Is is a valid line?
-			//
-			Buffer buffer = ((EditorContext) context).getBuffer();
-			if(line < 1 || line > buffer.size())
-				throw new BadParameterException();
-			
-			// Everything seems ok. Delete the line
-			//
-			buffer.remove(line - 1);
-		}
-		
-		public boolean acceptsParameters()
-		{
-			return true;
-		}
-	}
-	
 	private final CommandParser m_parser;
 	
 	public SimpleEditor(MessageFormatter formatter)
