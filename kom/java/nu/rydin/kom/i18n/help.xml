@@ -5,7 +5,7 @@
    <param order="0">Namn eller alias på det kommando du vill ha hjälp om.</param>
   </parameters>
   <description>
-   <block>OpenKOMs hjälpsystem innehåller hjälp om varje kommando som finns tillgänligt. För att få hjälp om ett specifikt kommando skriver du "hjälp kommandonamn".</block>
+   <block>OpenKOMs hjälpsystem innehåller hjälp om varje kommando som finns tillgängligt. För att få hjälp om ett specifikt kommando skriver du "hjälp kommandonamn".</block>
    <block>Hjälptexterna innehåller följande delar:</block>
    <block>Kommando: Här visas en formell definition av hur du kan använda kommandot, tillsammans med &lt;frivilliga&gt; och [obligatoriska] parametrar.</block>
    <block>Parametrar: Här förklaras varje parameter för sig.</block>
