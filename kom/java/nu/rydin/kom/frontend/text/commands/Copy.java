@@ -13,9 +13,11 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -31,23 +33,44 @@ public class Copy extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException, NoCurrentMessageException
 	{
-	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
-		long conference = nameAssociation.getId();
+	    ServerSession session = context.getSession();
+		PrintWriter out = context.getOut();
+		MessageFormatter fmt = context.getMessageFormatter();
+	    DisplayController dc = context.getDisplayController();
+	    
+	    dc.normal();
 		
-		ServerSession session = context.getSession();
-		long message = session.getCurrentMessage();
-		if(message == -1)
+		long messageid = session.getCurrentMessage();
+		if(messageid == -1)
 			throw new NoCurrentMessageException();
+	    
+	    long destination = ((NameAssociation)parameterArray[0]).getId();
 
 		// Call backend
 		//
-		session.copyMessage(message, conference);		
+		session.copyMessage(messageid, destination);		
 		
-		// Print confirmation
-		//
-		PrintWriter out = context.getOut();
-		MessageFormatter fmt = context.getMessageFormatter();
-		out.println(fmt.format("copy.confirmation", 
-			new Object [] { new Long(message), session.getName(conference) } ));
+        // Retrieve current local occurrence to try and get the local number
+        //
+        MessageOccurrence local = session.getCurrentMessageOccurrence();
+        int localnum = -1;
+        if (local.getConference() == session.getCurrentConferenceId())
+        {
+            //We're moving a message whose original is in the current conference...
+            localnum = local.getLocalnum();
+        }
+		
+        if (localnum == -1)
+        {
+            //Print global confirmation
+    		out.println(fmt.format("copy.global.confirmation", 
+    				new Object [] { new Long(messageid), session.getName(destination) } ));	
+        }
+        else
+        {
+            //Print local confirmation 
+    		out.println(fmt.format("copy.local.confirmation", 
+    				new Object [] { new Long(localnum), session.getName(destination) } ));	
+        }
 	}
 }
