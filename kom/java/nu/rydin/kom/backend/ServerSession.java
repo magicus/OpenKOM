@@ -689,4 +689,47 @@ public interface ServerSession
 	 */
 	public String getDebugString();
 
+	/**
+	 * Renames an object
+	 * @param id The id of the object 
+	 * @param newName The new name
+	 * @throws DuplicateNameException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public void renameObject(long id, String newName)
+	throws DuplicateNameException, ObjectNotFoundException, AuthorizationException, UnexpectedException;
+	
+	/**
+	 * Changes the suffix of the logged in user
+	 * @param suffix The new suffix
+	 * @throws DuplicateNameException
+	 * @throws ObjectNotFoundException
+	 * @throws AuthorizationException
+	 * @throws UnexpectedException
+	 */
+	public void changeSuffixOfLoggedInUser(String suffix)
+	throws DuplicateNameException, ObjectNotFoundException, AuthorizationException, UnexpectedException;
+
+	/**
+	 * Changes the suffix of a specified user.
+	 * @param id The ide of the user  
+	 * @param suffix The new suffix
+	 * @throws DuplicateNameException
+	 * @throws ObjectNotFoundException
+	 * @throws AuthorizationException
+	 * @throws UnexpectedException
+	 */	
+	public void changeSuffixOfUser(long id, String suffix)
+	throws DuplicateNameException, ObjectNotFoundException, AuthorizationException, UnexpectedException;
+
+	/**
+	 * Returns true if the current user has the right to change the name of
+	 * the specified object.
+	 * @param id The object id.
+	 * @throws DuplicateNameException
+	 * @throws UnexpectedException
+	 */
+	public boolean userCanChangeNameOf(long id)
+	throws DuplicateNameException, UnexpectedException;	
 }

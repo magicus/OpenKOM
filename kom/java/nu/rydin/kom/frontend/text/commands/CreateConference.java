@@ -45,6 +45,12 @@ public class CreateConference extends AbstractCommand
 		out.print(fmt.format("create.conference.fullname"));
 		out.flush();
 		String fullname = in.readLine();
+		
+		// Empty name? User interrupted
+		//
+		if(fullname.length() == 0)
+			return;
+		
 		short flags = 0;
 		
 		// Get conference type

@@ -39,6 +39,7 @@ public class NameManager
 	private final PreparedStatement m_addNameStmt;
 	private final PreparedStatement m_getAssociationsByPatternStmt;
 	private final PreparedStatement m_getAssociationsByPatternAndKindStmt;
+	private final PreparedStatement m_renameObjectStmt;
 	
 	public NameManager(Connection conn)
 	throws SQLException
@@ -67,6 +68,8 @@ public class NameManager
 		m_getAssociationsByPatternAndKindStmt = conn.prepareStatement(
 			"SELECT id, fullname FROM names WHERE norm_name LIKE ? AND visibility != 2 " +
 			"AND kind = ? ORDER BY fullname");
+		m_renameObjectStmt = conn.prepareStatement(
+			"UPDATE names SET fullname = ?, norm_name = ? WHERE id = ?");
 	}
 	
 	public void finalize()
@@ -103,6 +106,8 @@ public class NameManager
 			m_getAssociationsByPatternStmt.close();
 		if(m_getAssociationsByPatternAndKindStmt != null)
 			m_getAssociationsByPatternAndKindStmt.close();
+		if(m_renameObjectStmt != null)
+			m_renameObjectStmt.close();
 	}
 	
 	/**
@@ -413,6 +418,35 @@ public class NameManager
 		// Now, read it back to obtain the id
 		//
 		return ((com.mysql.jdbc.PreparedStatement) m_addNameStmt).getLastInsertID();
+	}
+	
+	/**
+	 * Renames an object
+	 * @param id The id of the Object to rename
+	 * @param newName The new name
+	 * @throws SQLException
+	 * @throws ObjectNotFoundException
+	 * @throws DuplicateNameException
+	 * @throws AmbiguousNameException
+	 */
+	public void renameObject(long id, String newName)
+	throws SQLException, ObjectNotFoundException, DuplicateNameException
+	{
+		String normName = NameUtils.normalizeName(newName);
+
+		// Check to see if we already have the name
+		//
+		if(this.nameExists(normName))
+			throw new DuplicateNameException(normName);
+		
+		// Update name
+		//
+		m_renameObjectStmt.clearParameters();
+		m_renameObjectStmt.setString(1, newName);
+		m_renameObjectStmt.setString(2, normName);
+		m_renameObjectStmt.setLong(3, id);
+		if(m_renameObjectStmt.executeUpdate() == 0)
+			throw new ObjectNotFoundException("id=" + id);
 	}
 	
 	

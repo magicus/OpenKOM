@@ -1,5 +1,5 @@
 /*
- * Created on Nov 11, 2003
+ * Created on Jun 5, 2004
  *
  * Distributed under the GPL licens.
  * See http://www.gnu.org for details
@@ -9,27 +9,27 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.MissingArgumentException;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class SendChatMessage extends AbstractCommand
+public class RenameObject extends AbstractCommand
 {
-
-	public SendChatMessage(String fullName)
+	public RenameObject(String fullName)
 	{
-		super(fullName);	
+		super(fullName);
 	}
-
+	
 	public void execute(Context context, String[] parameters)
 		throws KOMException, IOException, InterruptedException
 	{
@@ -37,45 +37,47 @@ public class SendChatMessage extends AbstractCommand
 		//
 		if(parameters.length == 0)
 			throw new MissingArgumentException();
-		
-		// Special case: * sends to all
-		//
-		long user = "*".equals(parameters[0])
-			? -1
-			: NamePicker.resolveName(NameUtils.assembleName(parameters), UserManager.USER_KIND, context);
 
+		long id = NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context);
+		
 		// Set up
 		//
 		LineEditor in = context.getIn();
 		PrintWriter out = context.getOut();
+		MessageFormatter formatter = context.getMessageFormatter();
 		ServerSession session = context.getSession();
-		String me = session.getLoggedInUser().getName();
+		
+		// Are we allowed to rename this object?
+		//
+		if(!session.userCanChangeNameOf(id))
+			throw new AuthorizationException();
+		
+		String oldName = session.getName(id);
 		
 		// Print prompt
 		//
-		out.print(me);
-		out.print(": ");
+		out.print(formatter.format("rename.prompt", oldName));
 		out.flush();
 		
-		
-		// Read message
+		// Read new name
 		//
-		String message = in.readLine();
+		String newName = in.readLine();
 		
-		// Empty message? User interrupted
+		// Empty name? User interrupted
 		//
-		if(message.length() == 0)
+		if(newName.length() == 0)
 			return;
 
 		
-		// Send it
+		// Execute
 		//
-		if(user == -1)
-			session.broadcastChatMessage(message);
-		else
-			session.sendChatMessage(user, message);
+		session.renameObject(id, newName);
+		
+		// Print confirmation
+		//
+		out.println(formatter.format("rename.confirmation", new Object [] { oldName, newName }));
 	}
-
+	
 	public boolean acceptsParameters()
 	{
 		return true;

@@ -37,15 +37,26 @@ public class CreateUser extends AbstractCommand
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
-		out.print(fmt.format("create.user.login"));
+		out.print(fmt.format("create.user.login"));		
 		out.flush();
 		String login = in.readLine();
+		
+		// Empty login? User interrupted
+		//
+		if(login.length() == 0)
+			return;
+		
 		out.print(fmt.format("create.user.password"));
 		out.flush();
 		String password = in.readLine();
 		out.print(fmt.format("create.user.fullname"));
 		out.flush();
 		String fullname = in.readLine();
+		
+		// Empty name? User interrupted
+		//
+		if(fullname.length() == 0)
+			return;
 		try
 		{
 			// TODO: Ask for rights!

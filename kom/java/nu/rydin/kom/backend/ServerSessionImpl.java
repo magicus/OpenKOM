@@ -1202,7 +1202,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	}
 	
 	public boolean hasPermissionInConference(long conferenceId, int mask)
-	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+	throws ObjectNotFoundException, UnexpectedException
 	{
 		try
 		{
@@ -1223,6 +1223,77 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	{
 		return hasPermissionInConference(this.getCurrentConferenceId(), mask);
 	}
+	
+	public void renameObject(long id, String newName)
+	throws DuplicateNameException, ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+		try
+		{
+			if(!this.userCanChangeNameOf(id))
+				throw new AuthorizationException();
+			m_da.getNameManager().renameObject(id, newName);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+	
+	public void changeSuffixOfLoggedInUser(String suffix)
+	throws DuplicateNameException, ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+		try
+		{
+			long me = this.getLoggedInUserId();
+			String name = this.getName(me);
+			m_da.getNameManager().renameObject(me, NameUtils.addSuffix(name, suffix));
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}			
+	}
+	
+	public void changeSuffixOfUser(long id, String suffix)
+	throws DuplicateNameException, ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+		try
+		{
+			this.checkRights(UserPermissions.CHANGE_ANY_NAME);
+			String name = this.getName(id);
+			m_da.getNameManager().renameObject(id, NameUtils.addSuffix(name, suffix));
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}			
+	}
+	
+	
+	public boolean userCanChangeNameOf(long id)
+	throws UnexpectedException
+	{
+		// Do we have sysop rights? Anything goes!
+		//
+		if(this.getLoggedInUser().hasRights(UserPermissions.CHANGE_ANY_NAME))
+			return true;
+			
+		// Otherwise, we may only change names of conferences we're the admin
+		// of.
+		//
+		try
+		{
+			return this.hasPermissionInConference(id, ConferencePermissions.ADMIN_PERMISSION);
+		}
+		catch(ObjectNotFoundException e)
+		{
+			// Conference not found. It's probably a user then, and we 
+			// don't have the right to admin rights for that.
+			//
+			return false;
+		}
+	}
+
 
 	protected void markAsInvalid()
 	{

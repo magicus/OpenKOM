@@ -104,4 +104,16 @@ public class NameUtils
 		//
 		return true;
 	}
+	
+	public static String stripSuffix(String name)
+	{
+		int p = name.indexOf('/'); 
+		return p == -1 ? name : name.substring(0, p > 0 ? p - 1 : 0).trim();
+	}
+	
+	public static String addSuffix(String name, String suffix)
+	{
+		name = stripSuffix(name);
+		return suffix.length() != 0 ? name + " /" + suffix : name;
+	}
 }
