@@ -109,3 +109,17 @@ CREATE TABLE IF NOT EXISTS messageoccurrences
 	INDEX occmessage_ix(message),
 	FOREIGN KEY (message) REFERENCES messages(id) ON DELETE CASCADE
 ) TYPE=INNODB;
+
+CREATE TABLE IF NOT EXISTS messageattributes
+(
+	id BIGINT NOT NULL AUTO_INCREMENT,
+	message BIGINT NOT NULL,
+	kind SMALLINT NOT NULL,
+	created DATETIME NOT NULL,
+	value TEXT,
+	PRIMARY KEY (id),
+	INDEX message_ix(message),
+	FOREIGN KEY (message) REFERENCES messages(id) ON DELETE CASCADE,
+	INDEX messagekind_ix(message, kind)
+) TYPE=INNODB;
+	
