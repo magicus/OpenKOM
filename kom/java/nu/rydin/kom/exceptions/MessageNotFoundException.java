@@ -9,11 +9,20 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class MessageNotFoundException extends UserException
+public class MessageNotFoundException extends ObjectNotFoundException
 {
-    //FIXME This class is never used!
     public MessageNotFoundException()
     {
         super();
+    }
+
+    public MessageNotFoundException(Object[] msgArgs)
+    {
+        super(msgArgs);
+    }
+
+    public MessageNotFoundException(String msg)
+    {
+        super(msg);
     }
 }

@@ -28,7 +28,7 @@ public class SimpleChatEditor extends AbstractEditor
     public SimpleChatEditor(Context context)
             throws IOException, UnexpectedException 
     {
-        super("/chateditorcommands.list", context);
+        super("/chateditorcommands.xml", context);
     }
 
 	protected void refresh() throws KOMException

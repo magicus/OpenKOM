@@ -21,6 +21,7 @@ public abstract class AbstractCommand implements Command
     public final static CommandLineParameter[] NO_PARAMETERS = new CommandLineParameter[0];
 	
     private String m_fullName;
+    private String m_category;
 	
 	private CommandLineParameter[] m_signature;
     private CommandNamePart[] m_nameSignature;
@@ -41,6 +42,16 @@ public abstract class AbstractCommand implements Command
 	public void checkAccess(Context context) throws AuthorizationException
 	{
 	    //Restricted commands have to override and implement access checking.
+	}
+	
+	public String getCategory()
+	{
+	    return m_category;
+	}
+	
+	public void setCategory(String category)
+	{
+	    m_category = category;
 	}
 	
 	public String getFullName()

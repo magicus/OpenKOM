@@ -17,7 +17,7 @@ import java.util.List;
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.SQLUtils;
 import nu.rydin.kom.constants.Visibilities;
-import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.structs.GlobalMessageSearchResult;
 import nu.rydin.kom.structs.LocalMessageSearchResult;
 import nu.rydin.kom.structs.Message;
@@ -317,11 +317,11 @@ public class MessageManager
 	 * 
 	 * @param id The id
 	 * @return The message
-	 * @throws ObjectNotFoundException
+	 * @throws MessageNotFoundException
 	 * @throws SQLException
 	 */
 	public Message loadMessage(long id)
-	throws ObjectNotFoundException, SQLException
+	throws MessageNotFoundException, SQLException
 	{
 		m_loadMessageStmt.clearParameters();
 		m_loadMessageStmt.setLong(1, id);
@@ -330,7 +330,7 @@ public class MessageManager
 		{
 			rs = m_loadMessageStmt.executeQuery();
 			if(!rs.next())
-				throw new ObjectNotFoundException("Message id=" + id);
+				throw new MessageNotFoundException("Message id=" + id);
 			return new Message(
 				id,
 				rs.getTimestamp(1),		// created
@@ -354,11 +354,11 @@ public class MessageManager
 	 * Loads a message using a conference id and a local number
 	 * 
 	 * @return The message
-	 * @throws ObjectNotFoundException
+	 * @throws MessageNotFoundException
 	 * @throws SQLException
 	 */
 	public Message loadMessage(long conf, int localNum)
-	throws ObjectNotFoundException, SQLException
+	throws MessageNotFoundException, SQLException
 	{
 		m_loadMessageInConfStmt.clearParameters();
 		m_loadMessageInConfStmt.setLong(1, conf);
@@ -368,7 +368,7 @@ public class MessageManager
 		{
 			rs = m_loadMessageInConfStmt.executeQuery();
 			if(!rs.next())
-				throw new ObjectNotFoundException("Message conf=" + conf + " localnum=" + localNum);
+				throw new MessageNotFoundException("Message conf=" + conf + " localnum=" + localNum);
 			long id = rs.getLong(1);
 			return new Message(
 				id,
@@ -394,11 +394,11 @@ public class MessageManager
 	* 
 	* @param id The id
 	* @return The message
-	* @throws ObjectNotFoundException
+	* @throws MessageNotFoundException
 	* @throws SQLException
 	*/
    	public MessageHeader loadMessageHeader(long id)
-   	throws ObjectNotFoundException, SQLException
+   	throws MessageNotFoundException, SQLException
    	{
 	   m_loadMessageHeaderStmt.clearParameters();
 	   m_loadMessageHeaderStmt.setLong(1, id);
@@ -407,7 +407,7 @@ public class MessageManager
 	   {
 		   rs = m_loadMessageHeaderStmt.executeQuery();
 		   if(!rs.next())
-			   throw new ObjectNotFoundException("Message id=" + id);
+			   throw new MessageNotFoundException("Message id=" + id);
 		   return new MessageHeader(
 		   		id,
 			   	rs.getTimestamp(1),		// created
@@ -427,7 +427,7 @@ public class MessageManager
    	}
    	
    	public MessageOccurrence createMessageOccurrence(long globalId, short kind, long user, String userName, long conference)
-   	throws ObjectNotFoundException, SQLException
+   	throws MessageNotFoundException, SQLException
    	{
    		ResultSet rs = null;
    		try
@@ -438,7 +438,7 @@ public class MessageManager
 			m_getNextNumStmt.setLong(1, conference);			
 			rs = m_getNextNumStmt.executeQuery();
 			if(!rs.next())
-				throw new ObjectNotFoundException("conference id=" + conference);
+				throw new MessageNotFoundException("conference id=" + conference);
 			int num = rs.getInt(1) + 1;
 			Timestamp now = new Timestamp(System.currentTimeMillis());
 	
@@ -499,7 +499,7 @@ public class MessageManager
    	}
    
    	public MessageOccurrence addMessage(long author, String authorName, long conference, long replyTo, String subject, String body)
-   	throws ObjectNotFoundException, SQLException
+   	throws MessageNotFoundException, SQLException
    	{
    		ResultSet rs = null;
 		try
@@ -610,11 +610,11 @@ public class MessageManager
    	 * earliest message
    	 * 
    	 * @param messageId The message id
-   	 * @throws ObjectNotFoundException
+   	 * @throws MessageNotFoundException
    	 * @throws SQLException
    	 */
    	public MessageOccurrence getFirstOccurrence(long messageId)
-   	throws ObjectNotFoundException, SQLException
+   	throws MessageNotFoundException, SQLException
    	{
 		m_getFirstOccurrenceStmt.clearParameters();
 		m_getFirstOccurrenceStmt.setLong(1, messageId);
@@ -623,7 +623,7 @@ public class MessageManager
 		{
 			rs = m_getFirstOccurrenceStmt.executeQuery();
 			if(!rs.next())
-				throw new ObjectNotFoundException("Message id=" + messageId);
+				throw new MessageNotFoundException("Message id=" + messageId);
 
 			return new MessageOccurrence(
 				rs.getLong(1),		// Global id
@@ -648,11 +648,11 @@ public class MessageManager
    	 * @param conference The conference id
    	 * @param localnum The local message number
    	 * 
-   	 * @throws ObjectNotFoundException
+   	 * @throws MessageNotFoundException
    	 * @throws SQLException
    	 */
    	public long getGlobalMessageId(long conference, int localnum)
-   	throws ObjectNotFoundException, SQLException
+   	throws MessageNotFoundException, SQLException
    	{
 		m_getGlobalIdStmt.clearParameters();
 		m_getGlobalIdStmt.setLong(1, conference);
@@ -662,7 +662,7 @@ public class MessageManager
 		{
 			rs = m_getGlobalIdStmt.executeQuery();
 			if(!rs.next())
-				throw new ObjectNotFoundException("Message conference=" + conference + " localnum=" + localnum);
+				throw new MessageNotFoundException("Message conference=" + conference + " localnum=" + localnum);
 			return rs.getLong(1);
 		}
 		finally
@@ -678,11 +678,11 @@ public class MessageManager
 	 * @param conference The conference
 	 * @param localnum The local message number
 	 * @return
-	 * @throws ObjectNotFoundException
+	 * @throws MessageNotFoundException
 	 * @throws SQLException
 	 */
 	public MessageOccurrence loadMessageOccurrence(long conference, int localnum)
-	throws ObjectNotFoundException, SQLException
+	throws MessageNotFoundException, SQLException
 	{
 		m_loadOccurrenceStmt.clearParameters();
 		m_loadOccurrenceStmt.setLong(1, conference);
@@ -692,7 +692,7 @@ public class MessageManager
 		{
 			rs = m_loadOccurrenceStmt.executeQuery();
 			if(!rs.next())
-				throw new ObjectNotFoundException("Message conference=" + conference + " localnum=" + localnum);
+				throw new MessageNotFoundException("Message conference=" + conference + " localnum=" + localnum);
 			return new MessageOccurrence(
 				rs.getLong(1),		// Global id
 				rs.getTimestamp(2),	// Timestamp
@@ -716,11 +716,11 @@ public class MessageManager
    	 * @param conferenceId The conference
    	 * @param messageId The message
    	 * 
-   	 * @throws ObjectNotFoundException If the message didn't exist in this conference
+   	 * @throws MessageNotFoundException If the message didn't exist in this conference
    	 * @throws SQLException
    	 */
 	public MessageOccurrence getOccurrenceInConference(long conferenceId, long messageId)
-	throws ObjectNotFoundException, SQLException
+	throws MessageNotFoundException, SQLException
 	{
 		m_getOccurrenceInConferenceStmt.clearParameters();
 		m_getOccurrenceInConferenceStmt.setLong(1, conferenceId);
@@ -730,7 +730,7 @@ public class MessageManager
 		{
 			rs = m_getOccurrenceInConferenceStmt.executeQuery();
 			if(!rs.next())
-				throw new ObjectNotFoundException("Message id=" + messageId);
+				throw new MessageNotFoundException("Message id=" + messageId);
 
 			return new MessageOccurrence(
 				rs.getLong(1),		// Global id
@@ -756,17 +756,17 @@ public class MessageManager
 	 * <br>2: Otherwise, pick the earliest occurrence 
 	 * @param conference The conference id
 	 * @param id The message id
-	 * @throws ObjectNotFoundException
+	 * @throws MessageNotFoundException
 	 * @throws SQLException
 	 */
 	public MessageOccurrence getMostRelevantOccurrence(long conference, long id)
-	throws ObjectNotFoundException, SQLException
+	throws MessageNotFoundException, SQLException
 	{
 		try
 		{
 			return this.getOccurrenceInConference(conference, id);   	
 		}
-		catch(ObjectNotFoundException e)
+		catch(MessageNotFoundException e)
 		{
 			// Does not exist in this conference. Pick the first occurrence!
 			//
@@ -778,15 +778,15 @@ public class MessageManager
 	 * Returns the original occurrence of a message, which is defined as:
 	 * 1) If there is one with kind=ACTION_CREATED, pick it, otherwise
 	 * 2) Pick the one with kind=ACTION_MOVED, or if that also does not exist,
-	 * 3) Throw ObjectNotFoundException. 
+	 * 3) Throw MessageNotFoundException. 
 	 * 
 	 * @param messageId
 	 * @return the original occurrence
-	 * @throws ObjectNotFoundException
+	 * @throws MessageNotFoundException
 	 * @throws SQLException
 	 */
 	public MessageOccurrence getOriginalMessageOccurrence(long messageId)
-	throws ObjectNotFoundException, SQLException
+	throws MessageNotFoundException, SQLException
 	{
 	    MessageOccurrence[] occurrences = getOccurrences(messageId);
 	    for (int i = 0; i < occurrences.length; i++)
@@ -800,7 +800,7 @@ public class MessageManager
                 return occurrences[i];
             }
         }
-	    throw new ObjectNotFoundException();
+	    throw new MessageNotFoundException();
 	}
 	
 	/**
@@ -809,11 +809,11 @@ public class MessageManager
 	 * 
 	 * @param userId The user
 	 * @param globalId Global message id
-	 * @throws ObjectNotFoundException
+	 * @throws MessageNotFoundException
 	 * @throws SQLException
 	 */
 	public MessageOccurrence[] getVisibleOccurrences(long userId, long globalId)
-	throws ObjectNotFoundException, SQLException
+	throws MessageNotFoundException, SQLException
 	{
 		List list = new ArrayList();
 		m_getVisibleOccurrencesStmt.clearParameters();
@@ -990,7 +990,7 @@ public class MessageManager
 	}
 	
 	public void dropMessageOccurrence(int localNum, long conference)
-	throws SQLException, ObjectNotFoundException
+	throws SQLException, MessageNotFoundException
 	{
 		long globalNum = this.getGlobalMessageId(conference, localNum);
 		
@@ -1028,7 +1028,7 @@ public class MessageManager
 	            addMessageAttribute(replies[i].getId(), ATTR_ORIGINAL_DELETED, MessageAttribute.constructUsernamePayload(original.getAuthor(), original.getAuthorName().getName()));
 	        }
         } 
-		catch (ObjectNotFoundException e)
+		catch (MessageNotFoundException e)
         {
 		    // Well, uhh, if we got here it means we tried to delete a non-existing
 		    // message, which will fail naturally anyway. No worries, mate.
@@ -1058,7 +1058,7 @@ public class MessageManager
 			{
 				this.dropMessageOccurrence(rs.getInt(1), conference);
 			}
-			catch (ObjectNotFoundException f)
+			catch (MessageNotFoundException f)
 			{
 				// Ignore. This exception is probably due to someone deleting the message before
 				// we got to it.
@@ -1102,7 +1102,7 @@ public class MessageManager
 	}
 	
 	public long getTaggedMessage(long objectId, short kind)
-	throws SQLException, ObjectNotFoundException
+	throws SQLException, MessageNotFoundException
 	{
 		ResultSet rs = null;
 		try
@@ -1112,7 +1112,7 @@ public class MessageManager
 			this.m_getLatestMagicMessageStmt.setString(2, Long.toString(objectId));
 			rs = this.m_getLatestMagicMessageStmt.executeQuery();
 			if(!rs.next())
-			    throw new ObjectNotFoundException("object=" + objectId + ", kind=" + kind);
+			    throw new MessageNotFoundException("object=" + objectId + ", kind=" + kind);
 			return rs.getLong(1);
 		}
 		finally

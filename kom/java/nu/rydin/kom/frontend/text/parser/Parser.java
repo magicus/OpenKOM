@@ -11,6 +11,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.SAXException;
+
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.frontend.text.Command;
@@ -572,86 +578,24 @@ public class Parser
         MessageFormatter formatter = context.getMessageFormatter();
         try
         {
-            //List commandNames = new ArrayList();
             List list = new ArrayList();
             BufferedReader rdr = new BufferedReader(new InputStreamReader(
                     Parser.class.getResourceAsStream(filename)));
-
-            // Read command list
-            //
-            String line;
-            while ((line = rdr.readLine()) != null)
-            {
-                line = line.trim();
-                if (!line.startsWith("#"))
-                    list.add(line);
-            }
-            rdr.close();
-
-            // Instantiate commands
-            //
-            int top = list.size();
-            List commandList = new ArrayList();
-            for (int idx = 0; idx < top; ++idx)
-            {
-                Class clazz = Class.forName((String) list.get(idx));
-                Constructor ctor = clazz.getConstructor(s_commandCtorSignature);
-
-                // Install primary command
-                //
-                String name = formatter.format(clazz.getName() + ".name");
-                Command primaryCommand = (Command) ctor
-                        .newInstance(new Object[]
-                        { context, name });
-                commandList.add(primaryCommand);
-                //commandNames.add(name);
-
-                // Install aliases
-                //
-                int aliasIdx = 1;
-                for (;; ++aliasIdx)
-                {
-                    // Try alias key
-                    //
-                    String alias = formatter.getStringOrNull(clazz.getName()
-                            + ".name." + aliasIdx);
-                    if (alias == null)
-                        break; // No more aliases
-
-                    // We found an alias! Create command.
-                    //
-                    Command aliasCommand = (Command) ctor
-                            .newInstance(new Object[]
-                            { context, alias });
-                    commandList.add(aliasCommand);
-                    //commandNames.add(alias);
-                }
-            }
-
-            // Copy to command array
-            // 
-            return new Parser(commandList);
+            InputStream is = Parser.class.getResourceAsStream(filename);
+            SAXParser p = SAXParserFactory.newInstance().newSAXParser();
+            CommandListParser handler = new CommandListParser(context);
+            p.parse(is, handler);
+            is.close();
+            return new Parser(handler.getCommands());
         } 
-        catch (ClassNotFoundException e)
+        catch (SAXException e)
         {
             throw new UnexpectedException(-1, e);
         } 
-        catch (NoSuchMethodException e)
+        catch (ParserConfigurationException e)
         {
             throw new UnexpectedException(-1, e);
         } 
-        catch (InstantiationException e)
-        {
-            throw new UnexpectedException(-1, e);
-        } 
-        catch (IllegalAccessException e)
-        {
-            throw new UnexpectedException(-1, e);
-        } 
-        catch (InvocationTargetException e)
-        {
-            throw new UnexpectedException(-1, e.getCause());
-        }
     }
 
     /**

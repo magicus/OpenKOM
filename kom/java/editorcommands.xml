@@ -1,0 +1,22 @@
+<commandlist>
+	<category id="editor" i18n="command.category.editor" order="10">
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Save"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Quit"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Delete"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Insert"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Change"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.ChangeSubject"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.ShowSimpleMessage"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Move"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Quote"/>
+	</category>
+	<category id="misc" i18n="command.category.misc" order="20">
+		<command class="nu.rydin.kom.frontend.text.commands.Who"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SendChatMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ReadMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ReadOriginal"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.ListCommands"/>
+	</category>
+</commandlist>

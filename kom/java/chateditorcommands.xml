@@ -1,0 +1,20 @@
+<commandlist>
+	<category id="info" i18n="command.category.info" order="10">
+		<command class="nu.rydin.kom.frontend.text.commands.Who"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.ListCommands"/>
+	</category>
+	<category id="chat" i18n="command.category.chat" order="20">
+		<command class="nu.rydin.kom.frontend.text.commands.Who"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SendChatMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ReadMessage"/>
+	</category>
+	<category id="misc" i18n="command.category.misc" order="30">
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Save"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Quit"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Delete"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Insert"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.Change"/>
+		<command class="nu.rydin.kom.frontend.text.editor.simple.ShowSimpleChatMessage"/>
+	</category>
+</commandlist>	

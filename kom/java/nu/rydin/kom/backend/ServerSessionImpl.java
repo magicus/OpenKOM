@@ -55,6 +55,7 @@ import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.BadPasswordException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.exceptions.NoMoreMessagesException;
 import nu.rydin.kom.exceptions.NoMoreNewsException;
@@ -447,15 +448,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			    {
 			        try
 			        {
-				        int nextMail = m_memberships.getNextMessageInConference(user, cm);
-				        if(nextMail != -1)
+			            int nextMail = m_memberships.getNextMessageInConference(user, cm);
+			            try
+			            {
+					        if(nextMail != -1)
+					        {
+					            if(hasFilters && this.applyFiltersForMessage(
+							            this.localToGlobal(user, nextMail), 
+							            user, nextMail, FilterFlags.MAILS))
+					            	continue;
+					            return new SessionState(CommandSuggestions.NEXT_MAIL,
+					                    user, this.countUnread(user));
+					        }
+			            }
+				        catch(MessageNotFoundException e)
 				        {
-				            if(hasFilters && this.applyFiltersForMessage(
-						            this.localToGlobal(this.getLoggedInUserId(), nextMail), 
-						            user, nextMail, FilterFlags.MAILS))
-				            	continue;
-				            return new SessionState(CommandSuggestions.NEXT_MAIL,
-				                    user, this.countUnread(user));
+				            // Message is probably deleted. Skip it!
+				            //
+				            m_memberships.markAsRead(user, nextMail);
+				            continue;
 				        }
 			        }
 			        catch(ObjectNotFoundException e)
@@ -474,8 +485,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			        try
 			        {
 				        SessionState answer = new SessionState(CommandSuggestions.NEXT_REPLY, conf, 
-			                    this.countUnread(conf)); 				      
-				        MessageOccurrence occ = this.getMostRelevantOccurrence(conf, nextReply);
+			                    this.countUnread(conf));
+				        MessageOccurrence occ = null;
+				        try
+				        {
+				            occ = this.getMostRelevantOccurrence(conf, nextReply);
+				        }
+				        catch(MessageNotFoundException e)
+				        {
+				            // Probably deleted. Skip it!
+				            //
+				            this.popReply();
+				            continue;
+				        }
 
 				        // Already read?
 			            //
@@ -526,14 +548,24 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			    //
 				try
 				{
-				    if(nextMessage != -1)
+				    try
 				    {
-		                if(hasFilters && this.applyFiltersForMessage(
-				            this.localToGlobal(conf, nextMessage), 
-				            conf, nextMessage, FilterFlags.MESSAGES))
-		                    continue;
-			            return new SessionState(CommandSuggestions.NEXT_MESSAGE,
-			                    conf, this.countUnread(conf));
+					    if(nextMessage != -1)
+					    {
+			                if(hasFilters && this.applyFiltersForMessage(
+					            this.localToGlobal(conf, nextMessage), 
+					            conf, nextMessage, FilterFlags.MESSAGES))
+			                    continue;
+				            return new SessionState(CommandSuggestions.NEXT_MESSAGE,
+				                    conf, this.countUnread(conf));
+					    }
+				    }
+				    catch(MessageNotFoundException e)
+				    {
+				        // Probably deleted. Skip!
+				        //
+				        m_memberships.markAsRead(conf, nextMessage);
+				        continue;
 				    }
 				}
 				catch(ObjectNotFoundException e)
@@ -2500,9 +2532,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public int skipMessagesBySubject (String subject, boolean skipGlobal)
 	throws UnexpectedException, ObjectNotFoundException
 	{
-	    return skipGlobal 
-	    	? this.performOperationBySubjectInConference(subject, new MarkAsReadOperation())
-	    	: this.performOperationBySubject(subject, new MarkAsReadOperation());
+	    return skipGlobal
+	    	? this.performOperationBySubject(subject, new MarkAsReadOperation())
+	    	: this.performOperationBySubjectInConference(subject, new MarkAsReadOperation());
 	}
 		
 	public int skipTree(long root)
@@ -2907,11 +2939,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	protected int performOperationBySubject(String subject, MessageOperation op)
 	throws UnexpectedException, ObjectNotFoundException
 	{
-		long currentConference = this.getCurrentConference().getId();
 		try
 		{
 			MessageManager mm = m_da.getMessageManager();
-			long[] globalIds = mm.getMessagesBySubject(subject, currentConference);
+			long[] globalIds = mm.getMessagesBySubject(subject, this.getLoggedInUserId());
 			for (int idx = 0; idx < globalIds.length; ++idx)
 			    op.perform(globalIds[idx]);
 			return globalIds.length;
