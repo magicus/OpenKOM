@@ -45,27 +45,59 @@ public class SendChatMessage extends AbstractCommand
 		ServerSession session = context.getSession();
 		String me = session.getLoggedInUser().getName();
 
-		
-		
-		
-		
-		
-		
-		// Print prompt
+		//Parse parameters to get list of recipients.
 		//
-		
-/*		if (user == -1)
+		long[] destinations = null;
+		if("*".equals(parameters[0]))
 		{
-		    //Special case, sending to all users
+		    //Print beginning of prompt for message to all users.
 		    out.println(context.getMessageFormatter().format("chat.saytoall"));
 		}
 		else
 		{
-		    //Print username
-		    out.println(context.getMessageFormatter().format("chat.saytouser", session.getName(user)));
+			// TODO: Handle single recipients separately here (most common case and cheaper to do).
+
+			// Now splice the parameters and tokenize them again.
+			//
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < parameters.length; ++i)
+			{
+				sb.append(parameters[i]).append(" ");
+			}
+			String[] uarray = sb.toString().trim().split(",");
+			
+			// Resolve each name to an ID.
+			//
+			destinations = new long[uarray.length];
+			String recipients = "";
+			for (int i = 0; i < uarray.length; ++i)
+			{
+				try
+				{
+				    long id = NamePicker.resolveName(uarray[i], NameManager.UNKNOWN_KIND, context);
+					destinations[i] = id;
+					recipients += ", " + session.getNamedObject(id).getName();
+				}
+				catch (ObjectNotFoundException e)
+				{
+					destinations[i] = -1;
+				}
+			}
+			//TODO: If destinations is empty, maybe we should throw an exception here?
+			
+			//Print beginning of prompt for message to a list of users
+			//
+			if (recipients.length() > 2)
+			{
+			    recipients = recipients.substring(2);
+			}
+		    out.println(context.getMessageFormatter().format("chat.saytouser", recipients));
+
 		}
+
+		// Print rest of prompt
+		//
 	    out.println("");
-	*/	
 		out.print(me);
 		out.print(": ");
 		out.flush();
@@ -83,39 +115,14 @@ public class SendChatMessage extends AbstractCommand
 		
 		// Send it
 		//
+		// Can't make it less ugly than this...
 		if("*".equals(parameters[0]))
+		{
 			session.broadcastChatMessage(message);
+		}
 		else
 		{
-			// TODO: Handle single recipients separately here (most common case and cheaper to do).
-
-			// Now splice the parameters and tokenize them again.
-			//
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < parameters.length; ++i)
-			{
-				sb.append(parameters[i]).append(" ");
-			}
-			String[] uarray = sb.toString().trim().split(",");
-			
-			// Resolve each name to an ID.
-			//
-			long[] destinations = new long[uarray.length];
-			for (int i = 0; i < uarray.length; ++i)
-			{
-				try
-				{
-					destinations[i] = NamePicker.resolveName(uarray[i], NameManager.UNKNOWN_KIND, context);
-				}
-				catch (ObjectNotFoundException e)
-				{
-					destinations[i] = -1;
-				}
-			}
-			
-			// Finally call the multicast handler.
-			//
-			session.sendMulticastMessage(destinations, message);
+		    session.sendMulticastMessage(destinations, message);
 		}
 	}
 
