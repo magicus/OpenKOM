@@ -216,8 +216,8 @@ CREATE TABLE IF NOT EXISTS relationships
 	kind INT NOT NULL,
 	flags BIGINT NOT NULL,
 	PRIMARY KEY(id),
-	INDEX referer_ix(blocker),
-	FOREIGN KEY (referer) REFERENCES names(id) ON DELETE CASCASE,
+	INDEX referer_ix(referer),
+	FOREIGN KEY (referer) REFERENCES names(id) ON DELETE CASCADE,
 	INDEX referee_ix(referee),
-	FOREIGN KEY (referee) REFERENCES names(id) ON DELETE CASCASE
+	FOREIGN KEY (referee) REFERENCES names(id) ON DELETE CASCADE
 ) TYPE=INNODB;
