@@ -38,6 +38,8 @@ public class NameManager
 	private final PreparedStatement m_getNamesByPatternStmt;
 	private final PreparedStatement m_getIdsByPatternAndKindStmt;
 	private final PreparedStatement m_getNamesByPatternAndKindStmt;	
+	private final PreparedStatement m_getNamesByPatternAndKindAndDateStmt;	
+	private final PreparedStatement m_getNamesByPatternAndKindAndNameStmt;	
 	private final PreparedStatement m_addNameStmt;
 	private final PreparedStatement m_getAssociationsByPatternStmt;
 	private final PreparedStatement m_getAssociationsByPatternAndKindStmt;
@@ -64,6 +66,12 @@ public class NameManager
 			"SELECT id FROM names WHERE norm_name LIKE ? AND kind = ? AND visibility != 2");
 		m_getNamesByPatternAndKindStmt = conn.prepareStatement(
 			"SELECT fullname FROM names WHERE norm_name LIKE ? AND kind = ? " +			"AND visibility != 2 ORDER BY fullname");
+		m_getNamesByPatternAndKindAndNameStmt = conn.prepareStatement(
+				"SELECT fullname FROM names WHERE norm_name LIKE ? AND kind = ? " +
+				"AND visibility != 2 ORDER BY fullname");
+		m_getNamesByPatternAndKindAndDateStmt = conn.prepareStatement(
+				"SELECT fullname FROM names WHERE norm_name LIKE ? AND kind = ? " +
+				"AND visibility != 2 ORDER BY lastdate");
 		m_addNameStmt  = conn.prepareStatement(
 			"INSERT INTO names(norm_name, fullname, kind, visibility) VALUES(?, ?, ?, ?)");
 		m_getAssociationsByPatternStmt = conn.prepareStatement(

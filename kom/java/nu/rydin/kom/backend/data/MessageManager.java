@@ -54,6 +54,7 @@ public class MessageManager
 	private final PreparedStatement m_getGlobalBySubjectStmt;
 	private final PreparedStatement m_findLastOccurrenceInConferenceWithAttrStmt;
 	private final PreparedStatement m_getLatestMagicMessageStmt;
+	private final PreparedStatement m_updateConferenceLasttext;
 	
 	private final Connection m_conn; 
 	
@@ -86,6 +87,8 @@ public class MessageManager
 		m_addMessageOccurrenceStmt = conn.prepareStatement(
 			"INSERT INTO messageoccurrences(message, action_ts, kind, user, user_name, conference, localnum) " +
 			"VALUES(?, ?, ?, ?, ?, ?, ?)");
+		m_updateConferenceLasttext = conn.prepareStatement(
+			"UPDATE conferences SET lasttext=? WHERE id=?");
 		m_listOccurrencesStmt = conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name, conference, localnum FROM messageoccurrences " +			"WHERE message = ? ORDER BY action_ts");
 		m_getOccurrenceInConferenceStmt = conn.prepareStatement(
@@ -163,6 +166,7 @@ public class MessageManager
 			 "where MO.Conference = ? and MA.Kind = ? and MA.Value = ? " +
 			 "order by MO.Message desc " +
 			 "limit 1 offset 0");
+		
 	}
 	
 	public void close()
@@ -368,6 +372,13 @@ public class MessageManager
 			m_addMessageOccurrenceStmt.setLong(6, conference);
 			m_addMessageOccurrenceStmt.setInt(7, num);
 			m_addMessageOccurrenceStmt.executeUpdate();
+			
+			// Update conference records "last text" field
+			m_updateConferenceLasttext.clearParameters();
+			m_updateConferenceLasttext.setTimestamp(1, now);
+			m_updateConferenceLasttext.setLong(2,conference);
+			m_updateConferenceLasttext.executeUpdate();
+			
 			return new MessageOccurrence(globalId, now, kind, user, userName, conference, num);
    		}
    		finally

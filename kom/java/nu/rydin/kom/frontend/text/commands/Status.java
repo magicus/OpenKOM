@@ -84,6 +84,10 @@ public class Status extends AbstractCommand
 			30, info.getEmail2());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.url"), 
 			30, info.getUrl());
+		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.created"), 
+				30, PrintUtils.printDate(info.getCreated()));
+		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.lastlogin"), 
+				30, PrintUtils.printDate(info.getLastlogin()));
 		out.println();
 		
 		// Has the user left a note?
@@ -119,6 +123,23 @@ public class Status extends AbstractCommand
 		PrintUtils.printLabelled(out, formatter.format("status.conference.messages"), 30, 
 					Integer.toString(info.getFirstMessage()) + " - " + 
 					Integer.toString(info.getLastMessage()));			
+		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.created"), 
+				30, PrintUtils.printDate(info.getCreated()));
+		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.lasttext"), 
+				30, PrintUtils.printDate(info.getLasttext()));
+		
+		// TODO: fulkod
+		ListMembers l = new ListMembers("");
+		String [] args = {info.getName()};
+		try
+		{
+			l.execute(context, args);
+		}
+		catch (Exception e)
+		{
+			//
+		}		
+			
 	}
 
 	public boolean acceptsParameters()

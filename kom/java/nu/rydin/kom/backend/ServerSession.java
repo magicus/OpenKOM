@@ -1015,4 +1015,13 @@ public interface ServerSession
 	 */
 	public MessageOccurrence storeRulePosting(UnstoredMessage msg)
 	throws AuthorizationException, UnexpectedException, ObjectNotFoundException;
+
+	/**
+	 * Set last login date/time
+	 * 
+	 * @throws UnexpectedException
+	 */	
+	public void updateLastlogin()
+	throws ObjectNotFoundException, UnexpectedException;
+
 }

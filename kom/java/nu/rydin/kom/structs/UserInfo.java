@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.structs;
 
+import java.sql.Timestamp;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
@@ -37,13 +39,15 @@ public class UserInfo extends NamedObject
 	private final long[] m_flags = new long[4];
 	private final long m_rights;
 	private String m_locale;
+	private Timestamp m_created;
+	private Timestamp m_lastlogin;
 	
 	private int m_changeMask = 0;
 	
 	public UserInfo(long id, String name, String userid, String address1, String address2,
 		String address3, String address4, String phoneno1, String phoneno2, String email1,
 		String email2, String url, String charset, long flags1, long flags2, long flags3, long flags4,
-		long rights, String locale)
+		long rights, String locale, Timestamp created, Timestamp lastlogin)
 	{
 		super(id, name);
 		m_userid	= userid;
@@ -63,6 +67,8 @@ public class UserInfo extends NamedObject
 		m_flags[2] 	= flags4;
 		m_rights	= rights;
 		m_locale 	= locale;
+		m_created 	= created;
+		m_lastlogin = lastlogin;
 	}
 	
 	public String getAddress1()
@@ -159,7 +165,16 @@ public class UserInfo extends NamedObject
 	{
 		return m_charset;
 	}
+	
+	public Timestamp getCreated()
+	{
+		return m_created;
+	}
 
+	public Timestamp getLastlogin()
+	{
+		return m_lastlogin;
+	}
 	public void setAddress1(String string)
 	{
 		if(!string.equals(m_address1))

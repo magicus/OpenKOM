@@ -8,6 +8,9 @@ package nu.rydin.kom.frontend.text.commands;
 
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.ObjectNotFoundException;
+import nu.rydin.kom.UnexpectedException;
+
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -20,9 +23,14 @@ public class Logout extends AbstractCommand
 	}
 	
 	public void execute(Context ctx, String[] args)
+	throws ObjectNotFoundException, UnexpectedException
 	{
+		// TODO: use argument string as a logout message 
+		//       "log ska sova" broadcasts "Kalle Kula har loggat ut (ska sova)"
+		
 		// Not much to do here. The command loop is supposed to 
 		// recognize us and ends its own misery when it sees us.
 		//
+		ctx.getSession().updateLastlogin();
 	}
 }

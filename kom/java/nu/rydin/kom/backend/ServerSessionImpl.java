@@ -2242,4 +2242,18 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
 		}
 	}
+	
+	public void updateLastlogin()
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		try
+		{	
+			m_da.getUserManager().updateLastlogin(this.getLoggedInUserId());
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}		
+	}
+
 }

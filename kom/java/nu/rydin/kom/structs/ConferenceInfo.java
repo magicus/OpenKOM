@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.structs;
 
+import java.sql.Timestamp;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
@@ -16,9 +18,11 @@ public class ConferenceInfo extends NamedObject
 	private long m_replyConf;
 	private int m_firstMessage;
 	private int m_lastMessage;
+	private Timestamp m_created;
+	private Timestamp m_lasttext;
 	
 	public ConferenceInfo(long id, String name, long administrator, int permissions, long replyConf,
-	int firstMessage, int lastMessage)
+			Timestamp created, Timestamp lasttext, int firstMessage, int lastMessage )
 	{
 		super(id, name);
 		m_administrator	= administrator;
@@ -26,6 +30,8 @@ public class ConferenceInfo extends NamedObject
 		m_replyConf		= replyConf;
 		m_firstMessage 	= firstMessage;
 		m_lastMessage 	= lastMessage;
+		m_created		= created;
+		m_lasttext		= lasttext;
 	}
 	
 	public long getAdministrator()
@@ -51,5 +57,15 @@ public class ConferenceInfo extends NamedObject
 	public int getLastMessage()
 	{
 		return m_lastMessage;
+	}
+	
+	public Timestamp getCreated()
+	{
+		return m_created;
+	}
+	
+	public Timestamp getLasttext()
+	{
+		return m_lasttext;
 	}
 }

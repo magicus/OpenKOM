@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 
 import nu.rydin.kom.AlreadyMemberException;
@@ -34,6 +35,7 @@ public class UserManager
 	private final PreparedStatement m_updateCharsetStmt;
 	private final PreparedStatement m_changePasswordStmt;
 	private final PreparedStatement m_changeFlagsStmt;
+	private final PreparedStatement m_updateLastloginStmt;
 	
 	private final NameManager m_nameManager;
 	
@@ -57,10 +59,10 @@ public class UserManager
 			"SELECT u.id, u.pwddigest FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_addUserStmt = conn.prepareStatement(
 			"INSERT INTO users(userid, pwddigest, address1, address2, " +
-			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights) " +
-			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?)");
+			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights, created) " +
+			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?)");
 		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, u.address1, u.address2, u.address3, u.address4, " +
-			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale " +
+			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.created, u.lastlogin " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_updateCharsetStmt = conn.prepareStatement(
 			"UPDATE users SET charset = ? WHERE id = ?");
@@ -68,6 +70,8 @@ public class UserManager
 			"UPDATE users SET pwddigest = ? WHERE id = ?");
 		m_changeFlagsStmt = conn.prepareStatement(
 			"UPDATE users SET flags1 = ?, flags2 = ?, flags3 = ?, flags4 = ? WHERE id = ?");
+		m_updateLastloginStmt = conn.prepareStatement(
+		"UPDATE users SET lastlogin = ? WHERE id = ?");
 	}
 	
 	/**
@@ -170,7 +174,8 @@ public class UserManager
 			// First, add the name
 			//
 			long nameId = m_nameManager.addName(fullname, USER_KIND, NameManager.PUBLIC);
-			
+			Timestamp now = new Timestamp(System.currentTimeMillis());
+
 			// Now, add the user
 			//
 			m_addUserStmt.clearParameters();
@@ -192,6 +197,7 @@ public class UserManager
 			m_addUserStmt.setLong(16, flags3);
 			m_addUserStmt.setLong(17, flags4);
 			m_addUserStmt.setLong(18, rights);
+			m_addUserStmt.setTimestamp(19,now);
 			
 			// Lock cache while updating
 			//
@@ -326,7 +332,9 @@ public class UserManager
 				rs.getLong(15),		// flags3,
 				rs.getLong(16),		// flags4,
 				rs.getLong(17),		// rights
-				rs.getString(18)	// locale
+				rs.getString(18),	// locale
+				rs.getTimestamp(19),// created
+				rs.getTimestamp(20) // last login
 			);
 		}
 		finally
@@ -401,4 +409,24 @@ public class UserManager
 		md.update(password.getBytes());
 		return md.digest();		
 	}
+	/**
+	 * update last login date
+	 * 
+	 * @param userId
+	 * @throws ObjectNotFoundException
+	 * @throws SQLException
+	 */
+	public void updateLastlogin(long userId)
+	throws ObjectNotFoundException, SQLException
+	{
+		Timestamp now = new Timestamp(System.currentTimeMillis());
+
+		m_updateLastloginStmt.clearParameters();
+		m_updateLastloginStmt.setTimestamp(1, now);
+		m_updateLastloginStmt.setLong(2, userId);
+		if(m_updateLastloginStmt.executeUpdate() == 0)
+			throw new ObjectNotFoundException("user id=" + userId);
+		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
+	}
+
 }

@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 
 import nu.rydin.kom.AmbiguousNameException;
@@ -20,6 +21,7 @@ import nu.rydin.kom.structs.MessageRange;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:guru@slideware.com>Ulf Hedlund</a>
  */
 public class ConferenceManager // extends NameManager
 {
@@ -43,9 +45,9 @@ public class ConferenceManager // extends NameManager
 	{
 		m_nameManager = nameManager;
 		m_addConfStmt = conn.prepareStatement(
-			"INSERT INTO conferences(id, administrator, permissions, replyConf) VALUES(?, ?, ?, ?)");
+			"INSERT INTO conferences(id, administrator, permissions, replyConf, created) VALUES(?, ?, ?, ?, ?)");
 		m_loadConfStmt = conn.prepareStatement(
-			"SELECT n.fullname, c.administrator, c.permissions, c.replyConf " +
+			"SELECT n.fullname, c.administrator, c.permissions, c.replyConf, c.created, c.lasttext " +
 			"FROM names n, conferences c " +
 			"WHERE c.id = ? AND n.id = c.id");
 		m_loadRangeStmt = conn.prepareStatement(	
@@ -99,8 +101,9 @@ public class ConferenceManager // extends NameManager
 		// First, add the name
 		//
 		long nameId = m_nameManager.addName(fullname, CONFERENCE_KIND, visibility);
+		Timestamp now = new Timestamp(System.currentTimeMillis());
 		
-		// Now, add the user
+		// Now, add the conference
 		//
 		m_addConfStmt.clearParameters();
 		m_addConfStmt.setLong(1, nameId);
@@ -109,7 +112,8 @@ public class ConferenceManager // extends NameManager
 		if(replyConf == -1)
 			m_addConfStmt.setNull(4, Types.BIGINT);
 		else
-			m_addConfStmt.setLong(4, replyConf);			
+			m_addConfStmt.setLong(4, replyConf);
+		m_addConfStmt.setTimestamp(5, now);
 		m_addConfStmt.executeUpdate();
 		return nameId;
 	}
@@ -125,11 +129,14 @@ public class ConferenceManager // extends NameManager
 	{		
 		// Mailboxes are conferences with the same id as the user
 		//
+		Timestamp now = new Timestamp(System.currentTimeMillis());
+
 		m_addConfStmt.clearParameters();
 		m_addConfStmt.setLong(1, user);
 		m_addConfStmt.setLong(2, user);
 		m_addConfStmt.setInt(3, permissions);
 		m_addConfStmt.setNull(4, Types.BIGINT);					
+		m_addConfStmt.setTimestamp(5, now);
 		m_addConfStmt.executeUpdate();
 	}
 	
@@ -155,6 +162,8 @@ public class ConferenceManager // extends NameManager
 				rs.getLong(2),				// Admin
 				rs.getInt(3),				// Permissions
 				rs.getObject(4) != null ? rs.getLong(4) : -1, // Reply conference
+				rs.getTimestamp(5),
+				rs.getTimestamp(6),
 				r.getMin(),					// First text
 				r.getMax()					// Last text
 				);

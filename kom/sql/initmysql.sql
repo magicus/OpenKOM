@@ -39,6 +39,8 @@ CREATE TABLE IF NOT EXISTS users
 	locale VARCHAR(100),
 	charset VARCHAR(50) NOT NULL,
 	url VARCHAR(200),
+	created DATETIME NOT NULL,
+	lastlogin DATETIME NOT NULL,
 	PRIMARY KEY(id),
 	FOREIGN KEY (id) REFERENCES names(id) ON DELETE CASCADE,
 	INDEX userid_ix(userid)
@@ -51,12 +53,15 @@ CREATE TABLE IF NOT EXISTS conferences
 	replyConf BIGINT,
 	permissions INT NOT NULL,
 	nonmember_permissions INT NOT NULL,
+	created DATETIME NOT NULL,
+	lasttext DATETIME NOT NULL,
 	PRIMARY KEY(id),	
 	FOREIGN KEY (id) REFERENCES names(id) ON DELETE CASCADE,
 	INDEX admin_ix(administrator),
 	FOREIGN KEY (administrator) REFERENCES users(id) ON DELETE RESTRICT,
 	INDEX replyConf_ix(replyConf),
-	FOREIGN KEY (replyConf) REFERENCES conferences(id) ON DELETE SET NULL
+	FOREIGN KEY (replyConf) REFERENCES conferences(id) ON DELETE SET NULL,
+    INDEX lasttext_ix(lasttext)
 ) TYPE=INNODB;
 
 CREATE TABLE IF NOT EXISTS memberships
