@@ -19,7 +19,9 @@ public class ANSISequences
 	public static final String MOVE_CURSOR_UP			= "\u001b[{0}A";
 	public static final String MOVE_CURSOR_DOWN			= "\u001b[{0}B";
 	public static final String MOVE_CURSOR_RIGHT		= "\u001b[{0}C";
+	public static final String MOVE_CURSOR_RIGHT_ONE	= "\u001b[C";
 	public static final String MOVE_CURSOR_LEFT			= "\u001b[{0}D";
+	public static final String MOVE_CURSOR_LEFT_ONE		= "\u001b[D";
 	public static final String SAVE_CURSOR_POSITION		= "\u001b[s";
 	public static final String RECALL_CURSOR_POSITION	= "\u001b[u";
 	public static final String ERASE_CURRENT_LINE		= "\u001b[K";
