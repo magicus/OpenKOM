@@ -9,6 +9,7 @@ nu.rydin.kom.frontend.text.commands.ChangeConferencePresentationConference
 nu.rydin.kom.frontend.text.commands.ChangeLoginScript
 nu.rydin.kom.frontend.text.commands.ChangePassword
 nu.rydin.kom.frontend.text.commands.ChangePermissions
+nu.rydin.kom.frontend.text.commands.ChangeReplyToConference
 nu.rydin.kom.frontend.text.commands.ChangeSuffix
 nu.rydin.kom.frontend.text.commands.ChangeTerminalWidth
 nu.rydin.kom.frontend.text.commands.ChangeTerminalHeight

@@ -24,7 +24,7 @@ public class UserPermissions
 	public static final long USER_ADMIN				= 0x0002L;
 	
 	/**
-	 * Permission to delete conferences
+	 * Permission to delete and modify all conferences
 	 */
 	public static final long CONFERENCE_ADMIN		= 0x0004L;
 	

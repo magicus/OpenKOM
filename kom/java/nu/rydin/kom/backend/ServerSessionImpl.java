@@ -2031,6 +2031,23 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		return hasPermissionInConference(this.getCurrentConferenceId(), mask);
 	}
 	
+    public void changeReplyToConference(long originalConferenceId,
+            long newReplyToConferenceId) throws AuthorizationException,
+            ObjectNotFoundException, UnexpectedException
+    {
+        // Check rights. This also checks if the original conference exists.
+        this.assertModifyConference(originalConferenceId);
+        
+		try
+		{
+		    m_da.getConferenceManager().changeReplyToConference(originalConferenceId, newReplyToConferenceId);
+		}
+    	catch(SQLException e)
+    	{
+    		throw new UnexpectedException(this.getLoggedInUserId(), e);
+    	}
+    }
+    
 	public void renameObject(long id, String newName)
 	throws DuplicateNameException, ObjectNotFoundException, AuthorizationException, UnexpectedException
 	{
@@ -2663,6 +2680,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			
 	}
 		
+	public void assertModifyConference(long conferenceId)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+	{
+	    if(!(this.hasPermissionInConference(conferenceId, ConferencePermissions.ADMIN_PERMISSION)
+			       || this.getLoggedInUser().hasRights(UserPermissions.CONFERENCE_ADMIN)))
+			       throw new AuthorizationException();
+	}
+	
 	protected void pushReplies(long conference, int localnum)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -3173,9 +3198,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 		    // Do we have the right to do this?
 		    //
-		    if(!(this.hasPermissionInConference(conference, ConferencePermissions.ADMIN_PERMISSION)
-		       || this.getLoggedInUser().hasRights(UserPermissions.CONFERENCE_ADMIN)))
-		       throw new AuthorizationException();
+		    this.assertModifyConference(conference);
 		    
 		    // So far so, so good. Go ahead and delete!
 		    //
@@ -3275,7 +3298,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    CacheManager cm = CacheManager.instance();
 		    return new SystemInformation(m_sessions.canLogin(), cm.getNameCache().getStatistics(),
 		            cm.getUserCache().getStatistics(), cm.getConferenceCache().getStatistics(),
-		            m_da.getUserManager().countUsers(), m_da.getConferenceManager().countCounferences(),
+		            m_da.getUserManager().countUsers(), m_da.getConferenceManager().countConferences(),
 		            m_da.getMessageManager().countMessages());
 	    }
 	    catch(SQLException e)

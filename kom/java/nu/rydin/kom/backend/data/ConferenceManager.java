@@ -33,6 +33,7 @@ public class ConferenceManager // extends NameManager
 	private final NameManager m_nameManager;
 	
 	private final PreparedStatement m_addConfStmt;
+	private final PreparedStatement m_changeReplyToConfStmt;
 	private final PreparedStatement m_loadConfStmt;
 	private final PreparedStatement m_loadRangeStmt;
 	private final PreparedStatement m_isMailboxStmt;
@@ -46,6 +47,8 @@ public class ConferenceManager // extends NameManager
 		m_nameManager = nameManager;
 		m_addConfStmt = conn.prepareStatement(
 			"INSERT INTO conferences(id, administrator, permissions, nonmember_permissions, replyConf, created) VALUES(?, ?, ?, ?, ?, ?)");
+		m_changeReplyToConfStmt = conn.prepareStatement(
+		    "UPDATE conferences SET replyConf = ? WHERE id = ?");
 		m_loadConfStmt = conn.prepareStatement(
 			"SELECT n.fullname, c.administrator, c.permissions, c.nonmember_permissions, c.replyConf, c.created, c.lasttext " +
 			"FROM names n, conferences c " +
@@ -73,6 +76,8 @@ public class ConferenceManager // extends NameManager
 		{
 			if(m_addConfStmt != null)
 				m_addConfStmt.close();
+			if(m_changeReplyToConfStmt != null)
+			    m_changeReplyToConfStmt.close();
 			if(m_loadConfStmt != null)
 				m_loadConfStmt.close();
 			if(m_loadRangeStmt != null)
@@ -127,6 +132,25 @@ public class ConferenceManager // extends NameManager
 		m_addConfStmt.executeUpdate();
 		return nameId;
 	}
+	
+    /**
+     * Change the replyto-conference for the given conference
+     * 
+     * @param originalConferenceId
+     * @param newReplyToConferenceId
+     * @throws SQLException
+     */
+    public void changeReplyToConference(long originalConferenceId, long newReplyToConferenceId) throws SQLException
+    {
+        CacheManager.instance().getConferenceCache().registerInvalidation(new Long(originalConferenceId));
+        m_changeReplyToConfStmt.clearParameters();
+        if (newReplyToConferenceId == -1)
+            m_changeReplyToConfStmt.setNull(1, Types.BIGINT);
+		else
+            m_changeReplyToConfStmt.setLong(1, newReplyToConferenceId);
+        m_changeReplyToConfStmt.setLong(2, originalConferenceId);
+        m_changeReplyToConfStmt.executeUpdate();
+    }
 	
 	/**
 	 * Adds a personal mailbox
@@ -290,7 +314,7 @@ public class ConferenceManager // extends NameManager
 		}	    	    
 	}
 	
-	public long countCounferences()
+	public long countConferences()
 	throws SQLException
 	{
 	    ResultSet rs = null;
@@ -337,5 +361,4 @@ public class ConferenceManager // extends NameManager
 			}
 		}	    	    
 	}
-	
 }

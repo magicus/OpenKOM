@@ -888,6 +888,17 @@ public interface ServerSession
 	 */	
 	public void checkRights(long mask)
 	throws AuthorizationException;
+
+	/**
+	 * Change reply-to conference.
+	 * @param originalConferenceId Conference to change reply-to conference for
+	 * @param newReplyToConferenceId Use -1 to clear reply-to conference
+	 * @throws AuthorizationException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+    public void changeReplyToConference(long originalConferenceId, long newReplyToConferenceId)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 	
 	/**
 	 * Copies a message to another conference. The message itself isn't really
