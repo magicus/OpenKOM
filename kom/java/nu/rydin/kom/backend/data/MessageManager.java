@@ -56,6 +56,7 @@ public class MessageManager
 	private final PreparedStatement m_dropMessageOccurrenceStmt;
 	private final PreparedStatement m_countMessageOccurrencesStmt;
 	private final PreparedStatement m_dropMessageStmt;
+	private final PreparedStatement m_dropMessageSearchStmt;
 	private final PreparedStatement m_getLocalIdsInConfStmt;
 	private final PreparedStatement m_dropConferenceStmt;
 	private final PreparedStatement m_getGlobalBySubjectStmt;
@@ -144,7 +145,10 @@ public class MessageManager
 		m_dropMessageStmt = m_conn.prepareStatement(
 			 "delete from messages " + 
 			 "where id = ?");
-
+		m_dropMessageSearchStmt = m_conn.prepareStatement(
+			 "delete from messagesearch " + 
+			 "where id = ?");
+		
 		// Ooooh! There's room for optimization here :-) I suggest we optimize by moving to an
 		// RDBMS that supports indexed views (not to mention stored procedures..)
 		//		
@@ -945,6 +949,10 @@ public class MessageManager
 		this.m_dropMessageStmt.clearParameters();
 		this.m_dropMessageStmt.setLong(1, globalNum);
 		this.m_dropMessageStmt.execute();
+
+		this.m_dropMessageSearchStmt.clearParameters();
+		this.m_dropMessageSearchStmt.setLong(1, globalNum);
+		this.m_dropMessageSearchStmt.execute();
 	}
 	
 	public void deleteConference (long conference)
