@@ -56,6 +56,8 @@ nu.rydin.kom.frontend.text.commands.ListUserLog
 nu.rydin.kom.frontend.text.commands.ListUsers
 nu.rydin.kom.frontend.text.commands.Logout
 nu.rydin.kom.frontend.text.commands.MarkAsUnread
+nu.rydin.kom.frontend.text.commands.MarkTreeAsUnread
+nu.rydin.kom.frontend.text.commands.MarkSubjectAsUnread
 nu.rydin.kom.frontend.text.commands.MoveMessage
 nu.rydin.kom.frontend.text.commands.NoComment
 nu.rydin.kom.frontend.text.commands.PresentObject

@@ -18,11 +18,18 @@ public class ConferenceListItem extends NameAssociation implements Serializable
     
     private final Timestamp lastActive;
     
-    public ConferenceListItem(long id, Name name, Timestamp created, Timestamp lastActive)
+    private final boolean member;
+    
+    private final boolean owner;
+    
+    public ConferenceListItem(long id, Name name, Timestamp created, Timestamp lastActive, 
+            boolean member, boolean owner)
     {
         super(id, name);
         this.created 	= created;
         this.lastActive	= lastActive;
+        this.member		= member;
+        this.owner		= owner;
     }
     public Timestamp getCreated()
     {
@@ -31,5 +38,14 @@ public class ConferenceListItem extends NameAssociation implements Serializable
     public Timestamp getLastActive()
     {
         return lastActive;
+    }
+    public boolean isMember()
+    {
+        return member;
+    }
+    
+    public boolean isOwner()
+    {
+        return owner;
     }
 }

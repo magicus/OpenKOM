@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UserListItem;
 import nu.rydin.kom.utils.HeaderPrinter;
@@ -33,7 +34,9 @@ public class Who extends AbstractCommand
     {
 		MessageFormatter formatter = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
-		UserListItem[] users = context.getSession().listLoggedInUsers();		
+		UserListItem[] users = context.getSession().listLoggedInUsers();
+		DisplayController dc = context.getDisplayController();
+		dc.normal();
 		HeaderPrinter hp = new HeaderPrinter();
 		hp.addHeader(formatter.format("who.login"), 6, true);
 		hp.addHeader(formatter.format("who.idle"), 6, true);
@@ -44,6 +47,7 @@ public class Who extends AbstractCommand
 		hp.addHeader(formatter.format("who.name"), lastColWidth, false);
 		hp.printOn(out);
 		int top = users.length;
+		dc.output();
 		for(int idx = 0; idx < top; ++idx)
 		{
 			UserListItem each = users[idx];

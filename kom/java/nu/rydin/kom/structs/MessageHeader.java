@@ -19,15 +19,17 @@ public class MessageHeader implements Serializable
 	private final long m_author;
 	private final Name m_authorName;
 	private final long m_replyTo;
+	private final long m_thread;
 	private final String m_subject;
 	
-	public MessageHeader(long id, Timestamp created, long author, Name authorName, long replyTo, String subject)
+	public MessageHeader(long id, Timestamp created, long author, Name authorName, long replyTo, long thread, String subject)
 	{
 		m_id			= id;
 		m_created 		= created;
 		m_author 		= author;
 		m_authorName	= authorName;
 		m_replyTo		= replyTo;
+		m_thread		= thread;
 		m_subject 		= subject;
 	}
 	
@@ -49,6 +51,11 @@ public class MessageHeader implements Serializable
 	public long getReplyTo()
 	{
 		return m_replyTo;
+	}
+	
+	public long getThread()
+	{
+	    return m_thread;
 	}
 
 	public Timestamp getCreated()

@@ -143,6 +143,8 @@ public class MessageRangeList extends ListAtom implements Serializable
 	            l1.succeed(l);
 	        }
 	    }
+	    else
+	        l = (MessageRangeList) r.next();
 	    
 	    // Yank old range
 	    //

@@ -72,6 +72,7 @@ public class MessageManager
     private final PreparedStatement m_listMessagesGloballyByAuthor;
     private final PreparedStatement m_searchMessagesGlobally;
     private final PreparedStatement m_countStmt;
+    private final PreparedStatement m_setThreadIdStmt;
 	
 	private final Connection m_conn; 
 	
@@ -91,11 +92,11 @@ public class MessageManager
 	{
 		m_conn = conn;
 		m_loadMessageStmt = m_conn.prepareStatement(
-			"SELECT created, author, author_name, reply_to, subject, body FROM messages WHERE id = ?");
+			"SELECT created, author, author_name, reply_to, thread, subject, body FROM messages WHERE id = ?");
 		m_loadMessageInConfStmt = m_conn.prepareStatement(
-			"SELECT m.id, m.created, m.author, m.author_name, m.reply_to, m.subject, m.body " +			"FROM messages m, messageoccurrences mo " +			"WHERE m.id = mo.message AND mo.conference = ? AND mo.localnum = ?");
+			"SELECT m.id, m.created, m.author, m.author_name, m.reply_to, m.thread, m.subject, m.body " +			"FROM messages m, messageoccurrences mo " +			"WHERE m.id = mo.message AND mo.conference = ? AND mo.localnum = ?");
 		m_loadMessageHeaderStmt = m_conn.prepareStatement(
-			"SELECT created, author, author_name, reply_to, subject FROM messages WHERE id = ?");			
+			"SELECT created, author, author_name, reply_to, thread, subject FROM messages WHERE id = ?");			
 		m_loadMessageOccurrenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name FROM messages " +
 			"WHERE conference = ? AND localNum = ?");
@@ -122,7 +123,7 @@ public class MessageManager
 		m_getGlobalIdStmt = m_conn.prepareStatement(
 			"SELECT message FROM messageoccurrences WHERE conference = ? AND localnum = ?");
 		m_getRepliesStmt = m_conn.prepareStatement(
-			"SELECT id, created, author, author_name, reply_to, subject FROM messages " +			"WHERE reply_to = ?");
+			"SELECT id, created, author, author_name, reply_to, thread, subject FROM messages " +			"WHERE reply_to = ?");
 		m_getReplyIdsStmt = m_conn.prepareStatement(
 			"SELECT id FROM messages WHERE reply_to = ?");
 		m_loadOccurrenceStmt = m_conn.prepareStatement(
@@ -163,10 +164,9 @@ public class MessageManager
 			 "join messages on mo.message = messages.id " +
 			 "where ms.user = ? and subject = ?");
 		m_getLocalBySubjectStmt = m_conn.prepareStatement(
-		     "select localnum " +
-		     "from messageoccurrences as mo " +
-		     "join messages as m on m.id = mo.message " +
-		     "where mo.conference = ? and m.subject = ?");
+		     "select mo.localnum " +
+		     "from messageoccurrences mo, messages m " +
+		     "where m.id = mo.message and mo.conference = ? and m.subject = ?");
 		
 		// To speed things up, a special version to just retrieve the local ID.
 		//
@@ -189,9 +189,10 @@ public class MessageManager
 			 "limit 1 offset 0");
 				
 		m_searchMessagesLocally = m_conn.prepareStatement(
-				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
-				"FROM messagesearch ms, messageoccurrences mo " +
-				"WHERE ms.id = mo.message AND mo.conference = ? AND MATCH(subject, body) AGAINST (? IN BOOLEAN MODE) " +
+				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject, m.reply_to " +
+				"FROM messagesearch ms, messageoccurrences mo, messages m " +
+				"WHERE ms.id = mo.message AND ms.id = m.id AND mo.conference = ? " +
+				"AND MATCH(ms.subject, ms.body) AGAINST (? IN BOOLEAN MODE) " +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
 		
@@ -201,14 +202,15 @@ public class MessageManager
 		        "SELECT COUNT(*) FROM messagesearch");
 
 		m_grepMessagesLocally = m_conn.prepareStatement(
-				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
-				"FROM messagesearch ms, messageoccurrences mo " +
-				"WHERE ms.id = mo.message AND mo.conference = ? AND (subject LIKE ? OR body LIKE ?)" +
+				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject, m.reply_to " +
+				"FROM messagesearch ms, messageoccurrences mo, messages m " +
+				"WHERE ms.id = mo.message AND ms.id = m.id AND mo.conference = ? " +
+				"AND (ms.subject LIKE ? OR ms.body LIKE ?) " +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
 		
 		m_listAllMessagesLocally = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject " +
+		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject, m.reply_to " +
 		        "FROM messages m JOIN messageoccurrences mo " +
 		        "ON m.id = mo.message " +
 		        "WHERE mo.conference = ? " +
@@ -216,7 +218,7 @@ public class MessageManager
 		        "LIMIT ? OFFSET ?");
 		
 		m_listMessagesLocallyByAuthor = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject " +
+		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject, m.reply_to " +
 		        "FROM messages m JOIN messageoccurrences mo " +
 		        "ON m.id = mo.message " +
 		        "WHERE mo.conference = ? AND mo.user = ? " +
@@ -224,19 +226,21 @@ public class MessageManager
 		        "LIMIT ? OFFSET ?");
 		
 		m_listMessagesGloballyByAuthor = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject " +
+		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject, m.reply_to " +
 		        "FROM messages m, messageoccurrences mo, names n " +
-		        "WHERE m.id = mo.message AND n.id = mo.conference AND mo.user = ? AND n.id = mo.conference " +
+		        "WHERE m.id = mo.message AND n.id = mo.conference AND mo.user = ? " +
 		        "ORDER BY mo.action_ts DESC " +
 		        "LIMIT ? OFFSET ?");
 		
 		m_searchMessagesGlobally = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject " +
-		        "FROM messagesearch m, messageoccurrences mo, names n " +
-		        "WHERE m.id = mo.message AND n.id = mo.conference " +
+		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject, me.reply_to " +
+		        "FROM messagesearch m, messages me, messageoccurrences mo, names n " +
+		        "WHERE m.id = mo.message AND n.id = mo.conference AND m.id = me.id " +
 		        "AND MATCH(m.subject, m.body) AGAINST (? IN BOOLEAN MODE) " +
 		        "ORDER BY mo.action_ts DESC " +
 		        "LIMIT ? OFFSET ?");
+		m_setThreadIdStmt = m_conn.prepareStatement(
+		        "UPDATE messages SET thread = ? WHERE id = ?");
 	}
 	
 	public void close()
@@ -290,6 +294,8 @@ public class MessageManager
 			m_getLatestMagicMessageStmt.close();
 		if(m_countStmt != null)
 		    m_countStmt.close();
+		if(m_setThreadIdStmt != null)
+		    m_setThreadIdStmt.close();
 	}
 	
 	public void finalize()
@@ -331,8 +337,9 @@ public class MessageManager
 				rs.getLong(2), 			// author
 				new Name(rs.getString(3), Visibilities.PUBLIC),	// Author name
 				rs.getObject(4) != null ? rs.getLong(4) : -1, 	// reply to
-				rs.getString(5),		// subject
-				rs.getString(6),		// body
+				rs.getObject(5) != null ? rs.getLong(5) : -1, 	// thread
+				rs.getString(6),		// subject
+				rs.getString(7),		// body
 				this.getOccurrences(id)
 				);
 		}
@@ -369,8 +376,9 @@ public class MessageManager
 				rs.getLong(3), 			// author
 				new Name(rs.getString(4), Visibilities.PUBLIC),	// author name				
 				rs.getObject(5) != null ? rs.getLong(5) : -1, 	// reply to
-				rs.getString(6),		// subject
-				rs.getString(7),		// body 
+				rs.getObject(6) != null ? rs.getLong(6) : -1, 	// thread
+				rs.getString(7),		// subject
+				rs.getString(8),		// body 
 				this.getOccurrences(id)
 				);
 		}
@@ -406,7 +414,8 @@ public class MessageManager
 			   	rs.getLong(2), 			// author
 			   	new Name(rs.getString(3), Visibilities.PUBLIC),		// author name	
 			   	rs.getObject(4) != null ? rs.getLong(4) : -1,		// reply to
-			   	rs.getString(5)		
+			    rs.getObject(5) != null ? rs.getLong(5) : -1,		// reply to
+			   	rs.getString(6)		
 			   	);
 			
 	   }
@@ -516,9 +525,32 @@ public class MessageManager
 			
 			// Create message occurrence record
 			//
-			MessageOccurrence result = this.createMessageOccurrence(id, ACTION_CREATED, author, authorName, conference); 
+			MessageOccurrence result = this.createMessageOccurrence(id, ACTION_CREATED, author, authorName, conference);
 			
-			//Duplicate into search table
+			// Add thread id if needed
+			//
+			long thread = -1;
+			if(replyTo == -1) // We're the root of a thread, so use our own id
+			    thread = id;
+			else
+			{
+			    // This is a reply, so the thread id is the thread id
+			    // of the message we're replying to.
+			    //
+			    MessageHeader mh = this.loadMessageHeader(replyTo);
+			    thread = mh.getThread();
+			}
+			
+			// Update with thread id if needed
+			//
+			if(thread != -1)
+			{
+			    m_setThreadIdStmt.clearParameters();
+			    m_setThreadIdStmt.setLong(1, thread);
+			    m_setThreadIdStmt.setLong(2, id);
+			    m_setThreadIdStmt.executeUpdate();
+			}
+			// Duplicate into search table
 			//
 			m_addMessageSearchStmt.clearParameters();
 			m_addMessageSearchStmt.setLong(1, id);
@@ -759,9 +791,10 @@ public class MessageManager
 	    MessageOccurrence[] occurrences = getOccurrences(messageId);
 	    for (int i = 0; i < occurrences.length; i++)
         {
-	        //Note: In the highly unlikely event that there is more than one of either
-	        //a CREATED or MOVED occurrence, we'll pick the first one. The only way 
-	        //this can happen is if someone fucks up, THERE CAN BE ONLY ONE!
+	        // Note: In the highly unlikely event that there is more than one of either
+	        // a CREATED or MOVED occurrence, we'll pick the first one. The only way 
+	        // this can happen is if someone screws up, THERE CAN BE ONLY ONE!
+	        //
             if (occurrences[i].getKind() == ACTION_CREATED || occurrences[i].getKind() == ACTION_MOVED)
             {
                 return occurrences[i];
@@ -837,8 +870,9 @@ public class MessageManager
 					 rs.getTimestamp(2),	// created
 					 rs.getLong(3), 		// author
 					 new Name(rs.getString(4), Visibilities.PUBLIC),// author name	
-					 rs.getObject(4) != null ? rs.getLong(5) : -1,	// reply to
-					 rs.getString(6)		// subject	
+					 rs.getObject(5) != null ? rs.getLong(5) : -1,	// reply to
+					 rs.getObject(6) != null ? rs.getLong(6) : -1,	// reply to
+					 rs.getString(7)		// subject	
 					 ));
 			}
 			MessageHeader[] answer = new MessageHeader[list.size()];
@@ -958,7 +992,6 @@ public class MessageManager
 	public void dropMessageOccurrence(int localNum, long conference)
 	throws SQLException, ObjectNotFoundException
 	{
-		// TODO: When we migrate to stored procedures, this is the first transaction we convert.
 		long globalNum = this.getGlobalMessageId(conference, localNum);
 		
 		this.m_dropMessageOccurrenceStmt.clearParameters();
@@ -1151,7 +1184,8 @@ public class MessageManager
                     rs.getInt(2), // localid
                     new NameAssociation(rs.getLong(3), // authorid
                     new Name(rs.getString(4), Visibilities.PUBLIC)), // authorname
-                    rs.getString(5)) // subject	
+                    rs.getString(5), // subject
+                    rs.getLong(6)) 	// Reply to
                     );
         }
         LocalMessageSearchResult[] lmsr = new LocalMessageSearchResult[l.size()];
@@ -1194,7 +1228,8 @@ public class MessageManager
                             new Name(rs.getString(4), rs.getShort(5))),
                     new NameAssociation(rs.getLong(6), // authorid
                             new Name(rs.getString(7), Visibilities.PUBLIC)), // authorname
-                    rs.getString(8)) // subject	
+                    rs.getString(8), // subject
+                    rs.getLong(9)) // reply to
                     );
         }
         GlobalMessageSearchResult[] lmsr = new GlobalMessageSearchResult[l.size()];

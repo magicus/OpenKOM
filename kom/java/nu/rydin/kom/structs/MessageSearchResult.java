@@ -17,14 +17,16 @@ public abstract class MessageSearchResult implements Serializable
     protected final int m_localid;
     private final NameAssociation m_author;
     private final String m_subject;
+    private final long m_replyTo;
 
     public MessageSearchResult(long globalid, int localid, NameAssociation author,
-            String subject)
+            String subject, long replyTo)
     {
-        m_globalid = globalid;
-        m_localid = localid;
-        m_author = author;
-        m_subject = subject;
+        m_globalid 	= globalid;
+        m_localid 	= localid;
+        m_author 	= author;
+        m_subject 	= subject;
+        m_replyTo 	= replyTo;
     }
 
     public NameAssociation getAuthor()
@@ -44,5 +46,9 @@ public abstract class MessageSearchResult implements Serializable
     public int getLocalId()
     {
         return m_localid;
+    }
+    public long getReplyTo()
+    {
+        return m_replyTo;
     }
 }

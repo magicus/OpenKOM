@@ -58,14 +58,18 @@ public class ConferenceManager // extends NameManager
 		m_isMailboxStmt = conn.prepareStatement(
 		     "SELECT COUNT(*) FROM users WHERE id = ?");
 		m_listByDateStmt = conn.prepareStatement(
-		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext " +
-		     "FROM conferences c, names n " +
-		     "WHERE n.id = c.id AND n.kind = " + NameManager.CONFERENCE_KIND + ' '+
+		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext, m.permissions,  c.administrator " +
+		     "FROM conferences c " +
+		     "LEFT OUTER JOIN memberships m ON c.id = m.conference AND m.user = ? " +
+		     "JOIN names n ON n.id = c.id " +
+		     "WHERE n.kind = " + NameManager.CONFERENCE_KIND + ' '+
 		     "ORDER BY c.lasttext DESC");
 		m_listByNameStmt = conn.prepareStatement(
-		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext " +
-		     "FROM conferences c, names n " +
-		     "WHERE n.id = c.id AND n.kind = " + NameManager.CONFERENCE_KIND + ' '+
+		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext, m.permissions, c.administrator " +
+		     "FROM conferences c " +
+		     "LEFT OUTER JOIN memberships m ON c.id = m.conference AND m.user = ? " +
+		     "JOIN names n ON n.id = c.id " +
+		     "WHERE n.kind = " + NameManager.CONFERENCE_KIND + ' '+
 		     "ORDER BY n.norm_name");
 		m_countStmt = conn.prepareStatement("SELECT count(*) FROM conferences");
 	}
@@ -283,23 +287,27 @@ public class ConferenceManager // extends NameManager
 		}	    
 	}
 	
-	public ConferenceListItem[] listByDate()
+	public ConferenceListItem[] listByDate(long user)
 	throws SQLException
 	{
+	    m_listByDateStmt.clearParameters();
+	    m_listByDateStmt.setLong(1, user);
 	    ResultSet rs = null;
 	    try
 	    {
 	        ArrayList list = new ArrayList();
-	        m_listByDateStmt.clearParameters();
 	        rs = m_listByDateStmt.executeQuery();
 	        while(rs.next())
 	        {
+	            long id = rs.getLong(1); 
 	            list.add(new ConferenceListItem(
-                    rs.getLong(1),new Name(
+                    id,new Name(
                     rs.getString(2),
                     rs.getShort(3)),
                     rs.getTimestamp(4),
-                    rs.getTimestamp(5)));
+                    rs.getTimestamp(5),
+                    rs.getObject(6) != null,
+                    rs.getLong(7) == user));
 	        }
 	        ConferenceListItem[] answer = new ConferenceListItem[list.size()];
 	        list.toArray(answer);
@@ -331,14 +339,15 @@ public class ConferenceManager // extends NameManager
 	    }
 	}
 	
-	public ConferenceListItem[] listByName()
+	public ConferenceListItem[] listByName(long user)
 	throws SQLException
 	{
+	    m_listByNameStmt.clearParameters();
+	    m_listByNameStmt.setLong(1, user);
 	    ResultSet rs = null;
 	    try
 	    {
 	        ArrayList list = new ArrayList();
-	        m_listByNameStmt.clearParameters();
 	        rs = m_listByNameStmt.executeQuery();
 	        while(rs.next())
 	        {
@@ -347,7 +356,9 @@ public class ConferenceManager // extends NameManager
                     rs.getString(2),
                     rs.getShort(3)),
                     rs.getTimestamp(4),
-                    rs.getTimestamp(5)));
+                    rs.getTimestamp(5),
+                    rs.getObject(6) != null,
+                    rs.getLong(7) == user));
 	        }
 	        ConferenceListItem[] answer = new ConferenceListItem[list.size()];
 	        list.toArray(answer);
@@ -360,5 +371,5 @@ public class ConferenceManager // extends NameManager
 				rs.close();
 			}
 		}	    	    
-	}
+	}	
 }

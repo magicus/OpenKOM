@@ -19,10 +19,10 @@ public class Message extends MessageHeader implements Serializable
 	
 	private final MessageOccurrence[] m_occurrences;
 	
-	public Message(long id, Timestamp created, long author, Name authorName, long replyTo, String subject, String body,
+	public Message(long id, Timestamp created, long author, Name authorName, long replyTo, long thread, String subject, String body,
 		MessageOccurrence[] occurrences)
 	{
-		super(id, created, author, authorName, replyTo, subject);
+		super(id, created, author, authorName, replyTo, thread, subject);
 		m_body 			= body;
 		m_occurrences 	= occurrences;
 	}

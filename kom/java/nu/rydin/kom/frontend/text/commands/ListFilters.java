@@ -13,6 +13,11 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.EllipsisParameter;
+import nu.rydin.kom.frontend.text.parser.FlagParameter;
+import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Relationship;
 import nu.rydin.kom.utils.FlagUtils;
@@ -32,11 +37,13 @@ public class ListFilters extends AbstractCommand
     public void execute(Context context, Object[] parameters)
             throws KOMException, IOException, InterruptedException
     {
+        DisplayController dc = context.getDisplayController();
         ServerSession session = context.getSession();
         Relationship[] jinglar = session.listFilters();
         PrintWriter out = context.getOut();
         MessageFormatter formatter = context.getMessageFormatter();
         HeaderPrinter hp = new HeaderPrinter();
+        dc.normal();
         hp.addHeader(formatter.format("list.filters.user"), 38, false);
         hp.addSpace(1);
         hp.addHeader(formatter.format("list.filters.flags"), 38, false);
@@ -44,8 +51,10 @@ public class ListFilters extends AbstractCommand
         for (int idx = 0; idx < jinglar.length; idx++)
         {
             Relationship r = jinglar[idx];
+            dc.output();
             PrintUtils.printLeftJustified(out, session.getName(r.getReferee()).toString(), 38);
             out.print(' ');
+            dc.normal();
             FlagUtils.printFlagsShort(out, formatter, context.getFlagLabels("filterflags"), 
                     new long[] { r.getFlags() } );
             out.println();

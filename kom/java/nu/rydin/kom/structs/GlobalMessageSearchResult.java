@@ -14,9 +14,9 @@ public class GlobalMessageSearchResult extends MessageSearchResult
     private final NameAssociation m_conference;
 
     public GlobalMessageSearchResult(long globalid, int localid, NameAssociation conference, 
-            NameAssociation author, String subject)
+            NameAssociation author, String subject, long replyTo)
     {
-        super(globalid, localid, author, subject);
+        super(globalid, localid, author, subject, replyTo);
         m_conference = conference;
     }
     

@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.FileManager;
@@ -150,6 +151,45 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         }
     }
  	
+    private static interface MessageOperation
+    {
+        public void perform(long messageId)
+        throws ObjectNotFoundException, UnexpectedException;
+    }
+    
+    private class MarkAsUnreadOperation implements MessageOperation
+    {
+    	public void perform(long messageId)
+    	throws ObjectNotFoundException, UnexpectedException
+    	{
+    	    ServerSessionImpl.this.markAsUnreadAtLogout(messageId);
+    	}
+    }
+    
+    private class MarkAsReadOperation implements MessageOperation 
+    {
+    	public void perform(long messageId)
+    	throws ObjectNotFoundException, UnexpectedException
+    	{
+    	    ServerSessionImpl that = ServerSessionImpl.this;
+    	    try
+    	    {
+        	    MessageManager mm = that.m_da.getMessageManager();
+				MessageOccurrence[] mos = mm.getVisibleOccurrences(that.getLoggedInUserId(),
+						   messageId);
+				for (int idx = 0; idx < mos.length; ++idx)
+				{
+				    MessageOccurrence mo = mos[idx];
+				    that.markMessageAsReadEx(mo.getConference(), mo.getLocalnum());
+				}
+    	    }
+    		catch (SQLException e)
+    		{
+    			throw new UnexpectedException (that.getLoggedInUserId(), e);
+    		}
+        }
+    }
+
 	/**
 	 * Current conference id, or -1 if it could not be determined
 	 */
@@ -434,12 +474,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			        try
 			        {
 				        SessionState answer = new SessionState(CommandSuggestions.NEXT_REPLY, conf, 
-			                    this.countUnread(conf)); 
-				        if(!hasFilters)
-				            return answer; 
-				      
+			                    this.countUnread(conf)); 				      
 				        MessageOccurrence occ = this.getMostRelevantOccurrence(conf, nextReply);
-				        if(this.applyFiltersForMessage(nextReply, occ.getConference(), occ.getLocalnum(), FilterFlags.MESSAGES))
+
+				        // Already read?
+			            //
+			            if(m_memberships.isUnread(occ.getConference(), occ.getLocalnum()))
+			            {
+			                // Discard from reply stack and continue looking
+			                //
+			                this.popReply();
+			                continue;
+			            }
+				        if(hasFilters && this.applyFiltersForMessage(nextReply, occ.getConference(), occ.getLocalnum(), FilterFlags.MESSAGES))
 				            continue;
 				        return answer;
 			        }
@@ -782,7 +829,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 	    try
 	    {
-	        return (ConferenceListItem[]) this.censorNames(m_da.getConferenceManager().listByDate());
+	        return (ConferenceListItem[]) this.censorNames(m_da.getConferenceManager().
+	                listByDate(this.getLoggedInUserId()));
 	    }
 		catch(SQLException e)
 		{
@@ -803,7 +851,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 	    try
 	    {
-	        return (ConferenceListItem[]) this.censorNames(m_da.getConferenceManager().listByName());
+	        return (ConferenceListItem[]) this.censorNames(m_da.getConferenceManager().
+	                listByName(this.getLoggedInUserId()));
 	    }
 		catch(SQLException e)
 		{
@@ -991,7 +1040,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			//
 			this.sendEvent(recipient, new NewMessageEvent(me, recipient, occ.getLocalnum(), occ.getGlobalId()));
 			
-			m_stats.incNumPosted(); // TODO: Count mail separately?
+			m_stats.incNumPosted(); 
 			return occ;
 		}
 		catch(SQLException e)
@@ -1677,6 +1726,21 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+	
+	public int markThreadAsUnreadAtLogout(long root)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+	    return this.performTreeOperation(root, new MarkAsUnreadOperation());
+	}
+	
+	public int markSubjectAsUnreadAtLogout(String subject, boolean localOnly)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+	    return localOnly
+	    	? this.performOperationBySubjectInConference(subject, new MarkAsUnreadOperation())
+	    	: this.performOperationBySubject(subject, new MarkAsUnreadOperation());
+	}
+
 	
 	public void changeUnread(int nUnread)
 	throws ObjectNotFoundException, UnexpectedException
@@ -2436,117 +2500,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public int skipMessagesBySubject (String subject, boolean skipGlobal)
 	throws UnexpectedException, ObjectNotFoundException
 	{
-		long loggedInUser = this.getLoggedInUserId();
-		long currentConference = this.getCurrentConference().getId();
-		int sillyCounter = 0;
-		try
-		{
-			MessageManager mm = m_da.getMessageManager();
-			
-			if (skipGlobal)
-			{
-				long[] globalIds = mm.getMessagesBySubject(subject, loggedInUser);
-				for (int i = 0; i < globalIds.length; ++i)
-				{
-					MessageOccurrence[] mos = mm.getVisibleOccurrences(loggedInUser, globalIds[i]);
-					for (int j = 0; j < mos.length; ++j)
-					{
-						MessageOccurrence mo = mos[j];
-						sillyCounter += this.markMessageAsReadEx(mo.getConference(), mo.getLocalnum()) ? 1 : 0;
-					}
-				}
-			}
-			else
-			{
-			    int[] localIds = mm.getLocalMessagesBySubject(subject, currentConference);
-			    for (int i = 0; i < localIds.length; ++i)
-			    {
-			        sillyCounter += this.markMessageAsReadEx(currentConference, localIds[i]) ? 1 : 0;
-			    }
-			}
-			return sillyCounter;
-		}
-		catch (SQLException e)
-		{
-			throw new UnexpectedException (loggedInUser, e);
-		}
+	    return skipGlobal 
+	    	? this.performOperationBySubjectInConference(subject, new MarkAsReadOperation())
+	    	: this.performOperationBySubject(subject, new MarkAsReadOperation());
 	}
-	
+		
 	public int skipTree(long root)
 	throws UnexpectedException, ObjectNotFoundException
 	{
-		try
-		{
-			MessageManager mm = m_da.getMessageManager();
-			ArrayList al = new ArrayList();
-			
-			// Set up our start position (root node in al[0], beginning and end index at zero.
-			//			
-			int idxBeg = 0;
-			int idxEnd = 0;
-			int addCount = 0;
-			al.add(new Long(root));
-			while(true) // until we say otherwise :-)
-			{
-				// Iterate over the last set of new nodes we got from getReplies (or init).
-				//
-				for (int i = idxBeg; i <= idxEnd; ++i)
-				{
-					// Retrieve all children of that particular node.
-					//
-					MessageHeader[] mh = mm.getReplies(((Long)al.get(i)).longValue()); // LISP
-					if (0 == mh.length)
-					{
-						continue;
-					}
-					// Add them to the array list, we'll be iterating over them next time around.
-					//
-					for (int j = 0; j < mh.length; ++j)
-					{
-						al.add(new Long(mh[j].getId()));
-					}
-					addCount += mh.length;
-				}
-				// So, now we've gone through all nodes retrieved in the previous pass. Time to
-				// update the indexes or break out of the loop.
-				//
-				if (0 == addCount)
-				{
-					// Nothing was added this time around. This means we've penetrated the full
-					// depth of the tree and can go on to greater achievements.
-					//
-					break;
-				}
-				// Update the indices. The new idxBeg is, of course, the node after the previous
-				// idxEnd, just as the new idxEnd is addCount steps after its old value.
-				//
-				idxBeg = idxEnd + 1;
-				idxEnd+= addCount;
-				addCount = 0;
-			}
-			
-			// So, we now have a list of all messages in the tree branching out from the current
-			// node. Now all we have to do is find all occurrences and mark them as read.
-			//
-			int sillyCounter = 0;
-			Iterator it = al.listIterator();
-			while (it.hasNext())
-			{
-				MessageOccurrence[] mos = mm.getVisibleOccurrences(this.getLoggedInUserId(),
-																   ((Long)it.next()).longValue());
-				for (int j = 0; j < mos.length; ++j)
-				{
-					MessageOccurrence mo = mos[j];
-					sillyCounter += this.markMessageAsReadEx(mo.getConference(), mo.getLocalnum()) ? 1 : 0;
-				}
-			}
-			
-			return sillyCounter;
-		}
-		catch (SQLException e)
-		{
-			throw new UnexpectedException (this.getLoggedInUserId(), e);
-		}
+	    return this.performTreeOperation(root, new MarkAsReadOperation());
 	}
 	
 	public MessageLogItem[] getChatMessagesFromLog(int limit)
@@ -2894,6 +2856,72 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		return m_memberships.markAsReadEx(conference, localnum);
 	}
 	
+	protected int performTreeOperation(long root, MessageOperation op)
+	throws UnexpectedException, ObjectNotFoundException
+	{
+	    try
+	    {
+		    MessageManager mm = m_da.getMessageManager();
+		    Stack stack = new Stack();
+		    stack.add(new Long(root));
+		    int n = 0;
+		    for(;!stack.isEmpty(); ++n)
+		    {
+		        // Perform operation
+		        //
+		        long id = ((Long) stack.pop()).longValue();
+		        op.perform(id);
+		        
+		        // Push replies
+		        //
+		        MessageHeader[] mh = mm.getReplies(id);
+		        for (int idx = 0; idx < mh.length; idx++)
+		            stack.push(new Long(mh[idx].getId()));
+		    }
+		    return n;
+	    }
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+	
+	protected int performOperationBySubjectInConference(String subject, MessageOperation op)
+	throws UnexpectedException, ObjectNotFoundException
+	{
+		long currentConference = this.getCurrentConference().getId();
+		try
+		{
+			MessageManager mm = m_da.getMessageManager();
+			int[] ids = mm.getLocalMessagesBySubject(subject, currentConference);
+			for (int idx = 0; idx < ids.length; ++idx)
+			    op.perform(this.localToGlobalInCurrentConference(ids[idx]));
+			return ids.length;
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+	
+	protected int performOperationBySubject(String subject, MessageOperation op)
+	throws UnexpectedException, ObjectNotFoundException
+	{
+		long currentConference = this.getCurrentConference().getId();
+		try
+		{
+			MessageManager mm = m_da.getMessageManager();
+			long[] globalIds = mm.getMessagesBySubject(subject, currentConference);
+			for (int idx = 0; idx < globalIds.length; ++idx)
+			    op.perform(globalIds[idx]);
+			return globalIds.length;
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}	
+		
 	protected void markMessageAsRead(long conference, int localnum)
 	throws SQLException
 	{

@@ -11,8 +11,8 @@ package nu.rydin.kom.structs;
  */
 public class LocalMessageSearchResult extends MessageSearchResult
 {
-    public LocalMessageSearchResult(long globalid, int localid, NameAssociation author, String subject)
+    public LocalMessageSearchResult(long globalid, int localid, NameAssociation author, String subject, long replyTo)
     {
-        super(globalid, localid, author, subject);
+        super(globalid, localid, author, subject, replyTo);
     }
 }

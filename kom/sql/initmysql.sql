@@ -221,3 +221,4 @@ CREATE TABLE IF NOT EXISTS relationships
 	INDEX referee_ix(referee),
 	FOREIGN KEY (referee) REFERENCES names(id) ON DELETE CASCADE
 ) TYPE=INNODB;
+

@@ -15,6 +15,7 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.NoFilesException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
@@ -37,6 +38,7 @@ public class ListFiles extends AbstractCommand
     throws KOMException, IOException, InterruptedException
     {
         ServerSession session = context.getSession();
+        DisplayController dc = context.getDisplayController();
         
         // Resolve parent
         //
@@ -56,6 +58,7 @@ public class ListFiles extends AbstractCommand
         
         // Print header
         //
+        dc.normal();
         hp.addHeader(formatter.format("list.files.created"), 17, false);
         hp.addHeader(formatter.format("list.files.updated"), 17, false);
         hp.addHeader(formatter.format("list.files.permissions"), 12, false);
@@ -67,6 +70,7 @@ public class ListFiles extends AbstractCommand
         //
         for(int idx = 0; idx < top; ++idx)
         {
+            dc.normal();
             FileStatus each = files[idx];
             PrintUtils.printLeftJustified(out, context.smartFormatDate(each.getCreated()), 17);
             PrintUtils.printLeftJustified(out, context.smartFormatDate(each.getUpdated()), 17);
@@ -83,7 +87,9 @@ public class ListFiles extends AbstractCommand
                 permissions.append(formatter.format("list.files.permission.none"));
             PrintUtils.printLeftJustified(out, permissions.toString(), 12);
             out.print(' ');
+            dc.output();
             out.println(each.getName());
         }
+        dc.normal();
     }
 }

@@ -605,7 +605,27 @@ public interface ServerSession
 	 */
 	public Name[] getNames(long[] id)
 	throws ObjectNotFoundException, UnexpectedException;
-
+	
+	/**
+	 * Queues all messages in a thread to be marked as unread at logout
+	 * @param root The root of the thread
+	 * @return The number of messages marked as unread
+	 * @throws UnexpectedException
+	 */
+	public int markThreadAsUnreadAtLogout(long root)
+	throws ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * Marks all messages with a matching subject as unread at logout.
+	 * 
+	 * @param subject The subject
+	 * @param localOnly Look in current conference only
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public int markSubjectAsUnreadAtLogout(String subject, boolean localOnly)
+	throws ObjectNotFoundException, UnexpectedException;
+	
 	/**
 	 * Queues up a message to be marked as unread at logout.
 	 * 
