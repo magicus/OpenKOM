@@ -40,6 +40,8 @@ import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.BroadcastMessageEvent;
 import nu.rydin.kom.events.ChatMessageEvent;
+import nu.rydin.kom.events.BroadcastAnonymousMessageEvent;
+import nu.rydin.kom.events.ChatAnonymousMessageEvent;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
@@ -1237,21 +1239,35 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		return (Event) m_eventQueue.removeFirst();
 	}
 	
+	
+	// TODO: This is not used?
+	//
 	public void sendChatMessage(long userId, String message)
 	throws NotLoggedInException
 	{
 		if(m_sessions.getSession(userId) == null)
 			throw new NotLoggedInException();
-		m_sessions.sendEvent(userId, new ChatMessageEvent(userId, this.getLoggedInUserId(), 
-			this.getLoggedInUser().getName(), message));
+
+		if(message.substring(0,1).equals("!")) {
+			m_sessions.sendEvent(userId, new ChatAnonymousMessageEvent(userId, 
+					message.substring(1,message.length())));
+		} else {
+			m_sessions.sendEvent(userId, new ChatMessageEvent(userId, this.getLoggedInUserId(), 
+					this.getLoggedInUser().getName(), message));
+		}
 	}
 	
 	private void sendChatMessageHelper(long userId, String message)
 	{
 		if (m_sessions.hasSession(userId))
 		{
-			m_sessions.sendEvent(userId, new ChatMessageEvent(userId, this.getLoggedInUserId(), 
-				this.getLoggedInUser().getName(), message));
+			if(message.substring(0,1).equals("!")) {
+				m_sessions.sendEvent(userId, new ChatAnonymousMessageEvent(userId, 
+						message.substring(1,message.length())));
+			} else {
+				m_sessions.sendEvent(userId, new ChatMessageEvent(userId, this.getLoggedInUserId(), 
+					this.getLoggedInUser().getName(), message));
+			}
 		}
 	}
 	
@@ -1329,8 +1345,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	
 	public void broadcastChatMessage(String message)
 	{
-		m_sessions.broadcastEvent(new BroadcastMessageEvent(this.getLoggedInUserId(), 
-			this.getLoggedInUser().getName(), message));
+		if(message.substring(0,1).equals("!")) {
+			m_sessions.broadcastEvent(new BroadcastAnonymousMessageEvent( 
+					message.substring(1,message.length())));
+		} else {
+			m_sessions.broadcastEvent(new BroadcastMessageEvent(this.getLoggedInUserId(), 
+				this.getLoggedInUser().getName(), message));
+		}
 	}
 	
 	public void updateCharacterset(String charset)
@@ -1849,6 +1870,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		// 
 		this.postEvent(e);
 	}
+
+	public void onEvent(ChatAnonymousMessageEvent e)
+	{
+		// Just post it!
+		// 
+		this.postEvent(e);
+	}
 	
 	public void onEvent(BroadcastMessageEvent e)
 	{
@@ -1857,6 +1885,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		this.postEvent(e);
 	}
 	
+	public void onEvent(BroadcastAnonymousMessageEvent e)
+	{
+		// Just post it!
+		// 
+		this.postEvent(e);
+	}
+
 	public void onEvent(UserAttendanceEvent e)
 	{
 		// Just post it!

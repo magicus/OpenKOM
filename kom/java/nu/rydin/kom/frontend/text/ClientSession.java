@@ -37,6 +37,8 @@ import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.BroadcastMessageEvent;
 import nu.rydin.kom.events.ChatMessageEvent;
+import nu.rydin.kom.events.BroadcastAnonymousMessageEvent;
+import nu.rydin.kom.events.ChatAnonymousMessageEvent;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
@@ -568,7 +570,7 @@ public class ClientSession implements Runnable, Context, EventTarget
 								new Object[] { event.getUserName(), event.getMessage() }));
 		}		
 	}
-	
+
 	public void onEvent(BroadcastMessageEvent event)
 	{
 		// Put it on a queue until there's a good time to display it!
@@ -577,6 +579,28 @@ public class ClientSession implements Runnable, Context, EventTarget
 		{
 			m_displayMessageQueue.addLast(m_formatter.format("event.broadcast.default", 
 								new Object[] { event.getUserName(), event.getMessage() }));
+		}		
+	}
+
+	public void onEvent(BroadcastAnonymousMessageEvent event)
+	{
+		// Put it on a queue until there's a good time to display it!
+		//
+		synchronized(m_displayMessageQueue)
+		{
+			m_displayMessageQueue.addLast(m_formatter.format("event.broadcast.anonymous", 
+								new Object[] { event.getMessage() }));
+		}		
+	}
+
+	public void onEvent(ChatAnonymousMessageEvent event)
+	{
+		// Put it on a queue until there's a good time to display it!
+		//
+		synchronized(m_displayMessageQueue)
+		{
+			m_displayMessageQueue.addLast(m_formatter.format("event.broadcast.anonymous", 
+								new Object[] { event.getMessage() }));
 		}		
 	}
 	
