@@ -1,43 +1,35 @@
 <commandlist>
 	<category id="info" i18n="command.category.info" order="10">
-		<command class="nu.rydin.kom.frontend.text.commands.DisplayCurrentConference"/>
-		<command class="nu.rydin.kom.frontend.text.commands.Help"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListCommands"/>
+		<command class="nu.rydin.kom.frontend.text.commands.Help"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListConferences"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListConferencesAlphabetically"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ListGlobalMessage"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ListLocalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListMembers"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListNews"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListUserLog"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListUsers"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ShowLicense"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ShowSystemInfo"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ShowVersion"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.Who"/>
 		<command class="nu.rydin.kom.frontend.text.commands.WhoAmI"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.DisplayCurrentConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.Status"/>				
 	</category>
-	<category id="navigation" i18n="command.category.navigation" order="20">
+	<category id="chat" i18n="command.category.chat" order="20">	
+		<command class="nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SendChatMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SendCondensedBroadcast"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ViewBroadcastLog"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ViewChatLog"/>		
+	</category>
+	<category id="navigation" i18n="command.category.navigation" order="30">
 		<command class="nu.rydin.kom.frontend.text.commands.GotoConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.GotoNextConference"/>		
-	</category>
-	<category id="navigation" i18n="command.category.choose" order="25">
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeUnread"/>
-		<command class="nu.rydin.kom.frontend.text.commands.MarkAsUnread"/>
-		<command class="nu.rydin.kom.frontend.text.commands.MarkTreeAsUnread"/>
-		<command class="nu.rydin.kom.frontend.text.commands.MarkSubjectAsUnread"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.Prioritize"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.RollbackReads"/>
 		<command class="nu.rydin.kom.frontend.text.commands.Signup"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SignOff"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SkipGlobalSubject"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SkipSubject"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SkipTree"/>			
+		<command class="nu.rydin.kom.frontend.text.commands.Prioritize"/>		
 	</category>
-	<category id="read" i18n="command.category.read" order="30">
-		<command class="nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain"/>
+	<category id="read" i18n="command.category.read" order="40">
 		<command class="nu.rydin.kom.frontend.text.commands.ReadMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextMail"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextReply"/>
@@ -45,87 +37,95 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ReadRules"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ViewPresentation"/>		
 	</category>
-	<category id="manage.messages" i18n="command.category.manage.messages" order="40">				
-		<command class="nu.rydin.kom.frontend.text.commands.Copy"/>
-		<command class="nu.rydin.kom.frontend.text.commands.DeleteMessage"/>
-		<command class="nu.rydin.kom.frontend.text.commands.MoveMessage"/>		
+	<category id="choose" i18n="command.category.choose" order="50">
+		<command class="nu.rydin.kom.frontend.text.commands.RollbackReads"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeUnread"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SkipGlobalSubject"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SkipSubject"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SkipTree"/>			
+		<command class="nu.rydin.kom.frontend.text.commands.MarkAsUnread"/>
+		<command class="nu.rydin.kom.frontend.text.commands.MarkTreeAsUnread"/>
+		<command class="nu.rydin.kom.frontend.text.commands.MarkSubjectAsUnread"/>		
 	</category>
-	<category id="profile" i18n="command.category.profile" order="50">
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeCharacterset"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeContactInfo"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeLoginScript"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangePassword"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeSuffix"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeTerminalWidth"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeTerminalHeight"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeTimeZone"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ClearFlag"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.CreateAlias"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.DeleteProfile"/>
-		<command class="nu.rydin.kom.frontend.text.commands.EditProfile"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.ListFlags"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SetFlag"/>		
-	</category>
-	<category id="conf.admin" i18n="command.category.conf.admin" order="60">
-		<command class="nu.rydin.kom.frontend.text.commands.AddPermission"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangePermissions"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeReplyToConference"/>
-		<command class="nu.rydin.kom.frontend.text.commands.CreateConference"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.DeleteConference"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.SubtractPermission"/>		
-	</category>	
-	<category id="admin" i18n="command.category.admin" order="70">
-		<command class="nu.rydin.kom.frontend.text.commands.AllowLogin"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeConferencePresentationConference"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeUserPresentationConference"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeWelcomeMessage"/>	
-		<command class="nu.rydin.kom.frontend.text.commands.CreateUser"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.EnterSingleUserMode"/>
-		<command class="nu.rydin.kom.frontend.text.commands.GenerateTestdata"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.KillSession"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.ListPermissions"/>
-		<command class="nu.rydin.kom.frontend.text.commands.PrintDebug"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ProhibitLogin"/>
-		<command class="nu.rydin.kom.frontend.text.commands.RenameObject"/>		
-	</category>	
-	<category id="write" i18n="command.category.write" order="80">
+	<category id="write" i18n="command.category.write" order="60">
+		<command class="nu.rydin.kom.frontend.text.commands.WriteMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.WriteMail"/>
+		<command class="nu.rydin.kom.frontend.text.commands.WriteReply"/>
+		<command class="nu.rydin.kom.frontend.text.commands.WriteMailReply"/>
 		<command class="nu.rydin.kom.frontend.text.commands.NoComment"/>
 		<command class="nu.rydin.kom.frontend.text.commands.PresentObject"/>	
-		<command class="nu.rydin.kom.frontend.text.commands.WriteMail"/>
-		<command class="nu.rydin.kom.frontend.text.commands.WriteMailReply"/>
-		<command class="nu.rydin.kom.frontend.text.commands.WriteMessage"/>
-		<command class="nu.rydin.kom.frontend.text.commands.WriteReply"/>
-		<command class="nu.rydin.kom.frontend.text.commands.WriteNote"/>
 		<command class="nu.rydin.kom.frontend.text.commands.WriteRules"/>	
+		<command class="nu.rydin.kom.frontend.text.commands.WriteNote"/>
 	</category>	
-	<category id="chat" i18n="command.category.chat" order="90">	
-		<command class="nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SendChatMessage"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SendCondensedBroadcast"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ViewBroadcastLog"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ViewChatLog"/>		
+	<category id="manage.messages" i18n="command.category.manage.messages" order="70">				
+		<command class="nu.rydin.kom.frontend.text.commands.Copy"/>
+		<command class="nu.rydin.kom.frontend.text.commands.MoveMessage"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.DeleteMessage"/>
 	</category>
-	<category id="search" i18n="command.category.search" order="100">	
-		<command class="nu.rydin.kom.frontend.text.commands.GrepLocalMessage"/>
+	<category id="search" i18n="command.category.search" order="80">	
+		<command class="nu.rydin.kom.frontend.text.commands.ListLocalMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ListGlobalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SearchLocalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SearchGlobalMessage"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.GrepLocalMessage"/>
 	</category>
-	<category id="files" i18n="command.category.files" order="110">	
-		<command class="nu.rydin.kom.frontend.text.commands.DeleteFile"/>
-		<command class="nu.rydin.kom.frontend.text.commands.EditFile"/>
+	<category id="conf.admin" i18n="command.category.conf.admin" order="90">
+		<command class="nu.rydin.kom.frontend.text.commands.CreateConference"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.DeleteConference"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeReplyToConference"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangePermissions"/>
+	</category>	
+	<category id="profile" i18n="command.category.profile" order="100">
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeSuffix"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeContactInfo"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangePassword"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeCharacterset"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeTimeZone"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeTerminalWidth"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeTerminalHeight"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ListFlags"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SetFlag"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ClearFlag"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.CreateAlias"/>
+	</category>
+	<category id="files" i18n="command.category.files" order="105">	
 		<command class="nu.rydin.kom.frontend.text.commands.ListFiles"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.RunScript"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ShowFile"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.EditFile"/>
+		<command class="nu.rydin.kom.frontend.text.commands.DeleteFile"/>
+		<command class="nu.rydin.kom.frontend.text.commands.RunScript"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeLoginScript"/>
+		<command class="nu.rydin.kom.frontend.text.commands.EditProfile"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.DeleteProfile"/>
 	</category>	
 	<category id="filters" i18n="command.category.filters" order="110">		
+		<command class="nu.rydin.kom.frontend.text.commands.ListFilters"/>
 		<command class="nu.rydin.kom.frontend.text.commands.CreateFilter"/>
 		<command class="nu.rydin.kom.frontend.text.commands.DropFilter"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ListFilters"/>
 	</category>	
 	<category id="misc" i18n="command.category.misc" order="200">
 		<command class="nu.rydin.kom.frontend.text.commands.ClearScreen"/>
 		<command class="nu.rydin.kom.frontend.text.commands.Encouragement"/>
 		<command class="nu.rydin.kom.frontend.text.commands.Logout"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ShowTime"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ShowLicense"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ShowSystemInfo"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ShowVersion"/>		
 	</category>
+	<category id="admin" i18n="command.category.admin" order="300">
+		<command class="nu.rydin.kom.frontend.text.commands.CreateUser"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.RenameObject"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ListPermissions"/>
+		<command class="nu.rydin.kom.frontend.text.commands.AddPermission"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SubtractPermission"/>
+		<command class="nu.rydin.kom.frontend.text.commands.KillSession"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ProhibitLogin"/>
+		<command class="nu.rydin.kom.frontend.text.commands.EnterSingleUserMode"/>
+		<command class="nu.rydin.kom.frontend.text.commands.AllowLogin"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeWelcomeMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeConferencePresentationConference"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeUserPresentationConference"/>
+		<command class="nu.rydin.kom.frontend.text.commands.GenerateTestdata"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.PrintDebug"/>
+	</category>	
 </commandlist>
