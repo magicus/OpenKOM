@@ -6,22 +6,65 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormatSymbols;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.Locale;
 
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactory;
-import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.constants.CommandSuggestions;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.SystemFiles;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
-import nu.rydin.kom.events.*;
-import nu.rydin.kom.exceptions.*;
-import nu.rydin.kom.frontend.text.commands.*;
+import nu.rydin.kom.events.BroadcastAnonymousMessageEvent;
+import nu.rydin.kom.events.BroadcastMessageEvent;
+import nu.rydin.kom.events.ChatAnonymousMessageEvent;
+import nu.rydin.kom.events.ChatMessageEvent;
+import nu.rydin.kom.events.ClientEventTarget;
+import nu.rydin.kom.events.Event;
+import nu.rydin.kom.events.EventTarget;
+import nu.rydin.kom.events.MessageDeletedEvent;
+import nu.rydin.kom.events.NewMessageEvent;
+import nu.rydin.kom.events.ReloadUserProfileEvent;
+import nu.rydin.kom.events.TicketDeliveredEvent;
+import nu.rydin.kom.events.UserAttendanceEvent;
+import nu.rydin.kom.exceptions.AlreadyLoggedInException;
+import nu.rydin.kom.exceptions.AuthenticationException;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.EventDeliveredException;
+import nu.rydin.kom.exceptions.ImmediateShutdownException;
+import nu.rydin.kom.exceptions.InternalException;
+import nu.rydin.kom.exceptions.InvalidNameException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.KOMRuntimeException;
+import nu.rydin.kom.exceptions.LineEditorException;
+import nu.rydin.kom.exceptions.LineOverflowException;
+import nu.rydin.kom.exceptions.LineUnderflowException;
+import nu.rydin.kom.exceptions.LoginNotAllowedException;
+import nu.rydin.kom.exceptions.LoginProhibitedException;
+import nu.rydin.kom.exceptions.NoSuchModuleException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
+import nu.rydin.kom.exceptions.OutputInterruptedException;
+import nu.rydin.kom.exceptions.StopCharException;
+import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.exceptions.UserException;
+import nu.rydin.kom.frontend.text.commands.GotoNextConference;
+import nu.rydin.kom.frontend.text.commands.ReadNextMail;
+import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
+import nu.rydin.kom.frontend.text.commands.ReadNextReply;
+import nu.rydin.kom.frontend.text.commands.ShowTime;
 import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
@@ -30,7 +73,11 @@ import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.modules.Modules;
-import nu.rydin.kom.structs.*;
+import nu.rydin.kom.structs.ConferenceInfo;
+import nu.rydin.kom.structs.FileStatus;
+import nu.rydin.kom.structs.NameAssociation;
+import nu.rydin.kom.structs.SessionState;
+import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Logger;
 
 /**
@@ -62,11 +109,6 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private DateFormatSymbols m_dateSymbols;
 	private final boolean m_useTicket;
 	private SessionState m_state;
-	
-	// This could be read from some kind of user config if the
-	// user wants an alternate message printer. 
-	//
-	private final MessagePrinter m_messagePrinter = new BasicMessagePrinter();
 
 	private Parser m_parser;
     private boolean m_loggedIn;	
@@ -959,7 +1001,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
         {
 	        return (this.getCachedUserInfo().getFlags1() & UserFlags.ANSI_ATTRIBUTES) != 0
 	        	? (DisplayController) new ANSIDisplayController(m_out)
-	        	: (DisplayController) new DummyDisplayController(m_out);
+	        	: (DisplayController) new DummyDisplayController();
         }
         catch(UnexpectedException e)
         {
