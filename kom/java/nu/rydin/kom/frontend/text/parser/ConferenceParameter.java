@@ -38,7 +38,7 @@ public class ConferenceParameter extends NamedObjectParameter
                 NameManager.CONFERENCE_KIND, context);
     }
 
-    private boolean isValidName(String name)
+    protected boolean isValidName(String name)
     {
         // TODO Auto-generated method stub
         return NameUtils.isValidConferenceName(name);

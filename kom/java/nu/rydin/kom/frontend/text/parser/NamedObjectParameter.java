@@ -51,7 +51,7 @@ public class NamedObjectParameter extends CommandLineParameter
         }
     }
 
-    private boolean isValidName(String name)
+    protected boolean isValidName(String name)
     {
         // TODO Auto-generated method stub
         return NameUtils.isValidName(name);

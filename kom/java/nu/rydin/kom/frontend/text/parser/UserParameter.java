@@ -37,7 +37,7 @@ public class UserParameter extends NamedObjectParameter
                 NameManager.USER_KIND, context);
     }
 
-    private boolean isValidName(String name)
+    protected boolean isValidName(String name)
     {
         // TODO Auto-generated method stub
         return NameUtils.isValidUserName(name);
