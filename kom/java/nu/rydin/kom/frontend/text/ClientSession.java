@@ -590,7 +590,8 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			// Everything seems fine! We're in!
 			//
 			m_in.setSession(m_session);
-			m_loggedIn = true;			
+			m_loggedIn = true;		
+			Logger.info(this, "Successfully logged in as: " + userid);
 			return user;
 		}
 	}
