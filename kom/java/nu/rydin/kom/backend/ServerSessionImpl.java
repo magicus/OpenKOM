@@ -1053,6 +1053,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			    this.getCensoredName(me).getName(), 
 				recipient, replyTo, msg.getSubject(), msg.getBody()); 
 			
+			// Set the mail attribute with the original recipient. This is used
+			// to mark a text as a mail, and to keep track of the original
+			// recipient in case the occurrences are lost.
+			//
+			String payload = MessageAttribute.constructUsernamePayload(recipient, this.getCensoredName(recipient).getName());
+			mm.addMessageAttribute(occ.getGlobalId(), MessageManager.ATTR_MAIL_RECIPIENT, payload);
+			
 			// Store a copy in sender's mailbox
 			//
 			if((myinf.getFlags1() & UserFlags.KEEP_COPIES_OF_MAIL) != 0)
