@@ -66,29 +66,28 @@ public class MessageAttribute implements Serializable
 	{
 	    if (m_kind == MessageManager.ATTR_NOCOMMENT || m_kind == MessageManager.ATTR_ORIGINAL_DELETED || m_kind == MessageManager.ATTR_MAIL_RECIPIENT)
 	    {
-	        return m_value.substring(m_value.indexOf(":") + 1);
+	        int i = m_value.indexOf(":");
+	        if (i > 0 && m_value.length() > i)
+	            return m_value.substring(i + 1);
 	    }
-	    else
-	    {
-	        return "";
-	    }
+        return "";
 	}
 	
 	public long getUserId()
 	{
-	    long result = -1;
 	    if (m_kind == MessageManager.ATTR_NOCOMMENT || m_kind == MessageManager.ATTR_ORIGINAL_DELETED || m_kind == MessageManager.ATTR_MAIL_RECIPIENT)
 	    {
 	        try
             {
-                result = Long.parseLong(m_value.substring(0, m_value
-                        .indexOf(":")));
+	            int i = m_value.indexOf(":");
+	            if (i > 0)
+	                return Long.parseLong(m_value.substring(0, i));
             } 
 	        catch (NumberFormatException e)
             {
 	            //Malformed payload...
             }
 	    }
-	    return result;
+	    return -1;
 	}	
 }
