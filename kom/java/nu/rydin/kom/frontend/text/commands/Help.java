@@ -17,8 +17,10 @@ import nu.rydin.kom.exceptions.CommandNotFoundException;
 import nu.rydin.kom.utils.PrintUtils;
 import java.util.ArrayList;
 import java.io.PrintWriter;
-import java.io.FileReader;
 import java.io.CharArrayWriter;
+
+import javax.xml.parsers.SAXParserFactory;
+
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
@@ -120,7 +122,7 @@ public class Help extends AbstractCommand
 	     throws SAXException
 	     {
 	         contents.reset();
-	         if ("commands".equals(localName))
+	         if ("commands".equals(qName))
 	         {
 	     	    // Entering the outer layer
 	     	    //
@@ -128,7 +130,7 @@ public class Help extends AbstractCommand
 	     	    return;
 	         }
 	
-	     	if ("command".equals(localName))
+	     	if ("command".equals(qName))
 	     	{
 	     	    // New command
 	     	    //
@@ -145,7 +147,7 @@ public class Help extends AbstractCommand
 	         	return;
 	     	}
 	         	
-	     	if ("parameters".equals(localName))
+	     	if ("parameters".equals(qName))
 	     	{
 	     	    // We've just entered the parameter block
 	     	    //
@@ -153,7 +155,7 @@ public class Help extends AbstractCommand
 	     	    return;
 	     	}
 	         	
-	     	if ("param".equals(localName))
+	     	if ("param".equals(qName))
 	     	{
 	     	    // A parameter definition
 	     	    //
@@ -165,7 +167,7 @@ public class Help extends AbstractCommand
 	     	    return;
 	     	}
 	         	
-	     	if ("description".equals(localName))
+	     	if ("description".equals(qName))
 	     	{
 	     	    // Entering the description block
 	     	    //
@@ -173,7 +175,7 @@ public class Help extends AbstractCommand
 	     	    return;
 	     	}
 	         	
-	     	if ("exception".equals(localName))
+	     	if ("exception".equals(qName))
 	     	{
 	     	    // Entering the exception block
 	     	    //
@@ -181,7 +183,7 @@ public class Help extends AbstractCommand
 	     	    return;
 	     	}
 	 	    
-	     	if("seealso".equals(localName))
+	     	if("seealso".equals(qName))
 	     	{
 	     	    // Entering the reference block
 	     	    //
@@ -189,7 +191,7 @@ public class Help extends AbstractCommand
 	     	    return;
 	     	}
 	         	
-	     	if("element".equals(localName))
+	     	if("element".equals(qName))
 	     	{
 	     	    // A reference element
 	     	    //
@@ -207,7 +209,7 @@ public class Help extends AbstractCommand
 	     {
 	         if (m_found)
 	         {
-	         	if ("block".equals(localName))
+	         	if ("block".equals(qName))
 	         	{
 	 	    	    // A block of text, which is part of either the description
 	 	    	    // or the exception block. The state must not be updated as
@@ -226,7 +228,7 @@ public class Help extends AbstractCommand
 	     	        	    break;
 	     	        }
 	     	    }
-	         	if ("param".equals(localName))
+	         	if ("param".equals(qName))
 	         	{
 	         	    myContainer.addParameterDescription(m_lastParam, contents.toString());
 	         	}
@@ -260,14 +262,15 @@ public class Help extends AbstractCommand
 	    
 	    try
 	    {
-	        XMLReader xr = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+	        XMLReader xr = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 	        xr.setContentHandler(myParser);
-	        xr.parse (new InputSource (new FileReader ("./java/nu/rydin/kom/i18n/help.xml")));
+	        xr.parse (new InputSource (ClassLoader.getSystemClassLoader().
+	                getResourceAsStream("nu/rydin/kom/i18n/help.xml")));
 	        htc = myParser.getContainer();
 	    }
 	    catch (Exception e)
 	    {
-	        throw new UnexpectedException(context.getSession().getLoggedInUserId());
+	        throw new UnexpectedException(context.getSession().getLoggedInUserId(), e);
 	    }
 	    	    
 	    // OK, so now we have a container containing the help text.

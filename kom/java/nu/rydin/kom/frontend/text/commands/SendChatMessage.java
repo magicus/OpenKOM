@@ -13,8 +13,8 @@ import java.io.StringWriter;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ChatRecipientStatus;
 import nu.rydin.kom.exceptions.GenericException;
+import nu.rydin.kom.exceptions.InternalException;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.*;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.simple.AbstractEditor;
@@ -44,6 +44,7 @@ public class SendChatMessage extends AbstractCommand
 		DisplayController dc = context.getDisplayController();
 		PrintWriter out = context.getOut();
 		ServerSession session = context.getSession();
+		String me = session.getLoggedInUser().getName();
 		MessageFormatter formatter = context.getMessageFormatter();
 		
 		//Retrieve array of id's of receivers.
@@ -89,7 +90,7 @@ public class SendChatMessage extends AbstractCommand
 		    	case ChatRecipientStatus.OK_USER:
 		    	    break;
 		    	default:
-		    	    throw new UnexpectedException(context.getLoggedInUserId());
+		    	    throw new InternalException("Unexpected chat status");
 		    }
 		}
 		if(error)

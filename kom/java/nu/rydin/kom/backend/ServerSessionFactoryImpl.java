@@ -8,8 +8,16 @@ package nu.rydin.kom.backend;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.UserFlags;
@@ -23,18 +31,55 @@ import nu.rydin.kom.exceptions.LoginProhibitedException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.utils.Base64;
+import nu.rydin.kom.utils.Logger;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class ServerSessionFactoryImpl 
 {
-    //DEAD CODE
-	//private Connection m_conn;
-	
 	private SessionManager m_sessionManager = new SessionManager();
 
-	private static ServerSessionFactoryImpl s_instance = new ServerSessionFactoryImpl();
+	private static final ServerSessionFactoryImpl s_instance;
+	
+	static
+	{
+	    try
+	    {
+	        s_instance = new ServerSessionFactoryImpl();
+	    }
+	    catch(UnexpectedException e)
+	    {
+	        throw new ExceptionInInitializerError(e);
+	    }
+	}
+	
+	/**
+	 * Valid tickets
+	 */
+	private Map m_validTickets = Collections.synchronizedMap(new HashMap());
+
+	/**
+	 * Ticket expiration timer
+	 */
+	private Timer m_ticketExpirations = new Timer(true);
+	
+	private class TicketKiller extends TimerTask
+	{
+	    private String m_ticket;
+	    
+	    public TicketKiller(String ticket)
+	    {
+	        m_ticket = ticket;
+	    }
+	    
+	    public void run()
+	    {
+	        if(ServerSessionFactoryImpl.this.m_validTickets.remove(m_ticket) != null)
+	            Logger.info(this, "Discarded unused ticket");
+	    }
+	}
 	
 	public static ServerSessionFactoryImpl instance()
 	{
@@ -42,22 +87,11 @@ public class ServerSessionFactoryImpl
 	}
 	
 	protected ServerSessionFactoryImpl()
+	throws UnexpectedException
 	{
-	    // Make sure the DataAccess pool is initialized.
+	    // Make sure there's at least a sysop in the database
 	    //
-	    DataAccessPool.instance();
-	}	
-	
-	public void killSession(String user, String password)
-	throws AuthenticationException, UnexpectedException, InterruptedException
-	{
-	    m_sessionManager.killSession(this.authenticate(user, password));
-	}
-	
-	public ServerSession login(String user, String password)
-	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
-	{
-		boolean committed = false;
+	    boolean committed = false;
 		DataAccess da = DataAccessPool.instance().getDataAccess();
 		try
 		{
@@ -73,10 +107,73 @@ public class ServerSessionFactoryImpl
 				da.commit();
 				committed = true;
 			}
-
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(NoSuchAlgorithmException e)
+		{
+			// Could not calculate password digest. Should not happen!
+			//
+			throw new UnexpectedException(-1, e);
+		}
+		catch(AmbiguousNameException e)
+		{
+			// Ambigous name when adding sysop. Should not happen!
+			//
+			throw new UnexpectedException(-1, e);
+		}
+		catch(DuplicateNameException e)
+		{
+			// Duplicate name when adding sysop. Should not happen!
+			//
+			throw new UnexpectedException(-1, e);
+		}
+		finally
+		{
+			if(!committed)
+				da.rollback();
+			DataAccessPool.instance().returnDataAccess(da);
+		}
+	}	
+	
+	public void killSession(String user, String password)
+	throws AuthenticationException, UnexpectedException, InterruptedException
+	{
+	    m_sessionManager.killSession(this.authenticate(user, password));
+	}
+	
+	public ServerSession login(String ticket)
+	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
+	{
+	    // Check that we have the ticket (and consume it if we do)
+	    //
+	    Long idObj = (Long) m_validTickets.remove(ticket);
+	    if(idObj == null)
+	        throw new AuthenticationException();
+	    
+	    // Log us in!
+	    //
+	    DataAccess da = DataAccessPool.instance().getDataAccess();
+	    try
+	    {
+	        return this.innerLogin(idObj.longValue(), da);
+	    }
+	    finally
+	    {
+	        DataAccessPool.instance().returnDataAccess(da);
+	    }
+	}
+	
+	private ServerSession innerLogin(long id, DataAccess da)
+	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
+	{
+		try
+		{	 
 			// Authenticate user
 			//
-			long id = um.authenticate(user, password);
+		    UserManager um = da.getUserManager();
 			UserInfo ui = um.loadUser(id);
 			
 			// Login prohibited? Allow login only if sysop
@@ -118,33 +215,76 @@ public class ServerSessionFactoryImpl
 			//
 			throw new AuthenticationException();
 		}
+	}
+	
+	public ServerSession login(String user, String password)
+	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
+	{
+		DataAccess da = DataAccessPool.instance().getDataAccess();
+		try
+		{
+			UserManager um = da.getUserManager();
+			 
+			// Authenticate user
+			//
+			long id = um.authenticate(user, password);
+			return this.innerLogin(id, da);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(ObjectNotFoundException e)
+		{
+			// User was not found. We treat that as an authentication
+			// exception.
+			//
+			throw new AuthenticationException();
+		}
 		catch(NoSuchAlgorithmException e)
 		{
 			// Could not calculate password digest. Should not happen!
 			//
 			throw new UnexpectedException(-1, e);
 		}
-		catch(AmbiguousNameException e)
-		{
-			// Ambigous name when adding sysop. Should not happen!
-			//
-			throw new UnexpectedException(-1, e);
-		}
-		catch(DuplicateNameException e)
-		{
-			// Duplicate name when adding sysop. Should not happen!
-			//
-			throw new UnexpectedException(-1, e);
-		}
 		finally
 		{
-			if(!committed)
-				da.rollback();
 			DataAccessPool.instance().returnDataAccess(da);
 		}
 	}
 	
-	protected long authenticate(String user, String password)
+	public String generateTicket(String user, String password)
+	throws AuthenticationException, UnexpectedException
+	{
+	    // Check that username and password are valid.
+	    //
+	    long userId = this.authenticate(user, password);
+	    try
+	    {
+	        // Gerenate 128 bytes of random data and calculate MD5
+	        // digest. A ticket is typically valid for <30s, so
+	        // this feels fairly secure.
+	        //
+	        MessageDigest md = MessageDigest.getInstance("MD5");
+	        byte[] data = new byte[128];
+	        SecureRandom.getInstance("SHA1PRNG").nextBytes(data);
+	        md.update(data);
+	        String ticket = Base64.encodeBytes(md.digest());
+	        
+	        // Have a valid ticket! Now register it.
+	        //
+            m_validTickets.put(ticket, new Long(userId));
+            m_ticketExpirations.schedule(new TicketKiller(ticket), ServerSettings.getTicketLifetime()); 
+            return ticket;
+	    }
+	    catch(NoSuchAlgorithmException e)
+	    {
+	        throw new UnexpectedException(-1, e);
+	    }
+
+	}
+	
+	public long authenticate(String user, String password)
 	throws AuthenticationException, UnexpectedException
 	{
 		DataAccess da = DataAccessPool.instance().getDataAccess();

@@ -38,7 +38,10 @@ public class Who extends AbstractCommand
 		hp.addHeader(formatter.format("who.login"), 6, true);
 		hp.addHeader(formatter.format("who.idle"), 6, true);
 		hp.addSpace(1);
-		hp.addHeader(formatter.format("who.name"), 20, false);
+		int termWidth = context.getTerminalSettings().getWidth();
+		int firstColsWidth = 6 + 6 + 1;
+		int lastColWidth = termWidth - firstColsWidth - 1 ; 
+		hp.addHeader(formatter.format("who.name"), lastColWidth, false);
 		hp.printOn(out);
 		int top = users.length;
 		for(int idx = 0; idx < top; ++idx)
@@ -52,7 +55,9 @@ public class Who extends AbstractCommand
 			long idle = now - each.getLastHeartbeat();
 			PrintUtils.printRightJustified(out, idle >= 60000 ? StringUtils.formatElapsedTime(now - each.getLastHeartbeat()) : "", 6);
 			out.print(' ');
-			out.println(formatter.format("who.format", new Object[] { context.formatObjectName(each.getUser()), confName }));
+			PrintUtils.printIndented(out, 
+			        formatter.format("who.format", new Object[] { context.formatObjectName(each.getUser()), confName }),
+			        lastColWidth, 0, firstColsWidth);
 		}
     }
 }

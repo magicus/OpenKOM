@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
+import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -87,7 +88,7 @@ public class ListUserLog extends AbstractCommand
                 PrintUtils.printRightJustified(out, Integer.toString(each.getNumBroadcasts()), 5);
                 PrintUtils.printRightJustified(out, Integer.toString(each.getNumCopies()), 5);
                 out.print(' ');
-                out.println(each.getUserName());
+                out.println(NameUtils.stripSuffix(each.getUserName()));
             }
         }
     }

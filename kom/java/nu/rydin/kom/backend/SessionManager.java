@@ -34,13 +34,14 @@ public class SessionManager
 	/**
 	 * Queue of events to be broadcasted
 	 */
-	LinkedList m_broadcastQueue = new LinkedList();
+	private LinkedList m_broadcastQueue = new LinkedList();
 	
 	private class Broadcaster extends Thread
 	{
 		public Broadcaster() 
 		{
 			super("Broadcaster");
+			this.setDaemon(true);
 		}
 		
 		public void run()

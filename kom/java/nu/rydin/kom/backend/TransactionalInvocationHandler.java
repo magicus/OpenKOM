@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.exceptions.InternalException;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -32,7 +32,7 @@ public class TransactionalInvocationHandler implements InvocationHandler
 		// Don't even try if the session is invalid
 		//
 		if(!m_session.isValid())
-			throw new UnexpectedException(-1, "Invalid session!");
+			throw new InternalException("Invalid session!");
 		DataAccess da = DataAccessPool.instance().getDataAccess();
 		boolean committed = false;
 		try

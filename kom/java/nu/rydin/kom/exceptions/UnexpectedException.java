@@ -12,19 +12,7 @@ package nu.rydin.kom.exceptions;
 public class UnexpectedException extends SystemException
 {
 	private long m_user;
-	
-	public UnexpectedException(long user)
-	{
-		super();
-		m_user = user;
-	}
-	
-	public UnexpectedException(long user, String msg)
-	{
-		super(msg);
-		m_user = user;
-	}
-	
+		
 	public UnexpectedException(long user, Throwable t)
 	{
 		super(t);

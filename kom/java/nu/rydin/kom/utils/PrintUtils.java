@@ -56,21 +56,35 @@ public class PrintUtils
 
 	public static void printIndented(PrintWriter out, String s, int width, int indentWidth)
 	{
-	    String t = "";
+	    StringBuffer buffer = new StringBuffer(width);
 	    for (int i = 0; i < indentWidth; ++i)
-	    {
-	        t += ' ';
-	    }
-	    printIndented (out, s, width, t);
+	        buffer.append(' ');
+	    printIndented (out, s, width, buffer.toString());
+	}
+	
+	public static void printIndented(PrintWriter out, String s, int width, int initialIndentWidth, int indentWidth)
+	{
+	    StringBuffer buffer1 = new StringBuffer(width);
+	    for (int i = 0; i < initialIndentWidth; ++i)
+	        buffer1.append(' ');
+	    StringBuffer buffer2 = new StringBuffer(width);
+	    for (int i = 0; i < indentWidth; ++i)
+	        buffer2.append(' ');
+	    printIndented (out, s, width, buffer1.toString(), buffer2.toString());
 	}
 	
 	public static void printIndented(PrintWriter out, String s, int width, String indent)
 	{
+	    printIndented(out, s, width, indent, indent);
+	}
+	
+	public static void printIndented(PrintWriter out, String s, int width, String initialIndent, String indent)
+	{
 	    String[] p = s.split(" ");
 	    int indentLength = indent.length(); 
-	    int rowLength = indentLength;
+	    int rowLength = initialIndent.length();
 	    int wordLength;
-	    String thisRow = indent;
+	    String thisRow = initialIndent;
 	    String thisWord;
 	    for (int i = 0; i < p.length; ++i)
 	    {

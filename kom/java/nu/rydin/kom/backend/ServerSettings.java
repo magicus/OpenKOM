@@ -54,4 +54,10 @@ public class ServerSettings
 	    return s_settings.getInt("server.initial.data.access");
 	}
 	
+	public static long getTicketLifetime()
+	{
+		return s_settings.getLong("server.ticket.lifetime");
+	}
+
+	
 }

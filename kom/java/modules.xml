@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<modules>
+	<module name="TelnetServer" class="nu.rydin.kom.modules.TelnetServer">
+		<parameter name="port" value="23"/>
+		<parameter name="authentication" value="password"/>
+	</module>
+	<module name="TelnetServerTicketLogin" class="nu.rydin.kom.modules.TelnetServer">
+		<parameter name="port" value="2300"/>
+		<parameter name="authentication" value="ticket"/>
+	</module>
+		<module name="AuthenticationServer" class="nu.rydin.kom.modules.AuthenticationServer">
+		<parameter name="port" value="2301"/>
+		<parameter name="ticketLifetime" value="20000"/>
+	</module>
+</modules>

@@ -28,12 +28,7 @@ public class ClientSettings
 			throw new ExceptionInInitializerError(e);
 		}
 	}
-	
-	public static int getTelnetPort()
-	{
-		return s_settings.getInt("telnet.server.port");
-	}
-	
+		
 	public static int getEventPollInterval()
 	{
 		return s_settings.getInt("event.poll.interval");
@@ -43,4 +38,10 @@ public class ClientSettings
 	{
 		return s_settings.getString("supported.character.sets");
 	}
+	
+	public static String[] getServers()
+	{
+	    String s = s_settings.getString("boot.servers");
+	    return s.split(",");
+	}	
 }

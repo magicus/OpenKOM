@@ -36,16 +36,16 @@ import nu.rydin.kom.utils.Logger;
  * @author Henrik Schröder
  * @author Magnus Ihse
  */
-public class ClientSession implements Runnable, Context, EventTarget, TerminalSizeListener
+public class ClientSession implements Runnable, Context, ClientEventTarget, TerminalSizeListener, EnvironmentListener
 {
 	private static final int MAX_LOGIN_RETRIES = 3;
 	private static final String DEFAULT_CHARSET = "ISO-8859-1";
 	
-	LineEditor m_in;
-	KOMWriter m_out;
+	private LineEditor m_in;
+	private KOMWriter m_out;
 	private final InputStream m_rawIn;
 	private final OutputStream m_rawOut; 
-	MessageFormatter m_formatter = new MessageFormatter(Locale.getDefault());
+	private MessageFormatter m_formatter = new MessageFormatter(Locale.getDefault());
 	private ServerSession m_session;
 	private long m_userId;
 	private LinkedList m_displayMessageQueue = new LinkedList();
@@ -59,6 +59,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	private EventPrinter eventPrinter = new EventPrinter();
 	private Locale m_locale;
 	private DateFormatSymbols m_dateSymbols;
+	private final boolean m_useTicket;
 	
 	// This could be read from some kind of user config if the
 	// user wants an alternate message printer. 
@@ -219,13 +220,17 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		}
 	}
 	
-	public ClientSession(InputStream in, OutputStream out)
-	throws UnexpectedException
+	public ClientSession(InputStream in, OutputStream out, boolean useTicket)
+	throws UnexpectedException, InternalException
 	{
 		// Set up I/O
 		//
 		m_rawIn = in;
 		m_rawOut = out;
+		
+		// Set up authentication method
+		//
+		m_useTicket = useTicket;
 		
 		// Set up flag tables
 		//
@@ -248,7 +253,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		{
 			// There're NO WAY we don't support US-ASCII!
 			//
-			throw new UnexpectedException(-1, DEFAULT_CHARSET + " not supported. Your JVM is broken!");
+			throw new InternalException(DEFAULT_CHARSET + " not supported. Your JVM is broken!");
 		}		
 	}
 	 
@@ -277,7 +282,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 					}
 					catch(AuthenticationException e)
 					{
-						new PrintStream(m_rawOut).println(m_formatter.format("login.failure"));
+					    // Logging in with ticket? This HAS to work
+					    //
+					    if(m_useTicket)
+					        return;
+						m_out.println(m_formatter.format("login.failure"));
 					}
 				}
 			}
@@ -517,12 +526,20 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	{
 		// Collect information
 		//
-		m_out.print(m_formatter.format("login.user"));
-		m_out.flush();
-		String userid = m_in.readLine();
-		m_out.print(m_formatter.format("login.password"));
-		m_out.flush();
-		String password = m_in.readPassword();
+	    String ticket = null;
+	    String password = null;
+	    String userid = null;
+	    if(m_useTicket)
+	        ticket = this.waitForTicket();
+	    else
+	    {
+			m_out.print(m_formatter.format("login.user"));
+			m_out.flush();
+			userid = m_in.readLine();
+			m_out.print(m_formatter.format("login.password"));
+			m_out.flush();
+			password = m_in.readPassword();
+	    }
 		
 		for(;;)
 		{
@@ -531,7 +548,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			ServerSessionFactoryImpl ssf = ServerSessionFactoryImpl.instance();
 			try
 			{
-				m_session = ssf.login(userid, password);
+				m_session = m_useTicket? ssf.login(ticket) : ssf.login(userid, password);
 			}
 			catch(AlreadyLoggedInException e)
 			{
@@ -725,7 +742,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	public Command getDefaultCommand()
 	throws KOMException
 	{
-		switch(m_session.suggestNextAction())
+	    short suggestion = m_session.suggestNextAction();
+		switch(suggestion)
 		{
 			case ServerSession.NEXT_REPLY:
 				return m_parser.getCommand(ReadNextReply.class);
@@ -736,7 +754,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			case ServerSession.NO_ACTION:
 				return m_parser.getCommand(ShowTime.class);
 			default:
-				// TODO: Print warning
+				Logger.warn(this, "Unknown command suggestion: " + suggestion);
 				return m_parser.getCommand(ShowTime.class);
 		}
 	}
@@ -911,8 +929,6 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	
 	public TerminalSettings getTerminalSettings()
 	{
-		// TODO: Get from telnet session etc.
-		//
 		return new TerminalSettings(m_windowHeight != -1 ? m_windowHeight : 24, m_windowWidth != -1 ? m_windowWidth : 80, "ANSI");
 	}
 	
@@ -1132,6 +1148,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		//
 	}
 	
+	public void onEvent(TicketDeliveredEvent event)
+	{
+	    // TODO: Implement
+	}
+	
 	// Implementation of TerminalSizeListener
 	//
 	public void terminalSizeChanged(int width, int height)
@@ -1140,6 +1161,49 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	    {
 	        m_windowWidth = width;
 			m_windowHeight = height;
+	    }
+	}
+	
+	public void environmentChanged(String name, String value)
+	{
+	    if(!"TICKET".equals(name))
+	        return;
+	    Logger.debug(this, "Received ticket");
+	    m_in.handleEvent(new TicketDeliveredEvent(this.getLoggedInUserId(), value));
+	}
+	
+	protected String waitForTicket()
+	throws InterruptedException, IOException
+	{
+	    for(;;)
+	    {
+		    try
+		    {
+		        m_in.readLine("", "", 0, LineEditor.FLAG_STOP_ON_EVENT);
+		    }
+		    catch(EventDeliveredException e)
+		    {
+		        Logger.debug(this, "Got event while waiting for ticket: " + e.getClass().getName());
+		        Event ev = e.getEvent();
+		        if(ev instanceof TicketDeliveredEvent)
+		            return ((TicketDeliveredEvent) ev).getTicket();
+		    }
+		    catch(LineUnderflowException e)
+		    {
+		        // Ignore
+		    }
+		    catch(LineOverflowException e)
+		    {
+		        // Ignore
+		    }
+		    catch(StopCharException e)
+		    {
+		        // Ignore
+		    }
+		    catch(OperationInterruptedException e)
+		    {
+		        throw new InterruptedException();
+		    }
 	    }
 	}
 	

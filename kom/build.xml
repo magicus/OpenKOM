@@ -28,6 +28,7 @@
 		<copy todir="properties">
 			<fileset dir="java" includes="**/*.properties"/>
 			<fileset dir="java" includes="**/*.list"/>
+			<fileset dir="java" includes="**/*.xml"/>
 		</copy>
 	</target>
 	<target name="install" depends="build-jar,copy-properties"/>

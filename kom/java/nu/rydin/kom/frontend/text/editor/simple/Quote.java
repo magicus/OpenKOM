@@ -50,22 +50,31 @@ public class Quote extends AbstractCommand
         PrintWriter out = context.getOut();
         MessageFormatter formatter = context.getMessageFormatter();
         char yesChar = formatter.format("misc.y").toUpperCase().charAt(0);
-//        char noChar = formatter.format("misc.n").toUpperCase().charAt(0);
+        char noChar = formatter.format("misc.y").toUpperCase().charAt(0);
         char quitChar = formatter.format("misc.q").toUpperCase().charAt(0);
+        char goaheadChar = formatter.format("misc.goahead").toUpperCase().charAt(0);
         Buffer buffer = ec.getBuffer();
         
         // Let user pick lines to include
         //
         String line;
+        boolean goahead = false;
         while((line = ww.nextLine()) != null)
         {
             try
             {
                 line = "> " + line;
-	            out.println(line);
-	            char ch = Character.toUpperCase(in.readCharacter(0));
+	            out.print(line);
+	            out.flush();
+	            char ch = goahead ? yesChar : Character.toUpperCase(in.readCharacter(0));
+	            out.println();
 	            if(ch == yesChar)
 	                buffer.add(line + "\n");
+	            else if(ch == goaheadChar)
+	            {
+	                buffer.add(line + "\n");
+	                goahead = true;
+	            }
 	            else if(ch == quitChar || ch == '\u0003')
 	                break;
 	            

@@ -23,6 +23,7 @@ import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.parser.Parser;
+import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -66,6 +67,7 @@ public abstract class AbstractEditor
 		DisplayController dc = m_context.getDisplayController();
 		PrintWriter out = m_context.getOut();
 		LineEditor in = m_context.getIn();
+		MessageFormatter formatter = m_context.getMessageFormatter();
 		Buffer buffer = m_context.getBuffer();
 		int width = m_context.getTerminalSettings().getWidth() - 5;
 		
@@ -84,8 +86,10 @@ public abstract class AbstractEditor
 			{
 				// TODO: Handle chat messages n'stuff.
 				//
-				 line = in.readLine(defaultLine, "\u000c\u001a\u0004", width,
-				 	LineEditor.FLAG_ECHO | LineEditor.FLAG_STOP_ON_BOL | LineEditor.FLAG_STOP_ON_EOL);
+			    int flags = LineEditor.FLAG_ECHO | LineEditor.FLAG_STOP_ON_EOL;
+			    if(buffer.size() > 0)
+			        flags |= LineEditor.FLAG_STOP_ON_BOL;
+				 line = in.readLine(defaultLine, "\u000c\u001a\u0004", width, flags);
 				 	
 				 // Check if we got a command
 				 //
@@ -178,7 +182,6 @@ public abstract class AbstractEditor
 			catch(StopCharException e)
 			{
 				String s = null;
-//				int i = (int) e.getStopChar();
 				switch(e.getStopChar())
 				{
 					case '\u0004': // Ctrl-D
