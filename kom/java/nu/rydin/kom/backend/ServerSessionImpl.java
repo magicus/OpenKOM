@@ -1966,25 +1966,37 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}		
 	}
 	
-	public int skipMessagesBySubject (String subject)
+	public int skipMessagesBySubject (String subject, boolean skipGlobal)
 	throws UnexpectedException, ObjectNotFoundException
 	{
 		long loggedInUser = this.getLoggedInUserId();
+		long currentConference = this.getCurrentConference().getId();
 		int sillyCounter = 0;
 		try
 		{
 			MessageManager mm = m_da.getMessageManager();
 			MembershipManager msm = m_da.getMembershipManager();
 			
-			long[] globalIds = mm.getMessagesBySubject(subject, loggedInUser);
-			for (int i = 0; i < globalIds.length; ++i)
+			if (skipGlobal)
 			{
-				MessageOccurrence[] mos = mm.getVisibleOccurrences(loggedInUser, globalIds[i]);
-				for (int j = 0; j < mos.length; ++j)
+				long[] globalIds = mm.getMessagesBySubject(subject, loggedInUser);
+				for (int i = 0; i < globalIds.length; ++i)
 				{
-					MessageOccurrence mo = mos[j];
-					sillyCounter += this.markMessageAsReadEx(mo.getConference(), mo.getLocalnum()) ? 1 : 0;
+					MessageOccurrence[] mos = mm.getVisibleOccurrences(loggedInUser, globalIds[i]);
+					for (int j = 0; j < mos.length; ++j)
+					{
+						MessageOccurrence mo = mos[j];
+						sillyCounter += this.markMessageAsReadEx(mo.getConference(), mo.getLocalnum()) ? 1 : 0;
+					}
 				}
+			}
+			else
+			{
+			    int[] localIds = mm.getLocalMessagesBySubject(subject, currentConference);
+			    for (int i = 0; i < localIds.length; ++i)
+			    {
+			        sillyCounter += this.markMessageAsReadEx(currentConference, localIds[i]) ? 1 : 0;
+			    }
 			}
 			return sillyCounter;
 		}

@@ -31,6 +31,19 @@ public class SQLUtils
 		return answer;
 	}
 	
+	public static int[] extractInts(ResultSet rs, int index)
+	throws SQLException
+	{
+		List l = new ArrayList();
+		while(rs.next())
+			l.add(new Integer(rs.getInt(index)));
+		int top = l.size();
+		int[] answer = new int[top];
+		for(int idx = 0; idx < top; ++idx)
+			answer[idx] = ((Integer) l.get(idx)).intValue();
+		return answer;
+	}
+
 	public static String[] extractStrings(ResultSet rs, int index)
 	throws SQLException
 	{

@@ -57,6 +57,7 @@ public class MessageManager
 	private final PreparedStatement m_getLocalIdsInConfStmt;
 	private final PreparedStatement m_dropConferenceStmt;
 	private final PreparedStatement m_getGlobalBySubjectStmt;
+	private final PreparedStatement m_getLocalBySubjectStmt;
 	private final PreparedStatement m_findLastOccurrenceInConferenceWithAttrStmt;
 	private final PreparedStatement m_getLatestMagicMessageStmt;
 	private final PreparedStatement m_updateConferenceLasttext;
@@ -154,6 +155,11 @@ public class MessageManager
 			 "join Memberships as ms on mo.Conference = ms.Conference " +
 			 "join Messages on mo.Message = Messages.ID " +
 			 "where ms.User = ? and Subject = ?");
+		m_getLocalBySubjectStmt = conn.prepareStatement(
+		     "select localnum " +
+		     "from MessageOccurrences as mo " +
+		     "join Messages as m on m.id = mo.message " +
+		     "where mo.conference = ? and m.Subject = ?");
 		
 		// To speed things up, a special version to just retrieve the local ID.
 		//
@@ -964,6 +970,17 @@ public class MessageManager
 		this.m_getGlobalBySubjectStmt.setString(2, subject);
 		ResultSet rs = this.m_getGlobalBySubjectStmt.executeQuery();
 		return SQLUtils.extractLongs(rs, 1);	
+	}
+	
+	public int[] getLocalMessagesBySubject (String subject, long conference)
+	throws SQLException
+	{
+	    this.m_getLocalBySubjectStmt.clearParameters();
+	    this.m_getLocalBySubjectStmt.setLong(1, conference);
+	    this.m_getLocalBySubjectStmt.setString(2, subject);
+	    ResultSet rs = this.m_getLocalBySubjectStmt.executeQuery();
+	    return SQLUtils.extractInts(rs, 1);
+	    
 	}
 	
 	public int findLastOccurrenceInConferenceWithAttrStmt (short attrKind, long conference)

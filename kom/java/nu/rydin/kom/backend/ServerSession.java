@@ -1005,7 +1005,7 @@ public interface ServerSession
 	 * @throws UnexpectedException
 	 * @throws ObjectNotFoundException
 	 */
-	public int skipMessagesBySubject (String subject)
+	public int skipMessagesBySubject (String subject, boolean skipGlobal)
 	throws UnexpectedException, ObjectNotFoundException;
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * Created on Jun 10, 2004
+ * Created on Sep 04, 2004
  *
  * Distributed under the GPL license.
  * See http://www.gnu.org/ for details.
@@ -15,9 +15,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
-public class SkipSubject extends AbstractCommand 
+public class SkipGlobalSubject extends AbstractCommand 
 {
-	public SkipSubject (Context context, String fullname)
+	public SkipGlobalSubject (Context context, String fullname)
 	{
 		super(fullname, AbstractCommand.NO_PARAMETERS);
 	}
@@ -26,7 +26,7 @@ public class SkipSubject extends AbstractCommand
 	throws KOMException
 	{
  		ServerSession ss = context.getSession();
- 		int n = ss.skipMessagesBySubject(ss.getLastMessageHeader().getSubject(), false);
+ 		int n = ss.skipMessagesBySubject(ss.getLastMessageHeader().getSubject(), true);
  		MessageFormatter mf = context.getMessageFormatter();
  		context.getOut().println (mf.format("skip.subject.message", n));
 	}
