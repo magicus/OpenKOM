@@ -6,50 +6,17 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.text.DateFormatSymbols;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.Locale;
+import java.util.*;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
-import nu.rydin.kom.events.BroadcastAnonymousMessageEvent;
-import nu.rydin.kom.events.BroadcastMessageEvent;
-import nu.rydin.kom.events.ChatAnonymousMessageEvent;
-import nu.rydin.kom.events.ChatMessageEvent;
-import nu.rydin.kom.events.Event;
-import nu.rydin.kom.events.EventTarget;
-import nu.rydin.kom.events.MessageDeletedEvent;
-import nu.rydin.kom.events.NewMessageEvent;
-import nu.rydin.kom.events.ReloadUserProfileEvent;
-import nu.rydin.kom.events.UserAttendanceEvent;
-import nu.rydin.kom.exceptions.AlreadyLoggedInException;
-import nu.rydin.kom.exceptions.AuthenticationException;
-import nu.rydin.kom.exceptions.AuthorizationException;
-import nu.rydin.kom.exceptions.BadParameterException;
-import nu.rydin.kom.exceptions.EventDeliveredException;
-import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.KOMRuntimeException;
-import nu.rydin.kom.exceptions.UserException;
-import nu.rydin.kom.exceptions.LoginNotAllowedException;
-import nu.rydin.kom.exceptions.MessageNotFoundException;
-import nu.rydin.kom.exceptions.ObjectNotFoundException;
-import nu.rydin.kom.exceptions.OutputInterruptedException;
-import nu.rydin.kom.exceptions.UnexpectedException;
-import nu.rydin.kom.frontend.text.commands.GotoNextConference;
-import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
-import nu.rydin.kom.frontend.text.commands.ReadNextReply;
-import nu.rydin.kom.frontend.text.commands.ShowTime;
+import nu.rydin.kom.events.*;
+import nu.rydin.kom.exceptions.*;
+import nu.rydin.kom.frontend.text.commands.*;
 import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
@@ -57,11 +24,7 @@ import nu.rydin.kom.frontend.text.editor.simple.SimpleMessageEditor;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.ConferenceInfo;
-import nu.rydin.kom.structs.FileStatus;
-import nu.rydin.kom.structs.MessageHeader;
-import nu.rydin.kom.structs.NameAssociation;
-import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.structs.*;
 import nu.rydin.kom.utils.Logger;
 
 /**
@@ -968,28 +931,6 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	    String[] existingFlags = new String[numFlags];
 	    System.arraycopy(m_privLabels, 0, existingFlags, 0, numFlags);
 		return existingFlags;
-	}
-	
-	public MessageHeader resolveMessageSpecifier(String specifier)
-	throws MessageNotFoundException, AuthorizationException, UnexpectedException, BadParameterException
-	{
-	    try
-	    {
-		    int top = specifier.length();
-		    if(top == 0)
-		        throw new MessageNotFoundException();
-		    return specifier.charAt(0) == '(' && specifier.charAt(top - 1) == ')'
-		        ? m_session.getMessageHeader(Long.parseLong(specifier.substring(1, top - 1)))
-		        : m_session.getMessageHeaderInCurrentConference(Integer.parseInt(specifier));
-	    }
-	    catch(ObjectNotFoundException e)
-	    {
-	        throw new MessageNotFoundException();
-	    }
-	    catch(NumberFormatException e)
-	    {
-	        throw new BadParameterException();
-	    }
 	}
 	
 	// Implementation of EventTarget

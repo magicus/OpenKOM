@@ -50,22 +50,20 @@ public class MessageAttribute implements Serializable
         return m_value;
     }
 	
-	//TODO (skrolle) FIX THIS TEMPORARY SHIT!
-	public static String constructNoCommentPayload(String username)
+	public static String constructNoCommentPayload(UserInfo user)
 	{
-	    return username;
+	    return user.getId() + ":" + user.getName(); 
 	}
 
-	//TODO (skrolle) FIX THIS TEMPORARY SHIT!
 	public String getNoCommentUsername()
 	{
 	    if (m_kind == MessageManager.ATTR_NOCOMMENT)
 	    {
-	        return m_value;
+	        return m_value.substring(m_value.indexOf(":") + 1);
 	    }
 	    else
 	    {
-	        return m_value;
+	        return "";
 	    }
-	}
+	}	
 }

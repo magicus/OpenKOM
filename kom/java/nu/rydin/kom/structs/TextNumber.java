@@ -13,21 +13,21 @@ public class TextNumber
 {
 	private boolean m_global;
 
-	private int m_number;
+	private long m_number;
 
-	public TextNumber(int number)
+	public TextNumber(long number)
 	{
 		m_number = number;
 		m_global = false;
 	}
 
-	public TextNumber(int number, boolean global)
+	public TextNumber(long number, boolean global)
 	{
 		m_number = number;
 		m_global = global;
 	}
 
-	public int getNumber()
+	public long getNumber()
 	{
 		return m_number;
 	}

@@ -30,6 +30,8 @@ public class NoComment extends AbstractCommand
 	{
 		// Check permissions
 		//
+	    // TODO Should we really check this? What if user is not commenting a message
+	    // in a completely different conference?
 		if(!context.getSession().hasPermissionInCurrentConference(ConferencePermissions.REPLY_PERMISSION))
 			throw new AuthorizationException();
 
@@ -41,8 +43,8 @@ public class NoComment extends AbstractCommand
 		if (textNumber == null) {
 		    message = context.getSession().getCurrentMessage();
 		} else {
-		    message = textNumber.getNumber();
-		    // FIXME:Ihse: Handle global numbers...
+		    //Always get the global number.
+		    message = context.getSession().getGlobalMessageId(textNumber);
 		}
 			
 		// Store the "no comment"

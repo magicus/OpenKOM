@@ -10,67 +10,14 @@ import java.io.PrintStream;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
-import edu.oswego.cs.dl.util.concurrent.Mutex;
-
-import nu.rydin.kom.backend.data.ConferenceManager;
-import nu.rydin.kom.backend.data.FileManager;
-import nu.rydin.kom.backend.data.MembershipManager;
-import nu.rydin.kom.backend.data.MessageLogManager;
-import nu.rydin.kom.backend.data.MessageManager;
-import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.data.UserManager;
-import nu.rydin.kom.constants.ChatRecipientStatus;
-import nu.rydin.kom.constants.ConferencePermissions;
-import nu.rydin.kom.constants.FileProtection;
-import nu.rydin.kom.constants.MessageLogKinds;
-import nu.rydin.kom.constants.UserFlags;
-import nu.rydin.kom.constants.UserPermissions;
-import nu.rydin.kom.constants.Visibilities;
-import nu.rydin.kom.events.BroadcastMessageEvent;
-import nu.rydin.kom.events.ChatMessageEvent;
-import nu.rydin.kom.events.BroadcastAnonymousMessageEvent;
-import nu.rydin.kom.events.ChatAnonymousMessageEvent;
-import nu.rydin.kom.events.Event;
-import nu.rydin.kom.events.EventTarget;
-import nu.rydin.kom.events.NewMessageEvent;
-import nu.rydin.kom.events.ReloadUserProfileEvent;
-import nu.rydin.kom.events.UserAttendanceEvent;
-import nu.rydin.kom.events.MessageDeletedEvent;
-import nu.rydin.kom.exceptions.AllRecipientsNotReachedException;
-import nu.rydin.kom.exceptions.AlreadyMemberException;
-import nu.rydin.kom.exceptions.AmbiguousNameException;
-import nu.rydin.kom.exceptions.AuthenticationException;
-import nu.rydin.kom.exceptions.AuthorizationException;
-import nu.rydin.kom.exceptions.DuplicateNameException;
-import nu.rydin.kom.exceptions.NoCurrentMessageException;
-import nu.rydin.kom.exceptions.NoMoreMessagesException;
-import nu.rydin.kom.exceptions.NoMoreNewsException;
-import nu.rydin.kom.exceptions.NoRulesException;
-import nu.rydin.kom.exceptions.NotAReplyException;
-import nu.rydin.kom.exceptions.NotLoggedInException;
-import nu.rydin.kom.exceptions.NotMemberException;
-import nu.rydin.kom.exceptions.ObjectNotFoundException;
-import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.backend.data.*;
+import nu.rydin.kom.constants.*;
+import nu.rydin.kom.events.*;
+import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.structs.*;
-import nu.rydin.kom.structs.ConferenceInfo;
-import nu.rydin.kom.structs.ConferencePermission;
-import nu.rydin.kom.structs.Envelope;
-import nu.rydin.kom.structs.MembershipInfo;
-import nu.rydin.kom.structs.MembershipListItem;
-import nu.rydin.kom.structs.Message;
-import nu.rydin.kom.structs.MessageHeader;
-import nu.rydin.kom.structs.MessageOccurrence;
-import nu.rydin.kom.structs.NameAssociation;
-import nu.rydin.kom.structs.NamedObject;
-import nu.rydin.kom.structs.UnstoredMessage;
-import nu.rydin.kom.structs.UserInfo;
-import nu.rydin.kom.structs.UserListItem;
+import edu.oswego.cs.dl.util.concurrent.Mutex;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -882,15 +829,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}	
 	}
-
-	//TODO (skrolle) Why did I create this when it's never used? :-)
-	public void storeNoCommentToCurrentMessage()
-	throws NoCurrentMessageException, AuthorizationException, UnexpectedException
-	{
-		if(m_lastReadMessageId == -1)
-			throw new NoCurrentMessageException();
-		this.storeNoComment(m_lastReadMessageId);	
-	}
 	
 	public void storeNoComment(long message)
 	throws UnexpectedException, AuthorizationException
@@ -907,9 +845,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 
 			long me = this.getLoggedInUserId();
 
-			//TODO (skrolle) Add userid to payload
-			//TODO (skrolle) Scrap temporary shitty payload construction mechanism
-			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructNoCommentPayload(this.getLoggedInUser().getName()));
+			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructNoCommentPayload(this.getLoggedInUser()));
 		}
 		catch(ObjectNotFoundException e)
 		{
@@ -946,6 +882,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		return this.storeReplyToLocal(msg, this.getCurrentConferenceId(), replyToLocalnum);
 	}
 	
+	public MessageOccurrence globalToLocalInConference(long conferenceId, long globalNum)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		try
+		{
+			return m_da.getMessageManager().getMostRelevantOccurrence(conferenceId, globalNum);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+	
+	public MessageOccurrence globalToLocal(long globalNum)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		return this.globalToLocalInConference(m_currentConferenceId, globalNum);
+	}
+	
 	public long localToGlobal(long conferenceId, int localnum)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -965,6 +920,18 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    return localToGlobal(this.getCurrentConferenceId(), localId);
 	}
 
+    public long getGlobalMessageId(TextNumber textNumber)
+            throws ObjectNotFoundException, UnexpectedException
+    {
+        if (textNumber.isGlobal())
+        {
+            return textNumber.getNumber();
+        }
+        else
+        {
+            return localToGlobalInCurrentConference((int)textNumber.getNumber());
+        }
+    }
 	public MessageOccurrence storeMail(UnstoredMessage msg, long user, long replyTo)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -1110,25 +1077,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
-	}
-
-	public MessageOccurrence globalToLocalInConference(long conferenceId, long globalNum)
-	throws ObjectNotFoundException, UnexpectedException
-	{
-		try
-		{
-			return m_da.getMessageManager().getMostRelevantOccurrence(conferenceId, globalNum);
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
-	
-	public MessageOccurrence globalToLocal(long globalNum)
-	throws ObjectNotFoundException, UnexpectedException
-	{
-		return this.globalToLocalInConference(m_currentConferenceId, globalNum);
 	}
 		
 	public long getCurrentMessage()

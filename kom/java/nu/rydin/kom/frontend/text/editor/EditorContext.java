@@ -11,22 +11,12 @@ import java.io.IOException;
 import java.util.Date;
 
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.exceptions.AuthorizationException;
-import nu.rydin.kom.exceptions.BadParameterException;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
-import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.DisplayController;
-import nu.rydin.kom.frontend.text.KOMWriter;
-import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.frontend.text.MessageEditor;
-import nu.rydin.kom.frontend.text.MessagePrinter;
-import nu.rydin.kom.frontend.text.TerminalSettings;
+import nu.rydin.kom.frontend.text.*;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
@@ -211,12 +201,6 @@ public class EditorContext implements Context
 	public DisplayController getDisplayController()
 	{
 	    return m_underlying.getDisplayController();
-	}
-	
-	public MessageHeader resolveMessageSpecifier(String specifier)
-	throws MessageNotFoundException, AuthorizationException, UnexpectedException, BadParameterException
-	{
-	    return m_underlying.resolveMessageSpecifier(specifier);
 	}
 	
 	public void executeScript(String script)

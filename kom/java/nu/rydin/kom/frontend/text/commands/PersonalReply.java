@@ -45,11 +45,14 @@ public class PersonalReply extends AbstractCommand
 		TextNumber textNumber = (TextNumber) parameterArray[0];
 		MessageHeader mh;
 		ServerSession session = context.getSession();
-		if (textNumber == null) 
+		if (textNumber == null)
+		{
 		    mh = session.getMessageHeader(session.getCurrentMessage());
+		}
 		else
-		    mh = context.resolveMessageSpecifier(Integer.toString(textNumber.getNumber()));
-	    // FIXME:Ihse: Does this handle global numbers?
+		{
+		    mh = session.getMessageHeader(session.getGlobalMessageId(textNumber));
+		}
 			
 		// Get editor and execute it
 		//

@@ -12,35 +12,29 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
+import nu.rydin.kom.frontend.text.parser.LocalTextNumberParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.TextNumber;
 
 /**
- * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson </a>
  */
-public class DeleteMessage extends AbstractCommand 
+public class DeleteMessage extends AbstractCommand
 {
-	public DeleteMessage(Context context, String fullName) 
-	{
-		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true)});
-	}
+    public DeleteMessage(Context context, String fullName)
+    {
+        super(fullName, new CommandLineParameter[] { new LocalTextNumberParameter(true) });
+    }
 
-	public void execute(Context context, Object[] parameterArray)
-	throws KOMException 
-	{
-	    TextNumber textNumber = (TextNumber) parameterArray[0];
-		int n = textNumber.getNumber();
-		if (textNumber.isGlobal()) {
-		    // FIXME: Ihse: Do the right thing here
-		    return;
-		} else {
-		    context.getSession().deleteMessageInCurrentConference(n);
-		}
+    public void execute(Context context, Object[] parameterArray)
+            throws KOMException
+    {
+        int textNumber = ((Integer) parameterArray[0]).intValue();
 
-		PrintWriter out = context.getOut();
-		MessageFormatter fmt = context.getMessageFormatter();
-		out.println(fmt.format("delete.confirmation", 
-			new Object [] { new Long(n) } ));	
-	}
+        context.getSession().deleteMessageInCurrentConference(textNumber);
+
+        PrintWriter out = context.getOut();
+        MessageFormatter fmt = context.getMessageFormatter();
+        out.println(fmt.format("delete.confirmation", 
+                new Object[] { new Long(textNumber) }));
+    }
 }

@@ -10,39 +10,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import nu.rydin.kom.events.Event;
-import nu.rydin.kom.exceptions.AllRecipientsNotReachedException;
-import nu.rydin.kom.exceptions.AlreadyMemberException;
-import nu.rydin.kom.exceptions.AmbiguousNameException;
-import nu.rydin.kom.exceptions.AuthenticationException;
-import nu.rydin.kom.exceptions.AuthorizationException;
-import nu.rydin.kom.exceptions.DuplicateNameException;
-import nu.rydin.kom.exceptions.NoCurrentMessageException;
-import nu.rydin.kom.exceptions.NoMoreMessagesException;
-import nu.rydin.kom.exceptions.NoMoreNewsException;
-import nu.rydin.kom.exceptions.NoRulesException;
-import nu.rydin.kom.exceptions.NotAReplyException;
-import nu.rydin.kom.exceptions.NotLoggedInException;
-import nu.rydin.kom.exceptions.NotMemberException;
-import nu.rydin.kom.exceptions.ObjectNotFoundException;
-import nu.rydin.kom.exceptions.UnexpectedException;
-import nu.rydin.kom.structs.ConferenceInfo;
-import nu.rydin.kom.structs.ConferencePermission;
-import nu.rydin.kom.structs.Envelope;
-import nu.rydin.kom.structs.FileStatus;
-import nu.rydin.kom.structs.LocalMessageHeader;
-import nu.rydin.kom.structs.MembershipInfo;
-import nu.rydin.kom.structs.MembershipListItem;
-import nu.rydin.kom.structs.MessageLogItem;
-import nu.rydin.kom.structs.MessageOccurrence;
-import nu.rydin.kom.structs.MessageHeader;
-import nu.rydin.kom.structs.MessageSearchResult;
-import nu.rydin.kom.structs.Name;
-import nu.rydin.kom.structs.NameAssociation;
-import nu.rydin.kom.structs.NamedObject;
-import nu.rydin.kom.structs.UnstoredMessage;
-import nu.rydin.kom.structs.UserInfo;
-import nu.rydin.kom.structs.UserListItem;
-import nu.rydin.kom.structs.UserLogItem;
+import nu.rydin.kom.exceptions.*;
+import nu.rydin.kom.structs.*;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -398,13 +367,6 @@ public interface ServerSession
     throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
 
     /**
-     * Stores a "no comment" to the last message read
-     * @return
-     */
-    public void storeNoCommentToCurrentMessage()
-    throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
-    
-    /**
      * Reads a message identified by a global message id.
      * 
      * @param globalId The global message id
@@ -481,9 +443,23 @@ public interface ServerSession
 	 * @param localNum
 	 * @return
 	 */
+	
 	public long localToGlobalInCurrentConference(int localNum)
 	throws ObjectNotFoundException, UnexpectedException;
 
+	/**
+	 * Returns the global message id given a TextNumber object.
+	 * If the TextNumber object contains a local number, it will 
+	 * try to look it up in the current conference.
+	 * 
+	 * @param textnumber
+	 * @return
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public long getGlobalMessageId(TextNumber textnumber)
+	throws ObjectNotFoundException, UnexpectedException;
+	
 	/**
 	 * Returns the global id of the last read message.
 	 * 

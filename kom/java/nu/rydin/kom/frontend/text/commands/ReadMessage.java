@@ -31,7 +31,6 @@ public class ReadMessage extends AbstractCommand
 	throws KOMException
 	{
 	    TextNumber textNum = (TextNumber) parameterArray[0];
-		int num = textNum.getNumber();
 		
 		try
 		{
@@ -39,8 +38,8 @@ public class ReadMessage extends AbstractCommand
 			//
 		    ServerSession session = context.getSession();
 			Envelope env = textNum.isGlobal()
-				? session.readGlobalMessage(num)
-				: session.readLocalMessage(num);
+				? session.readGlobalMessage(textNum.getNumber())
+				: session.readLocalMessage((int)textNum.getNumber());
 			
 			// Print it using the default MessagePrinter
 			//
