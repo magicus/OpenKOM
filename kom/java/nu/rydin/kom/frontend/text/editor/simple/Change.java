@@ -11,26 +11,32 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.EventDeliveredException;
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.LineNumberParameter;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class Change extends LineNumberCommand
+public class Change extends AbstractCommand
 {
 	public Change(String fullName)
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) } );
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 		throws KOMException, IOException, InterruptedException
 	{
-		int line = this.parseLineNumber(context, parameters) - 1;
+	    assert (parameterArray[0] instanceof Integer);
+	    Integer lineInteger = (Integer) parameterArray[0];
+	    
+		int line = lineInteger.intValue();
 		Buffer buffer = ((EditorContext) context).getBuffer();
 		try
 		{

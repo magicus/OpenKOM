@@ -12,6 +12,8 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.UserException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.IntegerParameter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -20,28 +22,16 @@ public class ChangeUnread extends AbstractCommand
 {
 	public ChangeUnread(String fullName)
 	{
-		super(fullName);	
+		super(fullName, new CommandLineParameter[] { new IntegerParameter("change.unread.param.0.ask", true) } );	
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 		throws KOMException, IOException
 	{
-		if(parameters.length == 0)
-			throw new UserException(context.getMessageFormatter().format("change.unread.no.parameter"));
-		int n = 0;
-		try
-		{
-			n = Integer.parseInt(parameters[0]);
-		}
-		catch(NumberFormatException e)
-		{
-			throw new UserException(context.getMessageFormatter().format("change.unread.invalid.number"));
-		}
-		context.getSession().changeUnread(n);
+	    assert (parameterArray[0] instanceof Integer);
+	    Integer number = (Integer) parameterArray[0];
+		
+		context.getSession().changeUnread(number.intValue());
 	}
 
-	public boolean acceptsParameters()
-	{
-		return true;
-	}
 }

@@ -6,30 +6,44 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.ObjectNotFoundException;
-import nu.rydin.kom.UnexpectedException;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import nu.rydin.kom.KOMException;
 import nu.rydin.kom.constants.UserFlags;
+import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.FlagParameter;
+import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class ClearFlag extends ManipulateFlag
+public class ClearFlag extends AbstractCommand
 {
-
 	public ClearFlag(String fullName)
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new FlagParameter(true) } );
 	}
 
-	protected void manipulateFlag(Context context, int idx)
-	throws ObjectNotFoundException, UnexpectedException
-	{
+	public void execute2(Context context, Object[] parameterArray) throws KOMException, IOException, InterruptedException {
+        assert (parameterArray[0] instanceof Integer);
+        Integer flagNumberInteger = (Integer) parameterArray[0];
+        int flagNumber = flagNumberInteger.intValue();
+        
+		PrintWriter out = context.getOut();
+		MessageFormatter formatter = context.getMessageFormatter();
+		
 		long[] set = new long[UserFlags.NUM_FLAG_WORD];
 		long[] reset = new long[UserFlags.NUM_FLAG_WORD];
-		reset[idx / 64] = 1 << (idx % 64);
+		reset[flagNumber / 64] = 1 << (flagNumber % 64);
 		context.getSession().changeUserFlags(set, reset);
 		context.getOut().println(context.getMessageFormatter().format("clear.flag.confirmation", 
-			context.getFlagLabels()[idx]));
-	}
+			context.getFlagLabels()[flagNumber]));
+
+		// Clear cache
+		//
+		context.clearUserInfoCache();
+    }
 }

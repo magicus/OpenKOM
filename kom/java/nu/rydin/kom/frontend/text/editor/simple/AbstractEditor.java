@@ -13,12 +13,8 @@ import nu.rydin.kom.EventDeliveredException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.LineOverflowException;
 import nu.rydin.kom.LineUnderflowException;
-import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.StopCharException;
 import nu.rydin.kom.UnexpectedException;
-import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.frontend.text.Command;
-import nu.rydin.kom.frontend.text.CommandParser;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -26,6 +22,7 @@ import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
+import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
@@ -35,12 +32,12 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public abstract class AbstractEditor implements MessageEditor
 {	
-	private final CommandParser m_parser;
+	private final Parser m_parser;
 	
 	public AbstractEditor(String commandList, MessageFormatter formatter)
 	throws IOException, UnexpectedException
 	{
-		m_parser = CommandParser.load(commandList, formatter);
+		m_parser = Parser.load(commandList, formatter);
 	}
 	
 	public abstract UnstoredMessage edit(Context underlying, long replyTo)
@@ -90,34 +87,22 @@ public abstract class AbstractEditor implements MessageEditor
 				 		// It's a command! How great! Go parse it!
 				 		//
 				 		line = line.substring(1);
-				 		String[] parts = NameUtils.splitNameKeepParenteses(line);
-						Command command = null;
-				 		try
-				 		{
-				 			command = m_parser.parse(context, line, parts);
-				 		}
-				 		catch(OperationInterruptedException e)
-				 		{
-				 			// Command interrupted, continue with editor loop
-				 			//
-				 			continue;
-				 		}
+				 		Parser.ExecutableCommand executableCommand = null;
+				 		executableCommand = m_parser.parse(context, line);
 				 		
-				 		if(command == null)
+				 		if(executableCommand == null)
 				 			continue;
 				 			
 				 		// We have a command. Go run it! ...with two exceptions: The quit
 				 		// and the save command. Check them first.
 				 		//
-				 		if(command.getClass() == Save.class)
+				 		if(executableCommand.getCommand().getClass() == Save.class)
 				 			return true;
-				 		if(command.getClass() == Quit.class)
+				 		if(executableCommand.getCommand().getClass() == Quit.class)
 				 			return false;
 				 		try
 				 		{
-				 			command.printPreamble(out);
-				 			command.execute(context, command.getParameters(parts));
-				 			command.printPostamble(out);
+				 			executableCommand.execute(context);
 				 		}
 				 		catch(KOMException e)
 				 		{

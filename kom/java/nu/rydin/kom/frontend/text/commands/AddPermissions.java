@@ -10,16 +10,14 @@ import java.io.IOException;
 
 import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.MissingArgumentException;
-import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -28,17 +26,11 @@ public class AddPermissions extends AbstractCommand
 {
 	public AddPermissions(String fullName)
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new UserParameter(true) });
 	}
 
-	public void execute(Context context, String[] parameters)
-		throws KOMException, IOException, InterruptedException
+    public void execute2(Context context, Object[] parameterArray) throws KOMException, IOException, InterruptedException
 	{
-		// Check that we have enough parameters
-		//
-		if(parameters.length == 0)
-			throw new MissingArgumentException();
-			
 		// Check that we have administrator rights in the current conference
 		//
 		ServerSession session = context.getSession();
@@ -47,7 +39,9 @@ public class AddPermissions extends AbstractCommand
 			
 		// Resolve user
 		//
-		long user = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), NameManager.USER_KIND, context);
+		assert (parameterArray[0] instanceof NameAssociation);
+		NameAssociation userAssoc = (NameAssociation) parameterArray[0];
+		long user = userAssoc.getId();
 		
 		// Load current permissions (if any) 
 		//
@@ -77,10 +71,5 @@ public class AddPermissions extends AbstractCommand
 		int choice = context.getIn().getChoice(prefix + " " + formatter.format(format) + ": ", 
 			new String[] { formatter.format("misc.no"), formatter.format("misc.yes")}, defaultChoice, error);
 		return choice != 0 ? permissions : 0;
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true; 
 	}
 }

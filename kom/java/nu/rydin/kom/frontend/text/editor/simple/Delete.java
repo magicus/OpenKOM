@@ -8,53 +8,32 @@ package nu.rydin.kom.frontend.text.editor.simple;
 
 import java.io.PrintWriter;
 
-import nu.rydin.kom.BadParameterException;
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.MissingArgumentException;
+import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.LineNumberParameter;
 
-public class Delete extends LineNumberCommand
+public class Delete extends AbstractCommand
 {
 	public Delete(String fullName)
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) } );
 	}
 	
-	public void execute(Context context, String[] parameters)
-	throws KOMException
+	public void execute2(Context context, Object[] parameterArray)
 	{
-		// TODO: Support ranges
-		//
-		// Get parameter
-		//
-		if(parameters.length != 1)
-			throw new MissingArgumentException();
-		int line = -1;
-		try
-		{
-			line = Integer.parseInt(parameters[0]);
-		}
-		catch(NumberFormatException e)
-		{
-			throw new BadParameterException();
-		}
-		
-		// Is is a valid line?
+	    assert (parameterArray[0] instanceof Integer);
+	    Integer lineInteger = (Integer) parameterArray[0];
+	    
+		int line = lineInteger.intValue();
+
+		// Delete the line
 		//
 		Buffer buffer = ((EditorContext) context).getBuffer();
-		if(line < 1 || line > buffer.size())
-			throw new BadParameterException();
 		
-		// Everything seems ok. Delete the line
-		//
 		buffer.remove(line - 1);
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 	
 	public void printPreamble(PrintWriter out)

@@ -32,7 +32,7 @@ public class SimpleMessageEditor extends AbstractEditor
 	}
 	
 	public UnstoredMessage edit(Context underlying, long replyTo)
-		throws KOMException, InterruptedException, IOException
+		throws KOMException, InterruptedException
 	{
 		EditorContext context = new EditorContext(underlying);
 		DisplayController dc = context.getDisplayController();

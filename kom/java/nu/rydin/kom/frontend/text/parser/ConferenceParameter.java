@@ -13,7 +13,6 @@ import nu.rydin.kom.InvalidChoiceException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
-import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,8 +26,6 @@ import nu.rydin.kom.KOMRuntimeException;
 import nu.rydin.kom.MessageNotFoundException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
-import nu.rydin.kom.UserException;
-import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.constants.UserFlags;
@@ -44,8 +41,6 @@ import nu.rydin.kom.events.NewMessageEvent;
 import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
 import nu.rydin.kom.frontend.text.commands.GotoNextConference;
-import nu.rydin.kom.frontend.text.commands.Logout;
-import nu.rydin.kom.frontend.text.commands.ReadMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextReply;
 import nu.rydin.kom.frontend.text.commands.ShowTime;
@@ -53,16 +48,18 @@ import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleMessageEditor;
+import nu.rydin.kom.frontend.text.parser.Parser;
+import nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.UserInfo;
-import nu.rydin.kom.utils.StringUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  * @author Henrik Schröder
+ * @author Magnus Ihse
  */
 public class ClientSession implements Runnable, Context, EventTarget, TerminalSizeListener
 {
@@ -89,25 +86,9 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	//
 	private final MessagePrinter m_messagePrinter = new BasicMessagePrinter();
 
-	private CommandParser m_parser;	
+	private Parser m_parser;
+    private boolean m_loggedIn;	
 		
-	private static class ListCommands extends AbstractCommand
-	{
-		public ListCommands(String fullName)
-		{
-			super(fullName);
-		}
-		
-		public void execute(Context context, String[] args)
-		{
-			PrintWriter out = context.getOut();
-			Command[] cmds = ((ClientSession) context).m_parser.getCommandList();
-			int top = cmds.length;
-			for(int idx = 0; idx < top; ++idx)
-				out.println(cmds[idx].getFullName());
-		}
-	}
-	
 	private class EventPrinter implements EventTarget
 	{
 		private void printWrapped(String message, int offset)
@@ -377,6 +358,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			// Everything seems fine! We're in!
 			//
 			m_in.setSession(m_session);
+			m_loggedIn = true;
 			return user;
 		}
 	}
@@ -393,149 +375,98 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	}
 		
 	public void mainloop()
-	{
-		try
-		{
-			this.printCurrentConference();
-		}
-		catch(ObjectNotFoundException e)
-		{
-			// TODO: Default conference deleted. What do we do???
-			//
-			m_out.println(e.formatMessage(this));
-		}
-		catch(UnexpectedException e)
-		{
-			m_out.println(e.formatMessage(this));
-		}
-		m_out.println();
-		for(;;)
-		{			
-			// Determine default command and print prompt
-			//
-			try
-			{
-				// Print any pending chat messages
-				//
-			    DisplayController dc = this.getDisplayController();
-				synchronized(m_displayMessageQueue)
-				{
-					while(!m_displayMessageQueue.isEmpty())
-					{
-						Event ev = (Event)m_displayMessageQueue.removeFirst();
-						ev.dispatch(eventPrinter);
-						
-//					    WordWrapper ww = this.getWordWrapper((String) m_displayMessageQueue.removeFirst(), 
-//					            this.getTerminalSettings().getWidth());
-//					    String line = null;
-//					    while((line = ww.nextLine()) != null)
-//					        m_out.println(line);
-						// m_out.println((String) m_displayMessageQueue.removeFirst());
-//						m_out.println();
-					}
-				}
-				Command defaultCommand = this.getDefaultCommand();
-				dc.prompt();
-				String prompt = defaultCommand.getFullName() + " - "; 
-				m_out.print(prompt);
-				dc.input();
-				m_out.flush();
-				
-				// Read command
-				//
-				String cmdString = null;
-				try
-				{
-					cmdString = m_in.readLineStopOnEvent().trim();
-				}
-				catch(EventDeliveredException e)
-				{
-					// Interrupted by an event. Generate prompt and start 
-					// over again.
-					//
-					// Erase the prompt
-					//
-					int top = prompt.length();
-					for(int idx = 0; idx < top; ++idx)
-						m_out.print("\b \b");
-					continue;
-				}
-				
-				if(cmdString.length() > 0)
-				{				    
-				    // Can we parse it as a number? 
-				    //
-				    if(StringUtils.isMessageNumber(cmdString))
-				    {
-				        this.executeCommand(m_parser.getCommand(ReadMessage.class), new String[] { cmdString });
-				    }
-				    else
-				    {
-						// Not a number. Command given. Parse it!
-						//
-						String[] parts = NameUtils.splitNameKeepParenteses(cmdString);
-						Command command = m_parser.parse(this, cmdString, parts);
-						if(command != null) 
-						{
-							// Time to execute the command, but first, isolate the 
-							// parameters.
-							//
-							String[] args = command.getParameters(parts);
-	
-							// Go ahead and execute it!
-							//
-							this.executeCommand(command, args);
-						}
-						
-						// Special case: Seeing a Logout command here
-						// means we should end the loop
-						//
-						if(command instanceof Logout)
-							break;
-				    }
-				}
-				else
-					this.executeCommand(defaultCommand, new String[0]);
-			}
-			catch(UserException e)
-			{
-				m_out.println(e.getMessage());
-				m_out.println();
-			}
-			catch(ObjectNotFoundException e)
-			{
-				m_out.println(m_formatter.format("error.object.not.found", e.getMessage()));
-				m_out.println();
-			}
-			catch(UnexpectedException e)
-			{
-				m_out.println(e.formatMessage(this));
-				m_out.println();
-				System.err.println("Error caused by user: " + e.getUser());
-				e.printStackTrace(System.err);
-			}
-			catch(KOMException e)
-			{
-				m_out.println(e.formatMessage(this));
-				m_out.println();
-			}
-			catch(KOMRuntimeException e)
-			{
-				m_out.println(e.formatMessage(this));
-				m_out.println();
-			}			
-			catch(InterruptedException e)
-			{
-				// Someone set up us the bomb! Let's get out of here!
-				//
-				return;
-			}			
-			catch(Exception e)
-			{
-				e.printStackTrace(m_out);
-			}
-		}
-	}
+    {
+    	try
+    	{
+    		this.printCurrentConference();
+    	}
+    	catch(ObjectNotFoundException e)
+    	{
+    		// TODO: Default conference deleted. What do we do???
+    		//
+    		m_out.println(e.formatMessage(this));
+    	}
+    	catch(UnexpectedException e)
+    	{
+    		m_out.println(e.formatMessage(this));
+    	}
+    	m_out.println();
+    	while (m_loggedIn)
+    	{			
+    		// Determine default command and print prompt
+    		//
+    		try
+    		{
+    			// Print any pending chat messages
+    			//
+    		    DisplayController dc = this.getDisplayController();
+    			synchronized(m_displayMessageQueue)
+    			{
+    				while(!m_displayMessageQueue.isEmpty())
+    				{
+    					Event ev = (Event)m_displayMessageQueue.removeFirst();
+    					ev.dispatch(eventPrinter);
+    				}
+    			}
+    			Command defaultCommand = this.getDefaultCommand();
+    			dc.prompt();
+    			String prompt = defaultCommand.getFullName() + " - "; 
+    			m_out.print(prompt);
+    			dc.input();
+    			m_out.flush();
+    			
+    			// Read command
+    			//
+    			String cmdString = null;
+    			try
+    			{
+    				cmdString = m_in.readLineStopOnEvent();
+    			}
+    			catch(EventDeliveredException e)
+    			{
+    				// Interrupted by an event. Generate prompt and start 
+    				// over again.
+    				//
+    				// Erase the prompt
+    				//
+    				int top = prompt.length();
+    				for(int idx = 0; idx < top; ++idx)
+    					m_out.print("\b \b");
+    				continue;
+    			}
+    			
+    			if(cmdString.trim().length() > 0)
+    			{	
+    			    ExecutableCommand executableCommand = m_parser.parse(this, cmdString);
+    			    if (executableCommand != null) {
+    			        executableCommand.execute(this);
+    			    }
+    			}
+    		}
+    		catch(KOMException e)
+    		{
+    			m_out.println(e.formatMessage(this));
+    			m_out.println();
+    		}
+    		catch(KOMRuntimeException e)
+    		{
+    			m_out.println(e.formatMessage(this));
+    			m_out.println();
+    		}			
+    		catch(InterruptedException e)
+    		{
+    			// Someone set up us the bomb! Let's get out of here!
+    			// Can happen if connection is lost.
+    			return;
+    		}			
+    		catch(IOException e)
+    		{
+    			//Getting an IOException means something went seriously wrong with
+    			//the connection, we can't do much but print it.
+    			e.printStackTrace(m_out);
+    		} 
+    	}
+    }
 		
 	public Command getDefaultCommand()
 	throws KOMException
@@ -876,21 +807,12 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		
 		try
 		{
-			m_parser = CommandParser.load("/commands.list", m_formatter);
+			m_parser = Parser.load("/commands.list", m_formatter);
 		}
 		catch(IOException e)
 		{
 			throw new UnexpectedException(-1, e);
 		}
-	}
-	
-	protected void executeCommand(Command command, String[] parameters)
-	throws InterruptedException, IOException, KOMException
-	{
-		PrintWriter out = this.getOut();
-		command.printPreamble(out);
-		command.execute(this, parameters);
-		command.printPostamble(out);
 	}
 	
 	public void loadFlagTable()
@@ -920,4 +842,22 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			m_flagLabels[idx] = m_formatter.getStringOrNull(buf.toString());			
 		}
 	}
+	
+	/**
+	 * Returns an array of all Commands that are available to the user.
+	 * 
+	 * @return An Command[] of available commands.
+	 */
+	public Command[] getCommandList()
+	{
+		return m_parser.getCommandList();
+	}
+
+    public ClientSession getClientSession() {
+        return this;
+    }
+
+    public void logout() {
+        m_loggedIn = false;
+    }
 }

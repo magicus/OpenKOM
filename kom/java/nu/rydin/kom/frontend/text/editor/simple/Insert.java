@@ -8,29 +8,28 @@ package nu.rydin.kom.frontend.text.editor.simple;
 
 import java.io.PrintWriter;
 
-import nu.rydin.kom.KOMException;
+import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.LineNumberParameter;
 
-public class Insert extends LineNumberCommand
+public class Insert extends AbstractCommand
 {
 	public Insert(String fullName)
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) } );
 	}
 	
-	public void execute(Context context, String[] parameters)
-	throws KOMException
+	public void execute2(Context context, Object[] parameterArray)
 	{
+	    assert (parameterArray[0] instanceof Integer);
+	    Integer lineInteger = (Integer) parameterArray[0];
+	    
+		int line = lineInteger.intValue();
 		
-		// Everything seems ok. Delete the line
-		//
-		((EditorContext) context).getBuffer().insertBefore(this.parseLineNumber(context, parameters) - 1, "\n");
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
+		// Insert line
+		((EditorContext) context).getBuffer().insertBefore(line - 1, "\n");
 	}
 	
 	public void printPreamble(PrintWriter out)

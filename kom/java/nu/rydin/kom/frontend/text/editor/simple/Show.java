@@ -6,7 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.editor.simple;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
@@ -24,11 +23,11 @@ public class Show extends AbstractCommand
 {
 	public Show(String fullName)
 	{
-		super(fullName);
+		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 
-	public void execute(Context context, String[] parameters)
-		throws KOMException, IOException, InterruptedException
+	public void execute2(Context context, Object[] parameterArray)
+		throws KOMException
 	{
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();

@@ -18,14 +18,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
-import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.Command;
-import nu.rydin.kom.frontend.text.CommandParser;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
@@ -43,6 +39,29 @@ public class Parser
 	/** Map[Command->CommandLinePart[]] */
 	private Map m_commandToPartsMap = new HashMap();
 
+	public static class ExecutableCommand {
+	    private Object[] m_parameterArray;
+	    private Command m_command;
+	    
+        public ExecutableCommand(Command command, Object[] parameterArray) {
+            m_command = command;
+            m_parameterArray = parameterArray;
+        }
+        
+        public Command getCommand() {
+            return m_command;
+        }
+        public Object[] getParameterArray() {
+            return m_parameterArray;
+        }
+        
+        public void execute(Context context) throws KOMException, IOException, InterruptedException {
+    		m_command.printPreamble(context.getOut());
+    	    m_command.execute2(context, m_parameterArray);
+    		m_command.printPostamble(context.getOut());
+        }
+	}
+	
 	private class CommandToMatches {
 		private Command m_command;
 		/** List[CommandLinePart.Match] */
@@ -185,7 +204,7 @@ public class Parser
 		return (CommandToMatches) potentialTargets.get(idx - 1);
 	}
 
-	public void parseAndExecute(Context context, String commandLine) throws IOException, InterruptedException, KOMException
+	public ExecutableCommand parse(Context context, String commandLine) throws IOException, InterruptedException
     {
     	int level = 0;
     	
@@ -236,7 +255,7 @@ public class Parser
     		// Ambiguous matching command found. Try to resolve it.
     	    CommandToMatches potentialTarget = resolveAmbiguousCommand(context, potentialTargets);
     	    if (potentialTarget == null) {
-    	        return;
+    	        return null;
     	    }
     	    // Just save the chosen one in our list for later processing
     	    potentialTargets = new LinkedList();
@@ -251,7 +270,7 @@ public class Parser
     		
     		out.println(fmt.format("parser.unknown", commandLine));
     		out.flush();
-    		return;
+    		return null;
     	} else {
     		// We have one match, but it is not neccessarily correct: we might have
     		// too few parameters, as well as too many. Let's find out, and
@@ -275,7 +294,7 @@ public class Parser
     		    		
     		    		out.println(fmt.format("parser.invalid.match", target.getCommand().getFullName()));
     		    		out.flush();
-    		    		return;
+    		    		return null;
     				}
     				target.addMatch(match);
     				remainder = match.getRemainder();
@@ -287,7 +306,7 @@ public class Parser
 		    		
 		    		out.println(fmt.format("parser.superfluous.parameters", target.getCommand().getFullName()));
 		    		out.flush();
-		    		return;
+		    		return null;
     			}
     		}
     		
@@ -303,7 +322,7 @@ public class Parser
     			    Object parameter = parts[i].resolveFoundObject(context, match);
     				if (parameter == null) {
     					// Error message have already been written. User aborted.
-    					return;
+    					return null;
     				}
     				resolvedParameters.add(parameter);
     			}
@@ -323,14 +342,14 @@ public class Parser
 	    				
 	    				out.println(fmt.format("parser.invalid.parameter"));
 	    				out.flush();
-	    				return;
+	    				return null;
 	    			}
 	    			
 	    			// Resolve directly
 	    			parameter = parts[level].resolveFoundObject(context, match);
 	    			if (parameter == null) {
 	    				// Error message have already been written. User aborted.
-	    				return;
+	    				return null;
 	    			}
     		    }
 	    		else
@@ -344,7 +363,7 @@ public class Parser
     		
     		System.out.println("command: " + target.getCommand().getFullName());
     		for (Iterator iter = resolvedParameters.iterator(); iter.hasNext();) {
-                Object param = (Object) iter.next();
+                Object param = iter.next();
                 if (param == null)
                 {
                     System.out.println("param: null");
@@ -359,12 +378,10 @@ public class Parser
     		resolvedParameters.toArray(parameterArray);
     		
     		Command command = target.getCommand();
-    		command.printPreamble(context.getOut());
-    		command.execute2(context, parameterArray);
-    		command.printPreamble(context.getOut());
+    		return new ExecutableCommand(command, parameterArray);
     	}
     }
-	
+
 	private static final Class[] s_commandCtorSignature = new Class[] { String.class };
 	
 	public static Parser load(String filename, MessageFormatter formatter)
@@ -375,7 +392,7 @@ public class Parser
 			List commandNames = new ArrayList();
 			List list = new ArrayList();
 			BufferedReader rdr = new BufferedReader(
-				new InputStreamReader(CommandParser.class.getResourceAsStream(filename)));
+				new InputStreamReader(Parser.class.getResourceAsStream(filename)));
 				
 			// Read command list
 			//

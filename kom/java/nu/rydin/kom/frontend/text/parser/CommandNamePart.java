@@ -6,10 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
-import java.io.IOException;
-
 import nu.rydin.kom.frontend.text.Context;
-
 
 /**
  * @author Magnus Ihse (magnus@ihse.net)
@@ -64,7 +61,7 @@ public class CommandNamePart extends CommandLinePart
 	/* (non-Javadoc)
 	 * @see nu.rydin.kom.frontend.text.parser.CommandLinePart#fillInMissingObject(nu.rydin.kom.frontend.text.Context)
 	 */
-	public Match fillInMissingObject(Context context) throws IOException, InterruptedException
+	public Match fillInMissingObject(Context context)
 	{
 		return new Match(true, m_cookedName, null, null);
 	}

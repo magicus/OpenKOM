@@ -20,17 +20,18 @@ public class ListCommands extends AbstractCommand
 {
 	public ListCommands(String fullName)
 	{
-		super(fullName);
+		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute(Context context, String[] args)
-	{
+	protected Command[] getCommandList(Context context) throws KOMException, IOException {
+		Command[] cmds = context.getClientSession().getCommandList();
+		return cmds;
 	}
-	
-    public void execute2(Context context, Object[] parameterArray)
+
+	public void execute2(Context context, Object[] parameterArray)
             throws KOMException, IOException, InterruptedException {
 		PrintWriter out = context.getOut();
-		Command[] cmds = context.getClientSession().getCommandList();
+		Command[] cmds = getCommandList(context);
 		int top = cmds.length;
 		for(int idx = 0; idx < top; ++idx) {
 			out.print(cmds[idx].getFullName());

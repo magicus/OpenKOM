@@ -14,10 +14,10 @@ public class Quit extends AbstractCommand
 {
 	public Quit(String fullName)
 	{
-		super(fullName);
+		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] paramArray)
 	{
 		// Not much to do here
 	}

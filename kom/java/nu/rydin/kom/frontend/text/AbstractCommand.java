@@ -6,33 +6,25 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.utils.StringUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public abstract class AbstractCommand implements Command
 {
-	protected String m_fullName;
-	protected String[] m_nameParts;
-	protected CommandLineParameter[] signature = new CommandLineParameter[0];
+    public final static CommandLineParameter[] NO_PARAMETERS = new CommandLineParameter[0];
+	private String m_fullName;
+	private CommandLineParameter[] m_signature;
 	
-	protected AbstractCommand(String fullName)
+	protected AbstractCommand(String fullName, CommandLineParameter[] signature)
 	{
-		m_fullName = fullName;  
-		m_nameParts = NameUtils.splitName(m_fullName);
+		m_fullName = fullName;
+		m_signature = signature;
 	}
 	
-    public CommandLineParameter[] getSignature() {
-        return signature;
-    }
-    
 	/**
 	 * Returns the full, human readable name of a command
 	 */
@@ -41,78 +33,6 @@ public abstract class AbstractCommand implements Command
 		return m_fullName;
 	}
 	
-	public String[] getNameParts()
-	{
-		return m_nameParts;
-	}
-
-	/**
-	 * Returns <tt>true</tt> if the supplied command matches
-	 * this command.
-	 * @param commandParts The normalized command parts
-	 */
-	public int match(String[] commandParts)
-	{
-		int myTop = m_nameParts.length;
-		int itsTop = commandParts.length;
-		
-		// Spurious parameters aren't allowed
-		//
-		if(!this.acceptsParameters() && itsTop  > myTop)
-			return 0;
-					
-		// Start matching
-		//
-		int top = Math.min(myTop, itsTop);
-		for(int idx = 0; idx < top; ++idx)
-		{
-			String candidate = commandParts[idx];
-			String myPart = m_nameParts[idx];
-			if(candidate.length() > myPart.length())
-				return 0; 
-			if(!candidate.equals(myPart.substring(0, candidate.length())))
-				return 0;
-		}
-		
-		// If we accept parameters and we expect them to be numeric,
-		// then don't consider this a match for nun-numeric paramters.
-		//
-		if(this.acceptsParameters() && this.expectsNumericParameter() &&
-			!StringUtils.isMessageNumber(commandParts[myTop]))
-		    return 0;
-
-		
-		// If we got this far, we have a match! Whee!!
-		//
-		return top;
-	}
-
-	public boolean acceptsParameters()
-	{
-		return false;
-	}
-	
-	public boolean expectsNumericParameter()
-	{
-	    return false;
-	}
-	
-	public String[] getParameters(String[] parts)
-	{	
-		int top = this.getNameParts().length;
-		int numParts = parts.length;
-		String[] args = null;
-		if(numParts <= top)
-			args = new String[0];
-		else
-		{
-			int numArgs = numParts - top;
-			args = new String[numArgs];
-			System.arraycopy(parts, top, args, 0, numArgs);
-		}		
-		return args;
-	}
-
 	public void printPreamble(PrintWriter out)
 	{
 		out.println();
@@ -123,14 +43,11 @@ public abstract class AbstractCommand implements Command
 		out.println();
 	}	
 
-	public void execute2(Context context, Object[] parameterArray)
-	throws KOMException, IOException, InterruptedException
-	{
-	    // TODO This is implemented here only as a temporary solution to get all commands to work.
-	}
-
 	public String toString() {
         return getClass().getName() + "[" + m_fullName + "]";
     }
     
+    public CommandLineParameter[] getSignature() {
+        return m_signature;
+    }
 }

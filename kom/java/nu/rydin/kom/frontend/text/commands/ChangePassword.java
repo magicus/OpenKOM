@@ -18,7 +18,10 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -27,18 +30,20 @@ public class ChangePassword extends AbstractCommand
 {
 	public ChangePassword(String fullName)
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new UserParameter(false) });
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException
 	{
 		ServerSession session = context.getSession();
 		long user;
-		if(parameters.length != 0)
+		if(parameterArray[0] != null)
 		{
 			session.checkRights(UserPermissions.USER_ADMIN);
-			user = NamePicker.resolveNameToId(parameters[0], NameManager.USER_KIND, context);
+			assert (parameterArray[0] instanceof NameAssociation);
+			NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
+			user = nameAssociation.getId();
 		}
 		else
 			user = context.getLoggedInUserId();
@@ -76,10 +81,5 @@ public class ChangePassword extends AbstractCommand
 		//
 		session.changePassword(user, currentPassword, newPassword);
 		out.println(formatter.format("change.password.confirmation"));
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }
