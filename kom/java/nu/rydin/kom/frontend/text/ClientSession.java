@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
+import nu.rydin.kom.backend.HeartbeatListener;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.constants.UserFlags;
@@ -95,7 +96,55 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 
 	private Parser m_parser;
     private boolean m_loggedIn;	
-		
+    
+    private class HeartbeatSender extends Thread implements KeystrokeListener
+    {
+        private boolean m_idle = false;
+        
+        public void keystroke(char ch)
+        {
+            // Are we idle? Send heartbeat immediately!
+            //
+            if(m_idle)
+            {
+                synchronized(this)
+                {
+                    this.notify();
+                }
+                m_idle = false;
+            }
+        }
+        public void run()
+        {
+            
+            for(;;)
+            {
+                // Sleep for 30 seconds
+                //
+                try
+                {
+                    synchronized(this)
+                    {
+                        this.wait(30000);
+                    }
+                }
+                catch(InterruptedException e)
+                {
+                    break;
+                }
+                
+                // Any activity the last 30 seconds? Send hearbeat!
+                //
+                if(System.currentTimeMillis() - ClientSession.this.m_in.getLastKeystrokeTime() < 30000)
+                    ClientSession.this.getSession().getHeartbeatListener().heartbeat();
+                else
+                    m_idle = true;
+            }
+        }
+    }
+    
+    private HeartbeatSender m_heartbeatSender = new HeartbeatSender();
+    
 	private class EventPrinter implements EventTarget
 	{
 		private void printWrapped(String message, int offset)
@@ -215,6 +264,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		    // Start keystroke poller
 		    //
 		    m_in.start();
+		    m_in.setKeystrokeListener(m_heartbeatSender);
 
 			// Try to login
 			//
@@ -304,6 +354,10 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			m_out.println();
 				
 			userInfo = null; // Don't need it anymore... Let it be GC'd
+			
+			// Start heartbeat sender
+			//
+			m_heartbeatSender.start();
 			
 			// Enter main command loop
 			//		
@@ -397,6 +451,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	public synchronized void shutdown()
 	throws UnexpectedException
 	{
+	    m_heartbeatSender.interrupt();
 		m_in.shutdown();
 		if(m_session != null)
 		{

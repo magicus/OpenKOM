@@ -30,4 +30,21 @@ public class StringUtils
 	    }		
 	    return true;
     }
+    
+    public static String formatElapsedTime(long time)
+    {
+        time /= 60000;
+        long hours = time / 60;
+        long minutes = time % 60;
+        StringBuffer buffer = new StringBuffer(10);
+        if(hours > 0)
+        {
+	        buffer.append(hours);
+	        buffer.append(':');
+        }
+        if(minutes < 10 && hours > 0)
+            buffer.append('0');
+        buffer.append(minutes);
+        return buffer.toString();
+    }
 }

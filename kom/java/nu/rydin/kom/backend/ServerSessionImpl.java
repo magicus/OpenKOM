@@ -73,6 +73,14 @@ import nu.rydin.kom.structs.UserListItem;
  */
 public class ServerSessionImpl implements ServerSession, EventTarget
 {	
+    private class HeartbeatListenerImpl implements HeartbeatListener
+    {
+        public void heartbeat()
+        {
+            ServerSessionImpl.this.m_lastHeartbeat = System.currentTimeMillis();
+        }
+    }
+    
 	/**
 	 * Id of the user of this session
 	 */
@@ -134,8 +142,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	 * we may mark a session as invalid, thus prventing any client calls
 	 * from getting through.
 	 */
-	private boolean m_valid = true;	
+	private boolean m_valid = true;
 	
+	/**
+	 * Timestamp of last heartbeat
+	 */
+	private long m_lastHeartbeat = System.currentTimeMillis();
+		
 	public ServerSessionImpl(DataAccess da, long userId, SessionManager sessions)
 	throws UnexpectedException
 	{
@@ -1291,7 +1304,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 				{
 					// Conference deleted. Display as "???"
 				}
-				answer[idx] = new UserListItem(user, userName, (short) 0, conferenceName, inMailbox); 
+				answer[idx] = new UserListItem(user, userName, (short) 0, conferenceName, inMailbox, session.getLoginTime(),
+				        ((ServerSessionImpl) session).getLastHeartbeat()); 
 			}
 			return answer;
 		}
@@ -1300,7 +1314,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
-	
+		
 	public boolean hasSession (long userId)
 	{
 		return m_sessions.hasSession(userId);
@@ -1321,6 +1335,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		if(m_eventQueue.isEmpty())
 			return null;
 		return (Event) m_eventQueue.removeFirst();
+	}
+		
+	public long getLastHeartbeat()
+	{
+	    return m_lastHeartbeat;
 	}
 		
 	private void sendChatMessageHelper(long userId, String message)
@@ -1977,7 +1996,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	        throw new UnexpectedException (this.getLoggedInUserId(), e);
 	    }
 	}
-
+	
+	public HeartbeatListener getHeartbeatListener()
+	{
+	    return new HeartbeatListenerImpl();
+	}
 
 	protected void markAsInvalid()
 	{

@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
-
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
@@ -127,6 +126,8 @@ public class LineEditor implements NewlineListener
 	private final MessageFormatter m_formatter;
 	
 	private final String m_morePrompt;
+	
+	private long m_lastKeystrokeTime = System.currentTimeMillis();
 	
 	/**
 	 * Proxy to a reader. This allows us to replace the underlying reader
@@ -326,6 +327,7 @@ public class LineEditor implements NewlineListener
 	
 	private final TerminalSettingsProvider m_tsProvider;
 	
+	private KeystrokeListener m_keystrokeListener;
 		
 	public LineEditor(InputStream in, KOMWriter out, EventTarget target, TerminalSettingsProvider tsProvider, 
 	        ServerSession session, MessageFormatter formatter, String charset)
@@ -379,6 +381,11 @@ public class LineEditor implements NewlineListener
 		m_eventPoller.setSession(session);
 		m_eventPoller.start();
 		
+	}
+	
+	public void setKeystrokeListener(KeystrokeListener listener)
+	{
+	    m_keystrokeListener = listener;
 	}
 	
 	public String readLineStopOnEvent()
@@ -637,7 +644,11 @@ public class LineEditor implements NewlineListener
 			// Getting here means we have a Keystroke event, let's handle it!
 			//
 			m_lineCount = 0;
-			return ((KeystrokeEvent) ev).getChar();
+			char ch = ((KeystrokeEvent) ev).getChar();
+			m_lastKeystrokeTime = System.currentTimeMillis();
+			if(m_keystrokeListener != null)
+			    m_keystrokeListener.keystroke(ch);
+			return ch;
 		}
 	}
 	
@@ -881,6 +892,11 @@ public class LineEditor implements NewlineListener
 			this.wait();
 		return (Event) m_eventQueue.removeFirst();
 	}	
+	
+	public long getLastKeystrokeTime()
+	{
+	    return m_lastKeystrokeTime;
+	}
 	
 	// Implementation of NewlineListener
 	//

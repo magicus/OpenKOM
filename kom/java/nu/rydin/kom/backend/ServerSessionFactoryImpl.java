@@ -33,7 +33,7 @@ public class ServerSessionFactoryImpl
 	private Connection m_conn;
 	
 	private SessionManager m_sessionManager = new SessionManager();
-	
+
 	private static ServerSessionFactoryImpl s_instance = new ServerSessionFactoryImpl();
 	
 	public static ServerSessionFactoryImpl instance()

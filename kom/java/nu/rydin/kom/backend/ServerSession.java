@@ -1126,5 +1126,10 @@ public interface ServerSession
 	 */
     public MessageSearchResult[] searchMessagesInConference(long conference, String searchterm, int offset, int length)
     throws UnexpectedException;
+    
+    /**
+     * Returns the HeartbeatListener associated with this session.
+     */
+    public HeartbeatListener getHeartbeatListener();
 
 }

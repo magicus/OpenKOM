@@ -13,23 +13,30 @@ import java.io.Serializable;
  */
 public class UserListItem implements Serializable
 {
-	public long m_userId;
+	public final long m_userId;
 	
-	public String m_userName;
+	public final String m_userName;
 	
-	public short m_action;
+	public final short m_action;
 	
-	public String m_conferenceName;
+	public final String m_conferenceName;
 	
-	public boolean m_inMailbox;
+	public final boolean m_inMailbox;
 	
-	public UserListItem(long userId, String userName, short action, String conferenceName, boolean inMailbox)
+	public final long m_loginTime;
+	
+	public final long m_lastHeartbeat;
+	
+	public UserListItem(long userId, String userName, short action, String conferenceName, boolean inMailbox,
+	        long loginTime, long lastHeartbeat)
 	{
 		m_userId 			= userId;
 		m_userName 			= userName;
 		m_action 			= action;
 		m_conferenceName 	= conferenceName;
 		m_inMailbox			= inMailbox;
+		m_loginTime			= loginTime;
+		m_lastHeartbeat		= lastHeartbeat;
 	}
 	
 	public short getAction()
@@ -55,5 +62,15 @@ public class UserListItem implements Serializable
 	public boolean isInMailbox()
 	{
 		return m_inMailbox;
+	}
+	
+	public long getLoginTime()
+	{
+	    return m_loginTime;
+	}
+	
+	public long getLastHeartbeat()
+	{
+	    return m_lastHeartbeat;
 	}
 }
