@@ -6,6 +6,7 @@ nu.rydin.kom.frontend.text.commands.AddPermission
 nu.rydin.kom.frontend.text.commands.AllowLogin
 nu.rydin.kom.frontend.text.commands.ChangeCharacterset
 nu.rydin.kom.frontend.text.commands.ChangeConferencePresentationConference
+nu.rydin.kom.frontend.text.commands.ChangeContactInfo
 nu.rydin.kom.frontend.text.commands.ChangeLoginScript
 nu.rydin.kom.frontend.text.commands.ChangePassword
 nu.rydin.kom.frontend.text.commands.ChangePermissions
@@ -97,4 +98,3 @@ nu.rydin.kom.frontend.text.commands.WriteMessage
 nu.rydin.kom.frontend.text.commands.WriteReply
 nu.rydin.kom.frontend.text.commands.WriteNote
 nu.rydin.kom.frontend.text.commands.WriteRules
-nu.rydin.kom.frontend.text.commands.ChangeContactInfo
