@@ -43,7 +43,7 @@ public abstract class ViewMessageLog extends AbstractCommand
         MessageFormatter formatter = context.getMessageFormatter();
         int num = -1;
 		if(parameterArray[0] == null)
-			num = 20;
+			num = 10;
 		else
 		{
 		    num = ((Integer)parameterArray[0]).intValue();
