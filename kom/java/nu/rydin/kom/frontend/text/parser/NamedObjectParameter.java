@@ -32,10 +32,15 @@ public class NamedObjectParameter extends CommandLineParameter
 
     protected Match innerMatch(String matchingPart, String remainder)
     {
+        //Sanity-check.
+        if (!this.isValidName(matchingPart.trim()))
+        {
+            return new Match(false, null, null, null);
+        }
+        
         String cooked = cookString(matchingPart);
 
-        //TODO: Tired, stressed, does this really work?
-        if ((cooked.length() > 0) && this.isValidName(cooked))
+        if (cooked.length() > 0)
         {
             // well, this _could_ be a name... check it later
             return new Match(true, matchingPart, remainder, cooked);
