@@ -1,7 +1,8 @@
 /*
  * Created on Dec 9, 2004
- * 
- * Distributed under the GPL license. See http://www.gnu.org for details
+ *
+ * Distributed under the GPL license.
+ * See http://www.gnu.org for details
  */
 package nu.rydin.kom.modules.ssh;
 
@@ -30,6 +31,14 @@ import com.sshtools.j2ssh.transport.publickey.InvalidSshKeyException;
 import com.sshtools.j2ssh.transport.publickey.SshPrivateKey;
 import com.sshtools.j2ssh.transport.publickey.SshPrivateKeyFile;
 
+/**
+ * This class and its inner classes are only used as a work-around for the J2SSH
+ * configuration framework. We do not want to provide the expected xml-files, we
+ * just want programmatical control over the configuration and feed it values
+ * from our own module configuration file.
+ *  
+ * @author Henrik Schröder
+ */
 class DummyConfigurationContext implements ConfigurationContext
 {
     private HashMap configurations = new HashMap();

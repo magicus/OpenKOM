@@ -1,7 +1,8 @@
 /*
- * Created on Nov 10, 2003
- * 
- * Distributed under the GPL license. See http://www.gnu.org for details
+ * Created on Dec 9, 2004
+ *
+ * Distributed under the GPL license.
+ * See http://www.gnu.org for details
  */
 package nu.rydin.kom.modules.ssh;
 
@@ -38,10 +39,16 @@ import com.sshtools.j2ssh.transport.TransportProtocolEventAdapter;
 import com.sshtools.j2ssh.transport.TransportProtocolEventHandler;
 import com.sshtools.j2ssh.util.StartStopState;
 
+/**
+ * This is a J2SSH server implemented as an OpenKOM module.
+ * 
+ * @author Henrik Schröder
+ */
 public class SSHModule implements Module
 {
     InnerJ2SSHServer myserver;
 
+    //FIXME: Here be dragons, kraken, and copy-paste-programming.
     private static class InnerJ2SSHServer
     {
         private ConnectionListener listener = null;
@@ -313,7 +320,8 @@ public class SSHModule implements Module
             ConfigurationLoader.initialize(true, dummy);
         } catch (ConfigurationException e)
         {
-            Logger.fatal(this, "Cannot start SSH Server due to flawed configuration.", e);
+            Logger.fatal(this, "Cannot start SSH Server due to broken configuration.", e);
+            return;
         }
 
         try
@@ -322,7 +330,8 @@ public class SSHModule implements Module
             myserver.startServerSocket();
         } catch (IOException e)
         {
-            Logger.fatal(this, "Cannot start SSH Server: " + e.getMessage(), e);
+            Logger.fatal(this, "Couldn't start SSH Server: " + e.getMessage(), e);
+            return;
         }
 
         Logger.info(this, "OpenKOM SSH server is accepting connections at port "
@@ -336,7 +345,7 @@ public class SSHModule implements Module
             myserver.stopServer("Shutting down");
         } catch (IOException e)
         {
-            Logger.fatal(this, "Cannot stop SSH Server: " + e.getMessage(), e);
+            Logger.fatal(this, "Couldn't stop SSH Server: " + e.getMessage(), e);
         }
     }
 

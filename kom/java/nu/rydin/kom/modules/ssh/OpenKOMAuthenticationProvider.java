@@ -20,8 +20,13 @@ import com.sshtools.daemon.platform.PasswordChangeException;
 import com.sshtools.j2ssh.SshThread;
 
 /**
+ * This is J2SSH Authentication Provider for OpenKOM. It is responsible for handling
+ * all authentication requests to our SSH Server. If a user is authenticated,
+ * a ticket is generated and stored. The client session can retrieve this ticket
+ * at a later point as proof of successful authentication.
+ * 
  * @author Henrik Schröder
- *  
+ * @author Pontus Rydin
  */
 public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 {
@@ -54,7 +59,7 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 
     public String getHomeDirectory(String username) throws IOException
     {
-        // We don'r provide a home directory.
+        // We don't provide a home directory.
         //
         return "/no/way/jose";
     }
@@ -80,7 +85,8 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 
     public boolean logonUser(String username) throws IOException
     {
-        //No way.
+        // We do not support this.
+        //
         return false;
     }
 
@@ -92,7 +98,8 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
     public boolean changePassword(String username, String oldpassword,
             String newpassword)
     {
-        //No way.
+        // We do not support this.
+        //
         return false;
     }
 }

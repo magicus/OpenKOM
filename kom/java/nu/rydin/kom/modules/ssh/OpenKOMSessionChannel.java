@@ -24,8 +24,31 @@ import com.sshtools.j2ssh.connection.SshMsgChannelExtendedData;
 import com.sshtools.j2ssh.io.ByteArrayReader;
 
 /**
+ * This is the OpenKOM implementation of a an SSH session channel.
+ * 
+ * SSH allows for concurrent, multiplexed, encrypted channels over 
+ * one connection, once it has been authenticated. We are only interested
+ * in the channel called "session", and our SSH server only implements
+ * a handler for channels of this type, and this is the class for it.
+ * 
+ * On a channel, the client and server can either send data or requests. 
+ * 
+ * The IOCHannel superclass offers us an InputStream and an OutputStream which
+ * transparently handle all data traffic in the channel.
+ * 
+ * However, we still have to handle channel requests. We don't care or handle
+ * all of the requests that are in the specification, but we do handle the 
+ * following:
+ * 
+ * pty-req: The client requests a pseudo-terminal of a given terminal-type 
+ * and size.
+ * 
+ * window-change: The client changes the size of the pseudo-terminal to the 
+ * given size.
+ * 
+ * shell: The client wants to start an interactive shell. We give it OpenKOM.
+ * 
  * @author Henrik Schröder
- *
  */
 public class OpenKOMSessionChannel extends IOChannel
 {
@@ -33,6 +56,9 @@ public class OpenKOMSessionChannel extends IOChannel
     
     private ChannelOutputStream stderrOut;
     private final List m_sizeListeners = new LinkedList();
+    
+    private int ptyColumns = 80;
+    private int ptyRows = 25;
 
     public byte[] getChannelOpenData()
     {
@@ -83,7 +109,10 @@ public class OpenKOMSessionChannel extends IOChannel
     {
         if (requestType.equals("shell"))
         {
-            connection.sendChannelRequestSuccess(this);
+            // This request is issued by the client if it wants an interactive shell
+            // on the server. Our business is to provide OpenKOM as that shell, so we'll
+            // gladly accept this and start a ClientSession
+            //
             try
             {
                 String ticket = OpenKOMAuthenticationProvider.claimTicket();
@@ -93,18 +122,39 @@ public class OpenKOMSessionChannel extends IOChannel
                 client.setTicket(ticket);
                 Thread clientThread = new Thread(client, "Session (not logged in)");
 				clientThread.start();
+				client.terminalSizeChanged(ptyColumns, ptyRows);
+				
+				if (wantReply)
+				{
+				    connection.sendChannelRequestSuccess(this);
+				}
+				
             } catch (UnexpectedException e)
             {
                 Logger.error(this, e);
-                throw new IOException();
+				if (wantReply)
+				{
+				    connection.sendChannelRequestFailure(this);
+				}
+				//I think a request-failure is enough here.
+                //throw new IOException();
             } catch (InternalException e)
             {
                 Logger.error(this, e);
-                throw new IOException();
+				if (wantReply)
+				{
+				    connection.sendChannelRequestFailure(this);
+				}
+				//I think a request-failure is enough here.
+                //throw new IOException();
             }
         }
         else if (requestType.equals("pty-req"))
         {
+            // This request is recieved when the client wants a pseudo-terminal,
+            // and it should be issued by the client before a shell or exec request.
+            //
+            
             ByteArrayReader bar = new ByteArrayReader(requestData);
             String term = bar.readString();
             int cols = (int) bar.readInt();
@@ -113,6 +163,14 @@ public class OpenKOMSessionChannel extends IOChannel
             int height = (int) bar.readInt();
             String modes = bar.readString();
             
+            Logger.debug(this, "Requested pty-req with " + term + " of " + cols + "x" + rows);
+            
+            if (cols > 0 && rows > 0)
+            {
+                ptyColumns = cols;
+                ptyRows = rows;
+            }
+            
             if (wantReply)
             {
                 connection.sendChannelRequestSuccess(this);
@@ -120,17 +178,25 @@ public class OpenKOMSessionChannel extends IOChannel
         }
         else if (requestType.equals("window-change"))
         {
+            // This request is recieved every time the client terminal changes size
+            //
+
             ByteArrayReader bar = new ByteArrayReader(requestData);
             int cols = (int) bar.readInt();
             int rows = (int) bar.readInt();
             int width = (int) bar.readInt();
             int height = (int) bar.readInt();
             
-    		synchronized(m_sizeListeners)
-    		{
-    			for(Iterator itor = m_sizeListeners.iterator(); itor.hasNext();)
-    				((TerminalSizeListener) itor.next()).terminalSizeChanged(cols, rows);
-    		}
+            Logger.debug(this, "Requested window-change to " + cols + "x" + rows);
+            
+            if (cols > 0 && rows > 0)
+            {
+	    		synchronized(m_sizeListeners)
+	    		{
+	    			for(Iterator itor = m_sizeListeners.iterator(); itor.hasNext();)
+	    				((TerminalSizeListener) itor.next()).terminalSizeChanged(cols, rows);
+	    		}
+            }
 
             if (wantReply)
             {

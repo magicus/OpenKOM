@@ -1,3 +1,9 @@
+/*
+ * Created on Dec 10, 2004
+ *
+ * Distributed under the GPL license.
+ * See http://www.gnu.org for details
+ */
 package nu.rydin.kom.modules.ssh;
 
 import com.sshtools.j2ssh.configuration.ConfigurationException;
@@ -5,6 +11,13 @@ import com.sshtools.j2ssh.connection.Channel;
 import com.sshtools.j2ssh.connection.ChannelFactory;
 import com.sshtools.j2ssh.connection.InvalidChannelException;
 
+/**
+ * This factory class provides the J2SSH server with a channel implementation
+ * that handle the channel type "session", which is the standard channel
+ * for interactive shell access
+ * 
+ * @author Henrik Schröder
+ */
 public class OpenKOMSessionChannelFactory implements ChannelFactory
 {
 
