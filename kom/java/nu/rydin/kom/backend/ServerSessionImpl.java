@@ -985,6 +985,16 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 
 			MessageManager mm = m_da.getMessageManager(); 
 
+			//Delete already existing "no comment"
+			MessageAttribute[] attributes = mm.getMessageAttributes(message);
+			for (int i = 0; i < attributes.length; i++)
+            {
+                if (attributes[i].getKind() == MessageManager.ATTR_NOCOMMENT && attributes[i].getNoCommentUserid() == this.getLoggedInUserId())
+                {
+                    mm.dropMessageAttribute(attributes[i].getId(), message);
+                }
+            }
+			
 			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructNoCommentPayload(this.getLoggedInUser()));
 		}
 		catch(ObjectNotFoundException e)
@@ -1178,14 +1188,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
 		}
 	}
-
-	public void moveMessage(int localNum, long destConfId)
-	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
-	{
-		this.moveMessage(localNum, this.getCurrentConferenceId(), destConfId);
-	}
 	
-	public void moveMessage(int localNum, long sourceConfId, long destConfId)
+	private void moveMessage(int localNum, long sourceConfId, long destConfId)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
 	{
 		try
@@ -1227,7 +1231,23 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
-		
+
+	public void moveMessage(long messageId, long destConfId) 
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+	{
+	    //I'm lazy, I'll just re-use the old move-methods...
+	    MessageOccurrence originalOcc;
+        try
+        {
+            originalOcc = m_da.getMessageManager().getOriginalMessageOccurrence(messageId);
+            moveMessage(originalOcc.getLocalnum(), originalOcc.getConference(), destConfId);
+        }
+		catch (SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+	
 	public long getCurrentMessage()
 	throws NoCurrentMessageException
 	{
@@ -1253,6 +1273,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+	
+	public MessageOccurrence getOriginalMessageOccurrence(long messageId)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		try
+		{
+			return m_da.getMessageManager().getOriginalMessageOccurrence(messageId);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}	
 	
 	public String signup(long conferenceId)
 	throws ObjectNotFoundException, AlreadyMemberException, UnexpectedException, AuthorizationException

@@ -508,6 +508,21 @@ public interface ServerSession
 	public MessageOccurrence getCurrentMessageOccurrence()
 	throws NoCurrentMessageException, UnexpectedException;		
 
+	
+	/**
+	 * Returns the original occurrence of a message, which is defined as:
+	 * 1) If there is one with kind=ACTION_CREATED, pick it, otherwise
+	 * 2) Pick the one with kind=ACTION_MOVED, or if that also does not exist,
+	 * 3) Throw ObjectNotFoundException. 
+	 * 
+	 * @param messageId
+	 * @return
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public MessageOccurrence getOriginalMessageOccurrence(long messageId)
+	throws ObjectNotFoundException, UnexpectedException;
+	
 	/**
 	 * Signs up for a conference, i.e. makes the current user a member of it.
 	 * 
@@ -892,34 +907,19 @@ public interface ServerSession
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 	
 	/**
-	 * Moves a message to another conference. As with copyMessage(), the message isn't moved
-	 * as such, only the occurrence is changed. The source occurrence is dropped and a destination
-	 * occurrence is added. Furthermore, a matching MessageAttribute is created, in which we store
-	 * the source conference ID.
-	 * 
-	 * @param localNum Local text number
-	 * @param sourceConfId Conference to move from
-	 * @param destConfId Conference to move to.
-	 * @throws AuthorizationException
-	 * @throws ObjectNotFoundException
-	 * @throws UnexpectedException
-	 */
-	public void moveMessage(int localNum, long sourceConfId, long destConfId)
-	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
-
-	/**
-	 * Moves a message from the current conference to another conference. As with copyMessage(), 
-	 * the message isn't moved as such, only the occurrence is changed. The source occurrence is 
-	 * dropped and a destination occurrence is added. Furthermore, a matching MessageAttribute is 
+	 * Moves a message to another conference. It is only possible to move the original
+	 * occurrence, and not any copies of a message, therefore this method tries to
+	 * locate the original occurrence, drop it, and create a new moved occurrence in
+	 * the destination conference. Furthermore, a matching MessageAttribute is 
 	 * created, in which we store the source conference ID.
 	 * 
-	 * @param localNum Local text number
+	 * @param messageId Message to move.
 	 * @param destConfId Conference to move to.
 	 * @throws AuthorizationException
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
-	public void moveMessage(int localNum, long destConfId)
+	public void moveMessage(long messageId, long destConfId)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 
 	/**
