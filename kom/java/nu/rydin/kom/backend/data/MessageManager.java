@@ -66,6 +66,7 @@ public class MessageManager
 	private final PreparedStatement m_updateConferenceLasttext;
     private final PreparedStatement m_listMessagesByUserStmt;
     private final PreparedStatement m_searchMessagesInConference;
+    private final PreparedStatement m_grepMessagesInConference;
 	
 	private final Connection m_conn; 
 	
@@ -200,6 +201,13 @@ public class MessageManager
 				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
 				"FROM messagesearch ms, messageoccurrences mo " +
 				"WHERE ms.id = mo.message AND mo.conference = ? AND MATCH(subject, body) AGAINST (? IN BOOLEAN MODE) " +
+				"ORDER BY localnum DESC " +
+				"LIMIT ? OFFSET ?");
+
+		m_grepMessagesInConference = conn.prepareStatement(
+				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
+				"FROM messagesearch ms, messageoccurrences mo " +
+				"WHERE ms.id = mo.message AND mo.conference = ? AND (subject LIKE ? OR body LIKE ?)" +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
 	}
@@ -1062,6 +1070,31 @@ public class MessageManager
         this.m_searchMessagesInConference.setLong(3, length);
         this.m_searchMessagesInConference.setLong(4, offset);
         ResultSet rs = this.m_searchMessagesInConference.executeQuery();
+        List l = new ArrayList();
+        while (rs.next()) {
+ 		   l.add(new MessageSearchResult(
+ 		   		rs.getLong(1),			// Global id
+			   	rs.getInt(2),			// Local id
+				rs.getLong(3),			// user id
+			   	new Name(rs.getString(4), Visibilities.PUBLIC),	// username
+			   	rs.getString(5))		// subject	
+			   	);
+        }
+        MessageSearchResult[] result = new MessageSearchResult[l.size()];
+		l.toArray(result);
+		return result;
+    }
+
+    public MessageSearchResult[] grepMessagesInConference(long conference, String searchterm, int offset, int length)
+    throws SQLException
+    {
+    	this.m_grepMessagesInConference.clearParameters();
+    	this.m_grepMessagesInConference.setLong(1, conference);
+    	this.m_grepMessagesInConference.setString(2, "%" + searchterm + "%");
+    	this.m_grepMessagesInConference.setString(3, "%" + searchterm + "%");
+        this.m_grepMessagesInConference.setLong(4, length);
+        this.m_grepMessagesInConference.setLong(5, offset);
+        ResultSet rs = this.m_grepMessagesInConference.executeQuery();
         List l = new ArrayList();
         while (rs.next()) {
  		   l.add(new MessageSearchResult(

@@ -24,5 +24,6 @@ public class ShowTime extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray)
 	{
 		context.getOut().println(context.getMessageFormatter().format("show.time.format", new Date()));
+		context.getOut().println(context.getMessageFormatter().format("show.time.logintime", (System.currentTimeMillis() - context.getSession().getLoginTime()) / 60000));
 	}
 }

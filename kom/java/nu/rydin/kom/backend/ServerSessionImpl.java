@@ -2933,6 +2933,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     		throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+
+    public MessageSearchResult[] grepMessagesInConference(long conference, String searchterm, int offset, int length)
+    throws UnexpectedException
+	{
+    	try
+		{
+    		return m_da.getMessageManager().grepMessagesInConference(conference, searchterm, offset, length);
+		}
+    	catch (SQLException e)
+		{
+    		throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
     
     protected boolean isVisible(long conferenceId)
     throws ObjectNotFoundException, UnexpectedException

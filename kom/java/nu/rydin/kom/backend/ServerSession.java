@@ -1157,6 +1157,18 @@ public interface ServerSession
     throws UnexpectedException;
     
     /**
+     * Does a simple grep-like search in the given conference.
+     * 
+     * @param currentConferenceId
+     * @param searchterm
+     * @param offset
+     * @param chunk_size
+     * @return
+     */
+    public MessageSearchResult[] grepMessagesInConference(long conference, String searchterm, int offset, int length)
+    throws UnexpectedException;
+    
+    /**
      * Lists the user log for all users, sorted by date (descending)
      * 
      * @param start The start date
@@ -1275,4 +1287,5 @@ public interface ServerSession
      * Returns the HeartbeatListener associated with this session.
      */
     public HeartbeatListener getHeartbeatListener();
+
 }

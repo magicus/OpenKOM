@@ -1,5 +1,5 @@
 /*
- * Created on Jul 15, 2004
+ * Created on Sep 11, 2004
  *
  * Distributed under the GPL license.
  * See http://www.gnu.org/ for details
@@ -19,12 +19,11 @@ import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author Henrik Schröder
- * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class SearchMessage extends AbstractCommand 
+public class GrepLocalMessage extends AbstractCommand 
 {
     private static final int CHUNK_SIZE = 50;
-	public SearchMessage(Context context, String fullName) 
+	public GrepLocalMessage(Context context, String fullName) 
 	{
 		super(fullName, new CommandLineParameter[] { new RawParameter("search.param.0.ask", true) });
 	}
@@ -55,7 +54,7 @@ public class SearchMessage extends AbstractCommand
 		
 		for(int offset = 0;; offset += CHUNK_SIZE)
 		{
-		    MessageSearchResult[] msr = context.getSession().searchMessagesInConference(context.getSession().getCurrentConferenceId(), searchterm, offset, CHUNK_SIZE);
+		    MessageSearchResult[] msr = context.getSession().grepMessagesInConference(context.getSession().getCurrentConferenceId(), searchterm, offset, CHUNK_SIZE);
 		    int top = msr.length;
 		    if(top == 0)
 		        break;
