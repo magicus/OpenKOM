@@ -23,6 +23,6 @@ public class ListCommands extends nu.rydin.kom.frontend.text.commands.ListComman
 
     protected Collection getCategories(Context context) throws KOMException, IOException 
     {
-        return Parser.load("/editorcommands.xml", context).getCategories();
+        return Parser.load("editorcommands.xml", context).getCategories();
     }
 }

@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.backend;
 
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.security.MessageDigest;
@@ -15,6 +17,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,8 +30,10 @@ import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.LoginProhibitedException;
+import nu.rydin.kom.exceptions.ModuleException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.frontend.text.ClientSettings;
 import nu.rydin.kom.modules.Module;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Base64;
@@ -86,8 +91,101 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 		return s_instance;
 	}*/
 	
-	public void start(Map properties)
+	public void start(Map properties) throws ModuleException
 	{
+	    // Initialize the static global server settings class.
+	    //
+	    ServerSettings.initialize(properties);
+	    
+	    // Initialize the static global client settings class.
+	    // FIXME: This should probably not be initialized here, but since
+	    // the module system can't handle a separated client-side anyway,
+	    // we can safely ignore this for now.
+	    ClientSettings.initialize(properties);
+	    
+	    // Since we just loaded the client settings, we can perform this check:
+	    //
+        // Check that we have the character sets we need
+        //
+        StringTokenizer st = new StringTokenizer(ClientSettings.getCharsets(), ",");
+        while (st.hasMoreTokens())
+        {
+            String charSet = st.nextToken();
+            try
+            {
+                new OutputStreamWriter(System.out, charSet);
+            } 
+            catch (UnsupportedEncodingException e)
+            {
+    			throw new ModuleException("Character set " + charSet + " not supported. Do you have charsets.jar in you classpath?", e);
+            }
+        }
+	    
+	    // Make sure there's at least a sysop in the database
+	    //
+	    boolean committed = false;
+	    DataAccess da = null;
+		try
+		{
+		    da = DataAccessPool.instance().getDataAccess();
+			UserManager um = da.getUserManager();
+			 
+			//FIXME Move to a bootstrapping sql-script.
+			// Make sure there is at least a sysop in the database.
+			//
+			if(!um.userExists("sysop"))
+			{
+				um.addUser("sysop", "sysop", "Sysop", "", "", "", "", "", "", "", "", "", 
+					"ISO-8859-1", "sv_SE", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, 
+				UserFlags.DEFAULT_FLAGS3, UserFlags.DEFAULT_FLAGS4, UserPermissions.EVERYTHING);
+				da.commit();
+				committed = true;
+			}
+		}
+		catch(SQLException e)
+		{
+			throw new ModuleException(e);
+		}
+		catch(NoSuchAlgorithmException e)
+		{
+			// Could not calculate password digest. Should not happen!
+			//
+		    throw new ModuleException(e);
+		}
+		catch(AmbiguousNameException e)
+		{
+			// Ambigous name when adding sysop. Should not happen!
+			//
+		    throw new ModuleException(e);
+		}
+		catch(DuplicateNameException e)
+		{
+			// Duplicate name when adding sysop. Should not happen!
+			//
+		    throw new ModuleException(e);
+		} 
+		catch (UnexpectedException e)
+        {
+            // Noone expects ths Spanish Inquisition!
+		    throw new ModuleException(e);
+        }
+		finally
+		{
+			if(!committed && da != null)
+			{
+                try
+                {
+                    da.rollback();
+                } 
+				catch (UnexpectedException e)
+                {
+				    // This is probably bad if it happens.
+				    throw new ModuleException(e);
+                }
+			}
+			DataAccessPool.instance().returnDataAccess(da);
+		}
+	    
 	    m_sessionManager = new SessionManager();
 	    m_sessionManager.start();
 	}
@@ -106,54 +204,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	public ServerSessionFactoryImpl()
 	throws UnexpectedException
 	{
-	    // Make sure there's at least a sysop in the database
-	    //
-	    boolean committed = false;
-		DataAccess da = DataAccessPool.instance().getDataAccess();
-		try
-		{
-			UserManager um = da.getUserManager();
-			 
-			//FIXME Move to a bootstrapping sql-script.
-			// Make sure there is at least a sysop in the database.
-			//
-			if(!um.userExists("sysop"))
-			{
-				um.addUser("sysop", "sysop", "Sysop", "", "", "", "", "", "", "", "", "", 
-					"ISO-8859-1", "sv_SE", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, 
-				UserFlags.DEFAULT_FLAGS3, UserFlags.DEFAULT_FLAGS4, UserPermissions.EVERYTHING);
-				da.commit();
-				committed = true;
-			}
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(-1, e);
-		}
-		catch(NoSuchAlgorithmException e)
-		{
-			// Could not calculate password digest. Should not happen!
-			//
-			throw new UnexpectedException(-1, e);
-		}
-		catch(AmbiguousNameException e)
-		{
-			// Ambigous name when adding sysop. Should not happen!
-			//
-			throw new UnexpectedException(-1, e);
-		}
-		catch(DuplicateNameException e)
-		{
-			// Duplicate name when adding sysop. Should not happen!
-			//
-			throw new UnexpectedException(-1, e);
-		}
-		finally
-		{
-			if(!committed)
-				da.rollback();
-			DataAccessPool.instance().returnDataAccess(da);
-		}
+
 	}	
 	
 	public void killSession(String user, String password)

@@ -28,7 +28,7 @@ public class FileEditor extends AbstractEditor
     public FileEditor(Context context) throws IOException,
             UnexpectedException
     {
-        super("/fileeditorcommands.xml", context);
+        super("fileeditorcommands.xml", context);
     }
 
 	protected void refresh() throws KOMException

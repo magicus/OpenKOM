@@ -7,16 +7,12 @@
 package nu.rydin.kom.modules;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.ClientSession;
-import nu.rydin.kom.frontend.text.ClientSettings;
 import nu.rydin.kom.frontend.text.TelnetInputStream;
 import nu.rydin.kom.utils.Logger;
 
@@ -101,13 +97,8 @@ public class TelnetServer implements Module, Runnable
 		
 	public void start(Map parameters)
 	{
-		// Before we do anything, make sure we're even able to start
-		//
-		if(!this.sanityChecks())
-		{
-			Logger.fatal(this, "FATAL: Cannot start server due to the above errors.");
-			return;
-		}
+	    // Perform checks before start.
+	    //
 		int port = Integer.parseInt((String) parameters.get("port"));
 		m_useTicket = "ticket".equals(parameters.get("authentication"));
 		
@@ -206,28 +197,5 @@ public class TelnetServer implements Module, Runnable
 	public static void main(String[] args)
 	{
 		Logger.fatal(TelnetServer.class, "Starting TelnetServer directly is no longer supported. Use rydin.nu.kom.boot.Bootstrap instead.");
-	}
-	
-	protected boolean sanityChecks()
-	{
-		boolean ok = true;
-		
-		// Check that we have the character sets we need
-		//
-		StringTokenizer st = new StringTokenizer(ClientSettings.getCharsets(), ",");
-		while(st.hasMoreTokens())
-		{
-			String charSet = st.nextToken();
-			try
-			{
-				new OutputStreamWriter(System.out, charSet);
-			}
-			catch(UnsupportedEncodingException e)
-			{
-				Logger.error(this, "Character set " + charSet + " not supported. Do you have charsets.jar in you classpath?");
-				ok = false;					
-			}
-		}
-		return ok;
 	}
 }

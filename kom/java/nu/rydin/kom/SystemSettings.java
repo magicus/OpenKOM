@@ -6,28 +6,32 @@
  */
 package nu.rydin.kom;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.PropertyResourceBundle;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class SystemSettings 
 {
-	private final PropertyResourceBundle m_resources;
+	private final Properties m_resources;
 	
-	public SystemSettings(String resourceName)
-	throws IOException
+    public SystemSettings(Map parameters)
+    {
+        m_resources = new Properties();
+        Set keys = parameters.keySet();
+        for (Iterator iter = keys.iterator(); iter.hasNext();)
+        {
+            String key = (String) iter.next();
+            m_resources.setProperty(key, (String)parameters.get(key));
+        }
+    }
+
+    public String getString(String key)
 	{
-		InputStream is = this.getClass().getResourceAsStream(resourceName);
-		m_resources = new PropertyResourceBundle(is);
-		is.close();
-	}
-	
-	public String getString(String key)
-	{
-		return m_resources.getString(key);
+		return m_resources.getProperty(key);
 	}
 	
 	public int getInt(String key)

@@ -7,18 +7,14 @@
 package nu.rydin.kom.modules.ssh;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
-import nu.rydin.kom.frontend.text.ClientSettings;
 import nu.rydin.kom.modules.Module;
 import nu.rydin.kom.utils.Logger;
 
@@ -290,24 +286,9 @@ public class SSHServer implements Module
 
     protected boolean sanityChecks()
     {
-        boolean ok = true;
-
-        // Check that we have the character sets we need
+        // Check if our dummy configuration classes are loaded properly.
         //
-        StringTokenizer st = new StringTokenizer(ClientSettings.getCharsets(), ",");
-        while (st.hasMoreTokens())
-        {
-            String charSet = st.nextToken();
-            try
-            {
-                new OutputStreamWriter(System.out, charSet);
-            } catch (UnsupportedEncodingException e)
-            {
-                Logger.fatal(this, "Character set " + charSet + " not supported. Do you have charsets.jar in you classpath?");
-                ok = false;
-            }
-        }
-
+        boolean ok = true;
         try
         {
             if (!ConfigurationLoader

@@ -6,7 +6,7 @@
  */
 package nu.rydin.kom.backend;
 
-import java.io.IOException;
+import java.util.Map;
 
 import nu.rydin.kom.SystemSettings;
 
@@ -15,18 +15,11 @@ import nu.rydin.kom.SystemSettings;
  */
 public class ServerSettings 
 {
-	public static final SystemSettings s_settings;
+	public static SystemSettings s_settings;
 	
-	static
+	public static void initialize(Map parameters)
 	{
-		try
-		{
-			s_settings = new SystemSettings("/server.properties");
-		}
-		catch(IOException e)
-		{
-			throw new ExceptionInInitializerError(e);
-		}
+	    s_settings = new SystemSettings(parameters);
 	}
 	
 	public static String getJDBCDriverClass()

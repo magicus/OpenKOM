@@ -259,7 +259,7 @@ public class Help extends AbstractCommand
 	        XMLReader xr = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 	        xr.setContentHandler(myParser);
 	        xr.parse (new InputSource (ClassLoader.getSystemClassLoader().
-	                getResourceAsStream("nu/rydin/kom/i18n/help.xml")));
+	                getResourceAsStream("help.xml")));
 	        htc = myParser.getContainer();
 	    }
 	    catch (Exception e)

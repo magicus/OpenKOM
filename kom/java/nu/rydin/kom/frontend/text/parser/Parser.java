@@ -600,13 +600,9 @@ public class Parser
     public static Parser load(String filename, Context context)
             throws IOException, UnexpectedException
     {
-        MessageFormatter formatter = context.getMessageFormatter();
         try
         {
-            List list = new ArrayList();
-            BufferedReader rdr = new BufferedReader(new InputStreamReader(
-                    Parser.class.getResourceAsStream(filename)));
-            InputStream is = Parser.class.getResourceAsStream(filename);
+            InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream(filename);
             SAXParser p = SAXParserFactory.newInstance().newSAXParser();
             CommandListParser handler = new CommandListParser(context);
             p.parse(is, handler);

@@ -1315,7 +1315,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		
 		try
 		{
-			m_parser = Parser.load("/commands.xml", this);
+			m_parser = Parser.load("commands.xml", this);
 		}
 		catch(IOException e)
 		{

@@ -35,7 +35,7 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 	public SimpleMessageEditor(Context context)
 	throws IOException, UnexpectedException
 	{
-		super("/editorcommands.xml", context);
+		super("editorcommands.xml", context);
 	}
 	
 	public UnstoredMessage edit(long replyTo)

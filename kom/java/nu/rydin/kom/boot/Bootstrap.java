@@ -13,6 +13,7 @@ import java.util.TimeZone;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import nu.rydin.kom.exceptions.ModuleException;
 import nu.rydin.kom.exceptions.NoSuchModuleException;
 import nu.rydin.kom.modules.Module;
 import nu.rydin.kom.modules.Modules;
@@ -71,6 +72,9 @@ public class Bootstrap
 	        catch(IllegalAccessException e)
 	        {
 	            Logger.error(this, "Error creating instance of server class " + each.getName(), e);
+	        } catch (ModuleException e)
+            {
+	            Logger.error(this, "Error creating instance of server class " + each.getName(), e);            
 	        }	        	        
 	    }
 	}

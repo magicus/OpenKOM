@@ -27,7 +27,7 @@ public class MessageFormatter
 	
 	public MessageFormatter(Locale locale)
 	{
-	    m_resource 	= ResourceBundle.getBundle("nu.rydin.kom.i18n.messages", locale);
+	    m_resource 	= ResourceBundle.getBundle("messages", locale);
 	    m_locale 	= locale;
 	}
 	

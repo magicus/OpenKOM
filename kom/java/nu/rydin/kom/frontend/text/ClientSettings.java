@@ -6,7 +6,7 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.IOException;
+import java.util.Map;
 
 import nu.rydin.kom.SystemSettings;
 
@@ -15,18 +15,11 @@ import nu.rydin.kom.SystemSettings;
  */
 public class ClientSettings
 {
-	public static final SystemSettings s_settings;
+	public static SystemSettings s_settings;
 	
-	static
+	public static void initialize(Map parameters)
 	{
-		try
-		{
-			s_settings = new SystemSettings("/client.properties");
-		}
-		catch(IOException e)
-		{
-			throw new ExceptionInInitializerError(e);
-		}
+	    s_settings = new SystemSettings(parameters);
 	}
 		
 	public static int getEventPollInterval()
@@ -37,11 +30,5 @@ public class ClientSettings
 	public static String getCharsets()	
 	{
 		return s_settings.getString("supported.character.sets");
-	}
-	
-	public static String[] getServers()
-	{
-	    String s = s_settings.getString("boot.servers");
-	    return s.split(",");
 	}	
 }
