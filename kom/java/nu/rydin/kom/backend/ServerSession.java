@@ -29,6 +29,7 @@ import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.MembershipInfo;
 import nu.rydin.kom.structs.MembershipListItem;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.NamedObject;
 import nu.rydin.kom.structs.UnstoredMessage;
@@ -872,4 +873,28 @@ public interface ServerSession
 	 */
 	public void changeUserFlags(long[] set, long[] reset)
 	throws ObjectNotFoundException, UnexpectedException;
+
+	/**
+	 * Lists the messages in the given conference. Note that not all fields in the MessageHeader
+	 * array returned contain legal values.
+	 * 
+	 * @param conference Conference Id
+	 * @param start First row (given as offset from top) to return
+	 * @param length Number of rows to return
+	 * @return An array of MessageHeaders
+	 * @throws UnexpectedException
+	 */
+	public MessageHeader[] listMessagesInConference(long conference, int start, int length)
+	throws UnexpectedException;
+	
+	/**
+	 * This method lists the messages in the users current conference.
+	 * 
+	 * @param start First row (given as offset from top) to return
+	 * @param length Number of rows to return
+	 * @return An array of MessageHeaders
+	 * @throws UnexpectedException
+	 */
+	public MessageHeader[] listMessagesInCurrentConference(int start, int length)
+	throws UnexpectedException;
 }

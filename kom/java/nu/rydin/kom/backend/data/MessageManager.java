@@ -23,8 +23,8 @@ import nu.rydin.kom.structs.MessageOccurrence;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
- * @author Henrik Schröder
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
+ * @author Henrik Schröder
  */
 public class MessageManager
 {
@@ -48,6 +48,7 @@ public class MessageManager
 	private final PreparedStatement m_dropMessageOccurrenceStmt;
 	private final PreparedStatement m_countMessageOccurrencesStmt;
 	private final PreparedStatement m_dropMessageStmt;
+	private final PreparedStatement m_listOccurrencesInConferenceStmt;
 	
 	private final Connection m_conn; 
 	
@@ -115,6 +116,12 @@ public class MessageManager
 		m_dropMessageStmt = conn.prepareStatement(
 			 "delete from messages " + 
 			 "where id = ?");
+		m_listOccurrencesInConferenceStmt = conn.prepareStatement(
+			 "select mo.localnum, mo.action_ts, m.author_name, m.subject " +
+			 "from messages m join messageoccurrences mo " +
+			 "on m.id=mo.message " +
+			 "where mo.conference = ? " +
+			 "order by localnum desc limit ? offset ?;");
 
 	}
 	
@@ -155,6 +162,8 @@ public class MessageManager
 			m_countMessageOccurrencesStmt.close();
 		if(m_dropMessageStmt != null)
 			m_dropMessageStmt.close();
+		if(m_listOccurrencesInConferenceStmt != null)
+			m_listOccurrencesInConferenceStmt.close();
 	}
 	
 	public void finalize()
@@ -767,5 +776,29 @@ public class MessageManager
 		this.m_dropMessageStmt.clearParameters();
 		this.m_dropMessageStmt.setLong(1, globalNum);
 		this.m_dropMessageStmt.execute();		
+	}
+	
+	public MessageHeader[] getMessageOccurrencesInConference (long conference, int start, int limit)
+	throws SQLException
+	{
+		this.m_listOccurrencesInConferenceStmt.clearParameters();
+		this.m_listOccurrencesInConferenceStmt.setLong(1, conference);
+		this.m_listOccurrencesInConferenceStmt.setInt(2, limit);
+		this.m_listOccurrencesInConferenceStmt.setInt(3, start);
+		ResultSet rs = this.m_listOccurrencesInConferenceStmt.executeQuery();
+		List l = new ArrayList();
+		while (rs.next())
+		{
+			l.add (new MessageHeader(
+					rs.getInt(1),
+					rs.getTimestamp(2),
+					-1,
+					rs.getString(3),
+					-1,
+					rs.getString(4)));
+		}
+		MessageHeader[] mh = new MessageHeader[l.size()]; 
+		l.toArray(mh);
+		return mh;
 	}
 }

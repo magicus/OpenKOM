@@ -1894,4 +1894,24 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			return;
 		}
 	}
+
+	public MessageHeader[] listMessagesInConference(long conference, int start, int length)
+	throws UnexpectedException
+	{
+		try
+		{
+			return m_da.getMessageManager().getMessageOccurrencesInConference(conference, start, length);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+		
+	}
+
+	public MessageHeader[] listMessagesInCurrentConference(int start, int length)
+	throws UnexpectedException
+	{
+		return listMessagesInConference (this.getCurrentConferenceId(), start, length);
+	}
 }
