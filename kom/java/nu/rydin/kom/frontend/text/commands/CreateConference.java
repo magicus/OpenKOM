@@ -78,39 +78,39 @@ public class CreateConference extends AbstractCommand
 			choice = in.getChoice(fmt.format("create.conference.magic") + " (" + fmt.format("misc.y") + "/" + fmt.format("misc.n") + ")? ", 
 								  new String[] { fmt.format("misc.y"), fmt.format("misc.n") },
 								  1, error);
-		}
-		if (0 == choice)
-		{
-			doMagic = true;
-			out.println(fmt.format("magic.conference.presentation.users"));
-			out.println(fmt.format("magic.conference.presentation.conferences"));
-			out.println(fmt.format("magic.conference.notes"));
-			choice = in.getChoice("magic.conference.kind" + " (1/2/3)? ",
-								  new String[] { "1", "2", "3" }, -1, error);
-			
-			if (-1 != choice)
+			if (0 == choice)
 			{
-				magicType = (short)choice;
-				long oldMagic = -1;
-				try
+				doMagic = true;
+				out.println(fmt.format("magic.conference.presentation.users"));
+				out.println(fmt.format("magic.conference.presentation.conferences"));
+				out.println(fmt.format("magic.conference.notes"));
+				choice = in.getChoice("magic.conference.kind" + " (1/2/3)? ",
+									  new String[] { "1", "2", "3" }, -1, error);
+				
+				if (-1 != choice)
 				{
-					oldMagic = context.getSession().getMagicConference((short)choice);
-					choice = in.getChoice(fmt.format("magic.conference.exists", context.getSession().getName(oldMagic)),
-										  new String[] { fmt.format("misc.yes"), fmt.format("misc.no") },
-										  1, error);
-					if (0 != choice)
+					magicType = (short)choice;
+					long oldMagic = -1;
+					try
 					{
-						doMagic = false;
+						oldMagic = context.getSession().getMagicConference((short)choice);
+						choice = in.getChoice(fmt.format("magic.conference.exists", context.getSession().getName(oldMagic) + "? "),
+											  new String[] { fmt.format("misc.yes"), fmt.format("misc.no") },
+											  1, error);
+						if (0 != choice)
+						{
+							doMagic = false;
+						}
+					}
+					catch (KOMException e)
+					{
+						// There was no previous magic conference of this kind. 
 					}
 				}
-				catch (KOMException e)
+				else
 				{
-					// There was no previous magic conference of this kind. 
+					doMagic = false;
 				}
-			}
-			else
-			{
-				doMagic = false;
 			}
 		}
 		
