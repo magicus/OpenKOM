@@ -1,4 +1,12 @@
-CREATE TABLE names
+CREATE DATABASE IF NOT EXISTS kom;
+
+GRANT SELECT, INSERT, DELETE, UPDATE, CREATE, ALTER, INDEX, DROP ON kom.* TO 'kom'@'%' IDENTIFIED BY 'kom';
+
+FLUSH PRIVILEGES;
+
+USE kom;
+
+CREATE TABLE IF NOT EXISTS names
 (
 	id BIGINT NOT NULL AUTO_INCREMENT,
 	norm_name VARCHAR(80) NOT NULL,
@@ -10,7 +18,7 @@ CREATE TABLE names
 	UNIQUE INDEX norm_name_ix(norm_name)
 ) TYPE=INNODB;
 
-CREATE TABLE users 
+CREATE TABLE IF NOT EXISTS users 
 (
 	id BIGINT NOT NULL,
 	userid VARCHAR(50),
@@ -33,7 +41,7 @@ CREATE TABLE users
 	INDEX userid_ix(userid)
 ) TYPE=INNODB;
 
-CREATE TABLE conferences 
+CREATE TABLE IF NOT EXISTS conferences 
 (
 	id BIGINT NOT NULL,
 	administrator BIGINT NOT NULL,
@@ -48,7 +56,7 @@ CREATE TABLE conferences
 	FOREIGN KEY (replyConf) REFERENCES conferences(id) ON DELETE SET NULL
 ) TYPE=INNODB;
 
-CREATE TABLE memberships
+CREATE TABLE IF NOT EXISTS memberships
 (
 	conference BIGINT NOT NULL,
 	user BIGINT NOT NULL,
@@ -65,7 +73,7 @@ CREATE TABLE memberships
 	FOREIGN KEY (user) REFERENCES users(id) ON DELETE CASCADE		
 ) TYPE=INNODB;
 
-CREATE TABLE messages
+CREATE TABLE IF NOT EXISTS messages
 (
 	id BIGINT NOT NULL AUTO_INCREMENT,
 	created TIMESTAMP NOT NULL,
@@ -83,7 +91,7 @@ CREATE TABLE messages
 	FOREIGN KEY (reply_to) REFERENCES messages(id) ON DELETE SET NULL
 ) TYPE=INNODB;
 
-CREATE TABLE messageoccurrences
+CREATE TABLE IF NOT EXISTS messageoccurrences
 (
 	localnum INT NOT NULL,
 	conference BIGINT NOT NULL,

@@ -1,6 +1,8 @@
-DROP TABLE names;
-DROP TABLE users ;
-DROP TABLE conferences;
-DROP TABLE memberships;
-DROP TABLE messages;
-DROP TABLE messageoccurrences;
+USE kom;
+
+DROP TABLE IF EXISTS messageoccurrences;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS memberships;
+DROP TABLE IF EXISTS conferences;
+DROP TABLE IF EXISTS users ;
+DROP TABLE IF EXISTS names;
