@@ -11,22 +11,15 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.ChatRecipientStatus;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMUserException;
-import nu.rydin.kom.exceptions.MissingArgumentException;
 import nu.rydin.kom.exceptions.UnexpectedException;
-import nu.rydin.kom.frontend.text.AbstractCommand;
-import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.DisplayController;
-import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.*;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.simple.AbstractEditor;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleChatEditor;
-import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.RawParameter;
+import nu.rydin.kom.frontend.text.parser.*;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
 
@@ -38,20 +31,14 @@ public class SendChatMessage extends AbstractCommand
 
 	public SendChatMessage(Context context, String fullName)
 	{
-		super(fullName, new CommandLineParameter[] { new RawParameter("chat.fulhack.raw.ask", true)});	
+	    // Säg foo, bar: Du är bäst!
+	    //TODO: Fix messages, they're totally screwed up!
+		super(fullName, new CommandLineParameter[] { new NamedObjectEllipsisParameter("chat.fulhack.raw.ask", true, new NamedObjectParameter(true)), new RawParameter("chat.fulhack.raw.ask", false)});	
 	}
 
 	public void execute(Context context, Object[] parameterArray)
 		throws KOMException, IOException, InterruptedException
 	{
-	    String parameter = (String) parameterArray[0];
-	    parameter = parameter.trim();
-	    String[] parameters = parameter.split(" ");
-		// Handle parameters
-		//
-		if(parameters.length == 0)
-			throw new MissingArgumentException();
-		
 		// Set up
 		//
 		DisplayController dc = context.getDisplayController();
@@ -60,34 +47,23 @@ public class SendChatMessage extends AbstractCommand
 		ServerSession session = context.getSession();
 		String me = session.getLoggedInUser().getName();
 		MessageFormatter formatter = context.getMessageFormatter();
-
-		//Parse parameters to get list of recipients.
-		//
-		long[] destinations = null;
-
-		// TODO: Handle single recipients separately here (most common case and cheaper to do).
-
-		// Now splice the parameters and tokenize them again.
-		//
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < parameters.length; ++i)
-		{
-			sb.append(parameters[i]).append(" ");
-		}
-		String[] uarray = sb.toString().trim().split(",");
 		
-		// Resolve each name to an ID.
-		//
-		destinations = new long[uarray.length];
+		//Retrieve array of id's of receivers.
+		NameAssociation[] nameAssociations = (NameAssociation[])parameterArray[0];
+		long[] destinations = new long[nameAssociations.length];
 		String recipients = "";
-		for (int i = 0; i < uarray.length; ++i)
-		{
-		    long id = NamePicker.resolveNameToId(uarray[i], NameManager.UNKNOWN_KIND, context);
-			destinations[i] = id;
-			recipients += ", " + session.getName(id);
-		}
-
-		// Check that all users are logged in an can receive messages
+		for (int i = 0; i < nameAssociations.length; i++)
+        {
+		    long id = nameAssociations[i].getId();
+            destinations[i] = id;
+            //Build string of recipients...
+            recipients += ", " + session.getName(id);
+        }
+	    
+		//Retrieve message.
+		String message = (String)parameterArray[1];
+		
+		// Check that all users are logged in and can receive messages
 		//
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -119,29 +95,37 @@ public class SendChatMessage extends AbstractCommand
 		    }
 		}
 		if(error)
-		    throw new KOMUserException(sw.toString());
-	
-		//Print beginning of prompt for message to a list of users
-		//
-		if (recipients.length() > 2)
 		{
-		    recipients = recipients.substring(2);
+		    throw new KOMUserException(sw.toString());
 		}
-		dc.normal();
-	    out.println(context.getMessageFormatter().format("chat.saytouser", recipients));
-
-		out.flush();
-		
-		// Read message
-		//
-		AbstractEditor editor = new SimpleChatEditor(context.getMessageFormatter());
-		String message = editor.edit(context, -1).getBody();
+	
+		if (message == null)
+		{
+		    //Display message editor.
+		    
+			//Print beginning of prompt for message to a list of users
+			//
+			if (recipients.length() > 2)
+			{
+			    recipients = recipients.substring(2);
+			}
+			dc.normal();
+		    out.println(context.getMessageFormatter().format("chat.saytouser", recipients));
+	
+			out.flush();
+			
+			// Read message
+			//
+			AbstractEditor editor = new SimpleChatEditor(context.getMessageFormatter());
+			message = editor.edit(context, -1).getBody();
+		}
 		
 		// Empty message? User interrupted
 		//
 		if(message.length() == 0)
+		{
 			return;
-
+		}
 		
 		// Send it
 		//
