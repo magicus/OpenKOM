@@ -44,7 +44,7 @@ public class ShowSimpleChatMessage extends AbstractCommand
 		dc.normal();
 		
 		//FIXME EDITREFACTOR: We do not know the recipients at this point.
-		out.println(formatter.format("chat.saytouser", ""));
+		out.println(formatter.format("chat.editor.brokenheader"));
 		
 		// Print body
 		//

@@ -44,7 +44,7 @@ public class ShowSimpleFile extends AbstractCommand
 		dc.normal();
 		
 		//FIXME EDITREFACTOR: We do not know the name of the file at this point.
-		out.println(formatter.format("edit.file.header", ""));
+		out.println(formatter.format("edit.file.brokenheader"));
 		
 		// Print body
 		//
