@@ -30,7 +30,7 @@ public class GenerateTestdata extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new IntegerParameter(false)});
 	}
 	
-	public void execute2(Context context, Object[] parameterArray) 
+	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
 		int generate = 20;

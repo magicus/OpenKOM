@@ -27,7 +27,7 @@ public class ViewPresentation extends AbstractCommand
 		super(fullname, new CommandLineParameter[] { new NamedObjectParameter(true)});
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 	throws KOMException
 	{
 		try

@@ -30,7 +30,7 @@ public class Change extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) } );
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 		throws KOMException, IOException, InterruptedException
 	{
 	    Integer lineInteger = (Integer) parameterArray[0];

@@ -31,7 +31,7 @@ public abstract class ViewMessageLog extends AbstractCommand
         super(fullName, new CommandLineParameter[] { new IntegerParameter(false) });
     }
 
-    public abstract void execute2(Context context, Object[] parameterArray)
+    public abstract void execute(Context context, Object[] parameterArray)
             throws KOMException, IOException, InterruptedException;
     
     public void innerExecute(Context context, Object[] parameterArray, short kind)

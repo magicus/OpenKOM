@@ -27,7 +27,7 @@ public class ListMembers extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new ConferenceParameter(false)});
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 	throws KOMException 
 	{
 	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];

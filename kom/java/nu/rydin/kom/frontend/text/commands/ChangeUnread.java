@@ -24,7 +24,7 @@ public class ChangeUnread extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new IntegerParameter("change.unread.param.0.ask", true) } );	
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 		throws KOMException, IOException
 	{
 	    Integer number = (Integer) parameterArray[0];

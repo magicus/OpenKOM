@@ -31,7 +31,7 @@ public class ChangeTimeZone extends AbstractCommand
         super(fullName, new CommandLineParameter[] { new RawParameter("change.timezone.prompt", true) });
     }
 
-    public void execute2(Context context, Object[] parameters)
+    public void execute(Context context, Object[] parameters)
             throws KOMException, IOException, InterruptedException
     {
         KOMWriter out = context.getOut();

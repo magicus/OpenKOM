@@ -22,7 +22,7 @@ public class Encouragement extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 	{
 	    Random rand = new Random();
 	    //Note: Probability of getting the specified upper int is *very* low, 

@@ -27,7 +27,7 @@ public class SendMail extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new UserParameter(true) });	
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 		throws KOMException, IOException, InterruptedException
 	{
 	    long user = ((NameAssociation)parameterArray[0]).getId();

@@ -25,7 +25,7 @@ public class NoComment extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)});	
 	}
 	
-	public void execute2(Context context, Object[] parameterArray) 
+	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
 		// Check permissions

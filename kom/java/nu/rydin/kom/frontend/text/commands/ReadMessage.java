@@ -27,7 +27,7 @@ public class ReadMessage extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true)});	
 	}
 	
-	public void execute2(Context context, Object[] parameterArray) 
+	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
 	    TextNumber textNum = (TextNumber) parameterArray[0];

@@ -22,7 +22,7 @@ public class Delete extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) } );
 	}
 	
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 	{
 	    Integer lineInteger = (Integer) parameterArray[0];
 	    

@@ -27,7 +27,7 @@ public class ReadRules extends AbstractCommand
 		super(fullname, new CommandLineParameter[] { new ConferenceParameter(false) });
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 	throws KOMException
 	{
 		try

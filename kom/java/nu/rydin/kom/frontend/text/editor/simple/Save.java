@@ -17,7 +17,7 @@ public class Save extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute2(Context context, Object[] paramArray)
+	public void execute(Context context, Object[] paramArray)
 	{
 		// Not much to do here
 	}

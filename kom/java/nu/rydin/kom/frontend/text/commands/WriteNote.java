@@ -25,7 +25,7 @@ public class WriteNote extends AbstractCommand
 		super(fullname, AbstractCommand.NO_PARAMETERS);
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
 		UnstoredMessage msg = context.getMessageEditor().edit(context, -1);

@@ -26,7 +26,7 @@ public class Signup extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });	
 	}
 	
-	public void execute2(Context context, Object[] parameterArray) 
+	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
 		long conference = ((NameAssociation)parameterArray[0]).getId();

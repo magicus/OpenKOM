@@ -29,7 +29,7 @@ public class ListCommands extends AbstractCommand
 		return cmds;
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
             throws KOMException, IOException {
 		PrintWriter out = context.getOut();
 		Command[] cmds = getCommandList(context);

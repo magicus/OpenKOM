@@ -62,7 +62,7 @@ public class Parser
         
         public void execute(Context context) throws KOMException, IOException, InterruptedException {
     		m_command.printPreamble(context.getOut());
-    	    m_command.execute2(context, m_parameterArray);
+    	    m_command.execute(context, m_parameterArray);
     		m_command.printPostamble(context.getOut());
         }
 	}

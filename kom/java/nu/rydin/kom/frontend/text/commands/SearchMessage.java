@@ -29,7 +29,7 @@ public class SearchMessage extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new RawParameter("search.param.0.ask", true) });
 	}
 
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 	throws KOMException
 	{
 		KOMWriter out = context.getOut();

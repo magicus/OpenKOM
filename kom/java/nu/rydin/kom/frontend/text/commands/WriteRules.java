@@ -26,7 +26,7 @@ public class WriteRules extends AbstractCommand
 		super (fullname, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
 		if(!context.getSession().hasPermissionInCurrentConference(ConferencePermissions.ADMIN_PERMISSION))

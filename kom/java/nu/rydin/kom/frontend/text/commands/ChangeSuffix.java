@@ -32,7 +32,7 @@ public class ChangeSuffix extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new UserParameter(false), new RawParameter("change.suffix.param.1.ask", true)});
 	}
 	
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 		throws KOMException, IOException, InterruptedException
 	{
 		ServerSession session = context.getSession();

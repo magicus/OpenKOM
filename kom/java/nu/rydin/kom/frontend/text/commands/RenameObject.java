@@ -30,7 +30,7 @@ public class RenameObject extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(true) });
 	}
 	
-	public void execute2(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameterArray)
 		throws KOMException, IOException, InterruptedException
 	{
 		long id = ((NameAssociation)parameterArray[0]).getId();

@@ -28,7 +28,7 @@ public class Copy extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });	
 	}
 	
-	public void execute2(Context context, Object[] parameterArray) 
+	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException, NoCurrentMessageException
 	{
 	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];

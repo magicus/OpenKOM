@@ -26,7 +26,7 @@ public class SetFlag extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new FlagParameter(true) } );
 	}
 
-	public void execute2(Context context, Object[] parameterArray) throws KOMException
+	public void execute(Context context, Object[] parameterArray) throws KOMException
 	{
         Integer flagNumberInteger = (Integer) parameterArray[0];
         int flagNumber = flagNumberInteger.intValue();

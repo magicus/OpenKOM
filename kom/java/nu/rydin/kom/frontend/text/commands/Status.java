@@ -36,7 +36,7 @@ public class Status extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(false) });		
 	}
 	
-	public void execute2(Context context, Object[] parameters) 
+	public void execute(Context context, Object[] parameters) 
 	throws KOMException, IOException, InterruptedException
 	{	
 
@@ -144,7 +144,7 @@ public class Status extends AbstractCommand
 		String [] args = {info.getName()};
 		try
 		{
-			l.execute2(context, args);
+			l.execute(context, args);
 		}
 		catch (Exception e)
 		{
