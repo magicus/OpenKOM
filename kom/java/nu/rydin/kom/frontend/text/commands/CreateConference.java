@@ -9,16 +9,13 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.constants.Visibilities;
-import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
-import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -38,7 +35,6 @@ public class CreateConference extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new RawParameter("create.conference.param.0.ask", true) });
 	}
 	
-	//FIXME Command should be rewritten using better parameter!
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException, DuplicateNameException
 	{
@@ -47,73 +43,20 @@ public class CreateConference extends AbstractCommand
 		MessageFormatter fmt = context.getMessageFormatter();
 		String fullname = (String) parameterArray[0];
 		
-		if (NameUtils.normalizeName(fullname).equals(NameUtils.normalizeName(fmt.format("misc.mailboxtitle"))))
-		    throw new DuplicateNameException();
+		// Check name validity
+		//
+		context.checkName(fullname);
 
 		// Do we have the permission to do this?
 		//
 		context.getSession().checkRights(UserPermissions.CREATE_CONFERENCE);
 			
-		// There must be a better way to do this..
-		//
-		boolean canDoMagic = false;
-		boolean doMagic = false;
-		short magicType = -1;
-		try
-		{
-			context.getSession().checkRights(UserPermissions.CONFERENCE_ADMIN);
-			canDoMagic = true;
-		}
-		catch (AuthorizationException e)
-		{
-			// Ignore, user simply doesn´t have conference_admin privileges. 
-		}
 		
 		int choice = 0;
 
 		// User may create magic conferences. Do it?
 		//		
 		String error = fmt.format("create.conference.invalid.choice"); 
-		if (canDoMagic)
-		{
-			choice = in.getChoice(fmt.format("create.conference.magic") + " (" + fmt.format("misc.y") + "/" + fmt.format("misc.n") + ")? ", 
-								  new String[] { fmt.format("misc.y"), fmt.format("misc.n") },
-								  1, error);
-			if (0 == choice)
-			{
-				doMagic = true;
-				out.println(fmt.format("magic.conference.presentation.users"));
-				out.println(fmt.format("magic.conference.presentation.conferences"));
-				out.println(fmt.format("magic.conference.notes"));
-				choice = in.getChoice(fmt.format("magic.conference.kind") + " (1/2/3)? ",
-									  new String[] { "1", "2", "3" }, -1, error);
-				
-				if (-1 != choice)
-				{
-					magicType = (short)choice;
-					long oldMagic = -1;
-					try
-					{
-						oldMagic = context.getSession().getMagicConference((short)choice);
-						choice = in.getChoice(fmt.format("magic.conference.exists", context.getSession().getName(oldMagic)) + "? ",
-											  new String[] { fmt.format("misc.yes"), fmt.format("misc.no") },
-											  1, error);
-						if (0 != choice)
-						{
-							throw new OperationInterruptedException();
-						}
-					}
-					catch (ObjectNotFoundException e)
-					{
-						// There was no previous magic conference of this kind. 
-					}
-				}
-				else
-				{
-					doMagic = false;
-				}
-			}
-		}
 		
 		short flags = 0;
 		
@@ -199,14 +142,7 @@ public class CreateConference extends AbstractCommand
 		//			
 		try
 		{
-			if (doMagic)
-			{
-				context.getSession().createMagicConference(fullname, flags, nonmemberFlags, visibility, replyConf, magicType);
-			}
-			else
-			{
-				context.getSession().createConference(fullname, flags, nonmemberFlags, visibility, replyConf);
-			}
+			context.getSession().createConference(fullname, flags, nonmemberFlags, visibility, replyConf);
 		}
 		catch(DuplicateNameException e)
 		{

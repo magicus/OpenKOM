@@ -8,6 +8,8 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 
+import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -33,9 +35,11 @@ public class PresentObject extends AbstractCommand
 	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
 	    
 		long objectId = nameAssociation.getId();
-		short kind = context.getSession().getObjectKind(objectId);
+		ServerSession ss = context.getSession();
+		if(!ss.canManipulateObject(objectId))
+		    throw new AuthorizationException();
 		UnstoredMessage msg = context.getMessageEditor().edit(-1);
-		MessageOccurrence occ = context.getSession().storeMagicMessage(msg, kind, objectId);
+		MessageOccurrence occ = ss.storePresentation(msg, objectId);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));
 	}

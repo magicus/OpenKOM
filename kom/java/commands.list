@@ -85,6 +85,9 @@ nu.rydin.kom.frontend.text.commands.ShowSystemInfo
 nu.rydin.kom.frontend.text.commands.EnterSingleUserMode
 nu.rydin.kom.frontend.text.commands.ClearScreen
 nu.rydin.kom.frontend.text.commands.SendCondensedBroadcast
+nu.rydin.kom.frontend.text.commands.ChangeNotesConference
+nu.rydin.kom.frontend.text.commands.ChangeUserPresentationConference
+nu.rydin.kom.frontend.text.commands.ChangeConferencePresentationConference
 nu.rydin.kom.frontend.text.commands.Help
 nu.rydin.kom.frontend.text.commands.ChangeTerminalWidth
 nu.rydin.kom.frontend.text.commands.ChangeTerminalHeight

@@ -114,7 +114,7 @@ public class NameUtils
     {
         return ConferenceNamePattern.matcher(name).matches();
     }
-
+    
     public static String[] splitName(String name)
     {
         StringTokenizer st = new StringTokenizer(normalizeName(name));

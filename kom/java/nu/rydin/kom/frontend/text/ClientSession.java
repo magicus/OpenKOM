@@ -10,6 +10,7 @@ import java.io.*;
 import java.text.DateFormatSymbols;
 import java.util.*;
 
+import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.constants.MessageLogKinds;
@@ -979,6 +980,38 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	{
 		return m_flagLabels;
 	}
+	
+	public void checkName(String name)
+	throws DuplicateNameException, InvalidNameException, UnexpectedException
+	{
+	    // Check that name is lexigraphically correct
+	    //
+	    if(!NameUtils.isValidName(name))
+	        throw new InvalidNameException(name);
+	    
+	    // Check for conflict with mailbox name
+	    //
+		if (NameUtils.normalizeName(name).equals(NameUtils.normalizeName(m_formatter.format("misc.mailboxtitle"))))
+		    throw new DuplicateNameException(name);
+		
+		// Check for conflict with existing name, ignoring suffixes
+		//
+		String normalized = NameUtils.stripSuffix(NameUtils.normalizeName(name));
+		
+		// Nothing left after normalizing name? That's not legal!
+		//
+		if(normalized.length() == 0)
+		    throw new InvalidNameException(name);
+		NameAssociation names[] = m_session.getAssociationsForPattern(normalized);
+		int top = names.length;
+		for(int idx = 0; idx < top; ++idx)
+		{
+		    String each = names[idx].getName().toString();
+		    if(NameUtils.stripSuffix(NameUtils.normalizeName(each)).equals(normalized))
+		        throw new DuplicateNameException(name);
+		}
+	}
+
 	
 	// TODO: Ihse -- fulkod, I know. Vågade inte peta på de gamla funktionerna...
 	public String[] getExistingFlagLabels()

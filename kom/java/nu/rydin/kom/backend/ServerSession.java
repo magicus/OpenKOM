@@ -286,28 +286,27 @@ public interface ServerSession
 	throws AuthorizationException, UnexpectedException;
 	
 	/**
-	 * Store a magic message. Conference determined by kind of magic.
+	 * Stores a presentation of an object
 	 * 
 	 * @param msg Unstored message.
-	 * @param kind Magic type (see ConferenceManager.MAGIC_XXXXXXXX).
+	 * @param object The object id
 	 * @return The local occurrence.
 	 * @throws UnexpectedException
 	 * @throws AuthorizationException
-	 */
-	
-	public MessageOccurrence storeMagicMessage(UnstoredMessage msg, short kind, long object)
-	throws UnexpectedException, AuthorizationException;
+	 */	
+	public MessageOccurrence storePresentation(UnstoredMessage msg, long object)
+	throws UnexpectedException, AuthorizationException, ObjectNotFoundException;
 
 	/**
-	 * Reads a magic message.
+	 * Reads a tagged message.
 	 * 
-	 * @param kind Kind of magic (user presentation, conference presentation or note).
+	 * @param tag Message tag (user presentation, conference presentation or note).
 	 * @param object Object identifier (unser or conference ID).
 	 * @return The envelope around the latest matching message.
 	 * @throws UnexpectedException
 	 * @throws ObjectNotFoundException
 	 */
-	public Envelope readMagicMessage(short kind, long object)
+	public Envelope readTaggedMessage(short tag, long object)
 	throws UnexpectedException, ObjectNotFoundException;
 
 	/**
@@ -949,7 +948,18 @@ public interface ServerSession
 	 * @throws UnexpectedException
 	 */
 	public boolean userCanChangeNameOf(long id)
-	throws DuplicateNameException, UnexpectedException;	
+	throws DuplicateNameException, UnexpectedException;
+
+	/**
+	 * Returns the if the current user can manipulate an object, e.g. change
+	 * the presentation of it or delete it
+	 * 
+	 * @param object The id of the object to check
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public boolean canManipulateObject(long object)
+	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
 	 * Changes the password of a user.
@@ -1069,16 +1079,7 @@ public interface ServerSession
 	 */
 	public void deleteConference (long conference)
 	throws AuthorizationException, UnexpectedException;
-	
-	public void createMagicConference (String fullname, int permissions, int nonmemberPermissions, short visibility, long replyConf, short kind)
-	throws DuplicateNameException, UnexpectedException, AuthorizationException, AmbiguousNameException;
-
-	public long getMagicConference (short kind)
-	throws ObjectNotFoundException, UnexpectedException;
-
-	public boolean isMagicConference (long conference)
-	throws ObjectNotFoundException, UnexpectedException;
-	
+		
 	public short getObjectKind (long conference)
 	throws ObjectNotFoundException;
 	
@@ -1267,9 +1268,10 @@ public interface ServerSession
      * @param parent The id of the parent object
      * @param name The file name
      * @param content The content
+     * @param permissions The permissions
      * @throws UnexpectedException
      */
-    public void storeFile(long parent, String name, String content)
+    public void storeFile(long parent, String name, String content, int permissions)
     throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
     
     /**
@@ -1365,4 +1367,24 @@ public interface ServerSession
      */
     public SystemInformation getSystemInformation()
     throws UnexpectedException;
+    
+    /**
+     * Changes a setting having a string value.
+     * 
+     * @param name The name of the setting
+     * @param value The value
+     * @throws UnexpectedException
+     */
+    public void changeSetting(String name, String value)
+    throws AuthorizationException, UnexpectedException;
+
+    /**
+     * Changes a setting having a numeric value.
+     * 
+     * @param name The name of the setting
+     * @param value The value
+     * @throws UnexpectedException
+     */
+    public void changeSetting(String name, long value)
+    throws AuthorizationException, UnexpectedException;
 }

@@ -55,7 +55,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	/**
 	 * Id of the user of this session
 	 */
-	private long m_userId;
 	
 	/**
 	 * Current conference id, or -1 if it could not be determined
@@ -134,6 +133,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	 * Mutex controlling session access
 	 */
 	private final Mutex m_mutex = new Mutex();
+	
+	/**
+	 * The user currently logged in
+	 */
+	private long m_userId;
 		
 	public ServerSessionImpl(DataAccess da, long userId, SessionManager sessions)
 	throws UnexpectedException
@@ -730,6 +734,17 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		return this.storeReply(conf, msg, -1L);
 	}
 	
+	public boolean canManipulateObject(long object)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+	    short kind = this.getObjectKind(object);
+	    UserInfo ui = this.getLoggedInUser();
+	    return ui.getId() == object 
+	            || this.hasPermissionInConference(object, ConferencePermissions.ADMIN_PERMISSION)
+	            || (kind == NameManager.USER_KIND && ui.hasRights(UserPermissions.USER_ADMIN))
+	            || (kind == NameManager.CONFERENCE_KIND && ui.hasRights(UserPermissions.CONFERENCE_ADMIN));
+	}
+	
 	public MessageOccurrence storeReplyToCurrentMessage(UnstoredMessage msg)
 	throws NoCurrentMessageException, AuthorizationException, UnexpectedException
 	{
@@ -738,16 +753,26 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		return this.storeReplyInCurrentConference(msg, m_lastReadMessageId);	
 	}
 
-	public MessageOccurrence storeMagicMessage(UnstoredMessage msg, short kind, long object)
-	throws UnexpectedException, AuthorizationException
+	public MessageOccurrence storePresentation(UnstoredMessage msg, long object)
+	throws UnexpectedException, AuthorizationException, ObjectNotFoundException
 	{
 		try
 		{
-			if (-1L == object)
+		    // Permission checks: We have to be presenting ourselves, a conference
+		    // we're the administrator of or we have to hold the USER_ADMIN (in case
+		    // we're presenting a user) or CONFERENCE_ADMIN (in case of a conference)
+		    //
+			if (-1L == object) 
 			{
 				object = this.getLoggedInUserId();
 			}
-			long conference = this.getMagicConferenceForObject(kind, object);
+		    short kind = this.getObjectKind(object);
+		    UserInfo ui = this.getLoggedInUser();
+		    if(!this.canManipulateObject(object))
+		        throw new AuthorizationException();
+			long conference = m_da.getSettingManager().getNumber(
+			        kind == NameManager.CONFERENCE_KIND ? SettingKeys.CONFERENCE_PRESENTATIONS
+			                : SettingKeys.USER_PRESENTATIONS);
 			MessageManager mm = m_da.getMessageManager();  
 			MessageOccurrence occ = mm.addMessage(this.getLoggedInUserId(),
 				this.getCensoredName(this.getLoggedInUserId()).getName(),
@@ -757,20 +782,16 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			this.broadcastEvent(
 				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
 					occ.getGlobalId()));
-			this.m_da.getMessageManager().addMessageAttribute(occ.getGlobalId(), kind, new Long(object).toString());
+			this.m_da.getMessageManager().addMessageAttribute(occ.getGlobalId(), MessageManager.ATTR_PRESENTATION, new Long(object).toString());
 			return occ;
 		}
 		catch(SQLException e)
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
-		catch(ObjectNotFoundException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}	
 	}
 
-	public Envelope readMagicMessage(short kind, long object)
+	public Envelope readTaggedMessage(short tag, long object)
 	throws UnexpectedException, ObjectNotFoundException
 	{
 		try
@@ -779,8 +800,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			{
 				object = this.getLoggedInUserId();
 			}
-			long magicConference = getMagicConferenceForObject(kind, object);
-			return this.innerReadMessage(m_da.getMessageManager().getLatestMagicMessageFor(magicConference, object, kind));
+			return this.innerReadMessage(m_da.getMessageManager().getTaggedMessage(object, tag));
 		}
 		catch(SQLException e)
 		{
@@ -2338,7 +2358,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    }                        
     }
     
-    public void storeFile(long parent, String name, String content)
+    public void storeFile(long parent, String name, String content, int permissions)
     throws AuthorizationException, ObjectNotFoundException, UnexpectedException
     {
 	    try
@@ -2359,7 +2379,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	            if(!hasParentRights)
 	                throw new AuthorizationException();
 	        }
-	        m_da.getFileManager().store(parent, name, content);
+	        fm.store(parent, name, content);
+	        fm.chmod(parent, name, permissions);
 	    }
 	    catch(SQLException e)
 	    {
@@ -2402,8 +2423,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         try
         {
             long parent = m_da.getUserManager().getSysopId();
-            this.storeFile(parent, name, content);
-            m_da.getFileManager().chmod(parent, name, FileProtection.ALLOW_READ);
+            this.storeFile(parent, name, content, FileProtection.ALLOW_READ);
         }
 	    catch(SQLException e)
 	    {
@@ -3009,55 +3029,34 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
 		}
 	}
-	
-	public void createMagicConference (String fullname, int permissions, int nonmemberPermissions,  short visibility, long replyConf, short kind)
-	throws DuplicateNameException, UnexpectedException, AuthorizationException, AmbiguousNameException
-	{
+		
+    public void changeSetting(String name, String value)
+    throws AuthorizationException, UnexpectedException
+    {
 		try
 		{
-			m_da.getConferenceManager().setMagicConference(this.createConference(fullname, permissions, nonmemberPermissions, visibility, replyConf), kind);
+		    this.checkRights(UserPermissions.ADMIN);
+			m_da.getSettingManager().changeSetting(name, value, 0);
 		}
 		catch (SQLException e)
 		{
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
-		}
-	}
-	
-	public long getMagicConference (short kind)
-	throws ObjectNotFoundException, UnexpectedException
-	{
+		}        
+    }
+
+    public void changeSetting(String name, long value)
+    throws AuthorizationException, UnexpectedException
+    {
 		try
 		{
-			return m_da.getConferenceManager().getMagicConference(kind);
-		}
-		catch (SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
-	
-	public long getMagicConferenceForObject(short kind, long object)
-	throws ObjectNotFoundException, UnexpectedException
-	{
-		return this.getMagicConference(MessageManager.ATTR_PRESENTATION == kind ? 
-											NameManager.USER_KIND == this.getObjectKind(object) ? 
-												ConferenceManager.MAGIC_USERPRESENTATIONS : 
-												ConferenceManager.MAGIC_CONFPRESENTATIONS :
-											ConferenceManager.MAGIC_NOTE);		
-	}
-	
-	public boolean isMagicConference (long conference)
-	throws UnexpectedException, ObjectNotFoundException
-	{
-		try
-		{
-			return m_da.getConferenceManager().isMagic(conference);
+		    this.checkRights(UserPermissions.ADMIN);
+			m_da.getSettingManager().changeSetting(name, null, value);
 		}
 		catch (SQLException e)
 		{
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
-		}
-	}
+		}        
+    }
 	
 	public void updateLastlogin()
 	throws ObjectNotFoundException, UnexpectedException

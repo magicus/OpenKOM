@@ -199,3 +199,11 @@ CREATE TABLE IF NOT EXISTS files
 	INDEX file_parentix(parent), 
 	FOREIGN KEY (parent) REFERENCES names(id) ON DELETE CASCADE
 ) TYPE=INNODB;
+
+CREATE TABLE IF NOT EXISTS settings
+(
+	name VARCHAR(100) NOT NULL,
+	string_value VARCHAR(100),
+	numeric_value BIGINT,
+	PRIMARY KEY(name)
+) TYPE=INNODB;

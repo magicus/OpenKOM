@@ -8,11 +8,10 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 
-import nu.rydin.kom.backend.data.MessageManager;
+import nu.rydin.kom.constants.FileProtection;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -29,8 +28,7 @@ public class WriteNote extends AbstractCommand
 	throws KOMException, IOException, InterruptedException 
 	{
 		UnstoredMessage msg = context.getMessageEditor().edit(-1);
-		MessageOccurrence occ = context.getSession().storeMagicMessage(msg, MessageManager.ATTR_NOTE, -1L);
-		context.getOut().println(context.getMessageFormatter().format(
-			"write.message.saved", new Integer(occ.getLocalnum())));
+		context.getSession().storeFile(context.getLoggedInUserId(), ".note.txt", msg.getBody(), 
+		        FileProtection.ALLOW_READ);
 	}
 }

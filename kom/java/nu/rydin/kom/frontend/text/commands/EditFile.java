@@ -69,6 +69,6 @@ public class EditFile extends AbstractCommand
 
         // Store in file
         //
-        session.storeFile(parent, fileName, newContent);
+        session.storeFile(parent, fileName, newContent, 0);
     }
 }

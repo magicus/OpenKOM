@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Date;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.InvalidNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -247,6 +249,12 @@ public class EditorContext implements Context
     public String[] getExistingRightsLabels()
     {
         return m_underlying.getExistingRightsLabels();
+    }
+    
+    public void checkName(String name)
+    throws DuplicateNameException, InvalidNameException, UnexpectedException
+    {
+        m_underlying.checkName(name);
     }
 
 }

@@ -111,12 +111,15 @@ public abstract class AbstractEditor
 					 		if(executableCommand == null)
 					 			continue;
 					 			
-					 		// We have a command. Go run it! ...with two exceptions: The quit
-					 		// and the save command. Check them first.
+					 		// We have a command. Go run it! 
 					 		//
 					 		if(executableCommand.getCommand().getClass() == Save.class)
 					 			return;
 				 			executableCommand.execute(m_context);
+				 		}
+				 		catch(QuitEditorException e)
+				 		{
+				 		    throw new OperationInterruptedException();
 				 		}
 				 		catch(KOMException e)
 				 		{

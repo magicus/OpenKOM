@@ -31,10 +31,9 @@ public class NamePicker
         {
             long id = Long.parseLong(name);
             if (id > 0)
-            {
-                return new NameAssociation(id, (String) null);
-            }
-        } catch (NumberFormatException e)
+                return new NameAssociation(id, ctx.getSession().getName(id));
+        } 
+        catch (NumberFormatException e)
         {
             // Not a numeric ID, need to parse and resolve it.
         }

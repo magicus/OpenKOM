@@ -12,6 +12,24 @@ package nu.rydin.kom.utils;
 public class StringUtils 
 {
     /**
+     * Returns true if the supplied string can be interpreted as an integer.
+     * 
+     * @param s The string to test 
+     * @return
+     */
+    public static boolean isNumeric(String s)
+    {
+        int top = s.length();
+        for(int idx = 0; idx < top; ++idx)
+        {
+            char each = s.charAt(idx);
+            if(each < '0' || each > '9')
+                return false;
+        }
+        return true;
+    }
+
+    /**
      * Returns true if the supplie string can be parsed as a local or global message number.
      * 
      * @param s The string to test

@@ -9,8 +9,8 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -106,12 +106,17 @@ public class Status extends AbstractCommand
 		//
 		try
 		{
-			out.print(context.getSession().readMagicMessage(MessageManager.ATTR_NOTE, info.getId()).getMessage().getBody());
-			out.println();
+		    String note = context.getSession().readFile(info.getId(), ".note.txt");
+			out.println(formatter.format("status.user.note"));
+			out.println(note);
 		}
-		catch (UnexpectedException e)
+		catch (ObjectNotFoundException e)
 		{
-			//
+			// Not found, nothing to print
+		}
+		catch (AuthorizationException e)
+		{
+			// No access, nothing to print
 		}		
 		
 		// List memberships

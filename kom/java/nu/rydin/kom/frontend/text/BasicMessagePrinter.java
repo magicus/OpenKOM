@@ -111,7 +111,7 @@ public class BasicMessagePrinter implements MessagePrinter
 					break;
 				case MessageManager.ACTION_MOVED:
 					MessageAttribute[] attributes = envelope.getAttributes();
-					for(int attrIdx = attributes.length-1; 0 < attrIdx; --attrIdx)
+					for(int attrIdx = attributes.length-1; 0 <= attrIdx; --attrIdx)
 					{
 						MessageAttribute each = attributes[attrIdx];
 						if(each.getKind() == MessageManager.ATTR_MOVEDFROM)

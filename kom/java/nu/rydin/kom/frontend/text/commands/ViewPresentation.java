@@ -33,8 +33,8 @@ public class ViewPresentation extends AbstractCommand
 		try
 		{
 			long objectId = ((NameAssociation)parameterArray[0]).getId();
-			short kind = MessageManager.ATTR_PRESENTATION; 
-			context.getMessagePrinter().printMessage(context, context.getSession().readMagicMessage(kind, objectId));
+			context.getMessagePrinter().printMessage(context, context.getSession().
+			        readTaggedMessage(MessageManager.ATTR_PRESENTATION, objectId));
 		}
 		catch (UnexpectedException e)
 		{

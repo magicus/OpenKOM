@@ -176,12 +176,10 @@ public class MessageManager
 			 "order by mo.message desc " +
 			 "limit 1 offset 0");
 		m_getLatestMagicMessageStmt = conn.prepareStatement(
-			 "select mo.message " +
-			 "from messageoccurrences as mo " +
-			 "join magicconferences as mc on mo.conference = mc.conference " +
-			 "join messageattributes as ma on mo.message = ma.message " +
-			 "where mo.conference = ? and ma.kind = ? and ma.value = ? " +
-			 "order by mo.message desc " +
+			 "select m.id " +
+			 "from messages as m, messageattributes ma " +
+			 "where ma.kind = ? and ma.value = ? and ma.message = m.id " +
+			 "order by m.created desc " +
 			 "limit 1 offset 0");
 				
 		m_searchMessagesLocally = conn.prepareStatement(
@@ -1011,18 +1009,18 @@ public class MessageManager
 		return i;
 	}
 	
-	public long getLatestMagicMessageFor (long conference, long objectId, short kind)
-	throws SQLException
+	public long getTaggedMessage(long objectId, short kind)
+	throws SQLException, ObjectNotFoundException
 	{
 		ResultSet rs = null;
 		try
 		{
 			this.m_getLatestMagicMessageStmt.clearParameters();
-			this.m_getLatestMagicMessageStmt.setLong(1, conference);
-			this.m_getLatestMagicMessageStmt.setShort(2, kind);
-			this.m_getLatestMagicMessageStmt.setString(3, new Long(objectId).toString());
+			this.m_getLatestMagicMessageStmt.setShort(1, kind);
+			this.m_getLatestMagicMessageStmt.setString(2, Long.toString(objectId));
 			rs = this.m_getLatestMagicMessageStmt.executeQuery();
-			rs.first();
+			if(!rs.next())
+			    throw new ObjectNotFoundException("object=" + objectId + ", kind=" + kind);
 			return rs.getLong(1);
 		}
 		finally
