@@ -293,11 +293,15 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			}
 			catch(LoginProhibitedException e)
 			{
-			    m_out.println(e.getMessage());
+    		    m_out.println();
+    			m_out.println(e.formatMessage(this));
+    			m_out.println();
 			}
 			catch(LoginNotAllowedException e)
 			{
-			    m_out.println(e.getMessage());
+    		    m_out.println();
+    			m_out.println(e.formatMessage(this));
+    			m_out.println();
 			}
 			catch(InterruptedException e)
 			{
