@@ -153,16 +153,16 @@ public class MessageManager
 		// RDBMS that supports indexed views (not to mention stored procedures..)
 		//		
 		m_getGlobalBySubjectStmt = conn.prepareStatement(
-			 "select Message " + 
-			 "from MessageOccurrences as mo " +
-			 "join Memberships as ms on mo.Conference = ms.Conference " +
-			 "join Messages on mo.Message = Messages.ID " +
-			 "where ms.User = ? and Subject = ?");
+			 "select message " + 
+			 "from messageoccurrences as mo " +
+			 "join memberships as ms on mo.conference = ms.conference " +
+			 "join Messages on mo.message = messages.id " +
+			 "where ms.user = ? and subject = ?");
 		m_getLocalBySubjectStmt = conn.prepareStatement(
 		     "select localnum " +
-		     "from MessageOccurrences as mo " +
-		     "join Messages as m on m.id = mo.message " +
-		     "where mo.conference = ? and m.Subject = ?");
+		     "from messageoccurrences as mo " +
+		     "join messages as m on m.id = mo.message " +
+		     "where mo.conference = ? and m.subject = ?");
 		
 		// To speed things up, a special version to just retrieve the local ID.
 		//
