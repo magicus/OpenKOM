@@ -131,6 +131,20 @@ public interface Context extends TerminalSettingsProvider
 	 * Returns terminal information
 	 */
 	public TerminalSettings getTerminalSettings();
+
+	/**
+	 * Manually sets the width of the terminal.
+	 * 
+	 * @param width
+	 */
+	public void setTerminalWidth(int width);
+	
+	/**
+	 * Manually sets the height of the terminal.
+	 * 
+	 * @param height
+	 */
+	public void setTerminalHeight(int height);
 	
 	/**
 	 * Formats an object name according to user settings

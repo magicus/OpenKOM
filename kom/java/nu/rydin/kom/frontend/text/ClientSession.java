@@ -914,6 +914,15 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		return new TerminalSettings(m_windowHeight != -1 ? m_windowHeight : 24, m_windowWidth != -1 ? m_windowWidth : 80, "ANSI");
 	}
 	
+    public void setTerminalHeight(int height)
+    {
+        m_windowHeight = height;
+    }
+    public void setTerminalWidth(int width)
+    {
+        m_windowWidth = width;
+    }
+    
 	public void printDebugInfo()
 	{
 		m_out.println(m_session.getDebugString());

@@ -177,6 +177,15 @@ public class EditorContext implements Context
 		return m_underlying.getTerminalSettings();
 	}
 	
+    public void setTerminalHeight(int height)
+    {
+        m_underlying.setTerminalHeight(height);
+    }
+    public void setTerminalWidth(int width)
+    {
+        m_underlying.setTerminalWidth(width);
+    }
+    
 	public String formatObjectName(String name, long id)
 	{
 	    return m_underlying.formatObjectName(name, id);
