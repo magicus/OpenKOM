@@ -24,9 +24,6 @@ import com.sshtools.daemon.platform.PasswordChangeException;
 public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 {
 
-    /**
-     *  
-     */
     public OpenKOMAuthenticationProvider()
     {
         super();

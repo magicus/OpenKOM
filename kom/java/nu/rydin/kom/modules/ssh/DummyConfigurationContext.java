@@ -19,7 +19,7 @@ import nu.rydin.kom.utils.Logger;
 
 import org.xml.sax.SAXException;
 
-import com.sshtools.common.configuration.SshAPIConfiguration;
+//import com.sshtools.common.configuration.SshAPIConfiguration;
 import com.sshtools.daemon.configuration.PlatformConfiguration;
 import com.sshtools.daemon.configuration.ServerConfiguration;
 import com.sshtools.daemon.vfs.VFSMount;
@@ -77,8 +77,8 @@ class DummyConfigurationContext implements ConfigurationContext
             configurations.put(ServerConfiguration.class, fake1);
             PlatformConfiguration fake2 = new DummyPlatformConfiguration();
             configurations.put(PlatformConfiguration.class, fake2);
-            SshAPIConfiguration fake3 = new DummySshAPIConfiguration();
-            configurations.put(SshAPIConfiguration.class, fake3);
+//            SshAPIConfiguration fake3 = new DummySshAPIConfiguration();
+//            configurations.put(SshAPIConfiguration.class, fake3);
         } catch (Exception ex)
         {
             Logger.fatal(this, ex);
@@ -113,7 +113,7 @@ class DummyConfigurationContext implements ConfigurationContext
 
         public String getNativeProcessProvider()
         {
-            return "nu.rydin.kom.modules.ssh.OpenKOMProcessProvider";
+            return "";
         }
 
         public String getSetting(String name, String defaultValue)
@@ -272,6 +272,7 @@ class DummyConfigurationContext implements ConfigurationContext
         }
     }
 
+    /*
     private static class DummySshAPIConfiguration extends SshAPIConfiguration
     {
         public DummySshAPIConfiguration() throws SAXException,
@@ -361,5 +362,5 @@ class DummyConfigurationContext implements ConfigurationContext
             return new ArrayList();
         }
     }
-
+*/
 }

@@ -14,7 +14,7 @@ public class OpenKOMSessionChannelFactory implements ChannelFactory
 
     public OpenKOMSessionChannelFactory() throws ConfigurationException
     {
-        sessionChannelImpl = OpenKOMSessionChannelServer.class;
+        sessionChannelImpl = OpenKOMSessionChannel.class;
     }
 
     public Channel createChannel(String channelType, byte[] requestData)
