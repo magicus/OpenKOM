@@ -46,7 +46,14 @@ public class TextNumberParameter extends CommandLineParameter
 		try
 		{
 			int number = Integer.parseInt(cooked);
-			return new Match(true, matchingPart, remainder, new TextNumber(number, global));
+			if (number > 0)
+			{
+			    return new Match(true, matchingPart, remainder, new TextNumber(number, global));
+			}
+			else
+			{
+			    return new Match(false, null, null, null);
+			}
 		}
 		catch (NumberFormatException e)
 		{
