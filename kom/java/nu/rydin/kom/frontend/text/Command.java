@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -51,5 +52,16 @@ public interface Command
 	 * @param out The stream to print on
 	 */
 	public void printPostamble(PrintWriter out);
+
+	/**
+	 * @return
+	 */
+	public CommandLineParameter[] getSignature();
+
+	/**
+	 * @param context
+	 * @param parameterArray
+	 */
+	public void execute2(Context context, Object[] parameterArray);
 
 }

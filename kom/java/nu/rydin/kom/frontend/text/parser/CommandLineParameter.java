@@ -1,7 +1,7 @@
 /*
  * Created on Aug 8, 2004
  * 
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text.parser;
@@ -34,7 +34,7 @@ public abstract class CommandLineParameter extends CommandLinePart
 		return ",";
 	}
 
-	public Match fillInMissingObject(Context context, Match oldMatch) throws IOException, InterruptedException
+	public Match fillInMissingObject(Context context) throws IOException, InterruptedException
 	{
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();

@@ -23,11 +23,6 @@ public class RawParameter extends CommandLineParameter {
         return new Match(true, matchingPart, remainder, matchingPart);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see nu.rydin.kom.frontend.text.parser.CommandLinePart#getSeparator()
-     */
     public String getSeparator() {
         // Okay, this is a bit ugly. But since we'll never find this in the
         // string,

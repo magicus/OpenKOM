@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.utils.StringUtils;
 
 /**
@@ -114,4 +115,14 @@ public abstract class AbstractCommand implements Command
 	{
 		out.println();
 	}	
+	public CommandLineParameter[] getSignature()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public void execute2(Context context, Object[] parameterArray)
+	{
+	// TODO Auto-generated method stub
+
+	}
 }

@@ -16,39 +16,6 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public abstract class CommandLinePart
 {
-	public static final class Match
-	{
-		private boolean m_isMatching;
-		private String m_remainder;
-		private String m_matchedString;
-		private Object m_parsedObject;
-
-		public Match(boolean isMatching, String matchedString,
-				String remainder, Object parsedObject)
-		{
-			m_isMatching = isMatching;
-			m_matchedString = matchedString;
-			m_remainder = remainder;
-			m_parsedObject = parsedObject;
-		}
-		public boolean isMatching()
-		{
-			return m_isMatching;
-		}
-		public Object getParsedObject()
-		{
-			return m_parsedObject;
-		}
-		public String getRemainder()
-		{
-			return m_remainder;
-		}
-		public String getMatchedString()
-		{
-			return m_matchedString;
-		}
-	}
-	
 	public abstract boolean isRequired();
 	
 	public abstract String getSeparator();
@@ -87,15 +54,13 @@ public abstract class CommandLinePart
 		return innerMatch(matchingPart, remainder);
 	}
 
-	public Match fillInMissingObject(Context context, Match oldMatch) throws IOException, InterruptedException {
-		return oldMatch;
-	}
+	public abstract Match fillInMissingObject(Context context) throws IOException, InterruptedException;
 	
 	public Object resolveFoundObject(Context context, Match match) throws IOException, InterruptedException {
 		return match.getParsedObject();
 	}
 
-	protected String cookString(String matchingPart)
+	public static String cookString(String matchingPart)
 	{
 		return NameUtils.normalizeName(matchingPart);
 	}
