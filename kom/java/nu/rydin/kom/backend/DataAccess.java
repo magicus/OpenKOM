@@ -14,7 +14,6 @@ import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.data.ObjectManager;
 import nu.rydin.kom.backend.data.UserManager;
 
 /**
@@ -49,11 +48,6 @@ public class DataAccess
 	 */	
 	private final MessageManager m_messageManager;
 	
-	/**
-	 * Toolkit object dealing with objects of more than one class. 
-	 */
-	private final ObjectManager m_objectManager;
-	
 	public DataAccess(Connection conn)
 	throws UnexpectedException
 	{
@@ -65,7 +59,6 @@ public class DataAccess
 			m_conferenceManager = new ConferenceManager(conn, m_nameManager);
 			m_membershipManager = new MembershipManager(conn);
 			m_messageManager 	= new MessageManager(conn);
-			m_objectManager     = new ObjectManager(conn);
 		}
 		catch(SQLException e)
 		{
@@ -98,11 +91,6 @@ public class DataAccess
 		return m_messageManager;
 	}
 	
-	public ObjectManager getObjectManager()
-	{
-		return m_objectManager;
-	}
-		
 	public void commit()
 	throws UnexpectedException
 	{

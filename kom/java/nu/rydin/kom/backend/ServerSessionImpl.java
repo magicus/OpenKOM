@@ -1146,7 +1146,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	}
 	
 	public void sendMulticastMessage (long destinations[], String message)	
-	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException
+	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException, UnexpectedException
 	{
 		boolean hasError = false;
 		// Set to make sure we don't send the message to the same user more than once.
@@ -1160,7 +1160,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			}
 			else
 			{
-				if (UserManager.USER_KIND == m_da.getObjectManager().getObjectKind(destinations[i]))
+				if (UserManager.USER_KIND == m_da.getNameManager().getObjectKind(destinations[i]))
 				{
 					if (m_sessions.hasSession(destinations[i]))
 					{
@@ -1187,11 +1187,20 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 					}
 					catch (SQLException e)
 					{
-						e.printStackTrace();
+						throw new UnexpectedException (this.getLoggedInUserId(), e);
 					}
 				}
 			}
 		} // for
+		
+		// Remove sending user
+		// TODO: This should be a flag condition!
+		//
+		
+		if (s.contains (new Long(this.getLoggedInUserId())))
+		{
+			s.remove(new Long(this.getLoggedInUserId()));
+		}
 		
 		// Now just send it
 		//

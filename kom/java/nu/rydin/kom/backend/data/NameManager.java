@@ -25,6 +25,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class NameManager
 {
+	public static final short UNKNOWN_KIND = -1;
 	public static final short PUBLIC = 0;
 	public static final short PROTCTED = 1;
 	public static final short INVISIBLE = 2;
@@ -40,6 +41,7 @@ public class NameManager
 	private final PreparedStatement m_getAssociationsByPatternStmt;
 	private final PreparedStatement m_getAssociationsByPatternAndKindStmt;
 	private final PreparedStatement m_renameObjectStmt;
+	private final PreparedStatement m_getKindStmt;
 	
 	public NameManager(Connection conn)
 	throws SQLException
@@ -70,6 +72,8 @@ public class NameManager
 			"AND kind = ? ORDER BY fullname");
 		m_renameObjectStmt = conn.prepareStatement(
 			"UPDATE names SET fullname = ?, norm_name = ? WHERE id = ?");
+		m_getKindStmt = conn.prepareStatement(
+			"select kind from names where id=?");
 	}
 	
 	public void finalize()
@@ -108,6 +112,8 @@ public class NameManager
 			m_getAssociationsByPatternAndKindStmt.close();
 		if(m_renameObjectStmt != null)
 			m_renameObjectStmt.close();
+		if (m_getKindStmt != null)
+			m_getKindStmt.close();
 	}
 	
 	/**
@@ -455,4 +461,37 @@ public class NameManager
 		String s = NameUtils.normalizeName(name).toUpperCase().replaceAll(" ", "% ");
 		return s.endsWith("%") ? s : s + "%"; 
 	}
+
+	public short getObjectKind (long objectId)
+	throws ObjectNotFoundException
+	{
+		ResultSet rs = null;
+		try
+		{
+			m_getKindStmt.clearParameters();
+			m_getKindStmt.setLong(1, objectId);
+			rs = m_getKindStmt.executeQuery();
+			if(!rs.next())
+				throw new ObjectNotFoundException("Object ID=" + objectId);
+			return rs.getInt(1) == 0 ? UserManager.USER_KIND : ConferenceManager.CONFERENCE_KIND;
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			return 0;
+		}
+		finally
+		{
+			try
+			{
+				if(rs != null)
+					rs.close();
+			}
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
 }
+

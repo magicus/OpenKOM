@@ -570,7 +570,7 @@ public interface ServerSession
 	 * @param message The message
 	 */
 	public void sendMulticastMessage (long destinations[], String message)	
-	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException;
+	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException, UnexpectedException;
 	
 	/**
 	 * Broadcasts a chat message to all logged in users
