@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<commands locale="sv_SE"> <!-- locale identifier not currently used -->
+ <command class="nu.rydin.kom.frontend.text.commands.Help">
+  <parameters>
+   <param order="0">Namn eller alias på det kommando du vill ha hjälp om.</param>
+  </parameters>
+  <description>
+   <block>OpenKOMs hjälpsystem innehåller hjälp om varje kommando som finns tillgänligt. För att få hjälp om ett specifikt kommando skriver du "hjälp kommandonamn".</block>
+   <block>Hjälptexterna innehåller följande delar:</block>
+   <block>Kommando: Här visas en formell definition av hur du kan använda kommandot, tillsammans med &lt;frivilliga&gt; och [obligatoriska] parametrar.</block>
+   <block>Parametrar: Här förklaras varje parameter för sig.</block>
+   <block>Beskrivning: En utförlig beskrivning av vad kommandot gör.</block>
+   <block>Undantag: Om kommandots beteende inte är konsekvent finns undantagen under den här rubriken.</block>
+   <block>Se också: Under den här rubriken finns referenser till andra kommandon med likartad eller kompletterande funktion.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListCommands"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ShowTime">
+  <description>
+   <block>"(Se) tiden" är standardkommandot OpenKOM föreslår när du inte har några olästa texter.</block>
+   <block>Kommandot visar tid och datum.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.Logout">
+  <description>
+   <block>Om du någonsin skulle vilja avsluta OpenKOM är det det här kommandot du använder.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.CreateUser">
+  <description>
+   <block>Kommandot skapar en ny KOM-användare. Du måste vara sysop eller ha rätt att administrera användare för att kunna köra det.</block>
+   <block>Kommandot tar inga parametrar, utan kommer istället att be om användarnamn, lösenord och fullständigt namn.</block>
+  </description>
+  <exception>
+   <block>Du kan naturligtvis inte skapa flera användare med samma inloggningsnamn. Om du försöker kommer OpenKOM att låta dig ange all info, för att sedan ge dig ett felmeddelande.</block>
+   <block>Det här beteendet är by design. Den op som inte har koll på sina användare förtjänar att få lida.</block>
+  </exception>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.CreateConference">
+  <parameters>
+   <param order="0">Mötesnamn</param>
+  </parameters>
+  <description>
+   <block>Kommandot används för att skapa ett nytt möte.</block>
+   <block>Parametern Mötesnamn är frivillig. Anger du inte den kommer OpenKOM att fråga vad du vill döpa mötet till.</block>
+   <block>Kommandot ställer ett antal frågor:</block>
+   <block>- Mötestyp: Här kan du välja att skapa ett öppet möte alla kan gå med i, eller ett slutet där du själv väljer medlemmar.</block>
+   <block>- Tillåt skrivning: Om du inte tillåter skrivning kan bara du, sysop och konferensadministratören skriva i mötet.</block>
+   <block>- Tillåt kommentarer: Om du inte tillåter kommentarer kan medlemmarna bara skriva originalinlägg i mötet.</block>
+   <block>- Tillåt läsning för icke medlemmar: Här får du möjlighet att låta ickemedlemmar läsa texter skrivna i mötet, till exempel genom att ange ett globalt textnummer eller följa en kommentarskedja bakåt.</block>
+   <block>- Tillåt skrivning för icke medlemmar: Om du svarar ja här får ickemedlemmar möjlighet att !flytta en text under produktion till ditt möte.</block>
+   <block>- Tillåt kommentarer för icke medlemmar: Se ovan.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop eller mötesadministratör kommer du att få frågan "Skapa specialmöte?" först.</block>
+   <block>Innan en användare kan presentera sig själv eller ett möte, eller sätta en lapp på dörren, måste specialmöten av rätt typ skapas. Se manualen..</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.DeleteConference"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.AddPermissions"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListConferences"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListMembers"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.DeleteConference">
+  <parameters>
+   <param order="0">Möte att radera</param>
+  </parameters>
+  <description>
+   <block>Kommandot raderar det angivna mötet. Anger du inte mötesnamn eller -ID som parameter kommer OpenKOM att fråga vilket möte du vill ta bort.</block>
+  </description>
+  <exception>
+   <block>Är du sysop eller mötesadministratör kan du ta bort vilket möte som helst. Annars begränsar sig dina rättigheter till att ta bort de möten du själv skapat.</block>
+  </exception>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListUsers">
+  <description>
+   <block>Kommandot visar samtliga OpenKOM-användare.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListMembers"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListConferences">
+  <description>
+   <block>Kommandot listar samtliga möten i OpenKOM.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListMembers">
+  <parameters>
+   <param order="0">Namn eller ID på mötet du vill se medlemslistan för.</param>
+  </parameters>
+  <description>
+   <block>Det här kommandot listar medlemmarna i angivet möte. Anger du inget mötesnamn kommer OpenKOM att lista medlemmarna i det möte du just nu befinner dig i.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListUsers"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListTexts">
+  <description>
+   <block>Kommandot listar texterna i aktuellt möte, sorterade i stigande ålder.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ReadMessage"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SearchMessage"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListOwnMessages"/>
+  </seealso>
+ </command>
+</commands>
