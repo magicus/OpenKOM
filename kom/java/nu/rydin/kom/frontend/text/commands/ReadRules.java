@@ -6,9 +6,9 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.ObjectNotFoundException;
-import nu.rydin.kom.UserException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.KOMUserException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -44,7 +44,7 @@ public class ReadRules extends AbstractCommand
 		catch(ObjectNotFoundException e)
 		{
 			MessageFormatter formatter = context.getMessageFormatter();
-			throw new UserException(formatter.format("read.message.not.found"));
+			throw new KOMUserException(formatter.format("read.message.not.found"));
 		}
 	}
 }

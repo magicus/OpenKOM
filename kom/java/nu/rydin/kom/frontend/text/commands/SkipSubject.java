@@ -6,8 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.i18n.MessageFormatter;

@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import nu.rydin.kom.InvalidChoiceException;
-import nu.rydin.kom.KOMException;
+import nu.rydin.kom.exceptions.InvalidChoiceException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.ClientSettings;
 import nu.rydin.kom.frontend.text.Context;

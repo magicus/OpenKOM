@@ -9,12 +9,12 @@ package nu.rydin.kom.frontend.text.parser;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.InvalidChoiceException;
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.ObjectNotFoundException;
-import nu.rydin.kom.OperationInterruptedException;
-import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.exceptions.InvalidChoiceException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.i18n.MessageFormatter;

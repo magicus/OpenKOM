@@ -9,13 +9,13 @@ package nu.rydin.kom.backend;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageLogManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
+import nu.rydin.kom.exceptions.UnexpectedException;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>

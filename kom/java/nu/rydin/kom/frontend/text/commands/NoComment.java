@@ -6,9 +6,9 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.AuthorizationException;
-import nu.rydin.kom.KOMException;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;

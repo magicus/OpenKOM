@@ -8,9 +8,9 @@ package nu.rydin.kom.frontend.text;
 
 import java.io.PrintWriter;
 
-import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.constants.UserFlags;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.ansi.ANSISequences;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;

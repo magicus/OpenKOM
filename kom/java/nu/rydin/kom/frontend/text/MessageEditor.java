@@ -8,7 +8,7 @@ package nu.rydin.kom.frontend.text;
 
 import java.io.IOException;
 
-import nu.rydin.kom.KOMException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.structs.*;
 
 /**

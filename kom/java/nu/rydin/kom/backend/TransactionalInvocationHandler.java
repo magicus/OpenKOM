@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>

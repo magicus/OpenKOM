@@ -8,10 +8,10 @@ package nu.rydin.kom.frontend.text.editor.simple;
 
 import java.io.IOException;
 
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.OperationInterruptedException;
-import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.constants.UserFlags;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.i18n.MessageFormatter;

@@ -8,8 +8,8 @@ package nu.rydin.kom.frontend.text.parser;
 
 import java.io.IOException;
 
-import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 
 /**

@@ -14,9 +14,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.SQLUtils;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.LocalMessageHeader;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;

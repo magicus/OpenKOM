@@ -11,7 +11,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
-import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>

@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TimeZone;
 
-import nu.rydin.kom.InvalidChoiceException;
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.OperationInterruptedException;
+import nu.rydin.kom.exceptions.InvalidChoiceException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.KOMWriter;

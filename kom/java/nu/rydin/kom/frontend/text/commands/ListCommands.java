@@ -9,7 +9,7 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.KOMException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.ClientSession;
 import nu.rydin.kom.frontend.text.Command;

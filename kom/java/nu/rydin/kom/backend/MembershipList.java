@@ -14,9 +14,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.MembershipManager;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MembershipInfo;
 import nu.rydin.kom.structs.MessageRange;

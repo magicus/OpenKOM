@@ -13,10 +13,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import nu.rydin.kom.AlreadyMemberException;
-import nu.rydin.kom.AuthorizationException;
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.exceptions.AlreadyMemberException;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferencePermission;
 import nu.rydin.kom.structs.MembershipInfo;

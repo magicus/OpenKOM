@@ -6,10 +6,10 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
-import nu.rydin.kom.AmbiguousNameException;
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.exceptions.AmbiguousNameException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.Context;
 
 /**

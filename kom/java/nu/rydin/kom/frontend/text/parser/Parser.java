@@ -19,13 +19,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import nu.rydin.kom.CommandNotFoundException;
-import nu.rydin.kom.InvalidChoiceException;
-import nu.rydin.kom.InvalidParametersException;
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.TooManyParametersException;
-import nu.rydin.kom.UnexpectedException;
-import nu.rydin.kom.UserAbortedException;
+import nu.rydin.kom.exceptions.CommandNotFoundException;
+import nu.rydin.kom.exceptions.InvalidChoiceException;
+import nu.rydin.kom.exceptions.InvalidParametersException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
+import nu.rydin.kom.exceptions.TooManyParametersException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -189,7 +189,7 @@ public class Parser
 		// Empty string given? Abort!
 		//
 		if(input.length() == 0) {
-			throw new UserAbortedException();
+			throw new OperationInterruptedException();
 		}
 			
 		int idx = 0;

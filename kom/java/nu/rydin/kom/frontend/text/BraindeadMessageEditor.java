@@ -9,7 +9,7 @@ package nu.rydin.kom.frontend.text;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.KOMException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 

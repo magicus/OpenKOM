@@ -9,13 +9,13 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.AuthorizationException;
-import nu.rydin.kom.DuplicateNameException;
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;

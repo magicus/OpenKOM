@@ -6,8 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.KOMException;
 import nu.rydin.kom.constants.MessageLogKinds;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 

@@ -9,12 +9,12 @@ package nu.rydin.kom.frontend.text.editor.simple;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.EventDeliveredException;
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.LineOverflowException;
-import nu.rydin.kom.LineUnderflowException;
-import nu.rydin.kom.StopCharException;
-import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.exceptions.EventDeliveredException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.LineOverflowException;
+import nu.rydin.kom.exceptions.LineUnderflowException;
+import nu.rydin.kom.exceptions.StopCharException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -108,7 +108,7 @@ public abstract class AbstractEditor implements MessageEditor
 				 		{
 				 			// TODO: Is this the way we should handle this?
 				 			//
-				 			out.println(e.formatMessage(context));
+				 			out.println(e.getMessage(context));
 				 		}
 				 		
 				 		// Don't include this in the buffer!

@@ -13,7 +13,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
-import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.utils.Logger;
 
 /**

@@ -17,16 +17,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
-import nu.rydin.kom.AlreadyLoggedInException;
-import nu.rydin.kom.AuthenticationException;
-import nu.rydin.kom.AuthorizationException;
-import nu.rydin.kom.BadParameterException;
-import nu.rydin.kom.EventDeliveredException;
-import nu.rydin.kom.KOMException;
-import nu.rydin.kom.KOMRuntimeException;
-import nu.rydin.kom.MessageNotFoundException;
-import nu.rydin.kom.ObjectNotFoundException;
-import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.constants.UserFlags;
@@ -41,6 +31,16 @@ import nu.rydin.kom.events.MessageDeletedEvent;
 import nu.rydin.kom.events.NewMessageEvent;
 import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
+import nu.rydin.kom.exceptions.AlreadyLoggedInException;
+import nu.rydin.kom.exceptions.AuthenticationException;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.BadParameterException;
+import nu.rydin.kom.exceptions.EventDeliveredException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.KOMRuntimeException;
+import nu.rydin.kom.exceptions.MessageNotFoundException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.commands.GotoNextConference;
 import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextReply;
@@ -406,11 +406,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     	{
     		// TODO: Default conference deleted. What do we do???
     		//
-    		m_out.println(e.formatMessage(this));
+    		m_out.println(e.getMessage(this));
     	}
     	catch(UnexpectedException e)
     	{
-    		m_out.println(e.formatMessage(this));
+    		m_out.println(e.getMessage(this));
     	}
     	m_out.println();
     	while (m_loggedIn)
@@ -469,7 +469,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     		}
     		catch(KOMException e)
     		{
-    			m_out.println(e.formatMessage(this));
+    			m_out.println(e.getMessage(this));
     			m_out.println();
     		}
     		catch(KOMRuntimeException e)

@@ -6,8 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
-import nu.rydin.kom.InvalidLineNumberException;
-import nu.rydin.kom.KOMException;
+import nu.rydin.kom.exceptions.InvalidLineNumberException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;

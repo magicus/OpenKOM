@@ -8,12 +8,12 @@ package nu.rydin.kom.frontend.text.editor;
 
 import java.util.Date;
 
-import nu.rydin.kom.AuthorizationException;
-import nu.rydin.kom.BadParameterException;
-import nu.rydin.kom.MessageNotFoundException;
-import nu.rydin.kom.ObjectNotFoundException;
-import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.BadParameterException;
+import nu.rydin.kom.exceptions.MessageNotFoundException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.KOMWriter;

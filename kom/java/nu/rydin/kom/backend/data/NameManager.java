@@ -13,12 +13,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import nu.rydin.kom.AmbiguousNameException;
-import nu.rydin.kom.DuplicateNameException;
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.SQLUtils;
+import nu.rydin.kom.exceptions.AmbiguousNameException;
+import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**

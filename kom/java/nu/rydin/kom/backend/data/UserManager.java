@@ -15,15 +15,15 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 
-import nu.rydin.kom.AlreadyMemberException;
-import nu.rydin.kom.AmbiguousNameException;
-import nu.rydin.kom.AuthenticationException;
-import nu.rydin.kom.AuthorizationException;
-import nu.rydin.kom.DuplicateNameException;
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.KOMCache;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.exceptions.AlreadyMemberException;
+import nu.rydin.kom.exceptions.AmbiguousNameException;
+import nu.rydin.kom.exceptions.AuthenticationException;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.UserInfo;
 
 /**

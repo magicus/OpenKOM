@@ -12,17 +12,17 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import nu.rydin.kom.AlreadyLoggedInException;
-import nu.rydin.kom.AmbiguousNameException;
-import nu.rydin.kom.AuthenticationException;
-import nu.rydin.kom.DuplicateNameException;
-import nu.rydin.kom.ObjectNotFoundException;
-import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
+import nu.rydin.kom.exceptions.AlreadyLoggedInException;
+import nu.rydin.kom.exceptions.AmbiguousNameException;
+import nu.rydin.kom.exceptions.AuthenticationException;
+import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.structs.UserInfo;
 
 /**

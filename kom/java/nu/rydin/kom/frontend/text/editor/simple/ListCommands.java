@@ -9,7 +9,7 @@ package nu.rydin.kom.frontend.text.editor.simple;
 
 import java.io.IOException;
 
-import nu.rydin.kom.KOMException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.Parser;

@@ -13,11 +13,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 
-import nu.rydin.kom.AmbiguousNameException;
-import nu.rydin.kom.DuplicateNameException;
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.KOMCache;
+import nu.rydin.kom.exceptions.AmbiguousNameException;
+import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageRange;
 

@@ -9,8 +9,8 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.PrintWriter;
 
-import nu.rydin.kom.CantSignoffMailboxException;
-import nu.rydin.kom.KOMException;
+import nu.rydin.kom.exceptions.CantSignoffMailboxException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
