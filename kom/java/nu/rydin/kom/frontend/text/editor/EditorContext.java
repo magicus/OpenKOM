@@ -24,6 +24,7 @@ import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.MessagePrinter;
 import nu.rydin.kom.frontend.text.TerminalSettings;
+import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.UserInfo;
@@ -203,5 +204,11 @@ public class EditorContext implements Context
 	{
 	    m_underlying.executeScript(rdr);
 	}
+
+    public Parser getParser()
+    {
+        // FIXME: Ihse -- what is the correct thing to do???
+        return m_underlying.getParser();
+    }
 
 }

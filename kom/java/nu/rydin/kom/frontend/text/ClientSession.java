@@ -572,7 +572,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	        line = line.trim();
 	        if(line.length() == 0 || line.charAt(0) == '#')
 	            continue;
-		    ExecutableCommand executableCommand = m_parser.parse(this, line);
+		    ExecutableCommand executableCommand = m_parser.parseCommandLine(this, line);
 	        executableCommand.executeBatch(this);	        
 	        m_out.println();
 	    }
@@ -643,7 +643,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			
     			if(cmdString.trim().length() > 0)
     			{	
-    			    ExecutableCommand executableCommand = m_parser.parse(this, cmdString);
+    			    ExecutableCommand executableCommand = m_parser.parseCommandLine(this, cmdString);
 			        executableCommand.execute(this);
     			}
     			else
@@ -1080,6 +1080,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		return m_parser.getCommandList();
 	}
 
+	public Parser getParser()
+	{
+	    return m_parser;
+	}
+	
     public void logout() 
     {
         m_loggedIn = false;

@@ -106,7 +106,7 @@ public abstract class AbstractEditor implements MessageEditor
 					 		//
 					 		line = line.substring(1);
 					 		Parser.ExecutableCommand executableCommand = null;
-					 		executableCommand = m_parser.parse(m_context, line);
+					 		executableCommand = m_parser.parseCommandLine(m_context, line);
 					 		
 					 		if(executableCommand == null)
 					 			continue;
