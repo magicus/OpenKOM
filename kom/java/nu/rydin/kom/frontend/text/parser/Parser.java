@@ -157,6 +157,10 @@ public class Parser
             KOMException
     {
         CommandToMatches target = resolveMatchingCommand(context, commandLine);
+        
+        //Check access to command.
+        target.getCommand().checkAccess(context);
+        
         ExecutableCommand executableCommand = resolveParametersForTarget(
                 context, target);
         return executableCommand;
@@ -640,7 +644,6 @@ public class Parser
      */
     public Command getCommand(Class class1)
     {
-        //TODO: HOLY INEFFICIENT LOOKUP, BATMAN!
         for (int i = 0; i < m_commands.length; i++)
         {
             if (class1.isInstance(m_commands[i]))

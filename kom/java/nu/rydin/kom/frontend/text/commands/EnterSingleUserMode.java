@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -27,10 +28,14 @@ public class EnterSingleUserMode extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 
+    public void checkAccess(Context context) throws AuthorizationException
+    {
+        context.getSession().checkRights(UserPermissions.ADMIN);
+    }
+    
     public void execute(Context context, Object[] parameters)
     throws KOMException, IOException, InterruptedException
     {
-        context.getSession().checkRights(UserPermissions.ADMIN);
         MessageFormatter mf = context.getMessageFormatter();
         LineEditor in = context.getIn();
         int choice = in.getChoice(mf.format("single.user.prompt"),

@@ -9,6 +9,8 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -23,6 +25,11 @@ public class AllowLogin extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 
+    public void checkAccess(Context context) throws AuthorizationException
+    {
+        context.getSession().checkRights(UserPermissions.ADMIN);
+    }
+	
     public void execute(Context context, Object[] parameters)
     throws KOMException, IOException, InterruptedException
     {

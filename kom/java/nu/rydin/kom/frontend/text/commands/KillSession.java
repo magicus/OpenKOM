@@ -8,6 +8,8 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 
+import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -25,6 +27,11 @@ public class KillSession extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new UserParameter(true) });	
 	}
 
+    public void checkAccess(Context context) throws AuthorizationException
+    {
+        context.getSession().checkRights(UserPermissions.ADMIN);
+    }
+    
     public void execute(Context context, Object[] parameters)
     throws KOMException, IOException, InterruptedException
     {

@@ -13,6 +13,7 @@ import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.constants.Visibilities;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
@@ -35,23 +36,25 @@ public class CreateConference extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new RawParameter("create.conference.param.0.ask", true) });
 	}
 	
-	public void execute(Context context, Object[] parameterArray) 
+    public void checkAccess(Context context) throws AuthorizationException
+    {
+        context.getSession().checkRights(UserPermissions.CREATE_CONFERENCE);
+    }
+
+    public void execute(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException, DuplicateNameException
 	{
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
+
+		//FIXME This command only uses Parser to ask for conference name parameter.
 		String fullname = (String) parameterArray[0];
 		
 		// Check name validity
 		//
 		context.checkName(fullname);
 
-		// Do we have the permission to do this?
-		//
-		context.getSession().checkRights(UserPermissions.CREATE_CONFERENCE);
-			
-		
 		int choice = 0;
 
 		// User may create magic conferences. Do it?

@@ -8,6 +8,7 @@ package nu.rydin.kom.frontend.text;
 
 import java.io.PrintWriter;
 
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.CommandLinePart;
 import nu.rydin.kom.frontend.text.parser.CommandNamePart;
@@ -37,9 +38,11 @@ public abstract class AbstractCommand implements Command
 		System.arraycopy(m_signature, 0, m_fullSignature, m_nameSignature.length, m_signature.length);
 	}
 	
-	/**
-	 * Returns the full, human readable name of a command
-	 */
+	public void checkAccess(Context context) throws AuthorizationException
+	{
+	    //Restricted commands have to override and implement access checking.
+	}
+	
 	public String getFullName()
 	{
 		return m_fullName;

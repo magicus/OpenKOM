@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -28,16 +29,19 @@ public class CreateUser extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}
 	
+    public void checkAccess(Context context) throws AuthorizationException
+    {
+        context.getSession().checkRights(UserPermissions.USER_ADMIN);
+    }
+    
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException
 	{
-		// Do we have the permission to do this?
-		//
-		context.getSession().checkRights(UserPermissions.CREATE_CONFERENCE);
-
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
+		
+		//FIXME This command does not use Parser to ask for parameters.
 		out.print(fmt.format("create.user.login"));		
 		out.flush();
 		String login = in.readLine();

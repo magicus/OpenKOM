@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.CommandLinePart;
@@ -19,10 +20,30 @@ import nu.rydin.kom.frontend.text.parser.CommandNamePart;
  */
 public interface Command
 {
+    /**
+     * Executes the command with the given parameters in the given context.
+     * @param context
+     * @param parameters
+     * @throws KOMException
+     * @throws IOException
+     * @throws InterruptedException
+     */
 	public void execute(Context context, Object[] parameters)
 	throws KOMException, IOException, InterruptedException;
 	
+	/**
+	 * Returns the full, human readable, name of this instance of a Command.
+	 * @return
+	 */
 	public String getFullName();
+
+	/**
+	 * Checks to see is the current user has access to execute this command.
+	 * Used by the parser to abort execution before parameter completion.
+	 * @param context
+	 * @throws AuthorizationException
+	 */
+	public void checkAccess(Context context) throws AuthorizationException;
 	
 	/**
 	 * Prints characters preceeding command output, typically 
@@ -39,12 +60,21 @@ public interface Command
 	public void printPostamble(PrintWriter out);
 
 	/**
+	 * Gets the part of the signature containing the parameters.
 	 * @return
 	 */
 	public CommandLineParameter[] getSignature();
 	
+	/**
+	 * Gets the part of the sugnature containing the nameparts.
+	 * @return
+	 */
 	public CommandNamePart[] getNameSignature();
 	
+	/**
+	 * Gets the full, combined signature.
+	 * @return
+	 */
 	public CommandLinePart[] getFullSignature();
 
 }

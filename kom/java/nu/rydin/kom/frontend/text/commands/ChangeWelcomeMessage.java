@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.SystemFiles;
 import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -29,6 +30,11 @@ public class ChangeWelcomeMessage extends AbstractCommand
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}
+    
+    public void checkAccess(Context context) throws AuthorizationException
+    {
+        context.getSession().checkRights(UserPermissions.ADMIN);
+    }
     
     public void execute(Context context, Object[] parameters)
     throws KOMException, IOException, InterruptedException
