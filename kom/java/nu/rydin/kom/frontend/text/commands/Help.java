@@ -250,6 +250,10 @@ public class Help extends AbstractCommand
 	throws UnexpectedException, CommandNotFoundException
 	{
         Command command = (Command) parameterArray[0];
+        if (null == command)
+        {
+            command = this;
+        }
         
 	    HelpDocumentHandler myParser = new HelpDocumentHandler (command.getClass().getName(), "\r\n\r\n ");
 	    HelpTextContainer htc = null;
