@@ -36,6 +36,7 @@ public class UserFlags
 	public static long BEEP_ON_CHAT							= 0x00000400;
 	public static long BEEP_ON_BROADCAST					= 0x00000800;
 	public static long BEEP_ON_ATTENDANCE					= 0x00001000;
+	public static long NARCISSIST						= 0x00002000;
 
 	/**
 	 * Default value for flagword 1

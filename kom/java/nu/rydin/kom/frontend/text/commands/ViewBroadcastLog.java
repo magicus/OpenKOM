@@ -33,6 +33,6 @@ public class ViewBroadcastLog extends ViewMessageLog
     protected MessageLogItem[] fetch(ServerSession session, int num)
     throws KOMException
     {
-        return session.getChatMessagesFromLog(num);
+        return session.getBroadcastMessagesFromLog(num);
     }  
 }

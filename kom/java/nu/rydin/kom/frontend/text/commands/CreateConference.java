@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
@@ -46,10 +47,8 @@ public class CreateConference extends AbstractCommand
 		MessageFormatter fmt = context.getMessageFormatter();
 		String fullname = (String) parameterArray[0];
 		
-		if (fullname.equals(fmt.format("misc.mailboxtitle")))
-		{
+		if (NameUtils.normalizeName(fullname).equals(NameUtils.normalizeName(fmt.format("misc.mailboxtitle"))))
 		    throw new DuplicateNameException();
-		}
 
 		// Do we have the permission to do this?
 		//

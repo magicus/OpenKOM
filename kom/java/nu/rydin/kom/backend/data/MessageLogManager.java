@@ -41,11 +41,11 @@ public class MessageLogManager
         m_listBroadcastMessagesStmt = conn.prepareStatement(
                 "SELECT ml.id, mlp.kind, ml.author, ml.author_name, ml.created, mlp.sent, ml.body " +
                 "FROM messagelog ml, messagelogpointers mlp WHERE mlp.logid = ml.id AND " +
-                "mlp.recipient = ? AND mlp.kind = 0 ORDER BY ml.id DESC LIMIT ? OFFSET 0");
+                "mlp.recipient = ? AND mlp.kind > 0 ORDER BY ml.id DESC LIMIT ? OFFSET 0");
         m_listChatMessagesStmt = conn.prepareStatement(
                 "SELECT ml.id, mlp.kind, ml.author, ml.author_name, ml.created, mlp.sent, ml.body " +
                 "FROM messagelog ml, messagelogpointers mlp WHERE mlp.logid = ml.id AND " +
-                "mlp.recipient = ? AND mlp.kind > 0 ORDER BY ml.id DESC LIMIT ? OFFSET 0");
+                "mlp.recipient = ? AND mlp.kind = 0 ORDER BY ml.id DESC LIMIT ? OFFSET 0");
         m_listRecipientsStmt = conn.prepareStatement(
                 "SELECT mlp.recipient, n.fullname, n.visibility FROM messagelogpointers mlp, names n " +
                 "WHERE n.id = mlp.recipient AND mlp.logid = ? AND mlp.sent = 0");

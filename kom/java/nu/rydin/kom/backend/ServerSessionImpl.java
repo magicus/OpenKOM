@@ -752,7 +752,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			MessageOccurrence occ = mm.addMessage(this.getLoggedInUserId(),
 				this.getCensoredName(this.getLoggedInUserId()).getName(),
 				conference, -1, msg.getSubject(), msg.getBody());
-			this.markMessageAsRead(conference, occ.getLocalnum());
+			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
+			    this.markMessageAsRead(conference, occ.getLocalnum());
 			this.broadcastEvent(
 				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
 					occ.getGlobalId()));
@@ -843,7 +844,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			MessageManager mm = m_da.getMessageManager();  
 			MessageOccurrence occ = mm.addMessage(user, this.getCensoredName(user).getName(),
 				conference, replyTo, msg.getSubject(), msg.getBody());
-			this.markMessageAsRead(conference, occ.getLocalnum());
+			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
+			    this.markMessageAsRead(conference, occ.getLocalnum());
 			
 			// Are we replying to a mail? In that case, store the mail in the recipient's
 			// mailbox too!
@@ -995,7 +997,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			
 			// Mark local copy as read
 			//
-			this.markMessageAsRead(me, copy.getLocalnum());
+			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
+			    this.markMessageAsRead(me, copy.getLocalnum());
 			m_stats.incNumPosted(); // TODO: Count mail separately?
 			return occ;
 		}
@@ -1022,6 +1025,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			MessageManager mm = m_da.getMessageManager();
 			MessageOccurrence occ = mm.createMessageOccurrence(globalNum, MessageManager.ACTION_COPIED, 
 				me, this.getName(me).getName(), conferenceId);
+			
+			// Mark copy as read (unless we're narcissists)
+			//
+			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
+			    this.markMessageAsRead(conferenceId, occ.getLocalnum());			
 			
 			// Notify the rest of the world that there is a new message!
 			//
