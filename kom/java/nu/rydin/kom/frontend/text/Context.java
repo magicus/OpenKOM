@@ -148,6 +148,14 @@ public interface Context extends TerminalSettingsProvider
 	public void setListenToTerminalSize(boolean value);
 	
 	/**
+	 * Formats a conference according to current logged in user
+	 * @param id
+	 * @param name
+	 * @return
+	 */
+	public String formatConferenceName(long id, String name);
+	
+	/**
 	 * Formats an object name according to user settings
 	 * @param name Object name
 	 * @param id Object id

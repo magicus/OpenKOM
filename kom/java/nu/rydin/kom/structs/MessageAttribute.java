@@ -64,7 +64,7 @@ public class MessageAttribute implements Serializable
 
 	public String getUsername()
 	{
-	    if (m_kind == MessageManager.ATTR_NOCOMMENT || m_kind == MessageManager.ATTR_ORIGINAL_DELETED)
+	    if (m_kind == MessageManager.ATTR_NOCOMMENT || m_kind == MessageManager.ATTR_ORIGINAL_DELETED || m_kind == MessageManager.ATTR_MAIL_RECIPIENT)
 	    {
 	        return m_value.substring(m_value.indexOf(":") + 1);
 	    }
@@ -77,7 +77,7 @@ public class MessageAttribute implements Serializable
 	public long getUserId()
 	{
 	    long result = -1;
-	    if (m_kind == MessageManager.ATTR_NOCOMMENT || m_kind == MessageManager.ATTR_ORIGINAL_DELETED)
+	    if (m_kind == MessageManager.ATTR_NOCOMMENT || m_kind == MessageManager.ATTR_ORIGINAL_DELETED || m_kind == MessageManager.ATTR_MAIL_RECIPIENT)
 	    {
 	        try
             {

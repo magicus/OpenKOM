@@ -71,6 +71,17 @@ public class CompactMessagePrinter implements MessagePrinter
 		out.print("; ");
 		out.println(context.smartFormatDate(message.getCreated()));
 		
+		// Print the original mail recipient if this is a mail.
+		//
+		for(int idx = 0; idx < attributes.length; ++idx)
+		{
+		    MessageAttribute each = attributes[idx];
+		    if(each.getKind() == MessageManager.ATTR_MAIL_RECIPIENT && each.getUserId() != context.getLoggedInUserId())
+		    {
+		        out.println(formatter.format("CompactMessagePrinter.original.mail.recipient", context.formatObjectName(each.getUsername(), each.getUserId())));		        
+		    }
+		}
+		
 		// Print reply info (if any)
 		//
 		Envelope.RelatedMessage replyTo = envelope.getReplyTo();
@@ -213,7 +224,7 @@ public class CompactMessagePrinter implements MessagePrinter
 				{
 					case MessageManager.ACTION_COPIED:
 						out.println(formatter.format("CompactMessagePrinter.copied", 
-							new Object[] { context.formatObjectName(receivers[idx].getName(), receivers[idx].getId()), 
+							new Object[] { context.formatConferenceName(receivers[idx].getId(), receivers[idx].getName().getName()), 
 						        context.formatObjectName(occ.getUser()) }));
 						break;					
 				}

@@ -188,6 +188,11 @@ public class EditorContext implements Context
         m_underlying.setListenToTerminalSize(value);
     }
     
+    public String formatConferenceName(long id, String name)
+    {
+        return m_underlying.formatConferenceName(id, name);
+    }
+    
 	public String formatObjectName(String name, long id)
 	{
 	    return m_underlying.formatObjectName(name, id);
@@ -246,5 +251,4 @@ public class EditorContext implements Context
     {
         m_underlying.checkName(name);
     }
-
 }

@@ -86,6 +86,7 @@ public class MessageManager
 	public static final short ATTR_PRESENTATION = 3;
 	public static final short ATTR_NOTE = 4;
 	public static final short ATTR_ORIGINAL_DELETED = 5;
+	public static final short ATTR_MAIL_RECIPIENT = 6;
 	
 	public MessageManager(Connection conn)
 	throws SQLException

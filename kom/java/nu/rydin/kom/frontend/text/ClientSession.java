@@ -898,6 +898,15 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	{
 		return m_session;
 	}
+
+	public String formatConferenceName(long id, String name)
+	{
+		if (id == getLoggedInUserId())
+		{
+		    return getMessageFormatter().format("misc.mailboxtitle");
+		}
+		return formatObjectName(name, id);
+	}
 	
     public String formatObjectName(nu.rydin.kom.structs.Name name, long id)
     {

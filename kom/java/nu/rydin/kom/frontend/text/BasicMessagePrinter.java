@@ -72,6 +72,17 @@ public class BasicMessagePrinter implements MessagePrinter
 		out.print("; ");
 		out.println(context.smartFormatDate(message.getCreated()));
 		
+		// Print the original mail recipient if this is a mail.
+		//
+		for(int idx = 0; idx < attributes.length; ++idx)
+		{
+		    MessageAttribute each = attributes[idx];
+		    if(each.getKind() == MessageManager.ATTR_MAIL_RECIPIENT && each.getUserId() != context.getLoggedInUserId())
+		    {
+		        out.println(formatter.format("BasicMessagePrinter.original.mail.recipient", context.formatObjectName(each.getUsername(), each.getUserId())));		        
+		    }
+		}
+		
 		// Print reply info (if any)
 		//
 		Envelope.RelatedMessage replyTo = envelope.getReplyTo();
@@ -126,8 +137,16 @@ public class BasicMessagePrinter implements MessagePrinter
 			//
 			if (context.getSession().hasPermissionInConference(occ.getConference(), ConferencePermissions.READ_PERMISSION))
 			{
-				out.println(formatter.format("BasicMessagePrinter.receiver", 
-				        context.formatObjectName(receivers[idx].getName(), receivers[idx].getId())));
+			    String conferenceName;
+			    if (occ.getKind() == MessageManager.ACTION_CREATED && receivers[idx].getId() == context.getLoggedInUserId())
+			    {
+			        conferenceName = context.formatObjectName(receivers[idx]);
+			    }
+			    else
+			    {
+			        conferenceName = context.formatConferenceName(receivers[idx].getId(), receivers[idx].getName().getName()); 
+			    }
+				out.println(formatter.format("BasicMessagePrinter.receiver", conferenceName));
 				switch(occ.getKind())
 				{
 					case MessageManager.ACTION_COPIED:
