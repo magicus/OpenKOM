@@ -16,6 +16,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class GenerateTestdata extends AbstractCommand
 {
@@ -39,9 +40,9 @@ public class GenerateTestdata extends AbstractCommand
 			{
 				generate = Integer.parseInt(parameters[0]);
 			}
-			catch (Exception e)
+			catch (NumberFormatException e)
 			{
-				// Nope.
+				// NaN
 			}
 		}
 		ServerSession session = context.getSession();
