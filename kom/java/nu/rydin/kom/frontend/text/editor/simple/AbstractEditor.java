@@ -86,7 +86,7 @@ public abstract class AbstractEditor
 			{
 				// TODO: Handle chat messages n'stuff.
 				//
-				 line = in.readLine(defaultLine, "\u0003\u001a\u0004", width,
+				 line = in.readLine(defaultLine, "\u000c\u001a\u0004", width,
 				 	LineEditor.FLAG_ECHO | LineEditor.FLAG_STOP_ON_BOL | LineEditor.FLAG_STOP_ON_EOL);
 				 	
 				 // Check if we got a command
