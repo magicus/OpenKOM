@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS users
 	flags4 BIGINT NOT NULL,
 	rights BIGINT NOT NULL,
 	locale VARCHAR(100),
+	timezone VARCHAR(100),
 	charset VARCHAR(50) NOT NULL,
 	url VARCHAR(200),
 	created DATETIME NOT NULL,

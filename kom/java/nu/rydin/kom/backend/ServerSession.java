@@ -618,6 +618,18 @@ public interface ServerSession
 	 */
 	public NameAssociation[] sendMulticastMessage (long destinations[], String message)	
 	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException, UnexpectedException;
+
+	/**
+	 * Verifies a list of chat recipients and returns an array of status codes.
+	 * See nu.rydin.kom.constants.ChatStatusCodes for explanation.
+	 * 
+	 * @param recepipents List of recipients
+	 * @return List of status codes
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public int[] verifyChatRecipients(long recepipents[])
+	throws ObjectNotFoundException, UnexpectedException;
 	
 	/**
 	 * Broadcasts a chat message to all logged in users

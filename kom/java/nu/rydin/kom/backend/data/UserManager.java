@@ -60,8 +60,8 @@ public class UserManager
 			"SELECT u.id, u.pwddigest FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_addUserStmt = conn.prepareStatement(
 			"INSERT INTO users(userid, pwddigest, address1, address2, " +
-			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights, created) " +
-			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?)");
+			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights, locale, created) " +
+			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?)");
 		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, u.address1, u.address2, u.address3, u.address4, " +
 			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.created, u.lastlogin " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
@@ -163,7 +163,7 @@ public class UserManager
 	 */
 	public void addUser(String userid, String password, String fullname, String address1,
 		String address2, String address3, String address4, String phoneno1, 
-		String phoneno2, String email1, String email2, String url, String charset, long flags1, 
+		String phoneno2, String email1, String email2, String url, String charset, String locale, long flags1, 
 		long flags2, long flags3, long flags4, long rights)
 		throws DuplicateNameException, SQLException, NoSuchAlgorithmException,
 		AmbiguousNameException
@@ -198,7 +198,8 @@ public class UserManager
 			m_addUserStmt.setLong(16, flags3);
 			m_addUserStmt.setLong(17, flags4);
 			m_addUserStmt.setLong(18, rights);
-			m_addUserStmt.setTimestamp(19,now);
+			m_addUserStmt.setString(19, locale);
+			m_addUserStmt.setTimestamp(20,now);
 			
 			// Lock cache while updating
 			//

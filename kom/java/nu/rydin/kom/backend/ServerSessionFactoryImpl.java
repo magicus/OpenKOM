@@ -106,7 +106,7 @@ public class ServerSessionFactoryImpl
 			if(!um.userExists("sysop"))
 			{
 				um.addUser("sysop", "sysop", "Sysop", "", "", "", "", "", "", "", "", "", 
-					"ISO-8859-1", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, 
+					"ISO-8859-1", "sv_SE", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, 
 				UserFlags.DEFAULT_FLAGS3, UserFlags.DEFAULT_FLAGS4, UserPermissions.EVERYTHING);
 				da.commit();
 				committed = true;

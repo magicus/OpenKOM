@@ -29,7 +29,7 @@ public class SkipSubject extends AbstractCommand
 	{
  		ServerSession ss = context.getSession();
  		int n = ss.skipMessagesBySubject(ss.getLastMessageHeader().getSubject());
- 		MessageFormatter mf = new MessageFormatter();
+ 		MessageFormatter mf = context.getMessageFormatter();
  		context.getOut().println (mf.format("skip.subject.message", n));
 	}
 }

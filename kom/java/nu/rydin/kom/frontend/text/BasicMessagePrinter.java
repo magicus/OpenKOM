@@ -62,7 +62,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		// Print creation date
 		//
 		out.print("; ");
-		out.println(message.getCreated());
+		out.println(context.smartFormatDate(message.getCreated()));
 		
 		// Print reply info (if any)
 		//

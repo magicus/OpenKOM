@@ -44,7 +44,7 @@ public class ViewPresentation extends AbstractCommand
 		}
 		catch (UnexpectedException e)
 		{
-			MessageFormatter formatter = new MessageFormatter();
+			MessageFormatter formatter = context.getMessageFormatter();
 			throw new UserException(formatter.format("read.message.not.found"));
 		}
 	}

@@ -7,6 +7,7 @@
 package nu.rydin.kom.i18n;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -15,8 +16,15 @@ import java.util.ResourceBundle;
  */
 public class MessageFormatter
 {
-	private final ResourceBundle m_resource = 
-		ResourceBundle.getBundle("nu.rydin.kom.i18n.messages");
+	private final ResourceBundle m_resource;
+	
+	private final Locale m_locale;
+	
+	public MessageFormatter(Locale locale)
+	{
+	    m_resource 	= ResourceBundle.getBundle("nu.rydin.kom.i18n.messages", locale);
+	    m_locale 	= locale;
+	}
 		
 	public String format(String key)
 	{
@@ -65,6 +73,6 @@ public class MessageFormatter
 		String fmt = m_resource.getString(key);
 		return new MessageFormat(fmt != null
 			? fmt
-			: "Unknown resource: " + key);
+			: "Unknown resource: " + key, m_locale);
 	}
 }

@@ -39,7 +39,7 @@ public class DeleteConference extends AbstractCommand
 		}
 		long conference=NamePicker.resolveName(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context);
 		ServerSession ss = context.getSession();
-		MessageFormatter mf = new MessageFormatter();
+		MessageFormatter mf = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		if (ss.isMagicConference(conference))

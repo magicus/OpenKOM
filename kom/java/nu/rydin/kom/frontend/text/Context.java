@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.util.Date;
+
 import nu.rydin.kom.AuthenticationException;
 import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.BadParameterException;
@@ -126,6 +128,14 @@ public interface Context extends TerminalSettingsProvider
 	 * @param id Object id
 	 */
 	public String formatObjectName(String name, long id);
+	
+	/**
+	 * Formats a timestamp in a space efficient way.
+	 * 
+	 * @param date The date to format
+	 * @return A formatted date
+	 */
+	public String smartFormatDate(Date date);
 	
 	/**
 	 * Returns a <tt>DisplayController</tt> according to the user preferences

@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.editor;
 
+import java.util.Date;
+
 import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.MessageNotFoundException;
@@ -163,6 +165,11 @@ public class EditorContext implements Context
 	public String formatObjectName(String name, long id)
 	{
 	    return m_underlying.formatObjectName(name, id);
+	}
+	
+	public String smartFormatDate(Date date)
+	{
+	    return m_underlying.smartFormatDate(date);
 	}
 	
 	public DisplayController getDisplayController()

@@ -37,6 +37,7 @@ import nu.rydin.kom.backend.data.MessageLogManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
+import nu.rydin.kom.constants.ChatRecipientStatus;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.UserFlags;
@@ -516,7 +517,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		try
 		{
 			m_da.getUserManager().addUser(userid, password, fullname, address1, address2, address3, address4, 
-				phoneno1, phoneno2, email1, email2, url, charset, flags1, flags2, flags3, flags4, rights);
+				phoneno1, phoneno2, email1, email2, url, charset, "sv_SE", flags1, flags2, flags3, flags4, rights);
 		}
 		catch(SQLException e)
 		{
@@ -1437,6 +1438,55 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		{
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
 		}		
+	}
+	
+	public int[] verifyChatRecipients(long[] recipients)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+	    NameManager nm = m_da.getNameManager();
+	    UserManager um = m_da.getUserManager();
+	    try
+	    {
+	        int top = recipients.length;
+	        int[] answer = new int[top];
+	        for (int idx = 0; idx < top; idx++)
+            {
+	            long each = recipients[idx];
+	            try
+	            {
+	                short kind = nm.getObjectKind(each);
+	                
+	                // Conferences are always considered ok recipients
+	                //
+	                if(kind == ConferenceManager.CONFERENCE_KIND)
+	                    answer[idx] = ChatRecipientStatus.OK_CONFERENCE;
+	                else
+	                {
+	                    // User. Check if logged in.
+	                    //
+	                    if(!m_sessions.hasSession(each))
+	                        answer[idx] = ChatRecipientStatus.NOT_LOGGED_IN;
+	                    else
+	                    {
+	                        // Logged in. Do they receive chat messages?
+	                        //
+	                        answer[idx] = (um.loadUser(each).getFlags1() & UserFlags.ALLOW_CHAT_MESSAGES) != 0
+	                        	? ChatRecipientStatus.OK_USER
+	                        	: ChatRecipientStatus.REFUSES_MESSAGES;
+	                    }
+	                }
+	            }
+	            catch(ObjectNotFoundException e)
+	            {
+	                answer[idx] = ChatRecipientStatus.NONEXISTENT;
+	            }
+            }
+	        return answer;
+	    }
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}			    
 	}
 	
 	public NameAssociation[] broadcastChatMessage(String message)

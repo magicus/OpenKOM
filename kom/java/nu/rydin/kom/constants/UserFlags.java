@@ -23,13 +23,13 @@ public class UserFlags
 	
 	// Flagword 1:
 	//
-	public static long SHOW_ATTENDANCE_MESSAGES 			= 0x00000001; // TODO: Not supported
-	public static long ALLOW_BROADCAST_MESSAGES				= 0x00000002; // TODO: Not supported
-	public static long ALLOW_CHAT_MESSAGES		 			= 0x00000004; // TODO: Not supported
+	public static long SHOW_ATTENDANCE_MESSAGES 			= 0x00000001; 
+	public static long ALLOW_BROADCAST_MESSAGES				= 0x00000002; 
+	public static long ALLOW_CHAT_MESSAGES		 			= 0x00000004; 
 	public static long KEEP_COPIES_OF_MAIL		 			= 0x00000008; // TODO: Not supported
 	public static long SHOW_TEXT_FOOTER						= 0x00000010;
 	public static long CLEAR_SCREEN_BEFORE_MESSAGE			= 0x00000020;
-	public static long ANSI_ATTRIBUTES						= 0x00000040; // TODO: Not supported
+	public static long ANSI_ATTRIBUTES						= 0x00000040;
 	public static long SHOW_OBJECT_IDS						= 0x00000080;
 	public static long EMPTY_LINE_FINISHES_CHAT				= 0x00000100;
 

@@ -45,7 +45,7 @@ public class ReadRules extends AbstractCommand
 		}
 		catch(ObjectNotFoundException e)
 		{
-			MessageFormatter formatter = new MessageFormatter();
+			MessageFormatter formatter = context.getMessageFormatter();
 			throw new UserException(formatter.format("read.message.not.found"));
 		}
 	}

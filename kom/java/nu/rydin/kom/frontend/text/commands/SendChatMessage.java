@@ -8,11 +8,15 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.MissingArgumentException;
+import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.UserException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.constants.ChatRecipientStatus;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
@@ -82,10 +86,43 @@ public class SendChatMessage extends AbstractCommand
 			{
 			    long id = NamePicker.resolveName(uarray[i], NameManager.UNKNOWN_KIND, context);
 				destinations[i] = id;
-				recipients += ", " + session.getNamedObject(id).getName();
+				recipients += ", " + session.getName(id);
 			}
-			//TODO: If destinations is empty, maybe we should throw an exception here?
-			
+
+			// Check that all users are logged in an can receive messages
+			//
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			boolean error = false;
+			int[] status = session.verifyChatRecipients(destinations);
+			int top = status.length;
+			for(int idx = 0; idx < top; ++idx)
+			{
+			    long each = destinations[idx];
+			    switch(status[idx])
+			    {
+			    	case ChatRecipientStatus.NONEXISTENT:
+			    	    pw.println(formatter.format("chat.nonexistent", session.getName(each)));
+			    		error = true; 
+			    		break;
+			    	case ChatRecipientStatus.NOT_LOGGED_IN:
+			    	    pw.println(formatter.format("chat.not.logged.in", session.getName(each)));
+			    		error = true;
+			    		break;
+			    	case ChatRecipientStatus.REFUSES_MESSAGES:
+			    	    pw.println(formatter.format("chat.refuses.messages", session.getName(each)));
+			    		error = true;	
+			    		break;			    	
+			    	case ChatRecipientStatus.OK_CONFERENCE:
+			    	case ChatRecipientStatus.OK_USER:
+			    	    break;
+			    	default:
+			    	    throw new UnexpectedException(context.getLoggedInUserId());
+			    }
+			}
+			if(error)
+			    throw new UserException(sw.toString());
+		
 			//Print beginning of prompt for message to a list of users
 			//
 			if (recipients.length() > 2)

@@ -23,6 +23,6 @@ public class ShowTime extends AbstractCommand
 	
 	public void execute(Context context, String[] args)
 	{
-		context.getOut().println(new Date().toString());
+		context.getOut().println(context.getMessageFormatter().format("show.time.format", new Date()));
 	}
 }

@@ -29,7 +29,7 @@ public class SkipTree extends AbstractCommand
 	{
  		ServerSession ss = context.getSession();
  		int n = ss.skipTree(ss.getLastMessageHeader().getId());
- 		MessageFormatter mf = new MessageFormatter();
+ 		MessageFormatter mf = context.getMessageFormatter();
  		context.getOut().println (mf.format("skip.subject.message", n));
 	}
 }

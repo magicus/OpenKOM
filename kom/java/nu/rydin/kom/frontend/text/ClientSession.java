@@ -12,7 +12,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 
 import nu.rydin.kom.AlreadyLoggedInException;
 import nu.rydin.kom.AuthenticationException;
@@ -69,7 +72,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	private KOMWriter m_out;
 	private final InputStream m_rawIn;
 	private final OutputStream m_rawOut; 
-	private MessageFormatter m_formatter = new MessageFormatter();
+	private MessageFormatter m_formatter = new MessageFormatter(Locale.getDefault());
 	private ServerSession m_session;
 	private long m_userId;
 	private LinkedList m_displayMessageQueue = new LinkedList();
@@ -207,6 +210,12 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 					charSet = "US-ASCII";
 				}
 			}
+			
+			// Replace message formatter with a localized one
+			//
+			String locale = userInfo.getLocale();
+			if(locale != null)
+			    m_formatter = new MessageFormatter(new Locale(locale));
 				
 			m_out.println(m_formatter.format("login.welcome", userInfo.getName()));
 			m_out.println();
@@ -524,6 +533,49 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
         {
             throw new RuntimeException(e);
         }        
+    }
+    
+    public String smartFormatDate(Date date)
+    {
+        // Check number of days from today
+        // TODO: Get locale and timezone from user data!
+        //
+        Calendar then = Calendar.getInstance();
+        then.setTime(date);
+        String answer = m_formatter.format("timestamp.medium", date);
+        Calendar now = Calendar.getInstance();
+        now.setTimeInMillis(System.currentTimeMillis());
+        
+        // Today or yesterday?
+        //
+        // Future date? Format the usual way
+        //
+        if(now.before(then))
+            return answer;
+        int yearNow = now.get(Calendar.YEAR);
+        int yearThen = then.get(Calendar.YEAR);
+        int dayNow = now.get(Calendar.DAY_OF_YEAR);
+        int dayThen = then.get(Calendar.DAY_OF_YEAR);
+        if(yearNow == yearThen + 1)
+            dayNow += then.getActualMaximum(Calendar.DAY_OF_YEAR);
+        else
+        {
+            if(yearNow != yearThen)
+                return answer;
+        }
+        int dayDiff = dayNow - dayThen;
+        switch(dayDiff)
+        {
+        	case 0:
+        	    answer = m_formatter.format("date.today");
+        	    break;
+        	case 1: 
+        	    answer = m_formatter.format("date.yesterday");
+        	    break;
+        	default:
+        	    return answer;
+        }
+        return answer + ", " + m_formatter.format("time.medium", date);
     }
     
     public DisplayController getDisplayController()
