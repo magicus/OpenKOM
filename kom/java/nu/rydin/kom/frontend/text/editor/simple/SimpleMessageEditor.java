@@ -69,7 +69,6 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			m_context.setSubject(in.readLine(oldSubject));
 			dc.messageHeader();
 			PrintUtils.printRepeated(out, '-', subjLine.length() + m_context.getSubject().length());
-			dc.input();
 			out.println();
 						
 			// Enter the main editor loop
@@ -82,6 +81,12 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			throw new KOMRuntimeException(formatter.format("error.reading.user.input"), e);		
 		}
 	}	
+	
+	protected void refresh() throws KOMException
+	{
+
+	    new ShowSimpleMessage(m_context, "").execute(m_context, new Object[0]);
+	}
 	
 	public void setRecipient(NameAssociation recipient)
 	{

@@ -27,7 +27,9 @@ public class WriteNote extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
+		//FIXME EDITREFACTOR: We should perhaps not use the message editor for editing the note.
 		UnstoredMessage msg = context.getMessageEditor().edit(-1);
+		//FIXME We're missing a message for successful storing of file.
 		context.getSession().storeFile(context.getLoggedInUserId(), ".note.txt", msg.getBody(), 
 		        FileProtection.ALLOW_READ);
 	}

@@ -25,6 +25,12 @@ public class SimpleChatEditor extends AbstractEditor
         super("/chateditorcommands.list", context);
     }
 
+	protected void refresh() throws KOMException
+	{
+	    new ShowSimpleChatMessage(m_context, "").execute(m_context, new Object[0]);
+	}
+    
+	//FIXME EDITREFACTOR: replyTo is completely irrelevant in this context.
     public UnstoredMessage edit(long replyTo)
             throws KOMException, InterruptedException, IOException 
     {
