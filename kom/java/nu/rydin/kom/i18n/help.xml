@@ -222,4 +222,87 @@
    <block>Du kan också ange ett lokalt textnummer direkt vid prompten; "(Se) tiden - 4711"</block>
   </description>
  </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain">
+  <description>
+   <block>Använd det här kommandot för att läsa den senast lästa texten en gång till.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.DeleteMessage">
+  <parameters>
+   <param order="0">Den text du vill ta bort.</param>
+  </parameters>
+  <description>
+   <block>Det här kommandot används om du vill ta bort en av dina texter.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop, mötesadministratör eller har skapat mötet kan du även radera andras texter.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.DeleteConference"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.Status">
+  <parameters>
+   <param order="0">Det objekt du vill visa status för.</param>
+  </parameters>
+  <description>
+   <block>Kommandot visar information om ett möte eller en användare. Följande fält visas:</block>
+   <block>- Objektnummer: Det globala nummer du kan använda för att referera till användaren eller mötet.</block>
+   <block>- Namn: Fullständigt namn.</block>
+   <block>- Skapad: Datum och tidpunkt då användaren eller mötet skapades.</block>
+   <block>- Senaste aktivitet: För användare, senaste inloggning. För möten, datum och tid för det senaste inlägget.</block>
+   <block>För användare visas också följande fält:</block>
+   <block>- Användarid: Inloggningsnamn.</block>
+   <block>- Språk/landskod: Användarens språkval.</block>
+   <block>- Tidszon: Användarens lokala tidszon.</block>
+   <block>För möten visas också följande fält:</block>
+   <block>- Administratör: Den användare som skapat mötet.</block>
+   <block>- Texter: Det textintervall som finns i mötet.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.PresentObject">
+  <parameters>
+   <param order="0">Det objekt du vill presentera.</param>
+  </parameters>
+  <description>
+   <block>Kommandot används för att presentera dig själv eller ett möte du skapat.</block>
+  </description>
+  <exception>
+   <block>Sysop eller en administratör måste ha skapat rätt sorts specialmöte för att det här kommandot ska fungera. Se manualen..</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ViewPresentation"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ViewPresentation">
+  <parameters>
+   <param order="0">Det objekt du vill se presentationen för</param>
+  </parameters>
+  <description>
+   <block>Använd det här kommandot för att återse en presentation av en användare eller ett möte.</block>
+  </description>
+  <exception>
+   <block>Sysop eller en administratör måste ha skapat rätt sorts specialmöte för att det här kommandot ska fungera. Se manualen..</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.PresentObject"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.WriteNote">
+  <description>
+   <block>Det här kommandot sätter en "lapp på dörren". Lappen är ett textstycke som visas när någon ber om din Status eller skriver ett brev till dig.</block>
+  </description>
+  <exception>
+   <block>Sysop eller användaradministratören måste ha skapat rätt sorts specialmöte för att det här kommandot ska fungera. Se manualen..</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Status"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SendMail"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.PrintDebug">
+  <description>
+   <block>Kommandot skriver ut felsökningsinformation. Det är antagligen inte speciellt intressant för dig, om du inte är med och utvecklar OpenKOM.</block>
+  </description>
+ </command>
 </commands>
