@@ -72,6 +72,10 @@ public class TelnetInputStream extends InputStream
 		m_input 	= input;
 		m_output 	= output; 
 		
+		// Please don't use linemode
+		//
+		this.sendOption(CHAR_WONT, OPT_LINEMODE);
+		
 		// We do use binary mode
 		//
 		this.sendOption(CHAR_DO, OPT_BINARY);
@@ -80,9 +84,9 @@ public class TelnetInputStream extends InputStream
 		//
 		this.sendOption(CHAR_WILL, OPT_ECHO);
 		
-		// Please don't use linemode
+		// We will suppress go ahead
 		//
-		this.sendOption(CHAR_DONT, OPT_LINEMODE);
+		this.sendOption(CHAR_WILL, OPT_SUPPRESS_GA);
 		
 		// Please use NAWS if you support it!
 		//
