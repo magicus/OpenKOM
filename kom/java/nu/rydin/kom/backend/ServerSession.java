@@ -25,6 +25,7 @@ import nu.rydin.kom.events.Event;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferencePermission;
 import nu.rydin.kom.structs.Envelope;
+import nu.rydin.kom.structs.MembershipInfo;
 import nu.rydin.kom.structs.MembershipListItem;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
@@ -457,7 +458,7 @@ public interface ServerSession
 	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
-	 * Liest the conferences the specified user is a member of
+	 * List the conferences the specified user is a member of
 	 * 
 	 * @param userId The global id of the user
 	 * @throws ObjectNotFoundException If the user could not be found
@@ -466,6 +467,27 @@ public interface ServerSession
 	public NameAssociation[] listMemberships(long userId)
 	throws ObjectNotFoundException, UnexpectedException;
 
+	/**
+	 * List the members in the specified conference.
+	 * @param confId Conference identifier.
+	 * @return An array of MembershipInfo items.
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public MembershipInfo[] listConferenceMembers(long confId)
+	throws ObjectNotFoundException, UnexpectedException;
+
+	/**
+	 * List the members in the specified conference.
+	 * @param confId Conference identifier.
+	 * @return An array of Strings containing the member names.
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public String[] listMemberNamesByConference(long confId)
+	throws ObjectNotFoundException, UnexpectedException;
+	
+	
 	/**
 	 * Gets the name of a <tt>NamedObject</tt> by its id.
 	 * 

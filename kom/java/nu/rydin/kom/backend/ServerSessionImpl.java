@@ -940,6 +940,31 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+
+	public MembershipInfo[] listConferenceMembers(long confId)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		try
+		{
+			return m_da.getMembershipManager().listMembershipsByConference(confId);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+
+	public String[] listMemberNamesByConference(long confId)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		MembershipInfo[] mi = this.listConferenceMembers(confId);
+		String[] s = new String[mi.length];
+		for (int i = 0; i < mi.length; ++i)
+		{
+			s[i] = this.getName(mi[i].getUser());
+		}
+		return s;
+	}
 	
 	public String getName(long id)
 	throws ObjectNotFoundException, UnexpectedException
