@@ -305,4 +305,61 @@
    <block>Kommandot skriver ut felsökningsinformation. Det är antagligen inte speciellt intressant för dig, om du inte är med och utvecklar OpenKOM.</block>
   </description>
  </command>
+ <command class="nu.rydin.kom.frontend.text.commands.GenerateTestdata">
+  <parameters>
+   <param order="0">Halva antalet texter som skall genereras</param>
+  </parameters>
+  <description>
+   <block>Kommandot aktiverar roboten Flinge Jucht, som skriver dravel i det möte du just nu befinner dig i.</block>
+   <block>Du bör inte köra det här kommandot öht, om du inte är intresserad av inlägg med innehållet "katten har ingen tv".</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.GotoNextConference">
+  <description>
+   <block>Kommandot flyttar dig till nästa möte med olästa texter. OpenKOM föreslår automatiskt att du ska gå till nästa möte, om du har olästa texter.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.GotoConference"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ReadNextMessage">
+  <description>
+   <block>Kommandot läser nästa olästa text i mötet du befinner dig i. Det här är kommandot OpenKOM föreslår om du har olästa texter i aktuellt möte.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ReadMessage"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.DisplayCurrentConference">
+  <description>
+   <block>Kommandot visar vilket möte du just nu befinner dig i. Det berättar dessutom om du har några olästa texter.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.GotoConference"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ChangeUnread"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListNews"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ReadRules">
+  <parameters>
+   <param order="0">Det möte du vill läsa reglerna för.</param>
+  </parameters>
+  <description>
+   <block>Kommandot visar mötesreglerna för det möte du angivit. Om du inte anger ett möte antar OpenKOM att du vill se reglerna för det möte du befinner dig i.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.WriteRules"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.WriteRules">
+  <description>
+   <block>Det här kommandot använder du för att skriva regler för ett möte du skapat. Du kommer att få samma editor som du använder för att skriva vanliga inlägg.</block>
+  </description>
+  <exception>
+   <block>För att kommandot ska fungera måste sysop eller mötesadministratören ha skapat rätt sorts specialmöte. Se manualen..</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ReadRules"/>
+  </seealso>
+ </command>
 </commands>
