@@ -34,10 +34,16 @@ public class ANSIDisplayController implements DisplayController
         m_writer.print(ANSISequences.WHITE);
     }
 
+    public void messageSubject() 
+    {
+        m_writer.print(ANSISequences.BRIGHT);
+        m_writer.print(ANSISequences.WHITE);
+    }
+    
     public void chatMessage() 
     {
         m_writer.print(ANSISequences.BRIGHT);
-        m_writer.print(ANSISequences.CYAN);
+        m_writer.print(ANSISequences.GREEN);
     }
 
     public void broadcastMessage() 
@@ -58,6 +64,12 @@ public class ANSIDisplayController implements DisplayController
         m_writer.print(ANSISequences.YELLOW);
     }
 
+    public void genericHeader()
+    {
+        m_writer.print(ANSISequences.BRIGHT);
+        m_writer.print(ANSISequences.CYAN);    	
+    }
+    
     public void messageHeader() 
     {
         m_writer.print(ANSISequences.BRIGHT);
@@ -69,4 +81,11 @@ public class ANSIDisplayController implements DisplayController
         m_writer.print(ANSISequences.BRIGHT);
         m_writer.print(ANSISequences.CYAN);
     }
+
+    public void editorLineNumber() 
+    {
+        m_writer.print(ANSISequences.BRIGHT);
+        m_writer.print(ANSISequences.CYAN);
+    }
+    
 }

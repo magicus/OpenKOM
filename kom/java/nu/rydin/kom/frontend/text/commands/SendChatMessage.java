@@ -16,6 +16,7 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleChatEditor;
@@ -42,6 +43,7 @@ public class SendChatMessage extends AbstractCommand
 		
 		// Set up
 		//
+		DisplayController dc = context.getDisplayController();
 		LineEditor in = context.getIn();
 		PrintWriter out = context.getOut();
 		ServerSession session = context.getSession();
@@ -53,6 +55,7 @@ public class SendChatMessage extends AbstractCommand
 		if("*".equals(parameters[0]))
 		{
 		    //Print beginning of prompt for message to all users.
+			dc.genericHeader();
 		    out.println(context.getMessageFormatter().format("chat.saytoall"));
 		}
 		else
@@ -93,6 +96,7 @@ public class SendChatMessage extends AbstractCommand
 			{
 			    recipients = recipients.substring(2);
 			}
+			dc.genericHeader();
 		    out.println(context.getMessageFormatter().format("chat.saytouser", recipients));
 
 		}
@@ -102,6 +106,7 @@ public class SendChatMessage extends AbstractCommand
 	    out.println("");
 		out.print(me);
 		out.println(": ");
+		dc.normal();
 		out.flush();
 		
 		

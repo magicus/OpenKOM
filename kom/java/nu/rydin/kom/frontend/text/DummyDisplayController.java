@@ -15,10 +15,18 @@ public class DummyDisplayController implements DisplayController
     {
     }
 
+    public void genericHeader()
+    {
+    }
+    
     public void messageBody() 
     {
     }
 
+    public void messageSubject() 
+    {
+    }
+    
     public void chatMessage() 
     {
     }
@@ -42,4 +50,8 @@ public class DummyDisplayController implements DisplayController
     public void messageFooter() 
     {
     }
+
+	public void editorLineNumber() 
+	{
+	}
 }

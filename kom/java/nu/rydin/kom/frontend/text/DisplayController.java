@@ -13,11 +13,17 @@ public interface DisplayController
 {
     public void prompt();
     
+    public void genericHeader();
+    
     public void messageHeader();
     
     public void messageBody();
     
     public void messageFooter();
+    
+    public void messageSubject();
+    
+    public void editorLineNumber();
     
     public void chatMessage();
     

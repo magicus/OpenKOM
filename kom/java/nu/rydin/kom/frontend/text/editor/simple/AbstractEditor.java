@@ -20,6 +20,7 @@ import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.CommandParser;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.editor.Buffer;
@@ -50,6 +51,7 @@ public abstract class AbstractEditor implements MessageEditor
 	{
 		// Set up some stuff
 		//
+		DisplayController dc = context.getDisplayController();
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter formatter = context.getMessageFormatter();
@@ -61,8 +63,10 @@ public abstract class AbstractEditor implements MessageEditor
 		String defaultLine = ""; 
 		for(;;)
 		{
+			dc.messageHeader();
 			PrintUtils.printRightJustified(out, Integer.toString(buffer.size() + 1), 4);
 			out.print(':');
+			dc.normal();
 			out.flush();
 			String line = null;
 			try

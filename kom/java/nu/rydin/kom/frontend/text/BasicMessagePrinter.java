@@ -130,9 +130,12 @@ public class BasicMessagePrinter implements MessagePrinter
 				
 		// Print subject
 		//
-		String subjLine = formatter.format("BasicMessagePrinter.subject", message.getSubject()); 
-		out.println(subjLine);
-		PrintUtils.printRepeated(out, '-', subjLine.length());
+		String subjLine = formatter.format("BasicMessagePrinter.subject"); 
+		out.print(subjLine);
+		dc.messageSubject();
+		out.println(message.getSubject());
+		dc.messageHeader();
+		PrintUtils.printRepeated(out, '-', subjLine.length() + message.getSubject().length());
 		out.println();
 		
 		// Print body
