@@ -23,14 +23,21 @@ public class BraindeadMessageEditor implements MessageEditor
 	{
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
-		MessageFormatter formatter = context.getMessageFormatter();			
+		MessageFormatter formatter = context.getMessageFormatter();	
+		String oldSubject=null;
 		try
 		{
+			// if this is a reply, retrieve subject from original message
+			//
+			if(replyTo > 0) {
+				oldSubject = context.getSession().innerReadMessage(replyTo).getMessage().getSubject();
+			}
+				
 			// Read subject
 			//
 			out.print(formatter.format("write.message.subject"));
 			out.flush();
-			String subject = in.readLine();
+			String subject = in.readLine(oldSubject);
 			
 			// Read message body
 			//
