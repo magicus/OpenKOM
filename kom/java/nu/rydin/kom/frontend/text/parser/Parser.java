@@ -288,8 +288,18 @@ public class Parser
         		// We still have parts to match to
         		Match match = parts[level].match(remainder);
         		if (!match.isMatching()) {
-        			// User have entered an invalid parameter. This should be unlikely.
-            		throw new InvalidParametersException(context.getMessageFormatter().format("parser.invalid.match", target.getCommand().getFullName()));
+        		    if (parts[level] instanceof CommandNamePart)
+        		    {
+        		        // User has entered enough to match one command uniquely,
+        		        // but the rest of the commandline does not match the rest of
+        		        // the command name parameters.
+        		        throw new CommandNotFoundException(context.getMessageFormatter().format("parser.unknown", "ADD ORIGINAL COMMANDLINE HERE"));
+        		    }
+        		    else
+        		    {
+        		        // User have entered an invalid parameter. This should be unlikely.
+        		        throw new InvalidParametersException(context.getMessageFormatter().format("parser.invalid.match", target.getCommand().getFullName()));
+        		    }
         		}
         		target.addMatch(match);
         		remainder = match.getRemainder();
@@ -316,24 +326,34 @@ public class Parser
         // If we still need more parameters, ask the user about them.
         while (level < parts.length) {
             Object parameter;
-            if (parts[level].isRequired())
+            CommandLinePart part = parts[level];
+            
+            if (part instanceof CommandNamePart)
             {
-        		// Not on command line and required, ask the user about it.
-        		Match match = parts[level].fillInMissingObject(context);
-        		if (!match.isMatching()) {
-        			// The user entered an invalid parameter, abort
-            		throw new InvalidParametersException(context.getMessageFormatter().format("parser.invalid.parameter"));
-        		}
-        		
-        		// Resolve directly
-        		parameter = parts[level].resolveFoundObject(context, match);
+                // If we still have CommandNameParts unmatched, WE IGNORE THEM.
+                // Since we've obviously matched one unique command, it's ok.
             }
-        	else
-        	{
-        	    //Parameter was not required, just skip it and add null to the parameters
-        	    parameter = null;
-        	}
-        	resolvedParameters.add(parameter);
+            else
+            {
+	            if (part.isRequired())
+	            {
+	        		// Not on command line and required, ask the user about it.
+	        		Match match = part.fillInMissingObject(context);
+	        		if (!match.isMatching()) {
+	        			// The user entered an invalid parameter, abort
+	            		throw new InvalidParametersException(context.getMessageFormatter().format("parser.invalid.parameter"));
+	        		}
+	        		
+	        		// Resolve directly
+	        		parameter = part.resolveFoundObject(context, match);
+	            }
+	        	else
+	        	{
+	        	    //Parameter was not required, just skip it and add null to the parameters
+	        	    parameter = null;
+	        	}
+	        	resolvedParameters.add(parameter);
+            }
         	level++;
         }
         
