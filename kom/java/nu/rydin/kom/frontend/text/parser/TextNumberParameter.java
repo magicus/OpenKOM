@@ -43,4 +43,9 @@ public class TextNumberParameter extends CommandLineParameter
 			return new Match(false, null, null, null);
 		}
 	}
+
+    protected String getUserDescriptionKey() {
+        // TODO Auto-generated method stub
+        return "parser.parameter.textnumber.description";
+    }
 }

@@ -87,12 +87,15 @@ public class Parser
 		public CommandLinePart getCommandLinePart(int level)
 		{
 			CommandLinePart[] parts = (CommandLinePart[]) (m_commandToPartsMap.get(m_command));
-			if (level > parts.length) {
+			if (level >= parts.length) {
 				return null;
 			} else {
 				return parts[level];
 			}
 		}
+        public String toString() {
+            return "CommandToMatches:[command=" + m_command + ", matches=" + m_matches + "]";
+        }
 	}
 	
 	/**
@@ -134,8 +137,7 @@ public class Parser
 		for (int i = 0; i < cookedParts.length; i++)
 		{
 			String cookedPart = cookedParts[i];
-			//Only the first part is required, the rest are optional.
-			result[i] = new CommandNamePart(cookedPart, (i == 0));
+			result[i] = new CommandNamePart(cookedPart, true);
 		}
 		return result;
 	}
@@ -199,9 +201,9 @@ public class Parser
     	boolean remaindersExist = true;
     	while (remaindersExist && potentialTargets.size() > 1)
     	{
+			remaindersExist = false;
     		for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
     		{
-    			remaindersExist = false;
     			CommandToMatches potentialTarget = (CommandToMatches)iter.next();
     			CommandLinePart part = potentialTarget.getCommandLinePart(level);
     			if (part == null) {
@@ -213,7 +215,7 @@ public class Parser
     				if (level == 0) {
     					commandLineToMatch = commandLine;
     				} else {
-    					commandLineToMatch = potentialTarget.getMatch(level).getRemainder();
+    					commandLineToMatch = potentialTarget.getLastMatch().getRemainder();
     				}
     				Match match = part.match(commandLineToMatch);
     				if (!match.isMatching()) {
@@ -447,6 +449,11 @@ public class Parser
 		}		
 	}
 
+	/**
+	 * Returns an array of all Commands that are available to the user.
+	 * 
+	 * @return An Command[] of available commands.
+	 */
 	public Command[] getCommandList()
 	{
 		return m_commands;

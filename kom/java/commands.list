@@ -57,4 +57,4 @@ nu.rydin.kom.frontend.text.commands.ViewChatLog
 nu.rydin.kom.frontend.text.commands.ViewBroadcastLog
 nu.rydin.kom.frontend.text.commands.WhoAmI
 nu.rydin.kom.frontend.text.commands.SearchMessage
-nu.rydin.kom.frontend.text.ClientSession$ListCommands
+nu.rydin.kom.frontend.text.commands.ListCommands

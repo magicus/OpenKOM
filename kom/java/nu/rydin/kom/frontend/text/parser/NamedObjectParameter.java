@@ -115,4 +115,9 @@ public class NamedObjectParameter extends CommandLineParameter
 			return null;
 		}
 	}
+
+    protected String getUserDescriptionKey() {
+        // TODO Auto-generated method stub
+        return "parser.parameter.namedobject.description";
+    }
 }

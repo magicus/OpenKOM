@@ -128,4 +128,9 @@ public abstract class AbstractCommand implements Command
 	{
 	    // TODO This is implemented here only as a temporary solution to get all commands to work.
 	}
+
+	public String toString() {
+        return getClass().getName() + "[" + m_fullName + "]";
+    }
+    
 }

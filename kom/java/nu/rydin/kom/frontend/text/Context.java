@@ -64,6 +64,13 @@ public interface Context extends TerminalSettingsProvider
 	public ServerSession getSession();
 	
 	/**
+	 * Returns the client session.
+	 * 
+	 * @return The current client session.
+	 */
+	public ClientSession getClientSession();
+	
+	/**
 	 * Prints information about the current conference
 	 *
 	 */

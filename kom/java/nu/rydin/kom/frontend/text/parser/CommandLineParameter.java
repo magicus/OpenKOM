@@ -50,4 +50,15 @@ public abstract class CommandLineParameter extends CommandLinePart
     public boolean isRequired() {
     	return m_isRequired;
     }
+
+    public String getUserDescription(Context context) {
+		MessageFormatter fmt = context.getMessageFormatter();
+        if (isRequired()) {
+            return "<" + fmt.format(getUserDescriptionKey()) + ">";
+        } else {
+            return "[" + fmt.format(getUserDescriptionKey()) + "]";
+        }
+    }
+
+    protected abstract String getUserDescriptionKey();
 }

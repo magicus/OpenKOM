@@ -54,4 +54,7 @@ public class ConferenceParameter extends NamedObjectParameter
 		}
 	}
 	
+    protected String getUserDescriptionKey() {
+        return "parser.parameter.conference.description";
+    }
 }

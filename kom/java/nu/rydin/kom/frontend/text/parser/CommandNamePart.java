@@ -53,12 +53,10 @@ public class CommandNamePart extends CommandLinePart
 		//we should still match to allow for shortening of commands.
 		if (m_cookedName.indexOf(cooked) == 0)
 		{
-		    System.out.println("yes: " + m_cookedName + " against: " + matchingPart + " and: " + remainder);
 			return new Match(true, matchingPart, remainder, null);
 		}
 		else
 		{
-		    System.out.println("no!: " + m_cookedName + " against: " + matchingPart + " and: " + remainder);
 			return new Match(false, null, null, null);
 		}
 	}

@@ -54,4 +54,7 @@ public class UserParameter extends NamedObjectParameter
 		}
 	}
 	
+    protected String getUserDescriptionKey() {
+        return "parser.parameter.user.description";
+    }
 }

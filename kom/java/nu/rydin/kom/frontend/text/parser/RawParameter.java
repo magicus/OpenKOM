@@ -31,4 +31,8 @@ public class RawParameter extends CommandLineParameter {
         // which is exactly what we want.
         return '\0';
     }
+
+    protected String getUserDescriptionKey() {
+        return "parser.parameter.raw.description";
+    }
 }
