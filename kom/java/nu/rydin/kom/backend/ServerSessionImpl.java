@@ -1701,11 +1701,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 					break;
 				}
 				// Update the indices. The new idxBeg is, of course, the node after the previous
-				// idxEnd, just as the new idxEnd is addCount-1 steps after the new idxBeg
-				// (since idxBeg marks the first new node, so it's included in the interval).
+				// idxEnd, just as the new idxEnd is addCount steps after its old value.
 				//
 				idxBeg = idxEnd + 1;
-				idxEnd = idxBeg + addCount - 1;
+				idxEnd+= addCount;
 				addCount = 0;
 			}
 			
