@@ -8,6 +8,7 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 
 import nu.rydin.kom.exceptions.InvalidChoiceException;
@@ -18,6 +19,7 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 
@@ -71,34 +73,15 @@ public class ChangeTimeZone extends AbstractCommand
     }
 
 	private String resolveAmbiguities(Context context, String[] matches)
-	throws InterruptedException, IOException, InvalidChoiceException
+	throws InvalidChoiceException, OperationInterruptedException, IOException, InterruptedException
 	{
-        KOMWriter out = context.getOut();
-        LineEditor in = context.getIn();
-        MessageFormatter formatter = context.getMessageFormatter();
-        int top = matches.length;
-        for(int idx = 0; idx < top; ++idx)
-        {
-            out.print(idx + 1);
-            out.print(". ");
-            out.println(matches[idx]);
-        }
-        out.println();
-        out.print(formatter.format("change.timezone.pick.prompt"));
-        out.flush();
-        String answer = in.readLine();
-        try
-        {
-            return matches[Integer.parseInt(answer)-1];
-        }
-        catch(NumberFormatException e)
-        {
-            throw new InvalidChoiceException();
-        }
-        catch(ArrayIndexOutOfBoundsException e)
-        {
-            throw new InvalidChoiceException();
-        }
+		List matchList = new ArrayList(matches.length);
+		
+		for (int i = 0; i < matches.length; i++) {
+			matchList.add(matches[i]);
+		}
+		int selection = Parser.askForResolution(context, matchList, "change.timezone.pick.prompt", true, "change.timezone.ambiguous");
+		return matches[selection];
 	}
     
     private String[] matchTimezone(String key)
