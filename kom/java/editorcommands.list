@@ -5,6 +5,8 @@
 nu.rydin.kom.frontend.text.commands.Who
 nu.rydin.kom.frontend.text.commands.SendChatMessage
 nu.rydin.kom.frontend.text.commands.ReadMessage
+nu.rydin.kom.frontend.text.commands.ReadOriginal
+nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain
 nu.rydin.kom.frontend.text.editor.simple.ListCommands
 nu.rydin.kom.frontend.text.editor.simple.Save
 nu.rydin.kom.frontend.text.editor.simple.Quit
