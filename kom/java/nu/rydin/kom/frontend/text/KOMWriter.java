@@ -26,7 +26,7 @@ public class KOMWriter extends PrintWriter
 	private final OutputStream m_out;
 	private String m_charSet;
 	private int m_lineNo = 0;
-	private final String m_lineSeparator;
+	private static final String s_lineSeparator = "\r\n";
 	private final List m_newlineListeners = new LinkedList();
 
 	public KOMWriter(OutputStream out, String charSet)
@@ -36,14 +36,6 @@ public class KOMWriter extends PrintWriter
 		m_charSet = charSet;
 		m_out = out;
 		m_writer = new PrintWriter(new OutputStreamWriter(out, charSet));
-		
-		// Figure out line ending on this platform
-		//
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-		pw.println();
-		pw.flush();
-		m_lineSeparator = sw.toString();
 	}
 	
 	public void setCharset(String charSet)
@@ -138,7 +130,7 @@ public class KOMWriter extends PrintWriter
 
 	public void println()
 	{
-		this.print(m_lineSeparator);
+		this.print(s_lineSeparator);
 	}
 
 	public void println(boolean x)
