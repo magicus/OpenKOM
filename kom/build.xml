@@ -1,6 +1,8 @@
-<project name="kom" default="install" basedir=".">
+<project name="kom" default="build-jar" basedir=".">
 	<property name="libPath" value="lib"/>
 	<property name="distrPath" value="distr"/>
+	<property name="confPath" value="conf"/>
+	<property name="sqlPath" value="sql"/>
 	<path id="kom.class.path">
 		<pathelement location="${libPath}/kom.jar" /> 
 		<pathelement location="${distrPath}/mysql-connector-java-3.0.16-ga-bin.jar"/>
@@ -29,5 +31,13 @@
 		<mkdir dir="lib"/>
 		<jar destfile="lib/kom.jar" basedir="classes"/>
 	</target>
-	<target name="install" depends="build-jar"/>
+	<target name="release" depends="build-jar">
+		<zip destfile="openkom.zip">
+			<zipfileset dir="." includes="OpenKOM.LICENSE"/>
+			<zipfileset dir="${libPath}/" prefix="${libPath}/" />
+			<zipfileset dir="${distrPath}/" prefix="${distrPath}/" />
+			<zipfileset dir="${confPath}/" prefix="${confPath}/" />
+			<zipfileset dir="${sqlPath}/" prefix="${sqlPath}/" />
+		</zip>
+	</target>
 </project>
