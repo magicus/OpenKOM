@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.backend.data.ConferenceManager;
@@ -32,28 +33,21 @@ public class MoveMessage extends AbstractCommand
 	public void execute(Context context, String[] parameters)
 	throws KOMException, IOException, InterruptedException 
 	{
-		if (2 > parameters.length)
+		if (0 == parameters.length)
 		{
 			throw new BadParameterException();
 		}
 		
-		int n = -1;
-		try
-		{
-			n = Integer.parseInt(parameters[0]);
-		}
-		catch (NumberFormatException e)
-		{
-			throw new BadParameterException();
-		}
-		parameters[0]=" ";
 		long conference=NamePicker.resolveName(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context);
-		context.getSession().moveMessage(n, conference);
+		ServerSession ss = context.getSession();
+		int localNum = ss.globalToLocalInConference(ss.getCurrentConferenceId(), 
+													ss.getLastMessageHeader().getId()).getLocalnum();
+		context.getSession().moveMessage(localNum, conference);
 
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();
 		out.println(fmt.format("move.confirmation", 
-			new Object [] { new Long(n), context.getSession().getName(conference) } ));	}
+			new Object [] { new Long(localNum), context.getSession().getName(conference) } ));	}
 	
 	public boolean acceptsParameters()
 	{
