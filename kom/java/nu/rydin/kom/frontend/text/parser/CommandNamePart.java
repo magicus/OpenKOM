@@ -6,7 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
-import nu.rydin.kom.backend.NameUtils;
 
 /**
  * @author Magnus Ihse (magnus@ihse.net)

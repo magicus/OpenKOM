@@ -87,7 +87,7 @@ public abstract class CommandLinePart
 		return innerMatch(matchingPart, remainder);
 	}
 
-	public Match getMissingObject(Context context, Match oldMatch) throws IOException, InterruptedException {
+	public Match fillInMissingObject(Context context, Match oldMatch) throws IOException, InterruptedException {
 		return oldMatch;
 	}
 	

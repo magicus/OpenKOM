@@ -21,10 +21,12 @@ public abstract class CommandLineParameter extends CommandLinePart
 {
 
 	private String m_missingObjectQuestionKey;
+    protected boolean m_isRequired;
 	
-	public CommandLineParameter(String missingObjectQuestionKey)
+	public CommandLineParameter(String missingObjectQuestionKey, boolean isRequired)
 	{
 		m_missingObjectQuestionKey = missingObjectQuestionKey;
+		m_isRequired = isRequired;
 	}
 	
 	public String getSeparator()
@@ -32,7 +34,7 @@ public abstract class CommandLineParameter extends CommandLinePart
 		return ",";
 	}
 
-	public Match getMissingObject(Context context, Match oldMatch) throws IOException, InterruptedException
+	public Match fillInMissingObject(Context context, Match oldMatch) throws IOException, InterruptedException
 	{
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
@@ -44,4 +46,8 @@ public abstract class CommandLineParameter extends CommandLinePart
 		Match newMatch = innerMatch(line, "");
 		return newMatch;
 	}
+
+    public boolean isRequired() {
+    	return m_isRequired;
+    }
 }

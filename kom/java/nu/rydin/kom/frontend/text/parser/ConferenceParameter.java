@@ -14,7 +14,6 @@ import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.ConferenceManager;
-import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.i18n.MessageFormatter;

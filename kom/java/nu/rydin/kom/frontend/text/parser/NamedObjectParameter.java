@@ -25,23 +25,14 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class NamedObjectParameter extends CommandLineParameter
 {
-	private boolean m_isRequired;
-	
 	public NamedObjectParameter(String missingObjectQuestionKey, boolean isRequired)
 	{
-		super(missingObjectQuestionKey);
-		m_isRequired = isRequired;
+		super(missingObjectQuestionKey, isRequired);
 	}
 
 	public NamedObjectParameter(boolean isRequired)
 	{
-		super("parser.parameter.namedobject.ask");
-		m_isRequired = isRequired;
-	}
-
-	public boolean isRequired()
-	{
-		return m_isRequired;
+		super("parser.parameter.namedobject.ask", isRequired);
 	}
 
 	protected Match innerMatch(String matchingPart, String remainder)
