@@ -12,6 +12,7 @@ import java.util.*;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
+import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.SystemFiles;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
@@ -132,6 +133,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		public void onEvent(ChatMessageEvent event) 
 		{
 			getDisplayController().normal();
+			this.beepMaybe(UserFlags.BEEP_ON_CHAT);
 			String header = m_formatter.format("event.chat", new Object[] { event.getUserName() }); 
 			m_out.print(header);
 			getDisplayController().chatMessageBody();
@@ -142,7 +144,10 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		public void onEvent(BroadcastMessageEvent event) 
 		{
 			getDisplayController().normal();
-			String header = m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() }); 
+			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
+			String header = event.getKind() == MessageLogKinds.BROADCAST 
+			    ? m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() })
+			    : event.getUserName() + ' ';
 			m_out.print(header);
 			getDisplayController().broadcastMessageBody();
 			printWrapped(event.getMessage(), header.length());
@@ -152,6 +157,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		public void onEvent(ChatAnonymousMessageEvent event) 
 		{
 			getDisplayController().normal();
+			this.beepMaybe(UserFlags.BEEP_ON_CHAT);
 			String header = m_formatter.format("event.broadcast.anonymous");
 			m_out.print(header);
 			getDisplayController().broadcastMessageBody();
@@ -162,6 +168,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		public void onEvent(BroadcastAnonymousMessageEvent event) 
 		{
 			getDisplayController().normal();
+			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
 			String header = m_formatter.format("event.broadcast.anonymous");
 			m_out.print(header);
 			getDisplayController().broadcastMessageBody();
@@ -177,6 +184,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		public void onEvent(UserAttendanceEvent event) 
 		{
 			getDisplayController().normal();
+			this.beepMaybe(UserFlags.BEEP_ON_ATTENDANCE);			
 			m_out.println(m_formatter.format("event.attendance." + event.getType(), new Object[] { event.getUserName() }));
 			m_out.println();
 		}
@@ -189,6 +197,23 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		public void onEvent(MessageDeletedEvent event) 
 		{
 			//This event should not be handled here
+		}
+		
+		protected void beepMaybe(long flag)
+		{
+			try
+			{
+			    // Beep if user wants it
+			    //
+				if((ClientSession.this.getCachedUserInfo().getFlags1() & flag) != 0)
+				    m_out.print('\u0007');
+			}
+			catch(UnexpectedException e)
+			{
+			    // Should NOT happen!
+			    //
+			    throw new RuntimeException(e);
+			}					    
 		}
 	}
 	
@@ -618,6 +643,10 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			m_out.print(prompt);
     			dc.input();
     			m_out.flush();
+    			
+    			// Clear pager line counter
+    			//
+    			m_in.resetLineCount();
     			
     			// Read command
     			//

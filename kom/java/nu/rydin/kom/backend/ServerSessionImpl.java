@@ -1184,6 +1184,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				throw new NotMemberException();
 			}
 			m_da.getMembershipManager().signoff(userId, conferenceId);
+			this.reloadMemberships();
 			return this.getCensoredName(conferenceId).getName();
 		}
 		catch(SQLException e)
@@ -1625,7 +1626,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}			    
 	}
 	
-	public NameAssociation[] broadcastChatMessage(String message)
+	public NameAssociation[] broadcastChatMessage(String message, short kind)
 	throws UnexpectedException
 	{
 	    try
@@ -1645,7 +1646,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			else 
 			{
 				m_sessions.broadcastEvent(new BroadcastMessageEvent(this.getLoggedInUserId(), 
-					this.getLoggedInUser().getName(), message, logId));
+					this.getLoggedInUser().getName(), message, logId, kind));
 			}
 			
 			// Log to chat log. This could be done in the event handlers, but
@@ -1667,7 +1668,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			        //
 				    UserInfo user = um.loadUser(userId);
 				    if((user.getFlags1() & UserFlags.ALLOW_BROADCAST_MESSAGES) != 0)
-				        mlm.storeMessagePointer(logId, userId, false, MessageLogKinds.BROADCAST);
+				        mlm.storeMessagePointer(logId, userId, false, kind);
 				    else
 				        bounces.add(new NameAssociation(userId, 
 				                new Name(user.getName(), Visibilities.PUBLIC)));   
@@ -1955,7 +1956,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		try
 		{
 			// Load current flags.
-			// TODO: Might be a little inefficient to load the entire UserInfo
 			//
 			UserInfo ui = this.getLoggedInUser();
 			long[] oldFlags = ui.getFlags();
@@ -2118,18 +2118,31 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
-	public MessageLogItem[] getMessagesFromLog(short kind, int limit)
+	public MessageLogItem[] getChatMessagesFromLog(int limit)
 	throws UnexpectedException
 	{
 	    try
 	    {
-	        return m_da.getMessageLogManager().listMessages(this.getLoggedInUserId(), kind, limit);
+	        return m_da.getMessageLogManager().listChatMessages(this.getLoggedInUserId(), limit);
 	    }
 	    catch(SQLException e)
 	    {
 	        throw new UnexpectedException (this.getLoggedInUserId(), e);
 	    }
 	}
+	
+	public MessageLogItem[] getBroadcastMessagesFromLog(int limit)
+	throws UnexpectedException
+	{
+	    try
+	    {
+	        return m_da.getMessageLogManager().listBroadcastMessages(this.getLoggedInUserId(), limit);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
+	}	
 	
 	public HeartbeatListener getHeartbeatListener()
 	{
@@ -2882,18 +2895,29 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    return this.getMessageHeaderInConference(this.getCurrentConferenceId(), localNum);
 	}
 
-	
 	public void deleteConference (long conference)
-	throws UnexpectedException
+	throws AuthorizationException, UnexpectedException
 	{
 		try
 		{
+		    // Do we have the right to do this?
+		    //
+		    if(!(this.hasPermissionInConference(conference, ConferencePermissions.ADMIN_PERMISSION)
+		       || this.getLoggedInUser().hasRights(UserPermissions.CONFERENCE_ADMIN)))
+		       throw new AuthorizationException();
+		    
+		    // So far so, so good. Go ahead and delete!
+		    //
 			m_da.getMessageManager().deleteConference(conference);
 			m_da.getNameManager().dropNamedObject(conference);
 		}
 		catch (SQLException e)
 		{
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+		catch(ObjectNotFoundException e)
+		{
+		    throw new UnexpectedException (this.getLoggedInUserId(), e);
 		}
 	}
 	

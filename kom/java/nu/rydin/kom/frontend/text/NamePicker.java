@@ -98,12 +98,11 @@ public class NamePicker
         return assoc;
     }
 
-    public static NameAssociation pickName(NameAssociation[] assocs, Context ctx) throws IOException, InterruptedException, KOMException {
+    public static NameAssociation pickName(NameAssociation[] assocs, Context ctx) throws IOException, InterruptedException, KOMException 
+    {
         List candidates = new ArrayList(assocs.length);
         for (int i = 0; i < assocs.length; i++)
-        {
             candidates.add(assocs[i].getName());
-        }
         
         assocs[0].getName();
         int selection = Parser.askForResolution(ctx, candidates, "name.chose", true, "name.ambiguous", false);

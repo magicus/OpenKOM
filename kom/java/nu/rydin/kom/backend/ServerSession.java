@@ -660,9 +660,10 @@ public interface ServerSession
 	/**
 	 * Broadcasts a chat message to all logged in users
 	 * @param message The message
+	 * @param kind The message kind
 	 * @return An array of NameAssociations of users that refused the message
 	 */
-	public NameAssociation[] broadcastChatMessage(String message)
+	public NameAssociation[] broadcastChatMessage(String message, short kind)
 	throws UnexpectedException;
 		
 	/**
@@ -1058,7 +1059,7 @@ public interface ServerSession
 	 * @throws UnexpectedException
 	 */
 	public void deleteConference (long conference)
-	throws UnexpectedException;
+	throws AuthorizationException, UnexpectedException;
 	
 	public void createMagicConference (String fullname, int permissions, int nonmemberPermissions, short visibility, long replyConf, short kind)
 	throws DuplicateNameException, UnexpectedException, AuthorizationException, AmbiguousNameException;
@@ -1148,15 +1149,23 @@ public interface ServerSession
 	 */
 	public MessageHeader getMessageHeaderInCurrentConference(int localNum)
 	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
-
+	
 	/**
-	 * Returns an array of messages (chat or broadcast) from the message log
-	 * 
-	 * @param kind The message kind (char or broadcast)
+	 * Returns an array of chat messages from the message log
+	 *
 	 * @param limit Maximum number of messages to return
 	 * @throws UnexpectedException
 	 */
-	public MessageLogItem[] getMessagesFromLog(short kind, int limit)
+	public MessageLogItem[] getChatMessagesFromLog(int limit)
+	throws UnexpectedException;
+
+	/**
+	 * Returns an array of broadcast messages from the message log
+	 *
+	 * @param limit Maximum number of messages to return
+	 * @throws UnexpectedException
+	 */
+	public MessageLogItem[] getBroadcastMessagesFromLog(int limit)
 	throws UnexpectedException;
     
     /**

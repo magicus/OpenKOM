@@ -48,8 +48,6 @@ public class CreateConference extends AbstractCommand
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
-
-		// Have we already gotten a conference name?
 		String fullname = (String) parameterArray[0];
 
 		// There must be a better way to do this..

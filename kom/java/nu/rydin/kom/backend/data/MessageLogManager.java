@@ -26,7 +26,8 @@ public class MessageLogManager
     
     private final PreparedStatement m_storeMessageStmt;
     private final PreparedStatement m_storeMessagePointerStmt;
-    private final PreparedStatement m_listMessagesStmt;
+    private final PreparedStatement m_listChatMessagesStmt;
+    private final PreparedStatement m_listBroadcastMessagesStmt;
     private final PreparedStatement m_listRecipientsStmt;
     
     public MessageLogManager(Connection conn) 
@@ -37,10 +38,14 @@ public class MessageLogManager
                 "INSERT INTO messagelog(body, created, author, author_name) VALUES(?, ?, ?, ?)");
         m_storeMessagePointerStmt = conn.prepareStatement(
                 "INSERT INTO messagelogpointers(recipient, logid, sent, kind) VALUES(?, ?, ?, ?)");
-        m_listMessagesStmt = conn.prepareStatement(
-                "SELECT ml.id, ml.author, ml.author_name, ml.created, mlp.sent, ml.body " +
+        m_listBroadcastMessagesStmt = conn.prepareStatement(
+                "SELECT ml.id, mlp.kind, ml.author, ml.author_name, ml.created, mlp.sent, ml.body " +
                 "FROM messagelog ml, messagelogpointers mlp WHERE mlp.logid = ml.id AND " +
-                "mlp.recipient = ? AND mlp.kind = ? ORDER BY ml.id DESC LIMIT ? OFFSET 0");
+                "mlp.recipient = ? AND mlp.kind = 0 ORDER BY ml.id DESC LIMIT ? OFFSET 0");
+        m_listChatMessagesStmt = conn.prepareStatement(
+                "SELECT ml.id, mlp.kind, ml.author, ml.author_name, ml.created, mlp.sent, ml.body " +
+                "FROM messagelog ml, messagelogpointers mlp WHERE mlp.logid = ml.id AND " +
+                "mlp.recipient = ? AND mlp.kind > 0 ORDER BY ml.id DESC LIMIT ? OFFSET 0");
         m_listRecipientsStmt = conn.prepareStatement(
                 "SELECT mlp.recipient, n.fullname, n.visibility FROM messagelogpointers mlp, names n " +
                 "WHERE n.id = mlp.recipient AND mlp.logid = ? AND mlp.sent = 0");
@@ -53,8 +58,10 @@ public class MessageLogManager
             m_storeMessageStmt.close();
         if(m_storeMessagePointerStmt != null)
             m_storeMessagePointerStmt.close();
-        if(m_listMessagesStmt != null)
-            m_listMessagesStmt.close();         
+        if(m_listChatMessagesStmt != null)
+            m_listChatMessagesStmt.close(); 
+        if(m_listBroadcastMessagesStmt != null)
+            m_listBroadcastMessagesStmt.close();                 
         if(m_listRecipientsStmt != null)
         	m_listRecipientsStmt.close();
     }
@@ -115,39 +122,18 @@ public class MessageLogManager
 	    m_storeMessagePointerStmt.executeUpdate();
 	}
 	
-	public MessageLogItem[] listMessages(long user, short kind, int limit)
+	public MessageLogItem[] listChatMessages(long user, int limit)
 	throws SQLException
 	{
-	    m_listMessagesStmt.clearParameters();
-	    m_listMessagesStmt.setLong(1, user);
-	    m_listMessagesStmt.setShort(2, kind);
-	    m_listMessagesStmt.setInt(3, limit);
-	    ResultSet rs = null;
-	    try
-	    {
-	        ArrayList list = new ArrayList(limit);
-	        rs = m_listMessagesStmt.executeQuery();
-	        while(rs.next())
-	        {
-	            list.add(new MessageLogItem(
-	                    rs.getLong(2),			// Author
-	                    rs.getString(3),		// Author name
-	                    rs.getTimestamp(4),		// Created
-	                    rs.getBoolean(5),		// Sent
-	                    rs.getString(6),		// Body
-	                    this.listRecipients(rs.getLong(1)))); // Recipients		
-	        }
-	        MessageLogItem[] answer = new MessageLogItem[list.size()];
-	        list.toArray(answer);
-	        return answer;
-	    }
-	    finally
-	    {
-	        if(rs != null)
-	            rs.close();
-	    }
+	    return this.getMessages(m_listChatMessagesStmt, user, limit);
 	}
 	
+	public MessageLogItem[] listBroadcastMessages(long user, int limit)
+	throws SQLException
+	{
+	    return this.getMessages(m_listBroadcastMessagesStmt, user, limit);
+	}
+		
 	public NameAssociation[] listRecipients(long logid)
 	throws SQLException
 	{
@@ -166,6 +152,39 @@ public class MessageLogManager
 	                            rs.getShort(3))));	// Name
 	        }
 	        NameAssociation[] answer = new NameAssociation[list.size()];
+	        list.toArray(answer);
+	        return answer;
+	    }
+	    finally
+	    {
+	        if(rs != null)
+	            rs.close();
+	    }
+	}
+	
+	private MessageLogItem[] getMessages(PreparedStatement stmt, long user, int limit)
+	throws SQLException
+	{
+	    stmt.clearParameters();
+	    stmt.setLong(1, user);
+	    stmt.setInt(2, limit);
+	    ResultSet rs = null;
+	    try
+	    {
+	        ArrayList list = new ArrayList(limit);
+	        rs = stmt.executeQuery();
+	        while(rs.next())
+	        {
+	            list.add(new MessageLogItem(
+	                    rs.getShort(2),			// Kind
+	                    rs.getLong(3),			// Author
+	                    rs.getString(4),		// Author name
+	                    rs.getTimestamp(5),		// Created
+	                    rs.getBoolean(6),		// Sent
+	                    rs.getString(7),		// Body
+	                    this.listRecipients(rs.getLong(1)))); // Recipients		
+	        }
+	        MessageLogItem[] answer = new MessageLogItem[list.size()];
 	        list.toArray(answer);
 	        return answer;
 	    }

@@ -62,7 +62,7 @@ nu.rydin.kom.frontend.text.commands.SearchLocalMessage
 nu.rydin.kom.frontend.text.commands.GrepLocalMessage
 nu.rydin.kom.frontend.text.commands.ListLocalMessage
 nu.rydin.kom.frontend.text.commands.ListGlobalMessage
-#nu.rydin.kom.frontend.text.commands.SearchGlobalMessage
+nu.rydin.kom.frontend.text.commands.SearchGlobalMessage
 nu.rydin.kom.frontend.text.commands.ChangeTimeZone
 nu.rydin.kom.frontend.text.commands.AddPermission
 nu.rydin.kom.frontend.text.commands.SubtractPermission
@@ -83,4 +83,6 @@ nu.rydin.kom.frontend.text.commands.ProhibitLogin
 nu.rydin.kom.frontend.text.commands.AllowLogin
 nu.rydin.kom.frontend.text.commands.ShowSystemInfo
 nu.rydin.kom.frontend.text.commands.EnterSingleUserMode
+nu.rydin.kom.frontend.text.commands.ClearScreen
+nu.rydin.kom.frontend.text.commands.SendCondensedBroadcast
 nu.rydin.kom.frontend.text.commands.Help

@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.exceptions.GenericException;
 import nu.rydin.kom.exceptions.KOMException;
@@ -34,7 +35,7 @@ public abstract class ViewMessageLog extends AbstractCommand
     public abstract void execute(Context context, Object[] parameterArray)
             throws KOMException, IOException, InterruptedException;
     
-    public void innerExecute(Context context, Object[] parameterArray, short kind)
+    public void innerExecute(Context context, Object[] parameterArray)
     throws KOMException
     {
         
@@ -55,7 +56,7 @@ public abstract class ViewMessageLog extends AbstractCommand
 
 		// Fetch data
 		//
-		MessageLogItem[] messages = context.getSession().getMessagesFromLog(kind, num);
+		MessageLogItem[] messages = this.fetch(context.getSession(), num);
 
 		// Print data
 		//		
@@ -64,6 +65,7 @@ public abstract class ViewMessageLog extends AbstractCommand
 		{
 		    StringBuffer sb = new StringBuffer(top * 100); 
 		    MessageLogItem each = messages[idx];
+		    short kind = each.getKind();
 		    
 		    // Are we the sender? 
 		    //
@@ -85,7 +87,9 @@ public abstract class ViewMessageLog extends AbstractCommand
 		            sb.append("< ");
 		        sb.append(each.getAuthorName());
 		    }
-		    sb.append(": ");
+		    if(kind != MessageLogKinds.CONDENSED_BROADCAST)
+		        sb.append(':');
+		    sb.append(' ');
 		    sb.append(each.getBody());
 		    
 		    // Wordwrap and print
@@ -101,4 +105,7 @@ public abstract class ViewMessageLog extends AbstractCommand
     {
         return true;
     }
-}
+    
+    protected abstract MessageLogItem[] fetch(ServerSession session, int num)
+    throws KOMException;
+} 

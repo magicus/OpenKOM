@@ -33,12 +33,15 @@ public class UserFlags
 	public static long SHOW_OBJECT_IDS						= 0x00000080;
 	public static long EMPTY_LINE_FINISHES_CHAT				= 0x00000100;
 	public static long ALWAYS_PRINT_FULL_DATE				= 0x00000200;
+	public static long BEEP_ON_CHAT							= 0x00000400;
+	public static long BEEP_ON_BROADCAST					= 0x00000800;
+	public static long BEEP_ON_ATTENDANCE					= 0x00001000;
 
 	/**
 	 * Default value for flagword 1
 	 */
 	public static long DEFAULT_FLAGS1 = SHOW_ATTENDANCE_MESSAGES | ALLOW_BROADCAST_MESSAGES |
-		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT;
+		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT | BEEP_ON_CHAT;
 	
 	/**
 	 * Default value for flagword 2

@@ -77,6 +77,7 @@ public class NamedObjectParameter extends CommandLineParameter
             if ((cla[i] == separator) && !ignoreMode)
             {
                 separatorPos = i;
+                break;
             } else if (cla[i] == '(')
             {
                 ignoreMode = true;

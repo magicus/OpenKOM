@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -68,7 +69,7 @@ public class SendBroadcastChatMessage extends AbstractCommand {
 
 		// Send it
 		//
-		NameAssociation[] refused = session.broadcastChatMessage(message);
+		NameAssociation[] refused = session.broadcastChatMessage(message, MessageLogKinds.BROADCAST);
 		
 		// Print refused destinations (if any)
 		//

@@ -1004,6 +1004,11 @@ public class LineEditor implements NewlineListener
 	    return m_lastKeystrokeTime;
 	}
 	
+	public void resetLineCount()
+	{
+	    m_lineCount = 0;
+	}
+	
 	// Implementation of NewlineListener
 	//
 	public void onNewline()

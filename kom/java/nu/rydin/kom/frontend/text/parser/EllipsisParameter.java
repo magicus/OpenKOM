@@ -22,22 +22,31 @@ import nu.rydin.kom.utils.Logger;
  * of the wrapped type.
  * 
  * @author Henrik Schröder
+ * @author <a href="mailto:pontus@rydin.nu">Pontus Rydin</a>
  */
-public abstract class EllipsisParameter extends CommandLineParameter
+public class EllipsisParameter extends CommandLineParameter
 {
-    private CommandLineParameter innerParameter;
+    private final CommandLineParameter innerParameter;
+    
+    private final char separator;
     
     public EllipsisParameter(String missingObjectQuestionKey, boolean isRequired, CommandLineParameter innerParameter)
     {
+        this(missingObjectQuestionKey, isRequired, innerParameter, ':');
+    }
+    
+    public EllipsisParameter(String missingObjectQuestionKey, boolean isRequired, CommandLineParameter innerParameter, char separator)
+    {
         super(missingObjectQuestionKey, isRequired);
+        this.separator = separator;
         this.innerParameter = innerParameter;
         if (!innerParameter.isRequired())
         {
             //Uh-oh, this will cause an infinite loop on parsing. Die violently.
-            Logger.fatal(this, "Ellipsises CAN NOT contain optional parameters!");
+            Logger.fatal(this, "Ellipses CANNOT contain optional parameters!");
             //TODO: Throw KOM Exception. Needs refactoring so all parameter constructors can throw KOM Exceptions
-            throw new IllegalArgumentException("Ellipsises CAN NOT contain optional parameters!");
-        }
+            throw new IllegalArgumentException("Ellipses CANNOT contain optional parameters!");
+        }        
     }
 
     protected Match innerMatch(String matchingPart, String remainder)
@@ -76,11 +85,19 @@ public abstract class EllipsisParameter extends CommandLineParameter
             return new Match(false, null, null, null);
         }
     }
-    
-    public abstract Object resolveFoundObject(Context context, Match match)
-    throws KOMException, IOException, InterruptedException;
-    
-	public abstract char getSeparator();
+        
+    public Object resolveFoundObject(Context context, Match match)
+    throws KOMException, IOException, InterruptedException
+    {
+        Object[] parsedObjects = (Object[])match.getParsedObject();
+        Object[] result = new Object[parsedObjects.length];
+        for (int i = 0; i < parsedObjects.length; i++)
+        {
+            String parsed = (String) parsedObjects[i];
+            result[i] = this.innerParameter.resolveFoundObject(context, new Match(true, parsed, "", parsed)); 
+        }
+        return result;
+    }
 	
     public String getUserDescription(Context context) 
     {
@@ -95,5 +112,10 @@ public abstract class EllipsisParameter extends CommandLineParameter
     protected String getUserDescriptionKey()
     {
         return "parser.parameter.ellipsis.description";
+    }
+    
+    public char getSeparator()
+    {
+        return this.separator;
     }
 }

@@ -9,7 +9,7 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class NotLoggedInException extends SystemException
+public class NotLoggedInException extends UserException
 {
 	public NotLoggedInException()
 	{
@@ -18,7 +18,7 @@ public class NotLoggedInException extends SystemException
 	
 	public NotLoggedInException(String fullname)
 	{
-		super(fullname);
+		super(new Object[] { fullname });
 	}
 
 }

@@ -6,10 +6,11 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.constants.MessageLogKinds;
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
+import nu.rydin.kom.structs.MessageLogItem;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -26,6 +27,12 @@ public class ViewBroadcastLog extends ViewMessageLog
     {	
     	DisplayController dc = context.getDisplayController();
     	dc.broadcastMessageBody();
-        this.innerExecute(context, parameterArray, MessageLogKinds.BROADCAST);
+        this.innerExecute(context, parameterArray);
     }
+    
+    protected MessageLogItem[] fetch(ServerSession session, int num)
+    throws KOMException
+    {
+        return session.getChatMessagesFromLog(num);
+    }  
 }

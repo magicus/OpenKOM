@@ -14,7 +14,7 @@ import java.text.MessageFormat;
  */
 public class ANSISequences
 {
-	public static final String CLEAR_DISPLAY 			= "\u001b[2J";
+	public static final String CLEAR_DISPLAY 			= "\u001b[H\u001b[J";
 	public static final String SET_GRAPHIC_RENDITION 	= "\u001b[#";
 
 	public static final String SET_CURSOR_POSITION		= "\u001b[{0};{1}H";

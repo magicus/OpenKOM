@@ -13,6 +13,7 @@ import java.sql.Timestamp;
  */
 public class MessageLogItem 
 {
+    private final short m_kind;
     private final long m_author;
     private final String m_authorName;
     private final Timestamp m_created;
@@ -20,9 +21,10 @@ public class MessageLogItem
     private final NameAssociation[] m_recipients;
     private final boolean m_sent;
     
-    public MessageLogItem(long author, String authorName, Timestamp created, boolean sent, String body,  
+    public MessageLogItem(short kind, long author, String authorName, Timestamp created, boolean sent, String body,  
             NameAssociation[] recipients)
     {
+        m_kind			= kind;
         m_author 		= author;
         m_authorName	= authorName;
         m_created 		= created;
@@ -30,7 +32,11 @@ public class MessageLogItem
         m_sent			= sent;
         m_recipients	= recipients;
     }
-
+    
+    public short getKind()
+    {
+        return m_kind;
+    }
     public long getAuthor() 
     {
         return m_author;

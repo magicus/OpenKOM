@@ -33,7 +33,7 @@ public class SendChatMessage extends AbstractCommand
 	{
 	    // Säg foo, bar: Du är bäst!
 	    //TODO: Fix messages, they're totally screwed up!
-		super(fullName, new CommandLineParameter[] { new NamedObjectEllipsisParameter("chat.fulhack.raw.ask", true, new NamedObjectParameter(true)), new RawParameter("chat.fulhack.raw.ask", false)});	
+		super(fullName, new CommandLineParameter[] { new EllipsisParameter("chat.fulhack.raw.ask", true, new ChatRececipientParameter(true)), new RawParameter("chat.fulhack.raw.ask", false)});	
 	}
 
 	public void execute(Context context, Object[] parameterArray)
@@ -49,12 +49,12 @@ public class SendChatMessage extends AbstractCommand
 		MessageFormatter formatter = context.getMessageFormatter();
 		
 		//Retrieve array of id's of receivers.
-		NameAssociation[] nameAssociations = (NameAssociation[])parameterArray[0];
+		Object[] nameAssociations = (Object[])parameterArray[0];
 		long[] destinations = new long[nameAssociations.length];
 		String recipients = "";
 		for (int i = 0; i < nameAssociations.length; i++)
         {
-		    long id = nameAssociations[i].getId();
+		    long id = ((NameAssociation) nameAssociations[i]).getId();
             destinations[i] = id;
             //Build string of recipients...
             recipients += ", " + session.getName(id);

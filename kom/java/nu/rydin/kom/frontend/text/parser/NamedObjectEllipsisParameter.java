@@ -20,6 +20,8 @@ import nu.rydin.kom.structs.NameAssociation;
  * 
  * The "return type" for a NamedObjectEllipsisParameter is an Object[] of 
  * NameAssociation objects.
+ * 
+ * @deprecated
  *  
  * * @author Henrik Schröder
  */
@@ -40,7 +42,8 @@ public class NamedObjectEllipsisParameter extends EllipsisParameter
         
         for (int i = 0; i < parsedObjects.length; i++)
         {
-            result[i] = NamePicker.resolveName((String)parsedObjects[i], NameManager.UNKNOWN_KIND, context);
+            result[i] =  
+                NamePicker.resolveName((String)parsedObjects[i], NameManager.UNKNOWN_KIND, context);
         }
         return result;
     }
