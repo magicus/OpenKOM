@@ -35,15 +35,21 @@ public class ChangeTerminalHeight extends AbstractCommand
 	    KOMWriter out = context.getOut();
 	    
 	    int height = ((Integer)parameterArray[0]).intValue();
-		if (height > 10)
+	    if (height == 0)
+	    {
+	        context.setListenToTerminalSize(true);
+	        out.println(mf.format("change.terminal.listenon"));
+	    }
+		else if (height > 10)
 		{
+		    context.setListenToTerminalSize(false);
 		    context.setTerminalHeight(height);
+		    out.println(mf.format("change.terminal.info") + context.getTerminalSettings().getWidth() + "x" + context.getTerminalSettings().getHeight());
 		}
 		else
 		{
 		    //TODO: Skrolle: Maybe print error message?
+		    out.println(mf.format("change.terminal.info") + context.getTerminalSettings().getWidth() + "x" + context.getTerminalSettings().getHeight());
 		}
-		
-		out.println(mf.format("change.terminal.info") + context.getTerminalSettings().getWidth() + "x" + context.getTerminalSettings().getHeight());
 	}
 }

@@ -55,6 +55,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	private WordWrapperFactory m_wordWrapperFactory = new StandardWordWrapper.Factory();
 	private int m_windowHeight = -1;
 	private int m_windowWidth = -1;
+	private boolean m_ListenToTerminalSize = true;
 	private EventPrinter eventPrinter = new EventPrinter();
 	private Locale m_locale;
 	private DateFormatSymbols m_dateSymbols;
@@ -924,6 +925,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
         m_windowWidth = width;
     }
     
+    public void setListenToTerminalSize(boolean value)
+    {
+        m_ListenToTerminalSize = value;
+    }
+    
 	public void printDebugInfo()
 	{
 		m_out.println(m_session.getDebugString());
@@ -1130,8 +1136,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	//
 	public void terminalSizeChanged(int width, int height)
 	{
-		m_windowWidth = width;
-		m_windowHeight = height;
+	    if (m_ListenToTerminalSize)
+	    {
+	        m_windowWidth = width;
+			m_windowHeight = height;
+	    }
 	}
 	
 	protected void installCommands()

@@ -188,6 +188,11 @@ public class EditorContext implements Context
         m_underlying.setTerminalWidth(width);
     }
     
+    public void setListenToTerminalSize(boolean value)
+    {
+        m_underlying.setListenToTerminalSize(value);
+    }
+    
 	public String formatObjectName(String name, long id)
 	{
 	    return m_underlying.formatObjectName(name, id);

@@ -148,6 +148,15 @@ public interface Context extends TerminalSettingsProvider
 	 */
 	public void setTerminalHeight(int height);
 	
+	
+	/**
+	 * Decide whether the Context should listen to terminal 
+	 * size changes or not.
+	 * 
+	 * @param value
+	 */
+	public void setListenToTerminalSize(boolean value);
+	
 	/**
 	 * Formats an object name according to user settings
 	 * @param name Object name
