@@ -4,7 +4,7 @@
 		<!-- Name of the JDBC driver class. -->
 		<parameter name="server.jdbc.driver.class" value="com.mysql.jdbc.Driver"/>
 		<!-- JDBC connection string. Change this to reflect your database configuration. -->
-		<parameter name="server.jdbc.connect" value="jdbc:mysql://localhost/kom?user=kom&amp;password=kom"/>
+		<parameter name="server.jdbc.connect" value="jdbc:mysql://mozart/kom?user=kom&amp;password=kom"/>
 		<!-- Alternate connection string with trusted login -->
 		<!-- <parameter name="server.jdbc.connect" value="server.jdbc.connect=jdbc:mysql://localhost/kom"/> -->
 		<!-- Number of data access objects to create initially -->

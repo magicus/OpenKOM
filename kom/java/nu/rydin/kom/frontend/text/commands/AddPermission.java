@@ -26,7 +26,7 @@ public class AddPermission extends AbstractCommand
     public AddPermission(Context context, String fullName)
     {
         super(fullName, new CommandLineParameter[] { new UserParameter("add.permission.user.question", true), 
-                new RightParameter(true, context.getFlagLabels("userrights")) });
+                new RightParameter(true, context.getFlagLabels("userprivs")) });
     }
 
     public void checkAccess(Context context) throws AuthorizationException
@@ -42,7 +42,7 @@ public class AddPermission extends AbstractCommand
         int flagNumber = ((Integer) parameters[1]).intValue();	
 		context.getSession().changeUserPermissions(user, 1 << flagNumber, 0);
 		context.getOut().println(context.getMessageFormatter().format("add.permission.confirmation", 
-			new Object[] { context.getFlagLabels("userrights")[flagNumber], nameAssoc.getName() } ));
+			new Object[] { context.getFlagLabels("userprivs")[flagNumber], nameAssoc.getName() } ));
 
 		// Clear cache
 		//
