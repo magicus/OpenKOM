@@ -242,17 +242,48 @@ public class Parser
     	
     	// Check if there is one and only one potential command that the user 
     	// wrote all parts of. If so, choose it.
-    	//FIXME HOLA BANDOOLA BAND!
-/*    	if (potentialTargets.size() > 1) {
-    	    List foo = new ArrayList();
+    	if (potentialTargets.size() > 1) {
+    	    List newPotentialTargets = new LinkedList();
     	    for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
             {
                 CommandToMatches each = (CommandToMatches) iter.next();
-                List matches = each.getMatches(); 
+                List matches = each.getMatches();
+                CommandNamePart[] words = each.getCommand().getNameSignature();
+                boolean failedAtLeastOnce = false;
+                
+                //More words than matches, we have definitely not matched all words.
+                if (words.length > matches.size())
+                {
+                    failedAtLeastOnce = true;
+                }
+                else
+                {
+	                //Ok, let's check if all words in the command matches.
+	                //If so, put it in the new list.
+	                for (int i = 0; i < words.length; i++)
+	                {
+	                    if (!((Match)matches.get(i)).isMatching())
+	                    {
+	                        failedAtLeastOnce = true;
+	                    }
+	                }
+                }
+                
+                if (!failedAtLeastOnce)
+                {
+                    newPotentialTargets.add(each);
+                }
             }
     	
+    	    //If newPotentialTargets holds one and only one item, this means
+    	    //that in the list of ambigous commands, one and only one matched
+    	    //all of its words. SELECT IT!
+    	    if (newPotentialTargets.size() == 1)
+    	    {
+    	        potentialTargets = newPotentialTargets;
+    	    }
     	}
-  */  	
+  	
     	if (potentialTargets.size() > 1) {
     		// Ambiguous matching command found. Try to resolve it.
     	    CommandToMatches potentialTarget = resolveAmbiguousCommand(context, potentialTargets);
