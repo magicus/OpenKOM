@@ -14,6 +14,7 @@ import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.KOMPrinter;
+import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.LocalMessageHeader;
 import nu.rydin.kom.utils.PrintUtils;
@@ -60,6 +61,16 @@ public class ListOwnMessages extends AbstractCommand
 			PrintUtils.printLeftJustified(out.toPrintWriter(), lmh[i].getSubject(), 30);
 			out.println();
 			out.flush();
+		}
+		
+		LineEditor in = context.getIn();
+		if (in.getYesNo("Tut i luren? abc/def", "\r".toCharArray(), " ".toCharArray()))
+		{
+			out.println("TJOOHOO!");
+		}
+		else
+		{
+			out.println("NEEEEEEEEEEJ");
 		}
 	}
 }

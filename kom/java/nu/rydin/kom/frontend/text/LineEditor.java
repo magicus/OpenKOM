@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 
 import nu.rydin.kom.EventDeliveredException;
+import nu.rydin.kom.InputInterruptedException;
 import nu.rydin.kom.LineOverflowException;
 import nu.rydin.kom.LineUnderflowException;
 import nu.rydin.kom.StopCharException;
@@ -36,6 +37,7 @@ public class LineEditor
 	private static final char BS				= 8;
 	private static final char CTRL_U			= 21;
 	private static final char CTRL_W			= 23;
+	private static final char CTRL_C			= 3;
 	private static final char DEL				= 127;
 	
 	private final ReaderProxy m_in;
@@ -381,6 +383,133 @@ public class LineEditor
 			m_out.println();
 		}		
 
+	}
+	
+	public boolean getYesNo(String prompt, char[] yesChars, char[] noChars)
+	throws IOException, InterruptedException
+	{
+		boolean result = false;
+		
+		//Print prompt
+		m_out.print(prompt);
+		m_out.flush();
+		
+		try {
+			char ch = waitForCharacter((String.valueOf(yesChars) + String.valueOf(noChars)).toCharArray());
+			for (int i = 0; i < yesChars.length; i++) {
+				if (yesChars[i] == ch)
+				{
+					//We got a yes character!
+					result = true;
+				}
+			}
+			//No need to check for a no character since waitForChar won't return
+			//on any other characters but the specified ones.
+			
+			//Print character and flush.
+			m_out.println(ch);
+			m_out.flush();
+		} 
+		catch (InputInterruptedException e) 
+		{
+			//Return default: false.
+		}		
+		return result;
+	}
+	
+	/**
+	 * Waits for the user to input any of the given characters and then returns it,
+	 * or throws InputInterruptedException on ctrl-c.
+	 */
+	public char waitForCharacter(char[] allowedCharacters)
+	throws IOException, InterruptedException, InputInterruptedException
+	{	
+		//Loop until user inputs an expected character or input is interrupted
+		//
+		while(true)
+		{
+			try 
+			{
+				char ch = innerReadCharacter(0);
+				for (int i = 0; i < allowedCharacters.length; i++) {
+					if (ch == allowedCharacters[i])
+					{
+						return ch;
+					}
+				}
+			} 
+			catch (InputInterruptedException e) 
+			{
+				// Input interrupted by user, throw event and exit.
+				throw e;
+			} 
+			catch (EventDeliveredException e) 
+			{
+				// HUH??!?!? We asked NOT TO have events interrupt us, but
+				// still here we are. Something is broken!
+				//
+				throw new RuntimeException("This should not happen!", e);
+			}
+		}
+	}
+	
+	/**
+	 * Reads a single character from the user without echoing back. Throws InputInterruptedException on ctrl-c.
+	 * @param flags If FLAG_STOP_ON_EVENT is true, the method will throw event exception on event.
+	 * @return The character read from user.
+	 */
+	protected char innerReadCharacter(int flags)
+	throws IOException, InterruptedException, EventDeliveredException, InputInterruptedException
+	{
+		while(true)
+		{
+			// Read next event from queue
+			//
+			Event e = this.getNextEvent();
+			
+			// Not a keystroke? Handle event
+			if(!(e instanceof KeystrokeEvent))
+			{
+				// IOException while reading user input? Pass it on!
+				//
+				if(e instanceof IOExceptionEvent)
+				{
+					throw ((IOExceptionEvent) e).getException();
+				}
+				
+				// Session shutdown? Get us out of here immediately!
+				//
+				if(e instanceof SessionShutdownEvent)
+				{
+					throw new InterruptedException();
+				}
+
+				//Dispatch event
+				//
+				e.dispatch(m_target);
+				if((flags & FLAG_STOP_ON_EVENT) != 0)
+					throw new EventDeliveredException(e);
+				
+				// This is not the event we're looking for. Move along.
+				//
+				continue;
+			}
+			
+			//Getting here means we have a Keystroke event, let's handle it!
+			//
+			char ch = ((KeystrokeEvent) e).getChar();
+			
+			//The only special character we handle is ctrl-c
+			//
+			if (ch == CTRL_C)
+			{
+				throw new InputInterruptedException();
+			}
+			else
+			{
+				return ch;
+			}
+		}
 	}
 	
 	protected String innerReadLine(String defaultString, String stopChars, int maxLength, int flags)

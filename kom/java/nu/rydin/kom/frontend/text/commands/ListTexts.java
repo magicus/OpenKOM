@@ -94,12 +94,7 @@ public class ListTexts extends AbstractCommand
 			//
 			if (mh.length == screenHeight)
 			{
-				int choice = in.getChoice(question, 
-										  new String[] { mf.format("misc.y"), 
-														 mf.format("misc.n") }, 
-										  0, 
-										  mf.format("parser.invalid.choice"));
-				if (0 != choice)
+				if (!(in.getYesNo(question, mf.format("misc.more.yeschars").toCharArray(), mf.format("misc.more.nochars").toCharArray())))
 				{
 					break; // We're done!
 				}
