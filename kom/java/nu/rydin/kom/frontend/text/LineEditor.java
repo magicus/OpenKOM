@@ -324,7 +324,7 @@ public class LineEditor implements NewlineListener
 					break;
 				}
 			}	
-			Logger.info(this, "Exiting keystroke poller");		
+			Logger.debug(this, "Exiting keystroke poller");		
 		}		
 	}
 	
