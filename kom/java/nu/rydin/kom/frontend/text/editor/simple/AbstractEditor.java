@@ -11,18 +11,22 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.LineEditingInterruptedException;
 import nu.rydin.kom.exceptions.LineOverflowException;
 import nu.rydin.kom.exceptions.LineUnderflowException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
+import nu.rydin.kom.exceptions.OutputInterruptedException;
 import nu.rydin.kom.exceptions.StopCharException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
+import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.parser.Parser;
+import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -31,6 +35,7 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public abstract class AbstractEditor
 {	
+    public final static String MESSAGE_EDITOR_STOP_CHARS = "\u000c\u001a\u0004";
 	private Parser m_parser;
 	private final String m_commandList;
 	protected final EditorContext m_context; 
@@ -55,7 +60,7 @@ public abstract class AbstractEditor
 	    m_context.getBuffer().fill(wrapper);
 	}
 	
-	abstract void refresh() throws KOMException;
+	protected abstract void refresh() throws KOMException;
 	
 	protected void mainloop(boolean stopOnEmpty)
 	throws InterruptedException, OperationInterruptedException, UnexpectedException, IOException
@@ -89,7 +94,7 @@ public abstract class AbstractEditor
 			    int flags = LineEditor.FLAG_ECHO | LineEditor.FLAG_STOP_ON_EOL;
 			    if(buffer.size() > 0)
 			        flags |= LineEditor.FLAG_STOP_ON_BOL;
-				 line = in.readLine(defaultLine, "\u000c\u001a\u0004", width, flags);
+				 line = in.readLine(defaultLine, MESSAGE_EDITOR_STOP_CHARS, width, flags);
 				 	
 				 // Check if we got a command
 				 //
@@ -115,13 +120,24 @@ public abstract class AbstractEditor
 					 			
 					 		// We have a command. Go run it! 
 					 		//
-					 		if(executableCommand.getCommand().getClass() == Save.class)
-					 			return;
 				 			executableCommand.execute(m_context);
 				 		}
+				 		catch(OperationInterruptedException e) {
+				 		    // ignore it, it was just the command that was interrupted,
+				 		    // (like a help listing), not the editing.
+				 		}
+				 		catch(OutputInterruptedException e) {
+				 		    // ignore it, it was just the command that was interrupted,
+				 		    // (like a help listing), not the editing.
+				 		}
+						catch(SaveEditorException e)
+						{
+						    // We're done. Just return.
+						    return;
+						}
 				 		catch(QuitEditorException e)
 				 		{
-				 		    throw new OperationInterruptedException();
+				 		    throw new LineEditingInterruptedException(null);
 				 		}
 				 		catch(KOMException e)
 				 		{
@@ -150,6 +166,22 @@ public abstract class AbstractEditor
 			catch(EventDeliveredException e)
 			{
 				// TODO: Handle chat messages here!
+			}
+			catch(LineEditingInterruptedException e)
+			{
+			    defaultLine = e.getPartialLine();
+			    if (defaultLine != null) {
+			        // If it's null we've gotten here by a Quit command, otherwise by ctrl-c.
+			        // Only add extra line in ctrl-c case. (Sorry för fulkoden. /Ihse)
+			        out.println();
+			    }
+			    MessageFormatter formatter = m_context.getMessageFormatter();
+			    out.print(formatter.format("simple.editor.abortquestion"));
+			    out.flush();
+			    String answer = in.readLine();
+			    if (answer.equals(formatter.format("misc.y"))) {
+			        throw e;
+			    }
 			}
 			catch(LineOverflowException e)
 			{
@@ -195,9 +227,7 @@ public abstract class AbstractEditor
 					    try
 					    {
 							s = e.getLine();
-							if(s.length() > 0)
-								buffer.add(s);
-							defaultLine = null;
+							defaultLine = s;
 							out.println();
 					        refresh();
 					    }

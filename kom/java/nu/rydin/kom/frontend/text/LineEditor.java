@@ -21,6 +21,7 @@ import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.ImmediateShutdownException;
+import nu.rydin.kom.exceptions.LineEditingInterruptedException;
 import nu.rydin.kom.exceptions.LineOverflowException;
 import nu.rydin.kom.exceptions.LineUnderflowException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
@@ -41,8 +42,7 @@ public class LineEditor implements NewlineListener
 	public static final int FLAG_STOP_ON_EOL			= 0x08;
 	public static final int FLAG_STOP_ONLY_WHEN_EMPTY	= 0x10;
 	public static final int FLAG_RECORD_HISTORY			= 0x20;
-	public static final int FLAG_INHIBIT_ABORT			= 0x40;
-	public static final int FLAG_ALLOW_HISTORY			= 0x80;
+	public static final int FLAG_ALLOW_HISTORY			= 0x40;
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
@@ -593,7 +593,7 @@ public class LineEditor implements NewlineListener
 			// Erase the prompt
 			//
 			m_out.print('\r');
-			PrintUtils.printRepeated(m_out, ' ', m_morePrompt.length());
+			PrintUtils.printRepeated(m_out, ' ', prompt.length());
 			m_out.print('\r');
 			m_out.flush();	
 		return result;
@@ -762,12 +762,7 @@ public class LineEditor implements NewlineListener
 		    switch(kind)
 		    {
 		    	case TOKEN_ABORT:
-		    	    if((flags & FLAG_INHIBIT_ABORT) == 0)
-		    	    {
-		    	        m_out.println();
-		    	        throw new OperationInterruptedException();
-		    	    }
-		    	    break;
+	    	        throw new LineEditingInterruptedException(buffer.toString());
 		    	case TOKEN_PREV:
 		    	case TOKEN_UP:
 		    	    if(historyPos > 0 && (flags & FLAG_ALLOW_HISTORY) != 0)

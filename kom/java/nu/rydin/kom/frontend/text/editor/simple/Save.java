@@ -17,8 +17,8 @@ public class Save extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute(Context context, Object[] paramArray)
+	public void execute(Context context, Object[] paramArray) throws SaveEditorException
 	{
-		// Not much to do here
+	    throw new SaveEditorException();
 	}
 }
