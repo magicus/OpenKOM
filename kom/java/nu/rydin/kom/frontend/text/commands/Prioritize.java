@@ -8,11 +8,9 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.PrintWriter;
 
-import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.i18n.MessageFormatter;

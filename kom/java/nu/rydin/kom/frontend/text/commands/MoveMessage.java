@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.NoCurrentMessageException;
-import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;

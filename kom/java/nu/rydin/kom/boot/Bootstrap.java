@@ -13,15 +13,14 @@ import java.util.TimeZone;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-
-import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.exceptions.NoSuchModuleException;
 import nu.rydin.kom.modules.Module;
 import nu.rydin.kom.modules.Modules;
 import nu.rydin.kom.utils.Logger;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>

@@ -15,7 +15,6 @@ import java.net.Socket;
 import java.util.Map;
 
 import nu.rydin.kom.backend.ServerSessionFactory;
-import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.utils.Logger;
 
