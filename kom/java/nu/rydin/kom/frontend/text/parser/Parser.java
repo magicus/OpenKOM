@@ -357,9 +357,6 @@ public class Parser
         	level++;
         }
         
-        for (Iterator iter = resolvedParameters.iterator(); iter.hasNext();) {
-            Object param = iter.next();
-        }
         // Now we can execute the command with the resolved parameters.
         Object[] parameterArray = new Object[resolvedParameters.size()];
         resolvedParameters.toArray(parameterArray);
