@@ -29,9 +29,9 @@ public abstract class CommandLineParameter extends CommandLinePart
 		m_isRequired = isRequired;
 	}
 	
-	public String getSeparator()
+	public char getSeparator()
 	{
-		return ",";
+		return ',';
 	}
 
 	public Match fillInMissingObject(Context context) throws IOException, InterruptedException

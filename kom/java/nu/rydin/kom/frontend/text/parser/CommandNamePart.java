@@ -23,9 +23,9 @@ public class CommandNamePart extends CommandLinePart
 		m_cookedName = cookedName;
 	}
 
-	public String getSeparator()
+	public char getSeparator()
 	{
-		return " ";
+		return ' ';
 	}
 
 	public boolean isRequired()

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import nu.rydin.kom.KOMException;
 import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.NameUtils;
@@ -181,7 +182,7 @@ public class Parser
 		return (CommandToMatches) potentialTargets.get(idx - 1);
 	}
 
-	public void parseAndExecute(Context context, String commandLine) throws IOException, InterruptedException
+	public void parseAndExecute(Context context, String commandLine) throws IOException, InterruptedException, KOMException
     {
     	int level = 0;
     	
@@ -337,7 +338,11 @@ public class Parser
     		// Now we can execute the command with the resolved parameters.
     		Object[] parameterArray = new Object[resolvedParameters.size()];
     		resolvedParameters.toArray(parameterArray);
-    		target.getCommand().execute2(context, parameterArray);
+    		
+    		Command command = target.getCommand();
+    		command.printPreamble(context.getOut());
+    		command.execute2(context, parameterArray);
+    		command.printPreamble(context.getOut());
     	}
     }
 	

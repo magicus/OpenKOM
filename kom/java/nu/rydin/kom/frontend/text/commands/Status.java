@@ -17,6 +17,8 @@ import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.NameAssociation;
@@ -30,9 +32,14 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class Status extends AbstractCommand
 {
+    
 	public Status(String fullName)
 	{
-		super(fullName);	
+		super(fullName);
+		
+		//Initialize signature
+	    signature = new CommandLineParameter[1];
+	    signature[0] = new NamedObjectParameter(false);
 	}
 	
 	public void execute(Context context, String[] parameters) 
@@ -48,6 +55,33 @@ public class Status extends AbstractCommand
 			? context.getLoggedInUserId()
 			: NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
 
+		// Call backend
+		//		
+		NamedObject no = context.getSession().getNamedObject(id);
+		if(no instanceof ConferenceInfo)
+			this.printConferenceStatus(context, (ConferenceInfo) no);
+		else if(no instanceof UserInfo)
+			this.printUserStatus(context, (UserInfo) no); 
+		
+	}
+
+	public void execute2(Context context, Object[] parameters) 
+	throws KOMException, IOException, InterruptedException
+	{	
+
+		// No parameters? That implies we're asking for our own status!
+		//
+	    long id;
+	    if (parameters.length == 0)
+	    {
+	        id = context.getLoggedInUserId();
+	    }
+	    else
+	    {
+	        id = ((NameAssociation)parameters[0]).getId();
+	    }
+	    
+	    
 		// Call backend
 		//		
 		NamedObject no = context.getSession().getNamedObject(id);
@@ -145,5 +179,5 @@ public class Status extends AbstractCommand
 	public boolean acceptsParameters()
 	{
 		return true;
-	}	
+	}
 }

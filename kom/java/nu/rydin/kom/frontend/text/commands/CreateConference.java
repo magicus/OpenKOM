@@ -21,6 +21,7 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
@@ -31,8 +32,13 @@ public class CreateConference extends AbstractCommand
 {
 	public CreateConference(String fullName)
 	{
-		super(fullName);	
+		super(fullName);
 	}
+	
+    public void execute2(Context context, Object[] parameterArray)
+    throws KOMException, IOException, InterruptedException {
+        this.execute(context, new String[0]);
+    }
 	
 	public void execute(Context context, String[] parameters) 
 	throws KOMException, IOException, InterruptedException
@@ -199,5 +205,5 @@ public class CreateConference extends AbstractCommand
 	 */
 	public boolean acceptsParameters() {
 		return true;
-	}
+	}	
 }

@@ -18,7 +18,7 @@ public abstract class CommandLinePart
 {
 	public abstract boolean isRequired();
 	
-	public abstract String getSeparator();
+	public abstract char getSeparator();
 	
 	protected abstract Match innerMatch(String matchingPart, String remainder);
 
@@ -42,7 +42,8 @@ public abstract class CommandLinePart
 			return new Match(false, null, null, null);
 		}
 		
-		int separatorPos = commandLine.indexOf(getSeparator());
+		int separatorPos = getSeparatorPos(commandLine); 
+
 		if (separatorPos == -1) {
 			matchingPart = commandLine;
 			remainder = "";
@@ -54,7 +55,12 @@ public abstract class CommandLinePart
 		return innerMatch(matchingPart, remainder);
 	}
 
-	public abstract Match fillInMissingObject(Context context) throws IOException, InterruptedException;
+    protected int getSeparatorPos(String commandLine) 
+    {
+        return commandLine.indexOf(getSeparator());
+    }
+
+    public abstract Match fillInMissingObject(Context context) throws IOException, InterruptedException;
 	
 	public Object resolveFoundObject(Context context, Match match) throws IOException, InterruptedException {
 		return match.getParsedObject();

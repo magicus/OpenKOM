@@ -22,6 +22,12 @@ public class WhoAmI extends AbstractCommand
         super(fullName);
     }
 
+    public void execute2(Context context, Object[] parameterArray)
+            throws KOMException, IOException, InterruptedException {
+        context.getOut().println(context.getMessageFormatter().
+                format("who.am.i.message", context.getCachedUserInfo().getName()));
+    }
+    
     public void execute(Context context, String[] parameters)
     throws KOMException, IOException, InterruptedException
     {

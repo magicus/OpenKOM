@@ -23,12 +23,12 @@ public class RawParameter extends CommandLineParameter {
         return new Match(true, matchingPart, remainder, matchingPart);
     }
 
-    public String getSeparator() {
+    public char getSeparator() {
         // Okay, this is a bit ugly. But since we'll never find this in the
         // string,
         // match() will call innerMatch with the whole rest of the string as
         // matchingPart,
         // which is exactly what we want.
-        return "\0";
+        return '\0';
     }
 }

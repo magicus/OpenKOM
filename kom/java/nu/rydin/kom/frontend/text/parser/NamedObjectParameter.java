@@ -75,6 +75,29 @@ public class NamedObjectParameter extends CommandLineParameter
 		}	    
 	}
 
+    protected int getSeparatorPos(String commandLine) 
+    {
+        int separatorPos = -1;
+        boolean ignoreMode = false;
+        char separator = getSeparator();
+        char[] cla = commandLine.toCharArray();
+        for (int i = 0; i < cla.length; i++) {
+            if ((cla[i] == separator) && !ignoreMode)
+            {
+                separatorPos = i;
+            }
+            else if (cla[i] == '(')
+            {
+                ignoreMode = true;
+            }
+            else if (cla[i] == ')')
+            {
+                ignoreMode = false;
+            }
+        }
+        return separatorPos;
+    }
+	
 	protected Object innerResolve(Context context, Match match) throws UnexpectedException, IOException, InterruptedException, OperationInterruptedException, InvalidChoiceException
 	{
 		try

@@ -6,8 +6,10 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.utils.StringUtils;
@@ -19,6 +21,7 @@ public abstract class AbstractCommand implements Command
 {
 	protected String m_fullName;
 	protected String[] m_nameParts;
+	protected CommandLineParameter[] signature = new CommandLineParameter[0];
 	
 	protected AbstractCommand(String fullName)
 	{
@@ -26,6 +29,10 @@ public abstract class AbstractCommand implements Command
 		m_nameParts = NameUtils.splitName(m_fullName);
 	}
 	
+    public CommandLineParameter[] getSignature() {
+        return signature;
+    }
+    
 	/**
 	 * Returns the full, human readable name of a command
 	 */
@@ -115,14 +122,10 @@ public abstract class AbstractCommand implements Command
 	{
 		out.println();
 	}	
-	public CommandLineParameter[] getSignature()
-	{
-		// TODO Auto-generated method stub
-		return new CommandLineParameter[0];
-	}
-	public void execute2(Context context, Object[] parameterArray)
-	{
-	// TODO Auto-generated method stub
 
+	public void execute2(Context context, Object[] parameterArray)
+	throws KOMException, IOException, InterruptedException
+	{
+	    // TODO This is implemented here only as a temporary solution to get all commands to work.
 	}
 }

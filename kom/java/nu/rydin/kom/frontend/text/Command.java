@@ -19,6 +19,9 @@ public interface Command
 {
 	public void execute(Context context, String[] parameters)
 	throws KOMException, IOException, InterruptedException;
+
+	public void execute2(Context context, Object[] parameterArray)
+	throws KOMException, IOException, InterruptedException;
 	
 	public String getFullName();
 	
@@ -57,11 +60,5 @@ public interface Command
 	 * @return
 	 */
 	public CommandLineParameter[] getSignature();
-
-	/**
-	 * @param context
-	 * @param parameterArray
-	 */
-	public void execute2(Context context, Object[] parameterArray);
 
 }

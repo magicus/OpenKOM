@@ -26,6 +26,12 @@ public class Who extends AbstractCommand
 		super(fullName);	
 	}
 	
+    public void execute2(Context context, Object[] parameterArray)
+            throws KOMException, IOException, InterruptedException {
+        // TODO Auto-generated method stub
+        this.execute(context, new String[0]);
+    }
+    
 	public void execute(Context context, String[] parameters)
 		throws KOMException, IOException, InterruptedException
 	{
