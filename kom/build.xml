@@ -4,7 +4,8 @@
 	<property name="confPath" value="conf"/>
 	<property name="sqlPath" value="sql"/>
 	<path id="kom.class.path">
-		<pathelement location="${libPath}/kom.jar" /> 
+		<pathelement location="${confPath}" />
+		<pathelement location="${libPath}/kom.jar" />
 		<pathelement location="${distrPath}/mysql-connector-java-3.0.16-ga-bin.jar"/>
 		<pathelement location="${distrPath}/log4j-1.2.8.jar"/>
 		<pathelement location="${distrPath}/xercesImpl.jar"/>
@@ -27,17 +28,23 @@
 		<mkdir dir="classes"/>
 		<javac srcdir="java" destdir="classes" classpathref="kom.class.path" debug="yes"/>
 	</target>
+
 	<target name="build-jar" depends="compile">
 		<mkdir dir="lib"/>
 		<jar destfile="lib/kom.jar" basedir="classes"/>
 	</target>
+
 	<target name="release" depends="build-jar">
 		<zip destfile="openkom.zip">
-			<zipfileset dir="." includes="OpenKOM.LICENSE"/>
+			<zipfileset dir="." includes="OpenKOM.LICENSE, run.sh"/>
 			<zipfileset dir="${libPath}/" prefix="${libPath}/" />
 			<zipfileset dir="${distrPath}/" prefix="${distrPath}/" />
 			<zipfileset dir="${confPath}/" prefix="${confPath}/" />
 			<zipfileset dir="${sqlPath}/" prefix="${sqlPath}/" />
 		</zip>
+	</target>
+	
+	<target name="run" depends="build-jar">
+		<java classname="nu.rydin.kom.boot.Bootstrap" classpathref="kom.class.path" fork="yes"/>
 	</target>
 </project>
