@@ -22,22 +22,27 @@ public interface ServerSession
 	/**
 	 * Suggested action: No suggestion
 	 */
-	public static final short NO_ACTION = 0;
+	public static final short NO_ACTION 		= 0;
 
 	/**
 	 * Suggested action: Read next reply
 	 */
-	public static final short NEXT_REPLY = 1;
+	public static final short NEXT_REPLY 		= 1;
 
 	/**
 	 * Suggested action: Read next message
 	 */
-	public static final short NEXT_MESSAGE = 3;
+	public static final short NEXT_MESSAGE 		= 3;
 
 	/**
 	 * Suggested action: Go to next conference
 	 */
-	public static final short NEXT_CONFERENCE = 4;
+	public static final short NEXT_CONFERENCE 	= 4;
+	
+	/**
+	 * Suggested action: Read next mail
+	 */
+	public static final short NEXT_MAIL			= 5;
 
 	/**
 	 * Changes the current conference.
@@ -75,12 +80,12 @@ public interface ServerSession
 	public abstract long getLoginTime();
 	
 	/**
-	 * Given the current context, suggest a next action
-	 *
-	 * @return NO_ACTION, NEXT_REPLY, NEXT_MESSAGE or NEXT_CONFERENCE. 
+	 * Returns the session state, i.e. suggested action, a "focused" conference
+	 * and number of unread messages in tha conference.
+	 * 
 	 * @throws UnexpectedException
 	 */
-	public abstract short suggestNextAction() 
+	public abstract SessionState getSessionState() 
 	throws UnexpectedException;
 	
 	/** 
@@ -170,6 +175,18 @@ public interface ServerSession
 	 */	
 	public Envelope readLocalMessage(long conf, int localnum)
 	throws ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * Retrieves the next unread message in the specified conference and marks it as read
+	 * @param conf The conference if
+	 * 
+	 * @throws NoMoreMessagesException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */	
+	public Envelope readNextMessage(long conf)
+	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException;
+
 
 	/**
 	 * Retrieves the next unread message in the current conference and marks it as read
@@ -178,7 +195,7 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */	
-	public Envelope readNextMessage()
+	public Envelope readNextMessageInCurrentConference()
 	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException;
 
 	/**

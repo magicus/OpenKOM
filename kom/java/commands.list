@@ -31,6 +31,7 @@ nu.rydin.kom.frontend.text.commands.WriteNote
 nu.rydin.kom.frontend.text.commands.PrintDebug
 nu.rydin.kom.frontend.text.commands.GenerateTestdata
 nu.rydin.kom.frontend.text.commands.GotoNextConference
+nu.rydin.kom.frontend.text.commands.ReadNextMail
 nu.rydin.kom.frontend.text.commands.ReadNextMessage
 nu.rydin.kom.frontend.text.commands.DisplayCurrentConference
 nu.rydin.kom.frontend.text.commands.ReadRules

@@ -1,6 +1,6 @@
 /*
- * Created on Oct 26, 2003
- *  
+ * Created on Sep 20, 2004
+ *
  * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
@@ -13,9 +13,9 @@ import nu.rydin.kom.frontend.text.Context;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class ReadNextMessage extends AbstractCommand
+public class ReadNextMail extends AbstractCommand
 {
-	public ReadNextMessage(Context context, String fullName)
+	public ReadNextMail(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
@@ -24,6 +24,6 @@ public class ReadNextMessage extends AbstractCommand
 	throws KOMException
 	{
 		context.getMessagePrinter().printMessage(context, 
-		        context.getSession().readNextMessageInCurrentConference());
+		        context.getSession().readNextMessage(context.getLoggedInUserId()));
 	}
 }

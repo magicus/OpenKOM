@@ -36,13 +36,17 @@ public class UserFlags
 	public static long BEEP_ON_CHAT							= 0x00000400;
 	public static long BEEP_ON_BROADCAST					= 0x00000800;
 	public static long BEEP_ON_ATTENDANCE					= 0x00001000;
-	public static long NARCISSIST						= 0x00002000;
+	public static long NARCISSIST							= 0x00002000;
+	public static long PRIORITIZE_MAIL						= 0x00004000;
+	public static long BEEP_ON_NEW_MESSAGES					= 0x00008000;
+	public static long SHOW_NUM_UNREAD						= 0x00010000;
 
 	/**
 	 * Default value for flagword 1
 	 */
 	public static long DEFAULT_FLAGS1 = SHOW_ATTENDANCE_MESSAGES | ALLOW_BROADCAST_MESSAGES |
-		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT | BEEP_ON_CHAT;
+		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT | BEEP_ON_CHAT
+		| PRIORITIZE_MAIL | BEEP_ON_NEW_MESSAGES | SHOW_NUM_UNREAD;
 	
 	/**
 	 * Default value for flagword 2

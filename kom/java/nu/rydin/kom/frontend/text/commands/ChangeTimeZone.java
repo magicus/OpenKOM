@@ -13,7 +13,6 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.KOMWriter;
-import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.TimeZoneParameter;
 import nu.rydin.kom.i18n.MessageFormatter;

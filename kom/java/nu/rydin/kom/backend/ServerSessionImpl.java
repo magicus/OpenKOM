@@ -18,6 +18,7 @@ import nu.rydin.kom.constants.*;
 import nu.rydin.kom.events.*;
 import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.structs.*;
+import nu.rydin.kom.utils.Logger;
 import edu.oswego.cs.dl.util.concurrent.Mutex;
 
 /**
@@ -34,16 +35,26 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         }
     }
     
-    private static class DeferredEvent
+    private static abstract class DeferredEvent
+    {
+        protected final Event m_event;
+        
+        public DeferredEvent(Event event)
+        {
+            m_event 	= event;
+        }
+        
+        public abstract void dispatch(SessionManager manager);
+    }
+    
+    private static class DeferredSend extends DeferredEvent
     {
         private final long m_recipient;
         
-        private final Event m_event;
-        
-        public DeferredEvent(long recipient, Event event)
+        public DeferredSend(long recipient, Event event)
         {
+            super(event);
             m_recipient	= recipient;
-            m_event 	= event;
         }
         
         public void dispatch(SessionManager manager)
@@ -51,6 +62,20 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             manager.sendEvent(m_recipient, m_event);
         }
     }
+    
+    private static class DeferredBroadcast extends DeferredEvent
+    {
+        public DeferredBroadcast(Event event)
+        {
+            super(event);
+        }
+        
+        public void dispatch(SessionManager manager)
+        {
+            manager.broadcastEvent(m_event);
+        }
+    }
+ 
     
 	/**
 	 * Id of the user of this session
@@ -103,9 +128,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	private final LinkedList m_incomingEvents = new LinkedList();
 	
 	/**
-	 * List of outgoing events
+	 * List of deferred events, i.e. events that will be sent once
+	 * the current transaction is committed.
 	 */
-	private final LinkedList m_outgoingEvents = new LinkedList();
+	private final LinkedList m_deferredEvents = new LinkedList();
 	
 	/**
 	 * Last suggested command
@@ -261,22 +287,38 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		return m_loginTime;
 	}	
 	
-	public short suggestNextAction()
+	public SessionState getSessionState()
 	throws UnexpectedException
 	{
 		try
 		{
-			// Do we have any unread replies?
+		    ConferenceManager cm = m_da.getConferenceManager();
+		    
+		    // Do we have any unread mail?
+		    //
+		    try
+		    {
+			    if((this.getLoggedInUser().getFlags1() & UserFlags.PRIORITIZE_MAIL) != 0)
+			    {
+			        int unreadMail = m_memberships.countUnread(this.getLoggedInUserId(), cm);
+			        if(unreadMail > 0)
+			            return new SessionState(m_lastSuggestedCommand = NEXT_MAIL, this.getLoggedInUserId(), 
+			                    unreadMail);
+			    }
+		    }
+		    catch(ObjectNotFoundException e)
+		    {
+		        // Not members in our own mailbox? This can't happen!
+		        //
+		        throw new UnexpectedException(this.getLoggedInUserId(), "No mailbox", e);
+		    }
+		    
+			// Count messages in current conference
 			//
-			if(this.peekReply() != -1)
-				return m_lastSuggestedCommand = NEXT_REPLY;
-			
-			// Do we have any unread messages in current conference?
-			//
+		    int unread = 0;
 			try
-			{
-				if(m_memberships.countUnread(this.getCurrentConferenceId(), m_da.getConferenceManager()) > 0)
-				    return m_lastSuggestedCommand = NEXT_MESSAGE;
+			{				
+			    unread = m_memberships.countUnread(this.getCurrentConferenceId(), cm);
 			}
 			catch(ObjectNotFoundException e)
 			{
@@ -294,6 +336,18 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			        throw new UnexpectedException(this.getLoggedInUserId(), e2);
 			    }
 			}
+
+		    
+			// Do we have any unread replies?
+			//
+			if(this.peekReply() != -1)
+				return new SessionState(m_lastSuggestedCommand = NEXT_REPLY,
+				        this.getCurrentConferenceId(), unread);
+			
+			if(unread > 0)
+			    return new SessionState(m_lastSuggestedCommand = NEXT_MESSAGE,
+			            this.getCurrentConferenceId(), unread);
+			
 			
 			// Get next conference with unread messages
 			//	
@@ -303,13 +357,17 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Do we have any unread messages?
 			//
 			if(confId == -1)
-				return m_lastSuggestedCommand = NO_ACTION;
+				return new SessionState(m_lastSuggestedCommand = NO_ACTION,
+				        this.getCurrentConferenceId(), unread);
 				
 			// Do we have messages in our current conference?
 			//
 			if(confId == m_currentConferenceId)
-				return m_lastSuggestedCommand = NEXT_MESSAGE;
-			return m_lastSuggestedCommand = NEXT_CONFERENCE;
+				return new SessionState(m_lastSuggestedCommand = NEXT_MESSAGE,
+				        this.getCurrentConferenceId(), unread);
+				        
+			return new SessionState(m_lastSuggestedCommand = NEXT_CONFERENCE,
+			        this.getCurrentConferenceId(), unread);
 		}
 		catch(SQLException e)
 		{
@@ -421,7 +479,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
-	public Envelope readNextMessage()
+	public Envelope readNextMessageInCurrentConference()
+	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
+	{
+	    return this.readNextMessage(this.getCurrentConferenceId());
+	}
+	
+	public Envelope readNextMessage(long confId)
 	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
 	{
 		try
@@ -429,8 +493,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Keep on trying until we've skipped all deleted messages
 			//
 			for(;;)
-			{
-				long confId = this.getCurrentConferenceId(); 
+			{ 
 				int next = m_memberships.getNextMessageInConference(confId, m_da.getConferenceManager());
 				if(next == -1)
 					throw new NoMoreMessagesException();
@@ -1017,6 +1080,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
 			    this.markMessageAsRead(me, copy.getLocalnum());
 			m_stats.incNumPosted(); // TODO: Count mail separately?
+			
+			// Send event to recipient
+			//
+			this.sendEvent(user, new NewMessageEvent(me, user, occ.getLocalnum(), occ.getGlobalId()));
 			return occ;
 		}
 		catch(SQLException e)
@@ -2740,25 +2807,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    // Push events onto a transaction-local queue that will
 	    // be flushed once the current transaction is committed.
 	    //
-	    synchronized(m_outgoingEvents)
+	    synchronized(m_deferredEvents)
 	    {
-	        m_outgoingEvents.add(new DeferredEvent(userId, e));
+	        m_deferredEvents.add(new DeferredSend(userId, e));
 	    }
 	}
 	
 	protected void flushEvents()
 	{
-	    synchronized(m_outgoingEvents)
+	    synchronized(m_deferredEvents)
 	    {
-	        for(Iterator itor = m_outgoingEvents.iterator(); itor.hasNext();)
+	        for(Iterator itor = m_deferredEvents.iterator(); itor.hasNext();)
 	            ((DeferredEvent) itor.next()).dispatch(m_sessions);
-	        m_outgoingEvents.clear();
+	        m_deferredEvents.clear();
 	    }
 	}
 	
 	protected void discardEvents()
 	{
-	    m_outgoingEvents.clear();
+	    m_deferredEvents.clear();
 	}
 	
 	/**
@@ -2768,7 +2835,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	 */
 	protected void broadcastEvent(Event e)
 	{
-		m_sessions.broadcastEvent(e);
+	    // Push events onto a transaction-local queue that will
+	    // be flushed once the current transaction is committed.
+	    //
+	    synchronized(m_deferredEvents)
+	    {
+	        m_deferredEvents.add(new DeferredBroadcast(e));
+	    }
 	}
 	
 	// Implementation of EventTarget
@@ -2836,10 +2909,29 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	
 	public synchronized void onEvent(NewMessageEvent e)
 	{
+	    // Is this a new text in our mailbox? Then we're definately interested in it 
+	    // and should always pass it on!
+	    //
+	    boolean debug = Logger.isDebugEnabled(this);
+	    if(e.getConference() == this.getLoggedInUserId())
+	    {
+	        if(debug)
+	            Logger.debug(this, "New mail. Passing event to client");
+	        this.postEvent(e);
+	        return;
+	    }
+	    
 		// Already have unread messages? No need to send event! 
 		// 
+	    if(debug)
+	        Logger.debug(this, "NewMessageEvent received. Conf=" + e.getConference());
 		if(m_lastSuggestedCommand == NEXT_MESSAGE || m_lastSuggestedCommand == NEXT_REPLY)
-			return;
+		{
+		    if(debug)
+		        Logger.debug(this, "Event ignored since we already have an unread text in this conference");
+		    return;
+		}
+			
 			
 		// Don't send notification unless we're members.
 		//
@@ -2850,17 +2942,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    // was not posted in current conference? No need to pass it on.
 		    //
 		    if(m_lastSuggestedCommand == NEXT_CONFERENCE && conf != this.getCurrentConferenceId())
+		    {
+		        if(debug)
+		            Logger.debug(this, "Event ignored because we're already suggesting going to the next conference");
 		        return;
-		    
+		    }
+		        
 		    // Try to load the membership to see if we should care.
 		    //
 			m_memberships.get(conf);
+			if(debug)
+			    Logger.debug(this, "Passing event to client");
 			this.postEvent(e);
 		}
 		catch(ObjectNotFoundException ex)
 		{
 			// Not a member. No need to notify client
 			//
+		    if(debug)
+		        Logger.debug(this, "Event ignored because we're not members where the new message was posted");
 			return;
 		}
 	}

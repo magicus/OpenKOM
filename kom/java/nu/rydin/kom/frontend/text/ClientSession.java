@@ -60,6 +60,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private Locale m_locale;
 	private DateFormatSymbols m_dateSymbols;
 	private final boolean m_useTicket;
+	private SessionState m_state;
 	
 	// This could be read from some kind of user config if the
 	// user wants an alternate message printer. 
@@ -673,7 +674,22 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
     			}
     			Command defaultCommand = this.getDefaultCommand();
     			dc.prompt();
-    			String prompt = defaultCommand.getFullName() + " - "; 
+    			
+    			// Build prompt
+    			//
+    			StringBuffer promptBuffer = new StringBuffer(50);
+    			promptBuffer.append(defaultCommand.getFullName());
+    			if((this.getCachedUserInfo().getFlags1() & UserFlags.SHOW_NUM_UNREAD) != 0
+    			        && m_state.getNumUnread() > 0)
+    			{
+    			    // Add number of unread to prompt
+    			    //
+    			    promptBuffer.append(" [");
+    			    promptBuffer.append(m_state.getNumUnread());
+    			    promptBuffer.append(']');
+    			}
+    			promptBuffer.append(" - ");
+    			String prompt = promptBuffer.toString();
     			m_out.print(prompt);
     			dc.input();
     			m_out.flush();
@@ -697,6 +713,9 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
     				//
     				// Erase the prompt
     				//
+    			    if((this.getCachedUserInfo().getFlags1() & UserFlags.BEEP_ON_NEW_MESSAGES) != 0 
+    			            && (e.getEvent() instanceof NewMessageEvent))
+    			        m_out.print('\u0007'); // BEEP!
     				int top = prompt.length();
     				for(int idx = 0; idx < top; ++idx)
     					m_out.print("\b \b");
@@ -757,9 +776,12 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	public Command getDefaultCommand()
 	throws KOMException
 	{
-	    short suggestion = m_session.suggestNextAction();
+	    m_state = m_session.getSessionState();
+	    short suggestion = m_state.getSuggestedAction(); 
 		switch(suggestion)
 		{
+			case ServerSession.NEXT_MAIL:
+				return m_parser.getCommand(ReadNextMail.class);
 			case ServerSession.NEXT_REPLY:
 				return m_parser.getCommand(ReadNextReply.class);
 			case ServerSession.NEXT_MESSAGE:
@@ -1153,9 +1175,6 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	
 	public void onEvent(NewMessageEvent event)
 	{
-		// Not much to do. Command loop will reevaluate default command
-		// and try again.
-		//
 	}
 	
 	public void onEvent(MessageDeletedEvent event)
