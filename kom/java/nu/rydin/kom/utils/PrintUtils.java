@@ -52,5 +52,54 @@ public class PrintUtils
 			s = s.substring(0, width);
 		printRepeated(out, ' ', width - s.length());			
 		out.print(s);
-	}	
+	}
+
+	public static void printIndented(PrintWriter out, String s, int width, int indentWidth)
+	{
+	    String t = "";
+	    for (int i = 0; i < indentWidth; ++i)
+	    {
+	        t += ' ';
+	    }
+	    printIndented (out, s, width, t);
+	}
+	
+	public static void printIndented(PrintWriter out, String s, int width, String indent)
+	{
+	    String[] p = s.split(" ");
+	    int indentLength = indent.length(); 
+	    int rowLength = indentLength;
+	    int wordLength;
+	    String thisRow = indent;
+	    String thisWord;
+	    for (int i = 0; i < p.length; ++i)
+	    {
+	        thisWord = p[i];
+	        wordLength = thisWord.length() + 1;
+	        if (rowLength + wordLength < width)
+	        {
+	            rowLength += wordLength;
+	            thisRow += thisWord;
+	            thisRow += " ";
+	        }
+	        else
+	        {
+	            out.println(thisRow);
+	            thisRow = indent + thisWord + " ";
+	            rowLength = indentLength + wordLength;
+	            continue; //
+	        }
+	        if (thisWord.endsWith("\r") || thisWord.endsWith("\n")) //
+	        {	//
+	            out.print(thisRow);
+	            thisRow = indent;
+	            rowLength = indentLength;
+	            continue;
+	        }
+	    }
+	    if (rowLength != indentLength)
+	    {
+	        out.println(thisRow);
+	    }
+	}
 }
