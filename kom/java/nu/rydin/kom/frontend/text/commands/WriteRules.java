@@ -29,7 +29,7 @@ public class WriteRules extends AbstractCommand
 	public void execute(Context context, String[] parameters)
 	throws KOMException, IOException, InterruptedException 
 	{
-		if(!context.getSession().hasPermissionInCurrentConference(ConferencePermissions.WRITE_PERMISSION))
+		if(!context.getSession().hasPermissionInCurrentConference(ConferencePermissions.ADMIN_PERMISSION))
 			throw new AuthorizationException();
 			
 		// Get editor and execute it
