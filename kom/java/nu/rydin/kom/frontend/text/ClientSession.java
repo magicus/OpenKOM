@@ -116,7 +116,7 @@ public class ClientSession implements Runnable, Context, EventTarget
 		new AddPermissions(m_formatter),
 		new ReadNextReply(m_formatter),
 		new Copy(m_formatter),
-		new ListCommands(m_formatter)
+		new ListCommands(m_formatter) //
 		};
 		
 	private class ListCommands extends AbstractCommand
