@@ -21,6 +21,7 @@ import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class BasicMessagePrinter implements MessagePrinter
 {
@@ -90,6 +91,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		int space = formatter.format("BasicMessagePrinter.receiver", "").length();
 		MessageOccurrence[] occs = envelope.getOccurrences();
 		String[] receivers = envelope.getReceivers();
+		String movedFrom = null;
 		int top = receivers.length;
 		for(int idx = 0; idx < top; ++idx)
 		{
@@ -103,9 +105,18 @@ public class BasicMessagePrinter implements MessagePrinter
 						new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
 					break;
 				case MessageManager.ACTION_MOVED:
+					MessageAttribute[] attributes = envelope.getAttributes();
+					for(int attrIdx = 0; attrIdx < attributes.length; ++attrIdx)
+					{
+						MessageAttribute each = attributes[attrIdx];
+						if(each.getKind() == MessageManager.ATTR_MOVEDFROM)
+						{
+							movedFrom = new String(each.getValue());
+						}
+					}
 					PrintUtils.printRepeated(out, ' ', space);
-					out.println(formatter.format("BasicMessagePrinter.moved", 
-						new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
+					out.println(formatter.format("BasicMessagePrinter.moved.long", 
+						new Object[] { movedFrom, occ.getUserName(), occ.getTimestamp().toString() }));
 					break;					
 			}
 		} 

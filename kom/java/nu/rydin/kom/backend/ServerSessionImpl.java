@@ -892,7 +892,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			
 			// Tag the message with an ATTR_MOVEDFROM attribute containing the source conference id.
 			//
-			mm.addMessageAttribute(globId, MessageManager.ATTR_MOVEDFROM, Long.toString(sourceConfId));
+			mm.addMessageAttribute(globId, MessageManager.ATTR_MOVEDFROM, m_da.getNameManager().getNameById(sourceConfId));
 
 			// Hello, world!
 			//			
