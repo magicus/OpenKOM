@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
+import nu.rydin.kom.InvalidLineNumberException;
+import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
@@ -27,13 +29,11 @@ public class LineNumberParameter extends IntegerParameter {
         super("parser.parameter.linenumber.ask", isRequired);
     }
 
-    public Object resolveFoundObject(Context context, Match match) {
+    public Object resolveFoundObject(Context context, Match match) throws KOMException {
         int line = ((Integer) (match.getParsedObject())).intValue();
 		Buffer buffer = ((EditorContext) context).getBuffer();
 		if(line < 1 || line > buffer.size()) {
-		    // FIXME:Ihse: Handle this in a better way
-		    return null;
-			//throw new BadParameterException();
+		    throw new InvalidLineNumberException();
 		}
 		return match.getParsedObject();
     }

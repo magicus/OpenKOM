@@ -460,9 +460,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			if(cmdString.trim().length() > 0)
     			{	
     			    ExecutableCommand executableCommand = m_parser.parse(this, cmdString);
-    			    if (executableCommand != null) {
-    			        executableCommand.execute(this);
-    			    }
+			        executableCommand.execute(this);
     			}
     			else
     			{

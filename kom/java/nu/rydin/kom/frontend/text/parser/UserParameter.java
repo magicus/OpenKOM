@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.InvalidChoiceException;
+import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
@@ -35,24 +36,11 @@ public class UserParameter extends NamedObjectParameter
 		super("parser.parameter.user.ask", isRequired);
 	}
 
-	protected Object innerResolve(Context context, Match match) throws UnexpectedException, IOException, InterruptedException, OperationInterruptedException, InvalidChoiceException
+	public Object resolveFoundObject(Context context, Match match) throws KOMException, IOException, InterruptedException
 	{
-		try
-		{
-			NameAssociation assoc = NamePicker.resolveName(match.getParsedObject().toString(), NameManager.USER_KIND, context);
-			return assoc;
-		}
-		catch (ObjectNotFoundException e)
-		{
-			PrintWriter out = context.getOut();
-			MessageFormatter fmt = context.getMessageFormatter();
-
-			out.println(fmt.format("parser.parameter.user.notfound", match.getMatchedString()));
-			out.flush();
-			return null;
-		}
+		return NamePicker.resolveName(match.getParsedObject().toString(), NameManager.USER_KIND, context);
 	}
-	
+
     protected String getUserDescriptionKey() {
         return "parser.parameter.user.description";
     }

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.InvalidChoiceException;
+import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
@@ -47,32 +48,9 @@ public class NamedObjectParameter extends CommandLineParameter
 		}
 	}
 
-	public Object resolveFoundObject(Context context, Match match) throws IOException, InterruptedException
+	public Object resolveFoundObject(Context context, Match match) throws KOMException, IOException, InterruptedException
 	{
-		PrintWriter out = context.getOut();
-		MessageFormatter fmt = context.getMessageFormatter();
-		
-		try {
-			return innerResolve(context, match); 
-		}
-		catch (UnexpectedException e)
-		{
-			out.println(fmt.format("nu.rydin.kom.UnexpectedException.format"));
-			out.flush();
-			return null;
-		}
-		catch (OperationInterruptedException e)
-		{
-			out.println(fmt.format("nu.rydin.kom.OperationInterruptedException.format"));
-			out.flush();
-			return null;
-		}
-		catch (InvalidChoiceException e)
-		{
-			out.println(fmt.format("nu.rydin.kom.InvalidChoiceException.format"));
-			out.flush();
-			return null;
-		}	    
+		return NamePicker.resolveName(match.getParsedObject().toString(), NameManager.UNKNOWN_KIND, context);
 	}
 
     protected int getSeparatorPos(String commandLine) 
@@ -97,24 +75,6 @@ public class NamedObjectParameter extends CommandLineParameter
         }
         return separatorPos;
     }
-	
-	protected Object innerResolve(Context context, Match match) throws UnexpectedException, IOException, InterruptedException, OperationInterruptedException, InvalidChoiceException
-	{
-		try
-		{
-			NameAssociation assoc = NamePicker.resolveName(match.getParsedObject().toString(), NameManager.UNKNOWN_KIND, context);
-			return assoc;
-		}
-		catch (ObjectNotFoundException e)
-		{
-			PrintWriter out = context.getOut();
-			MessageFormatter fmt = context.getMessageFormatter();
-
-			out.println(fmt.format("parser.parameter.namedobject.notfound", match.getMatchedString()));
-			out.flush();
-			return null;
-		}
-	}
 
     protected String getUserDescriptionKey() {
         // TODO Auto-generated method stub

@@ -6,6 +6,9 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
+import nu.rydin.kom.AmbiguousNameException;
+import nu.rydin.kom.KOMException;
+import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.Context;
 
@@ -40,7 +43,7 @@ public class FlagParameter extends CommandLineParameter {
 		}
     }
 
-    public Object resolveFoundObject(Context context, Match match) {
+    public Object resolveFoundObject(Context context, Match match) throws KOMException {
 		String[] flagLabels = context.getFlagLabels();
 		String flagName = match.getMatchedString();
 		int imatch = -1;
@@ -53,16 +56,14 @@ public class FlagParameter extends CommandLineParameter {
 				//
 				if(imatch != -1) {
 				    // FIXME:Ihse: We should resolve the ambiguity instead!
-				    return null;
-//					throw new AmbiguousNameException(flagName);
+				    throw new AmbiguousNameException();
 				}
 				imatch = idx;
 			}
 		}
 		if(imatch == -1)
 		{
-			context.getOut().println(context.getMessageFormatter().format("manipulate.flag.nonexistent", flagName));
-			return null;	
+		    throw new ObjectNotFoundException(context.getMessageFormatter().format("manipulate.flag.nonexistent", flagName));
 		}        
         
 		return new Integer(imatch);

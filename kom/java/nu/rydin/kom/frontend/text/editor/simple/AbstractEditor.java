@@ -84,24 +84,24 @@ public abstract class AbstractEditor implements MessageEditor
 				 		line = line.substring(1);
 				 	else
 				 	{
-				 		// It's a command! How great! Go parse it!
-				 		//
-				 		line = line.substring(1);
-				 		Parser.ExecutableCommand executableCommand = null;
-				 		executableCommand = m_parser.parse(context, line);
-				 		
-				 		if(executableCommand == null)
-				 			continue;
-				 			
-				 		// We have a command. Go run it! ...with two exceptions: The quit
-				 		// and the save command. Check them first.
-				 		//
-				 		if(executableCommand.getCommand().getClass() == Save.class)
-				 			return true;
-				 		if(executableCommand.getCommand().getClass() == Quit.class)
-				 			return false;
 				 		try
 				 		{
+					 		// It's a command! How great! Go parse it!
+					 		//
+					 		line = line.substring(1);
+					 		Parser.ExecutableCommand executableCommand = null;
+					 		executableCommand = m_parser.parse(context, line);
+					 		
+					 		if(executableCommand == null)
+					 			continue;
+					 			
+					 		// We have a command. Go run it! ...with two exceptions: The quit
+					 		// and the save command. Check them first.
+					 		//
+					 		if(executableCommand.getCommand().getClass() == Save.class)
+					 			return true;
+					 		if(executableCommand.getCommand().getClass() == Quit.class)
+					 			return false;
 				 			executableCommand.execute(context);
 				 		}
 				 		catch(KOMException e)

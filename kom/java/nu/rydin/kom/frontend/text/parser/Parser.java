@@ -19,8 +19,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import nu.rydin.kom.CommandNotFoundException;
+import nu.rydin.kom.InvalidChoiceException;
+import nu.rydin.kom.InvalidParametersException;
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.TooManyParametersException;
 import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.UserAbortedException;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -161,7 +166,7 @@ public class Parser
 		return result;
 	}
 	
-	private CommandToMatches resolveAmbiguousCommand(Context context, List potentialTargets) throws IOException, InterruptedException {
+	private CommandToMatches resolveAmbiguousCommand(Context context, List potentialTargets) throws IOException, InterruptedException, KOMException {
 		LineEditor in = context.getIn();
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();
@@ -183,8 +188,9 @@ public class Parser
 		
 		// Empty string given? Abort!
 		//
-		if(input.length() == 0)
-			return null;
+		if(input.length() == 0) {
+			throw new UserAbortedException();
+		}
 			
 		int idx = 0;
 		try
@@ -193,20 +199,21 @@ public class Parser
 		}
 		catch(NumberFormatException e)
 		{
-			out.println(fmt.format("parser.invalid.choice"));
-			return null;
+		    throw new InvalidChoiceException();
 		}
 		if(idx < 1 || idx > top)
 		{
-			out.println(fmt.format("parser.invalid.choice"));
-			return null;
+		    throw new InvalidChoiceException();
 		}
 		return (CommandToMatches) potentialTargets.get(idx - 1);
 	}
 
-	public ExecutableCommand parse(Context context, String commandLine) throws IOException, InterruptedException
+	public ExecutableCommand parse(Context context, String commandLine) throws IOException, InterruptedException, KOMException
     {
     	int level = 0;
+    	
+    	// Trim the commandline
+    	commandLine = commandLine.trim();
     	
     	// List[CommandToMatches] 
     	List potentialTargets = new LinkedList();
@@ -254,9 +261,7 @@ public class Parser
     	if (potentialTargets.size() > 1) {
     		// Ambiguous matching command found. Try to resolve it.
     	    CommandToMatches potentialTarget = resolveAmbiguousCommand(context, potentialTargets);
-    	    if (potentialTarget == null) {
-    	        return null;
-    	    }
+
     	    // Just save the chosen one in our list for later processing
     	    potentialTargets = new LinkedList();
     	    potentialTargets.add(potentialTarget);
@@ -264,13 +269,7 @@ public class Parser
     	
     	// Now we either have one target candidate, or none.
     	if (potentialTargets.size() == 0) {
-    		// No matching command found. Print error and abort.
-    		PrintWriter out = context.getOut();
-    		MessageFormatter fmt = context.getMessageFormatter();
-    		
-    		out.println(fmt.format("parser.unknown", commandLine));
-    		out.flush();
-    		return null;
+    	    throw new CommandNotFoundException(context.getMessageFormatter().format("parser.unknown", commandLine));
     	} else {
     		// We have one match, but it is not neccessarily correct: we might have
     		// too few parameters, as well as too many. Let's find out, and
@@ -288,25 +287,14 @@ public class Parser
     				// We still have parts to match to
     				Match match = parts[level].match(remainder);
     				if (!match.isMatching()) {
-    					// User have entered an invalid parameter. Report error. This should be unlikely.
-    		    		PrintWriter out = context.getOut();
-    		    		MessageFormatter fmt = context.getMessageFormatter();
-    		    		
-    		    		out.println(fmt.format("parser.invalid.match", target.getCommand().getFullName()));
-    		    		out.flush();
-    		    		return null;
+    					// User have entered an invalid parameter. This should be unlikely.
+    		    		throw new InvalidParametersException(context.getMessageFormatter().format("parser.invalid.match", target.getCommand().getFullName()));
     				}
     				target.addMatch(match);
     				remainder = match.getRemainder();
     				level++;
     			} else {
-    				// User have entered too many parameters. Report error.
-		    		PrintWriter out = context.getOut();
-		    		MessageFormatter fmt = context.getMessageFormatter();
-		    		
-		    		out.println(fmt.format("parser.superfluous.parameters", target.getCommand().getFullName()));
-		    		out.flush();
-		    		return null;
+		    		throw new TooManyParametersException(context.getMessageFormatter().format("parser.superfluous.parameters", target.getCommand().getFullName()));
     			}
     		}
     		
@@ -320,10 +308,6 @@ public class Parser
         		    Match match = target.getMatch(i);
 
     			    Object parameter = parts[i].resolveFoundObject(context, match);
-    				if (parameter == null) {
-    					// Error message have already been written. User aborted.
-    					return null;
-    				}
     				resolvedParameters.add(parameter);
     			}
     		}
@@ -337,20 +321,11 @@ public class Parser
 	    			Match match = parts[level].fillInMissingObject(context);
 	    			if (!match.isMatching()) {
 	    				// The user entered an invalid parameter, abort
-	    				PrintWriter out = context.getOut();
-	    				MessageFormatter fmt = context.getMessageFormatter();
-	    				
-	    				out.println(fmt.format("parser.invalid.parameter"));
-	    				out.flush();
-	    				return null;
+    		    		throw new InvalidParametersException(context.getMessageFormatter().format("parser.invalid.parameter"));
 	    			}
 	    			
 	    			// Resolve directly
 	    			parameter = parts[level].resolveFoundObject(context, match);
-	    			if (parameter == null) {
-	    				// Error message have already been written. User aborted.
-	    				return null;
-	    			}
     		    }
 	    		else
 	    		{
@@ -361,17 +336,8 @@ public class Parser
     			level++;
     		}
     		
-    		System.out.println("command: " + target.getCommand().getFullName());
     		for (Iterator iter = resolvedParameters.iterator(); iter.hasNext();) {
                 Object param = iter.next();
-                if (param == null)
-                {
-                    System.out.println("param: null");
-                }
-                else
-                {
-                    System.out.println("param: " + param.toString());
-                }
             }
     		// Now we can execute the command with the resolved parameters.
     		Object[] parameterArray = new Object[resolvedParameters.size()];
