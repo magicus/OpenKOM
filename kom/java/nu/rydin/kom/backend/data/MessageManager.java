@@ -53,6 +53,7 @@ public class MessageManager
 	private final PreparedStatement m_getVisibleOccurrencesStmt;
 	private final PreparedStatement m_getMessageAttributesStmt;
 	private final PreparedStatement m_addMessageAttributeStmt;
+	private final PreparedStatement m_dropMessageAttributeStmt;
 	private final PreparedStatement m_dropMessageOccurrenceStmt;
 	private final PreparedStatement m_countMessageOccurrencesStmt;
 	private final PreparedStatement m_dropMessageStmt;
@@ -129,13 +130,15 @@ public class MessageManager
 		m_getVisibleOccurrencesStmt = m_conn.prepareStatement(
 			"SELECT o.message, o.action_ts, o.kind, o.user, o.user_name, o.conference, o.localnum " +			"FROM messageoccurrences o, memberships m " +			"WHERE o.conference = m.conference AND m.user = ? AND o.message = ?");
 		m_getMessageAttributesStmt = m_conn.prepareStatement(
-		    "SELECT message, kind, created, value " +
+		    "SELECT id, message, kind, created, value " +
 		    "FROM messageattributes " +
 		    "WHERE message = ? " +
 			"order by created asc");
 		m_addMessageAttributeStmt = m_conn.prepareStatement(
 		    "INSERT INTO messageattributes (message, kind, created, value) " +
 		    "VALUES (?, ?, ?, ?)");
+		m_dropMessageAttributeStmt = m_conn.prepareStatement(
+			"DELETE FROM messageattributes WHERE id = ? AND message = ?");
 		m_dropMessageOccurrenceStmt = m_conn.prepareStatement(
 			"delete from messageoccurrences " +
 			"where localnum = ? and conference = ?");
@@ -716,7 +719,7 @@ public class MessageManager
 	/**
 	 * Given a message id and a conference, this method returns the message occurrence
 	 * the user is most likely interested in. The occurrence is determined as follows:
-	 * <br>1: If the message exitst in the current conference, pick that one
+	 * <br>1: If the message exists in the current conference, pick that one
 	 * <br>2: Otherwise, pick the earliest occurrence 
 	 * @param conference The conference id
 	 * @param id The message id
@@ -736,6 +739,34 @@ public class MessageManager
 			//
 			return this.getFirstOccurrence(id);
 		}
+	}
+	
+	/**
+	 * Returns the original occurrence of a message, which is defined as:
+	 * 1) If there is one with kind=ACTION_CREATED, pick it, otherwise
+	 * 2) Pick the one with kind=ACTION_MOVED, or if that also does not exist,
+	 * 3) Throw ObjectNotFoundException. 
+	 * 
+	 * @param messageId
+	 * @return the original occurrence
+	 * @throws ObjectNotFoundException
+	 * @throws SQLException
+	 */
+	public MessageOccurrence getOriginalMessageOccurrence(long messageId)
+	throws ObjectNotFoundException, SQLException
+	{
+	    MessageOccurrence[] occurrences = getOccurrences(messageId);
+	    for (int i = 0; i < occurrences.length; i++)
+        {
+	        //Note: In the highly unlikely event that there is more than one of either
+	        //a CREATED or MOVED occurrence, we'll pick the first one. The only way 
+	        //this can happen is if someone fucks up, THERE CAN BE ONLY ONE!
+            if (occurrences[i].getKind() == ACTION_CREATED || occurrences[i].getKind() == ACTION_MOVED)
+            {
+                return occurrences[i];
+            }
+        }
+	    throw new ObjectNotFoundException();
 	}
 	
 	/**
@@ -864,10 +895,11 @@ public class MessageManager
 	        while(rs.next())
 	        {
 	            list.add(new MessageAttribute(
-	                    rs.getLong(1),		//message
-	                    rs.getShort(2),		//kind
-	                    rs.getTimestamp(3),	//created
-	                    rs.getString(4)));	//value
+	                    rs.getLong(1),		//id
+	                    rs.getLong(2),		//message
+	                    rs.getShort(3),		//kind
+	                    rs.getTimestamp(4),	//created
+	                    rs.getString(5)));	//value
 	        }
 	        MessageAttribute[] result = new MessageAttribute[list.size()];
 	        list.toArray(result);
@@ -880,8 +912,8 @@ public class MessageManager
 		}
 	}
 	
-	public MessageAttribute addMessageAttribute(long message, short kind, String value)
-	throws ObjectNotFoundException, SQLException
+	public void addMessageAttribute(long message, short kind, String value)
+	throws SQLException
 	{
 		// Create messageattribute
 		//			
@@ -892,8 +924,15 @@ public class MessageManager
 		m_addMessageAttributeStmt.setTimestamp(3,now);
 		m_addMessageAttributeStmt.setString(4, value);
 		m_addMessageAttributeStmt.executeUpdate();
-
-		return new MessageAttribute(message, kind, now, value);
+	}
+	
+	public void dropMessageAttribute(long attributeid, long messageid) 
+	throws SQLException
+	{
+		m_dropMessageAttributeStmt.clearParameters();
+		m_dropMessageAttributeStmt.setLong(1, attributeid);
+		m_dropMessageAttributeStmt.setLong(2, messageid);
+		m_dropMessageAttributeStmt.executeUpdate();
 	}
 	
 	public int getMessageOccurrenceCount (long globalId)
