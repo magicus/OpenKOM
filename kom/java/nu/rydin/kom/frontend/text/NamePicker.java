@@ -28,7 +28,10 @@ public class NamePicker
         try
         {
             long id = Long.parseLong(name);
-            return new NameAssociation(id, null);
+            if (id > 0)
+            {
+                return new NameAssociation(id, null);
+            }
         } catch (NumberFormatException e)
         {
             // Not a numeric ID, need to parse and resolve it.
