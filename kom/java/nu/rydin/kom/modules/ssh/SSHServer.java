@@ -70,10 +70,13 @@ public class SSHServer implements Module
         Logger.debug(this, "Initializing connection");
 
         InetAddress address = socket.getInetAddress();
-
         Logger.debug(this, "Remote Hostname: " + address.getHostName());
         Logger.debug(this, "Remote IP: " + address.getHostAddress());
 
+        Logger.debug(this, "Socket keepalive: " + socket.getKeepAlive());        
+        socket.setKeepAlive(true);
+        Logger.debug(this, "Socket keepalive: " + socket.getKeepAlive());
+        
         TransportProtocolServer transport = new TransportProtocolServer();
 
         // Create the Authentication Protocol
