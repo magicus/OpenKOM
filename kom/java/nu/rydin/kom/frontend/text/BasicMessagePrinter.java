@@ -41,16 +41,22 @@ public class BasicMessagePrinter implements MessagePrinter
 		if(context.isFlagSet(0, UserFlags.CLEAR_SCREEN_BEFORE_MESSAGE))
 			out.print(ANSISequences.CLEAR_DISPLAY);
 		
-		// Could we figure out the local number?
+		// Start printing header
 		//
 		dc.messageHeader();
 		out.print(formatter.format("BasicMessagePrinter.textnumber"));
-		if(primaryOcc != null)
-			out.print(primaryOcc.getLocalnum());
 
+		// If we have a primary occurence, AND if we are in the conference of this 
+		// occurence, then print the local messagenumber.
+		if((primaryOcc != null) && (primaryOcc.getConference() == context.getSession().getCurrentConferenceId()))
+		{
+			out.print(primaryOcc.getLocalnum());
+			out.print(" ");
+		}
+		
 		// Print global numbber
 		//
-		out.print(" (");
+		out.print("(");
 		out.print(message.getId());
 		out.print(')');
 		
@@ -161,9 +167,23 @@ public class BasicMessagePrinter implements MessagePrinter
 		// Print text footer if requested
 		//
 		if(context.isFlagSet(0, UserFlags.SHOW_TEXT_FOOTER))
-			out.println(formatter.format("BasicMessagePrinter.footer", 
-				new Object[] { new Long(primaryOcc.getLocalnum()), 
-			        context.formatObjectName(message.getAuthorName(), message.getAuthor()) }));
+		{
+			// If we have a primary occurence, AND if we are in the conference of this 
+			// occurence, then print the local messagenumber, otherwise print the global 
+			// messagenumber. 
+			if((primaryOcc != null) && (primaryOcc.getConference() == context.getSession().getCurrentConferenceId()))
+			{
+				out.println(formatter.format("BasicMessagePrinter.local.footer", 
+				        new Object[] { new Integer(primaryOcc.getLocalnum()), 
+				        	context.formatObjectName(message.getAuthorName(), message.getAuthor()) }));
+			}
+			else
+			{
+				out.println(formatter.format("BasicMessagePrinter.global.footer", 
+				        new Object[] { new Long(message.getId()), 
+				        	context.formatObjectName(message.getAuthorName(), message.getAuthor()) }));
+			}
+		}
 		
 		// Print list of replies
 		//
