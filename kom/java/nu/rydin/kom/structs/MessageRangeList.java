@@ -175,6 +175,8 @@ public class MessageRangeList extends ListAtom implements Serializable
 				answer = mrl;
 			else
 				answer.succeed(mrl);
+			
+			each = (MessageRangeList)each.next();
 		} while(each != this);
 		return answer != null
 			? answer
