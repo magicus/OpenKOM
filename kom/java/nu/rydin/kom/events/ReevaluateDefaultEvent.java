@@ -28,4 +28,9 @@ public class ReevaluateDefaultEvent extends Event
 		super(user);
 		m_confId = conf;
 	}
+	
+	public long getConference()
+	{
+		return m_confId;
+	}
 }

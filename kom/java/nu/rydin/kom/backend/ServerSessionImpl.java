@@ -1852,7 +1852,18 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	
 	public void onEvent(ReevaluateDefaultEvent e)
 	{
-		this.postEvent(e);
+		long conf = e.getConference();
+		try
+		{
+			m_memberships.get(conf);
+			this.postEvent(e);
+		}
+		catch(ObjectNotFoundException ex)
+		{
+			// Not member. No need to notify client
+			//
+			return;
+		}
 	}
 	
 	public synchronized void onEvent(NewMessageEvent e)
