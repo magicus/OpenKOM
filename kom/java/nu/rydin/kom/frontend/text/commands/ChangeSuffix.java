@@ -12,9 +12,12 @@ import java.io.PrintWriter;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
+import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.frontend.text.parser.UserParameter;
@@ -29,7 +32,7 @@ public class ChangeSuffix extends AbstractCommand
 
 	public ChangeSuffix(Context context, String fullName)
 	{
-		super(fullName, new CommandLineParameter[] { new UserParameter(false), new RawParameter("change.suffix.param.1.ask", true)});
+		super(fullName, new CommandLineParameter[] { new UserParameter(false) });
 	}
 	
 	public void execute(Context context, Object[] parameterArray)
@@ -50,23 +53,62 @@ public class ChangeSuffix extends AbstractCommand
 		// Set up
 		//
 		PrintWriter out = context.getOut();
+		LineEditor in = context.getIn();
 		MessageFormatter formatter = context.getMessageFormatter();
-		
-		String oldName = NameUtils.stripSuffix(session.getName(id != -1 ? id : context.getLoggedInUserId()).getName()).trim();
+		DisplayController dc = context.getDisplayController();
 
+		// Get the old suffix
+		//
+		String oldName = session.getName(id != -1 ? id : context.getLoggedInUserId()).getName();
+		String oldSuffix = "";
+		if (oldName.indexOf("/") > 0)
+		{
+		    oldSuffix = oldName.substring(oldName.indexOf("/") + 1);
+		}
+		
 		// Get the new suffix
 		//
-	    String suffix = (String) parameterArray[1];
+		dc.normal();
+		out.print(formatter.format("change.suffix.ask"));
+		dc.input();
+		String suffix = in.readLine(oldSuffix);
+		
+		// Strip suffix before presentation.
+		//
+		oldName = NameUtils.stripSuffix(oldName).trim();
 		
 		// Execute
 		//
-		if(id == -1)
-			session.changeSuffixOfLoggedInUser(suffix);
-		else
-			session.changeSuffixOfUser(id, suffix);
+		try
+        {
+            if (id == -1)
+            {
+                session.changeSuffixOfLoggedInUser(suffix);
+            }
+            else
+            {
+                session.changeSuffixOfUser(id, suffix);
+            }
+
+    		// Print confirmation
+    		//
+    		out.println();
+    		if ("".equals(suffix))
+    		{
+    		    out.println(formatter.format("change.suffix.deletion", oldName));
+    		}
+    		else
+    		{
+    		    out.println(formatter.format("change.suffix.confirmation", oldName));
+    		}
+
+        } 
+		catch (DuplicateNameException e)
+        {
+		    //Mmmkay, if we ended up here we didn't submit any changes
+		    out.println();
+		    out.println(formatter.format("change.suffix.nochange", oldName));
+        }
 		
-		// Print confirmation
-		//
-		out.println(formatter.format("change.suffix.confirmation", oldName));
 	}
 }
