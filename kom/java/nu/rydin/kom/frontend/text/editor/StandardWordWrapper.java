@@ -48,13 +48,12 @@ public class StandardWordWrapper implements WordWrapper
 		else 
 			m_width = 1;
 		
-		// Offset larger than width makes no sense, set to width - 1 in that case.
+		// An offset larger than width means that the previous line 
+		// might be force-wrapped. We don't care, we just observe that
+		// the remainder of offset/width will always be smaller than width
+		// and always the number we want.
 		//
-		m_offset	= offset;
-		if (offset >= m_width)
-		{
-			m_offset	= m_width - 1;
-		}
+		m_offset = offset%m_width;
 	}
 	
 	public String nextLine()
@@ -138,20 +137,37 @@ public class StandardWordWrapper implements WordWrapper
 		}
 		
 		int p = top; // By default: Break at end
+		boolean advance = false;
 		for(int idx = top; idx >= m_start; --idx)
 		{
 			char ch = m_paragraph.charAt(idx);
-			if(ch == ' ' || ch == '-')
+			if(ch == ' ')
 			{
 				p = idx;
+				advance = true;
 				break;
+			}
+		    if(ch == '-')
+			{
+		        //TODO Fix editor so it doesn't eat hyphens while wrapping.
+		        //p = idx+1;
+			    p = idx;
+			    advance=true;
+			    break;
 			}
 		}
 		
 		// Cut string and advance pointer
 		//
 		String answer = m_paragraph.substring(m_start, p);
-		m_start = p + 1;
+
+	    // If the above loop defaulted, we might be breaking in the middle of a
+	    // word, in which case we should not advance the pointer, since there is 
+	    // no space or hyphen to strip away.
+		m_start = advance 
+					? p+1 
+					: p;
+		
 		if(m_start >= m_paragraph.length())
 			m_paragraph = null;
 		return answer;
