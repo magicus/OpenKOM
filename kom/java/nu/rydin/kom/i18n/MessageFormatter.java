@@ -80,7 +80,26 @@ public class MessageFormatter
 
 	public MessageFormat getFormat(String key)
 	{
-		String fmt = m_resource.getString(key);
+	    String fmt;
+	    try
+	    {
+	        fmt = m_resource.getString(key);
+	    }
+	    catch (MissingResourceException e)
+	    {
+	        try
+	        {
+	            // There MUST be a better way of doing this!
+	            //
+	            fmt = m_resource.getString("error.resource.not.found");
+		        String tmpbuf = MessageFormat.format(fmt, new Object[] { key });
+	            return new MessageFormat(tmpbuf, m_locale);
+	        }
+	        catch (MissingResourceException f)
+	        {
+	            return new MessageFormat("Panic: An error occurred while loading the error message.");
+	        }
+	    }
 		MessageFormat mf = new MessageFormat(fmt != null
 			? fmt
 			: "Unknown resource: " + key, m_locale);
