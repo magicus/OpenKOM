@@ -20,10 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.CommandParser;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
@@ -134,152 +137,209 @@ public class Parser
 		}
 		return result;
 	}
+	
+	private CommandToMatches resolveAmbiguousCommand(Context context, List potentialTargets) throws IOException, InterruptedException {
+		LineEditor in = context.getIn();
+		PrintWriter out = context.getOut();
+		MessageFormatter fmt = context.getMessageFormatter();
+
+		// Ask user to chose
+		//
+		out.println(fmt.format("parser.ambiguous"));
+		int top = potentialTargets.size();
+		for(int idx = 0; idx < top; ++idx)
+		{
+		    CommandToMatches potentialTarget = (CommandToMatches) potentialTargets.get(idx);
+			out.print(idx + 1);
+			out.print(". ");
+			out.println(potentialTarget.getCommand().getFullName()); 
+		}
+		out.print(fmt.format("parser.chose"));
+		out.flush();
+		String input = in.readLine();
+		
+		// Empty string given? Abort!
+		//
+		if(input.length() == 0)
+			return null;
+			
+		int idx = 0;
+		try
+		{
+			idx = Integer.parseInt(input);
+		}
+		catch(NumberFormatException e)
+		{
+			out.println(fmt.format("parser.invalid.choice"));
+			return null;
+		}
+		if(idx < 1 || idx > top)
+		{
+			out.println(fmt.format("parser.invalid.choice"));
+			return null;
+		}
+		return (CommandToMatches) potentialTargets.get(idx - 1);
+	}
 
 	public void parseAndExecute(Context context, String commandLine) throws IOException, InterruptedException
-	{
-		int level = 0;
-		
-		// List[CommandToMatches] 
-		List potentialTargets = new LinkedList();
-		
-		// Build a copy of all commands first, to filter down later.
-		for (int i = 0; i < m_commands.length; i++)
-		{
-			potentialTargets.add(new CommandToMatches(m_commands[i]));
-		}
-		
-		boolean remaindersExist = true;
-		while (remaindersExist && potentialTargets.size() > 1)
-		{
-			for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
-			{
-				remaindersExist = false;
-				CommandToMatches potentialTarget = (CommandToMatches)iter.next();
-				CommandLinePart part = potentialTarget.getCommandLinePart(level);
-				if (part == null) {
-					if (potentialTarget.getLastMatch().getRemainder().length() > 0) {
-						iter.remove();
-					}
-				} else {
-					String commandLineToMatch;
-					if (level == 0) {
-						commandLineToMatch = commandLine;
-					} else {
-						commandLineToMatch = potentialTarget.getMatch(level).getRemainder();
-					}
-					Match match = part.match(commandLineToMatch);
-					if (!match.isMatching()) {
-						iter.remove();
-					} else {
-						potentialTarget.addMatch(match);
-						if (match.getRemainder().length() > 0)
-						{
-							remaindersExist = true;
-						}
-					}
-				}
-			}
-			level++;
-		}
-		
-		if (potentialTargets.size() > 1) {
-			// Ambiguous matching command found. Print error and abort.
-			PrintWriter out = context.getOut();
-			MessageFormatter fmt = context.getMessageFormatter();
-			
-			out.println(fmt.format("parser.ambiguous", commandLine));
-			out.flush();
-			return;
-		}
-		
-		// Now we either have one target candidate, or none.
-		if (potentialTargets.size() == 0) {
-			// No matching command found. Print error and abort.
-			PrintWriter out = context.getOut();
-			MessageFormatter fmt = context.getMessageFormatter();
-			
-			out.println(fmt.format("parser.unknown", commandLine));
-			out.flush();
-			return;
-		} else {
-			// We have one match, but it is not neccessarily correct: we might have
-			// too few parameters, as well as too many. Let's find out, and
-			// ask user about missing parameters.
-			
-			CommandToMatches target = (CommandToMatches) potentialTargets.get(0); 
-			CommandLinePart[] parts = (CommandLinePart[]) m_commandToPartsMap.get(target.getCommand());
-			Match lastMatch = target.getMatch(level - 1);
-			
-			// First, do we have more left on the command line to parse?
-			// If so, match and put it in the targets match list.
-			String remainder = lastMatch.getRemainder();
-			while (remainder.length() > 0) {
-				if (level < parts.length) {
-					// We still have parts to match to
-					Match match = parts[level].match(remainder);
-					if (!match.isMatching()) {
-						// User have entered an invalid parameter. Report error.
-						//FIXME
-						return;
-					}
-					target.addMatch(match);
-					remainder = match.getRemainder();
-					level++;
-				} else {
-					// User have entered too many parameters. Report error.
-					//FIXME
-					return;
-				}
-			}
-			
-			// Now, resolve the entered parts.
-			List resolvedParameters = new LinkedList();
-			int i = 0;
-			for (Iterator iter = target.getMatches().iterator(); iter.hasNext();)
-			{
-				Match match = (Match)iter.next();
-				// If this is a command name part, then it is part of the
-				// signature. Add the resolved value of the match to our parameter
-				// list.
-				if (parts[i] instanceof CommandLineParameter) {
-					Object parameter = parts[i].resolveFoundObject(context, match);
-					if (parameter == null) {
-						// Error message have already been written. User aborted.
-						return;
-					}
-					resolvedParameters.add(parameter);
-				}
-			}
-			
-			// If we still need more parameters, ask the user about them.
-			while (level < parts.length) {
-				// Not on command line, ask the user about it.
-				Match match = parts[level].fillInMissingObject(context);
-				if (!match.isMatching()) {
-					// The user entered an invalid parameter, abort
-					PrintWriter out = context.getOut();
-					MessageFormatter fmt = context.getMessageFormatter();
-					
-					out.println(fmt.format("parser.invalid.parameter"));
-					out.flush();
-					return;
-				}
-				
-				// Resolve directly
-				Object parameter = parts[i].resolveFoundObject(context, match);
-				if (parameter == null) {
-					// Error message have already been written. User aborted.
-					return;
-				}
-				resolvedParameters.add(parameter);
-			}
-			
-			// Now we can execute the command with the resolved parameters.
-			Object[] parameterArray = new Object[resolvedParameters.size()];
-			resolvedParameters.toArray(parameterArray);
-			target.getCommand().execute2(context, parameterArray);
-		}
-	}
+    {
+    	int level = 0;
+    	
+    	// List[CommandToMatches] 
+    	List potentialTargets = new LinkedList();
+    	
+    	// Build a copy of all commands first, to filter down later.
+    	for (int i = 0; i < m_commands.length; i++)
+    	{
+    		potentialTargets.add(new CommandToMatches(m_commands[i]));
+    	}
+    	
+    	boolean remaindersExist = true;
+    	while (remaindersExist && potentialTargets.size() > 1)
+    	{
+    		for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
+    		{
+    			remaindersExist = false;
+    			CommandToMatches potentialTarget = (CommandToMatches)iter.next();
+    			CommandLinePart part = potentialTarget.getCommandLinePart(level);
+    			if (part == null) {
+    				if (potentialTarget.getLastMatch().getRemainder().length() > 0) {
+    					iter.remove();
+    				}
+    			} else {
+    				String commandLineToMatch;
+    				if (level == 0) {
+    					commandLineToMatch = commandLine;
+    				} else {
+    					commandLineToMatch = potentialTarget.getMatch(level).getRemainder();
+    				}
+    				Match match = part.match(commandLineToMatch);
+    				if (!match.isMatching()) {
+    					iter.remove();
+    				} else {
+    					potentialTarget.addMatch(match);
+    					if (match.getRemainder().length() > 0)
+    					{
+    						remaindersExist = true;
+    					}
+    				}
+    			}
+    		}
+    		level++;
+    	}
+    	
+    	if (potentialTargets.size() > 1) {
+    		// Ambiguous matching command found. Try to resolve it.
+    	    CommandToMatches potentialTarget = resolveAmbiguousCommand(context, potentialTargets);
+    	    if (potentialTarget == null) {
+    	        return;
+    	    }
+    	    // Just save the chosen one in our list for later processing
+    	    potentialTargets = new LinkedList();
+    	    potentialTargets.add(potentialTarget);
+    	}
+    	
+    	// Now we either have one target candidate, or none.
+    	if (potentialTargets.size() == 0) {
+    		// No matching command found. Print error and abort.
+    		PrintWriter out = context.getOut();
+    		MessageFormatter fmt = context.getMessageFormatter();
+    		
+    		out.println(fmt.format("parser.unknown", commandLine));
+    		out.flush();
+    		return;
+    	} else {
+    		// We have one match, but it is not neccessarily correct: we might have
+    		// too few parameters, as well as too many. Let's find out, and
+    		// ask user about missing parameters.
+    		
+    		CommandToMatches target = (CommandToMatches) potentialTargets.get(0); 
+    		CommandLinePart[] parts = (CommandLinePart[]) m_commandToPartsMap.get(target.getCommand());
+    		Match lastMatch = target.getMatch(level - 1);
+    		
+    		// First, do we have more left on the command line to parse?
+    		// If so, match and put it in the targets match list.
+    		String remainder = lastMatch.getRemainder();
+    		while (remainder.length() > 0) {
+    			if (level < parts.length) {
+    				// We still have parts to match to
+    				Match match = parts[level].match(remainder);
+    				if (!match.isMatching()) {
+    					// User have entered an invalid parameter. Report error. This should be unlikely.
+    		    		PrintWriter out = context.getOut();
+    		    		MessageFormatter fmt = context.getMessageFormatter();
+    		    		
+    		    		out.println(fmt.format("parser.invalid.match", target.getCommand().getFullName()));
+    		    		out.flush();
+    		    		return;
+    				}
+    				target.addMatch(match);
+    				remainder = match.getRemainder();
+    				level++;
+    			} else {
+    				// User have entered too many parameters. Report error.
+		    		PrintWriter out = context.getOut();
+		    		MessageFormatter fmt = context.getMessageFormatter();
+		    		
+		    		out.println(fmt.format("parser.superfluous.parameters", target.getCommand().getFullName()));
+		    		out.flush();
+		    		return;
+    			}
+    		}
+    		
+    		// Now, resolve the entered parts.
+    		List resolvedParameters = new LinkedList();
+    		for (int i = 0; i < target.getMatches().size(); i++) {
+    		    // If this is a command name part, then it is part of the
+    			// signature. Add the resolved value of the match to our parameter
+    			// list.
+    			if (parts[i] instanceof CommandLineParameter) {
+        		    Match match = target.getMatch(i);
+
+    			    Object parameter = parts[i].resolveFoundObject(context, match);
+    				if (parameter == null) {
+    					// Error message have already been written. User aborted.
+    					return;
+    				}
+    				resolvedParameters.add(parameter);
+    			}
+    		}
+    		
+    		// If we still need more parameters, ask the user about them.
+    		while (level < parts.length) {
+    			// Not on command line, ask the user about it.
+    			Match match = parts[level].fillInMissingObject(context);
+    			if (!match.isMatching()) {
+    				// The user entered an invalid parameter, abort
+    				PrintWriter out = context.getOut();
+    				MessageFormatter fmt = context.getMessageFormatter();
+    				
+    				out.println(fmt.format("parser.invalid.parameter"));
+    				out.flush();
+    				return;
+    			}
+    			
+    			// Resolve directly
+    			Object parameter = parts[level].resolveFoundObject(context, match);
+    			if (parameter == null) {
+    				// Error message have already been written. User aborted.
+    				return;
+    			}
+    			resolvedParameters.add(parameter);
+    			level++;
+    		}
+    		
+    		System.out.println("command: " + target.getCommand().getFullName());
+    		for (Iterator iter = resolvedParameters.iterator(); iter.hasNext();) {
+                Object param = (Object) iter.next();
+                System.out.println("param: " + param.toString());
+            }
+    		// Now we can execute the command with the resolved parameters.
+    		Object[] parameterArray = new Object[resolvedParameters.size()];
+    		resolvedParameters.toArray(parameterArray);
+    		target.getCommand().execute2(context, parameterArray);
+    	}
+    }
 	
 	private static final Class[] s_commandCtorSignature = new Class[] { String.class };
 	

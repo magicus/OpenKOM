@@ -34,7 +34,7 @@ public abstract class CommandLinePart
 		String remainder;
 	
 		// Trim leading whitespace
-		while (Character.isWhitespace(commandLine.charAt(0))) {
+		while (commandLine.length() > 0 && Character.isWhitespace(commandLine.charAt(0))) {
 			commandLine = commandLine.substring(1);
 		}
 		

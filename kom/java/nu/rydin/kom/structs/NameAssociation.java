@@ -32,4 +32,8 @@ public class NameAssociation implements Serializable
 	{
 		return m_name;
 	}
+	
+    public String toString() {
+        return getName() + "<" + getId() + ">";
+    }
 }

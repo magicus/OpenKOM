@@ -112,7 +112,7 @@ public class NamePicker
 		{
 			throw new InvalidChoiceException();
 		}
-		if(idx < 1 || idx > top + 1)
+		if(idx < 1 || idx > top)
 		{
 			throw new InvalidChoiceException();
 		}
