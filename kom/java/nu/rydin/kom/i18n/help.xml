@@ -109,4 +109,117 @@
    <element type="command" value="nu.rydin.kom.frontend.text.commands.ListOwnMessages"/>
   </seealso>
  </command>
+ <command class="nu.rydin.kom.frontend.text.commands.Signup">
+  <parameters>
+   <param order="0">Det möte du vill gå med i.</param>
+  </parameters>
+  <description>
+   <block>Du använder det här kommandot för att gå med i ett nytt möte.</block>
+  </description>
+  <exception>
+   <block>Om du försöker gå med i ett slutet möte du inte har rättigheter i får du felmeddelandet "Du har inte rätt att utföra denna operation."</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SignOff"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.GotoConference"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SignOff">
+  <parameters>
+   <param order="0">Det möte du vill lämna.</param>
+  </parameters>
+  <description>
+   <block>Använd det här kommandot för att lämna ett möte.</block>
+   <block>Om du senare går med i mötet igen kommer OpenKOM ihåg vilka texter du redan läst.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Signup"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.GotoConference">
+  <parameters>
+   <param order="0">Det möte du vill gå till.</param>
+  </parameters>
+  <description>
+   <block>Använd det här kommandot för att gå till ett specifikt möte.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.GotoNextConference"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListConferences"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Signup"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.WriteMessage">
+  <description>
+   <block>Använd det här kommandot för att skriva ett nytt inlägg i mötet du befinner dig i.</block>
+   <block>Du kommer att få ange ett ärende (rubrik) för ditt inlägg.</block>
+   <block>När editorn startats kan du använda !? för att få hjälp. Du kan också spara din text med Ctrl-D eller Ctrl-Z, eller kasta den med Ctrl-C.</block>
+  </description>
+  <exception>
+   <block>Om du försöker skriva ett inlägg i ett möte du inte har skrivrättigheter i kommer du att få meddelandet "Du har inte rätt att utföra denna operation".</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SendMail"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.Reply">
+  <parameters>
+   <param order="0">Den text du vill kommentera</param>
+  </parameters>
+  <description>
+   <block>Kommandot postar ett uppföljningsinlägg till den angivna texten. Om du inte anger textnummer antar OpenKOM att du vill kommentera den text du senast läste.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.WriteMessage"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.PersonalReply"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.PersonalReply">
+  <parameters>
+   <param order="0">Texten du vill skriva en kommentar till.</param>
+  </parameters>
+  <description>
+   <block>Kommandot postar en personlig kommentar till författaren av den angivna texten. Om du inte anger textnummer antar OpenKOM att du vill kommentera den text du senast läste.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Reply"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.NoComment">
+  <parameters>
+   <param order="0">Den text du inte vill kommentera.</param>
+  </parameters>
+  <description>
+   <block>Det här är ett tramskommando. Det postar ingen kommentar till den angivna texten, eller till den senast lästa texten om du inte anger ett textnummer.</block>
+   <block>Om du inte kommenterar en text kommer raden "Ingen kommentar av J Random User" att finnas med i listan över kommentarer till inlägget.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Reply"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SkipSubject">
+  <description>
+   <block>Kommandot hoppar över alla inlägg med samma ärende som det du just läste. Det innebär att alla inlägg med samma ärende markeras som lästa.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SkipTree"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SkipTree">
+  <description>
+   <block>Kommandot hoppar över det (del)träd som utgår från det inlägg du just läste. Det innebär att alla inlägg i (del)trädet markeras som lästa.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SkipSubject"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ReadMessage">
+  <parameters>
+   <param order="0">Det lokala numret på den text du vill läsa.</param>
+  </parameters>
+  <description>
+   <block>Det här kommandot används för att läsa en text i mötet du befinner dig i.</block>
+   <block>Du kan också ange ett lokalt textnummer direkt vid prompten; "(Se) tiden - 4711"</block>
+  </description>
+ </command>
 </commands>
