@@ -90,7 +90,6 @@ public class ClientSession implements Runnable, Context, EventTarget
 	private Command[] m_commandList = 
 	{ 
 		new ShowTime(m_formatter),
-		new ShowTime(m_formatter),  
 		new Logout(m_formatter),
 		new CreateUser(m_formatter),
 		new CreateConference(m_formatter),
@@ -116,8 +115,26 @@ public class ClientSession implements Runnable, Context, EventTarget
 		new ChangeCharacterset(m_formatter),
 		new AddPermissions(m_formatter),
 		new ReadNextReply(m_formatter),
-		new Copy(m_formatter)
+		new Copy(m_formatter),
+		new ListCommands(m_formatter)
 		};
+		
+	private class ListCommands extends AbstractCommand
+	{
+		public ListCommands(MessageFormatter formatter)
+		{
+			super(formatter);
+		}
+		
+		public void execute(Context context, String[] args)
+		{
+			PrintWriter out = context.getOut();
+			Command[] cmds = ClientSession.this.m_commandList;
+			int top = cmds.length;
+			for(int idx = 0; idx < top; ++idx)
+				out.println(cmds[idx].getFullName());
+		}
+	}
 		
 	private CommandParser m_parser = new CommandParser(m_commandList);
 	
