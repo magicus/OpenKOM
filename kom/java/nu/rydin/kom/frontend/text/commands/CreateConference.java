@@ -39,17 +39,22 @@ public class CreateConference extends AbstractCommand
 	
 	//FIXME Command should be rewritten using better parameter!
 	public void execute(Context context, Object[] parameterArray) 
-	throws KOMException, IOException, InterruptedException
+	throws KOMException, IOException, InterruptedException, DuplicateNameException
 	{
-		// Do we have the permission to do this?
-		//
-		context.getSession().checkRights(UserPermissions.CREATE_CONFERENCE);
-			
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
 		String fullname = (String) parameterArray[0];
+		
+		if (fullname.equals(fmt.format("misc.mailboxtitle")))
+		{
+		    throw new DuplicateNameException();
+		}
 
+		// Do we have the permission to do this?
+		//
+		context.getSession().checkRights(UserPermissions.CREATE_CONFERENCE);
+			
 		// There must be a better way to do this..
 		//
 		boolean canDoMagic = false;
