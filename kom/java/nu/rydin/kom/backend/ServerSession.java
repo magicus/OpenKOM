@@ -115,7 +115,7 @@ public interface ServerSession
 	 * Returns name associations of a certain kind based on a pattern.
 	 * 
 	 * @param pattern The pattern
-	 * @param id The kind (conference or user)
+	 * @param kind The kind (conference or user)
 	 * @throws UnexpectedException
 	 */		
 	public NameAssociation[] getAssociationsForPatternAndKind(String pattern, short kind)
@@ -144,8 +144,6 @@ public interface ServerSession
 	/**
 	 * Re-read the last read message.
 	 * 
-	 * @param messageId
-	 * @return
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
@@ -269,6 +267,16 @@ public interface ServerSession
 		String phoneno2, String email1, String email2, String url, String charset, 
 		long flags1, long flags2, long flags3, long flags4, long rights)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException;
+	
+	/**
+	 * Changes the contact info of a user.
+	 * 
+	 * @param ui
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public void changeContactInfo(UserInfo ui)
+	throws ObjectNotFoundException, UnexpectedException, AuthorizationException;
 
 	/**
 	 * Changes the default conference scope

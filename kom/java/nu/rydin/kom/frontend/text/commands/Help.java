@@ -35,17 +35,13 @@ public class Help extends AbstractCommand
 	//
     private class HelpTextContainer
 	{
-		 private String className;
-		 private String crlfSequence;
 		 private String[] paramDescriptions; 
 		 private ArrayList description;
 		 private ArrayList exceptions;
 		 private ArrayList seeAlso;
 		 
-		 public HelpTextContainer (String className, String crlfSequence)
+		 public HelpTextContainer ()
 		 {
-		     this.className = className;
-		     this.crlfSequence = crlfSequence;
 		     paramDescriptions = new String[10];
 		     description = new ArrayList();
 		     exceptions = new ArrayList();
@@ -100,17 +96,15 @@ public class Help extends AbstractCommand
 	private class HelpDocumentHandler extends DefaultHandler
 	{
 	     private String m_commandName;
-	     private String m_crlfSequence;
 	     private int m_state = -1;
 	     private int m_lastParam = -1; 
 	     private boolean m_found = false;
 	     private HelpTextContainer myContainer = null;
 	     private CharArrayWriter contents = new CharArrayWriter();
 	     
-	     public HelpDocumentHandler (String commandName, String crlfSequence)
+	     public HelpDocumentHandler (String commandName)
 	     {
 	         m_commandName = commandName;
-	         m_crlfSequence = crlfSequence;
 	     }
 	     
 	     public HelpTextContainer getContainer()
@@ -138,7 +132,7 @@ public class Help extends AbstractCommand
 	     	    if (attr.getValue("", "class").equals(m_commandName))
 	     	    {
 	     	        m_found = true;
-	     	        myContainer = new HelpTextContainer (m_commandName, m_crlfSequence);
+	     	        myContainer = new HelpTextContainer ();
 	     	    }
 	     	    else
 	     	    {
@@ -257,7 +251,7 @@ public class Help extends AbstractCommand
             command = this;
         }
         
-	    HelpDocumentHandler myParser = new HelpDocumentHandler (command.getClass().getName(), "\r\n\r\n ");
+	    HelpDocumentHandler myParser = new HelpDocumentHandler (command.getFullName());
 	    HelpTextContainer htc = null;
 	    
 	    try
@@ -337,18 +331,9 @@ public class Help extends AbstractCommand
 		    {
 		        String[] p = (String[]) htc.getReferences().get(i);
 		        if (p[1].equals("command"))
-		        {
-		            try
-		            {
-		                out.println ("  " + formatter.format(p[0] + ".name"));
-		                
-		            }
-		            catch (Exception e){}
-		        }
+	                out.println ("  " + formatter.format(p[0] + ".name"));		  
 		        else
-		        {
 		            out.println ("  " + p[0]);
-		        }
 		    }
 	    }
 	}

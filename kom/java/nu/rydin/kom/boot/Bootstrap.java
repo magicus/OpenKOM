@@ -28,6 +28,8 @@ import nu.rydin.kom.utils.Logger;
  */
 public class Bootstrap
 {
+    private static final long s_bootTime = System.currentTimeMillis();
+    
 	static
 	{
 	    //	  We always run in UTC.
@@ -40,6 +42,11 @@ public class Bootstrap
 	}
 	
 	private Map m_modules;
+	
+	public static long getBootTime()
+	{
+	    return s_bootTime;
+	}
 	
 	public void start()
 	throws IOException, ParserConfigurationException, SAXException

@@ -83,7 +83,6 @@ public interface Context extends TerminalSettingsProvider
 	 * keep this info up to date, it is not 100% reliable. Don't use for 
 	 * operations where slightly stale data could cause problems.
 	 * @throws UnexpectedException
-	 * @throws ObjectNotFoundException
 	 */	
 	public UserInfo getCachedUserInfo()
 	throws UnexpectedException;

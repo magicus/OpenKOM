@@ -18,6 +18,7 @@ public class Buffer
 	
 	public Buffer()
 	{
+	    super();
 	}
 	
 	public Buffer(WordWrapper wrapper)

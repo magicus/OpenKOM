@@ -12,7 +12,6 @@ import java.io.PrintWriter;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 
 /**
  * @author Henrik Schröder

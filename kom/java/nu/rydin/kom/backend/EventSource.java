@@ -14,11 +14,10 @@ import nu.rydin.kom.events.Event;
 public interface EventSource
 {
 	/**
-	 * Pools for an event. 
+	 * Polls for an event. 
 	 * 
 	 * @param timeoutMs Timeout, in milliseconds. If no event could be
 	 * delivered within this timeframe, <tt>null</tt> is returned.
-	 * @return
 	 */
 	public Event pollEvent(int timeoutMs)
 	throws InterruptedException;

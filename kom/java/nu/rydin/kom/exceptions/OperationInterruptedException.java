@@ -16,4 +16,5 @@ package nu.rydin.kom.exceptions;
  */
 public class OperationInterruptedException extends UserException
 {
+    // Just for classification
 }

@@ -1,5 +1,6 @@
 USE kom;
 
+DROP TABLE IF EXISTS blocks;
 DROP TABLE IF EXISTS magicconferences;
 DROP TABLE IF EXISTS messageattributes;
 DROP TABLE IF EXISTS messageoccurrences;

@@ -23,7 +23,7 @@ public class GotoNextConference extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
-		long id = context.getSession().gotoNextConference();
+		context.getSession().gotoNextConference();
 		context.printCurrentConference();
 	}
 }

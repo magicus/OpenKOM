@@ -40,6 +40,7 @@ public class UserManager
 	private final PreparedStatement m_authenticateStmt;
 	private final PreparedStatement m_authenticateOnIdStmt;
 	private final PreparedStatement m_addUserStmt;
+	private final PreparedStatement m_updateContactInfoStmt;
 	private final PreparedStatement m_loadUserStmt;
 	private final PreparedStatement m_updateCharsetStmt;
 	private final PreparedStatement m_changePasswordStmt;
@@ -72,6 +73,9 @@ public class UserManager
 			"INSERT INTO users(userid, pwddigest, address1, address2, " +
 			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights, locale, created) " +
 			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?)");
+		m_updateContactInfoStmt = conn.prepareStatement(
+		    "UPDATE users SET address1 = ?, address2 = ?, address3 = ?, address4 = ?, " +
+		    "phoneno1 = ?, phoneno2 = ?, email1 = ?, email2 = ?, url = ? WHERE id = ?");
 		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, u.address1, u.address2, u.address3, u.address4, " +
 			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.timezone, u.created, u.lastlogin " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
@@ -107,6 +111,8 @@ public class UserManager
 			m_authenticateOnIdStmt.close();
 		if(m_addUserStmt != null)
 			m_addUserStmt.close();
+		if(m_updateContactInfoStmt != null)
+		    m_updateContactInfoStmt.close();
 		if(m_loadUserStmt != null)
 			m_loadUserStmt.close();
 		if(m_updateCharsetStmt != null)
@@ -259,6 +265,26 @@ public class UserManager
 			}
 			
 		}
+	
+	public void changeContactInfo(UserInfo ui)
+	throws ObjectNotFoundException, SQLException
+	{
+	    m_updateContactInfoStmt.clearParameters();
+	    m_updateContactInfoStmt.setString(1, ui.getAddress1());
+	    m_updateContactInfoStmt.setString(2, ui.getAddress2());
+	    m_updateContactInfoStmt.setString(3, ui.getAddress3());
+	    m_updateContactInfoStmt.setString(4, ui.getAddress4());
+	    m_updateContactInfoStmt.setString(5, ui.getPhoneno1());
+	    m_updateContactInfoStmt.setString(6, ui.getPhoneno2());
+	    m_updateContactInfoStmt.setString(7, ui.getEmail1());
+	    m_updateContactInfoStmt.setString(8, ui.getEmail2());
+	    m_updateContactInfoStmt.setString(8, ui.getEmail2());
+	    m_updateContactInfoStmt.setString(9, ui.getUrl());
+	    m_updateContactInfoStmt.setLong(10, ui.getId());
+	    if(m_updateContactInfoStmt.executeUpdate() == 0)
+	        throw new ObjectNotFoundException();
+	    m_cacheManager.getUserCache().registerInvalidation(new Long(ui.getId()));
+	}
 		
 	public long getUserIdByLogin(String login)
 	throws ObjectNotFoundException, SQLException

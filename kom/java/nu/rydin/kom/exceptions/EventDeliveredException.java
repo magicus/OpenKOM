@@ -13,7 +13,7 @@ import nu.rydin.kom.events.*;
  * a high-priority event is delivered
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class EventDeliveredException extends Exception
+public class EventDeliveredException extends LineEditorException
 {
 	private Event m_event;
 	

@@ -9,7 +9,7 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class LineOverflowException extends SystemException
+public class LineOverflowException extends LineEditorException
 {
 	private String m_line;
 	 

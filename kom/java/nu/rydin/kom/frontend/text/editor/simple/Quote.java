@@ -50,7 +50,6 @@ public class Quote extends AbstractCommand
         PrintWriter out = context.getOut();
         MessageFormatter formatter = context.getMessageFormatter();
         char yesChar = formatter.format("misc.y").toUpperCase().charAt(0);
-        char noChar = formatter.format("misc.y").toUpperCase().charAt(0);
         char quitChar = formatter.format("misc.q").toUpperCase().charAt(0);
         char goaheadChar = formatter.format("misc.goahead").toUpperCase().charAt(0);
         Buffer buffer = ec.getBuffer();

@@ -89,6 +89,16 @@ public class MembershipInfo implements Serializable
 		return m_user;
 	}
 	
+	public int getPermissions()
+	{
+	    return m_permissions;
+	}
+	
+	public int getNegationMask()
+	{
+	    return m_negationMask;
+	}
+	
 	public static MessageRangeList decodeMessageRanges(String messageRanges)
 	{
 		if(messageRanges == null)

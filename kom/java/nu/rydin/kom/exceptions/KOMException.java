@@ -43,8 +43,7 @@ public abstract class KOMException extends Exception
 	{
         if (m_msgArgs != null) 
 	        return context.getMessageFormatter().format(this.getArgsFormatKey(), m_msgArgs);
-        else
-	        return context.getMessageFormatter().format(this.getFormatKey());
+	    return context.getMessageFormatter().format(this.getFormatKey());
 	}
 	
 	protected String getFormatKey()

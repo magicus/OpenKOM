@@ -74,8 +74,7 @@ public class ChatRececipientParameter extends NamedObjectParameter
         	    NameAssociation[] names = session.getAssociationsForPattern(pattern);
         	    if(names.length == 0)
         	        throw new ObjectNotFoundException(pattern);
-        	    else
-        	        throw new NotLoggedInException(names[0].getName().toString());
+        	    throw new NotLoggedInException(names[0].getName().toString());
         	}
         	case 1:
         	    return ((NameAssociation) list.get(0));

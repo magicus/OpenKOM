@@ -22,7 +22,6 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class GenerateTestdata extends AbstractCommand
 {
-	private static final String s_username = "Flinge Jücht";
 	private static final String s_subject = "Flinge Jücht informerar";
 	private static final String s_body1 = "Katter är solitära";
 	private static final String s_body2 = "Jag har ingen TV";

@@ -36,11 +36,11 @@ public class TelnetServer implements Module, Runnable
 	 */
 	private static class SessionReaper extends Thread
 	{
-		private final Socket m_socket;
+		private Socket m_socket;
 		
-		private final Thread m_clientThread;
+		private Thread m_clientThread;
 		
-		private final ClientSession m_session;
+		private ClientSession m_session;
 		
 		public SessionReaper(Socket socket, Thread clientThread, ClientSession session)
 		{
@@ -73,19 +73,28 @@ public class TelnetServer implements Module, Runnable
 				// just fall thru and kill the connection.
 				//
 			}
-			try
+			finally
 			{
-				m_socket.close();
-			}
-			catch(IOException e)
-			{
-				// IO error here? Tough luck...
+				try
+				{
+					m_socket.close();
+				}
+				catch(IOException e)
+				{
+					// IO error here? Tough luck...
+					//
+					e.printStackTrace();
+				}
+				
+				// Release references
 				//
-				e.printStackTrace();
+				m_socket 		= null;
+				m_clientThread 	= null;
+				m_session 		= null;
 			}
 		}
 	}
-	private int m_port;
+
 	private ServerSocket m_socket;
 	private Thread m_thread;
 	private boolean m_useTicket;
@@ -140,7 +149,8 @@ public class TelnetServer implements Module, Runnable
 	public void join()
 	throws InterruptedException
 	{
-	    m_thread.join();
+	    if(m_thread != null)
+	        m_thread.join();
 	}
 	
 	public void run()

@@ -15,4 +15,5 @@ package nu.rydin.kom.exceptions;
  */
 public class InputInterruptedException extends SystemException
 {
+    // Just for classification
 }

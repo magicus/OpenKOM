@@ -696,7 +696,27 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		return this.storeReplyAsMessage(conf, msg, -1L);
 	}
-
+	
+	public void changeContactInfo(UserInfo ui)
+	throws ObjectNotFoundException, UnexpectedException, AuthorizationException
+	{
+	    try
+	    {
+	        // We're only allowed to change address of ourselves, unless
+	        // we hold the USER_ADMIN priv.
+	        //
+	        long id = ui.getId(); 
+	        if(id != this.getLoggedInUserId())
+	            this.checkRights(UserPermissions.USER_ADMIN);
+	        m_da.getUserManager().changeContactInfo(ui);
+	        this.sendEvent(id, new ReloadUserProfileEvent(id));
+	    }
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}	    
+	}
+	
     public MessageOccurrence storeMail(long recipient, UnstoredMessage msg)
     throws ObjectNotFoundException, UnexpectedException	
 	{
@@ -3208,7 +3228,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 		    // Do we have the right to do this?
 		    //
-		    this.assertModifyConference(conference);
+		    if(!(this.hasPermissionInConference(conference, ConferencePermissions.ADMIN_PERMISSION)
+		       || this.getLoggedInUser().hasRights(UserPermissions.CONFERENCE_ADMIN)))
+		       throw new AuthorizationException();
 		    
 		    // So far so, so good. Go ahead and delete!
 		    //

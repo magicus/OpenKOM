@@ -40,9 +40,6 @@ public class NameManager
 	private final PreparedStatement m_getNamesByPatternStmt;
 	private final PreparedStatement m_getIdsByPatternAndKindStmt;
 	private final PreparedStatement m_getNamesByPatternAndKindStmt;	
-//DEAD CODE
-//	private final PreparedStatement m_getNamesByPatternAndKindAndDateStmt;	
-//	private final PreparedStatement m_getNamesByPatternAndKindAndNameStmt;	
 	private final PreparedStatement m_addNameStmt;
 	private final PreparedStatement m_getAssociationsByPatternStmt;
 	private final PreparedStatement m_getAssociationsByPatternAndKindStmt;
@@ -58,9 +55,6 @@ public class NameManager
 			"SELECT fullname, visibility FROM names WHERE id = ?");		
 		m_getIdByNameStmt = conn.prepareStatement(
 			"SELECT id FROM names WHERE norm_name = ?");		
-			
-		// TODO: Handle protected names!
-		//
 		m_getIdsByPatternStmt = conn.prepareStatement(
 			"SELECT id FROM names WHERE norm_name LIKE ?");
 		m_getNamesByPatternStmt = conn.prepareStatement(
@@ -69,13 +63,6 @@ public class NameManager
 			"SELECT id FROM names WHERE norm_name LIKE ? AND kind = ?");
 		m_getNamesByPatternAndKindStmt = conn.prepareStatement(
 			"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +			"ORDER BY fullname");
-//DEAD CODE
-//		m_getNamesByPatternAndKindAndNameStmt = conn.prepareStatement(
-//				"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +
-//				"ORDER BY fullname");
-//		m_getNamesByPatternAndKindAndDateStmt = conn.prepareStatement(
-//				"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +
-//				"ORDER BY lastdate");
 		m_addNameStmt  = conn.prepareStatement(
 			"INSERT INTO names(norm_name, fullname, kind, visibility) VALUES(?, ?, ?, ?)");
 		m_getAssociationsByPatternStmt = conn.prepareStatement(
@@ -376,14 +363,14 @@ public class NameManager
 	/**
 	 * Returns <tt>true</tt> if an exact match for a name exists
 	 * @param name The name to test
-	 * @throws SQLExcption
+	 * @throws SQLException
 	 */
 	public boolean nameExists(String name)
 	throws SQLException 
 	{
 		try
 		{
-			long id = this.getIdByName(name);
+			this.getIdByName(name);
 			return true;
 		}
 		catch(ObjectNotFoundException e)
@@ -434,7 +421,6 @@ public class NameManager
 	 * @throws SQLException
 	 * @throws ObjectNotFoundException
 	 * @throws DuplicateNameException
-	 * @throws AmbiguousNameException
 	 */
 	public void renameObject(long id, String newName)
 	throws SQLException, ObjectNotFoundException, DuplicateNameException

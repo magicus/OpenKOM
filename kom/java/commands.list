@@ -97,3 +97,4 @@ nu.rydin.kom.frontend.text.commands.WriteMessage
 nu.rydin.kom.frontend.text.commands.WriteReply
 nu.rydin.kom.frontend.text.commands.WriteNote
 nu.rydin.kom.frontend.text.commands.WriteRules
+nu.rydin.kom.frontend.text.commands.ChangeContactInfo

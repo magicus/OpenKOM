@@ -114,6 +114,6 @@ public class ANSIDisplayController implements DisplayController
 
     public void reset()
     {
+        m_writer.print(ANSISequences.RESET_ATTRIBUTES);
     }
-    
 }

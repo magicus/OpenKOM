@@ -207,3 +207,17 @@ CREATE TABLE IF NOT EXISTS settings
 	numeric_value BIGINT,
 	PRIMARY KEY(name)
 ) TYPE=INNODB;
+
+CREATE TABLE IF NOT EXISTS relationship
+(
+	id BIGINT NOT NULL AUTO_INCREMENT,
+	referer BIGINT NOT NULL,
+	referee BIGINT NOT NULL,
+	kind INT NOT NULL,
+	flags BIGINT NOT NULL,
+	PRIMARY KEY(id),
+	INDEX referer_ix(blocker),
+	FOREIGN KEY (referer) REFERENCES names(id) ON DELETE CASCASE,
+	INDEX referee_ix(referee),
+	FOREIGN KEY (referee) REFERENCES names(id) ON DELETE CASCASE
+) TYPE=INNODB;

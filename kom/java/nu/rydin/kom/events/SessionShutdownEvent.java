@@ -11,4 +11,5 @@ package nu.rydin.kom.events;
  */
 public class SessionShutdownEvent extends Event
 	{
+    // No methods. Exists only for classification purposes.
 	}

@@ -68,12 +68,12 @@ public class MRUCache implements Map
 		/**
 		 * The key
 		 */
-		private final Object m_key;
+		protected final Object m_key;
 
 		/**
 		 * The value
 		 */
-		private Object m_value;
+		protected Object m_value;
 
 		/**
 		 * Constructs a new <code>CacheItem</code>
@@ -374,7 +374,7 @@ public class MRUCache implements Map
 	/**
 	 * Returns the <code>CacheItem</code> associated with a key, or null
 	 * if no <code>CacheItem</code> existed for the specified key.
-	 * @param The key
+	 * @param key The key
 	 */
 	CacheItem getCacheItem(Object key)
 		{

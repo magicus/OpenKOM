@@ -11,8 +11,6 @@ package nu.rydin.kom.utils;
  */
 public class Logger extends Object
 {
-	private org.apache.log4j.Logger logger;
-
 	static
 	{
 		try

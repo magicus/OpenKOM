@@ -116,7 +116,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
         }
     }
     
-    private HeartbeatSender m_heartbeatSender = new HeartbeatSender();
+    private HeartbeatSender m_heartbeatSender ;
     
 	private class EventPrinter implements EventTarget
 	{
@@ -132,6 +132,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		
 		public void onEvent(Event event) 
 		{
+		    // Unknown event. Not much we can do.
 		}
 	
 		public void onEvent(ChatMessageEvent event) 
@@ -268,7 +269,6 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		    // Start keystroke poller
 		    //
 		    m_in.start();
-		    m_in.setKeystrokeListener(m_heartbeatSender);
 
 			// Try to login
 			//
@@ -300,12 +300,14 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
     		    m_out.println();
     			m_out.println(e.formatMessage(this));
     			m_out.println();
+    			return;
 			}
 			catch(LoginNotAllowedException e)
 			{
     		    m_out.println();
     			m_out.println(e.formatMessage(this));
     			m_out.println();
+    			return;
 			}
 			catch(InterruptedException e)
 			{
@@ -503,7 +505,9 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			
 			// Start heartbeat sender
 			//
+			m_heartbeatSender = new HeartbeatSender();
 			m_heartbeatSender.start();
+			m_in.setKeystrokeListener(m_heartbeatSender);
 			
 			// MAIN SCREEN TURN ON!
 			//		
@@ -511,7 +515,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			m_out.println();
 			m_out.println();
 			m_out.println(m_formatter.format("login.goodbye", m_session.getLoggedInUser().getName()));			
-			}
+		}
 		finally
 		{
 			// Shut down...
@@ -551,13 +555,20 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	        ticket = this.waitForTicket();
 	    else
 	    {
-			m_out.print(m_formatter.format("login.user"));
-			m_out.flush();
-			userid = m_in.readLine();
-			Logger.info(this, "Trying to login as: " + userid);
-			m_out.print(m_formatter.format("login.password"));
-			m_out.flush();
-			password = m_in.readPassword();
+	        try
+	        {
+				m_out.print(m_formatter.format("login.user"));
+				m_out.flush();
+				userid = m_in.readLine(null, null, 100, LineEditor.FLAG_ECHO);
+				Logger.info(this, "Trying to login as: " + userid);
+				m_out.print(m_formatter.format("login.password"));
+				m_out.flush();
+				password = m_in.readLine(null, null, 100, 0);
+	        }
+	        catch(LineEditorException e)
+	        {
+	            throw new RuntimeException("This should not happen!", e);
+	        }
 	    }
 		
 		for(;;)
@@ -610,7 +621,8 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	public synchronized void shutdown()
 	throws UnexpectedException
 	{
-	    m_heartbeatSender.interrupt();
+	    if(m_heartbeatSender != null)
+	        m_heartbeatSender.interrupt();
 		m_in.shutdown();
 		if(m_session != null)
 		{
@@ -1205,11 +1217,12 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	
 	public void onEvent(NewMessageEvent event)
 	{
+	    // Handled in command loop
 	}
 	
 	public void onEvent(MessageDeletedEvent event)
 	{
-		//
+	    // Handled in command loop
 	}
 	
 	public void onEvent(TicketDeliveredEvent event)

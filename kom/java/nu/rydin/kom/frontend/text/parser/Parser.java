@@ -73,10 +73,6 @@ public class Parser
         /** List[CommandLinePart.Match] */
         private List m_matches = new LinkedList();
 
-        /**
-         * @param command
-         * @param matches
-         */
         public CommandToMatches(Command command)
         {
             m_command = command;
@@ -153,10 +149,6 @@ public class Parser
         }
     }
 
-    /**
-     * @param commands
-     * @param primaryCommands
-     */
     private Parser(List commands)
     {
         m_commands = new Command[commands.size()];

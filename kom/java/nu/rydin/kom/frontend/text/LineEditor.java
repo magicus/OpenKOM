@@ -46,16 +46,7 @@ public class LineEditor implements NewlineListener
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
-	private static final char CTRL_A			= 1;
-	private static final char CTRL_C			= 3;
-	private static final char CTRL_E			= 5;
-	private static final char CTRL_U			= 21;
-	private static final char CTRL_W			= 23;
-	private static final char CTRL_X			= 24;
-	private static final char DEL				= 127;
-	private static final char ESC				= 27;
-	private static final char NEWLINE			= 14;
-	private static final char RET				= 18;
+	private static final char TAB				= 8;
 	private static final char SPACE				= 32;
 	
 	private static final int TOKEN_UP			= 1;
@@ -72,6 +63,12 @@ public class LineEditor implements NewlineListener
 	private static final int TOKEN_NEXT			= 12;
 	private static final int TOKEN_ABORT		= 13;
 	private static final int TOKEN_SKIP			= 100;
+	
+	/**
+	 * Maximum number of keystrokes on one line before session
+	 * shutdown. For protection against DOS-attacks.
+	 */
+	private static final int SHUTDOWN_LIMIT		= 10000;
 	
 	private static final KeystrokeTokenizerDefinition s_tokenizerDef;
 	
@@ -332,13 +329,13 @@ public class LineEditor implements NewlineListener
 	/**
 	 * Thread polling for system events, such as new messages and
 	 * chat messages.
-	 */
-	private final EventPoller m_eventPoller = new EventPoller();
+	 */ 
+	private EventPoller m_eventPoller;
 	
 	/**
 	 * Thread polling for keystrokes.
 	 */
-	private final KeystrokePoller m_keystrokePoller = new KeystrokePoller();
+	private KeystrokePoller m_keystrokePoller;
 	
 	/**
 	 * Incoming events. Low priority events that can't be handled 
@@ -395,6 +392,7 @@ public class LineEditor implements NewlineListener
 	 */
 	public void start()
 	{
+	    m_keystrokePoller = new KeystrokePoller();
 	    m_keystrokePoller.start();
 	}
 	
@@ -404,6 +402,7 @@ public class LineEditor implements NewlineListener
 			throw new IllegalStateException("Already have a session!");
 		m_session = session;
 		m_keystrokePoller.setSession(session);
+		m_eventPoller = new EventPoller();
 		m_eventPoller.setSession(session);
 		
 		// Set priority somewhere between the normal and the maximum
@@ -720,6 +719,7 @@ public class LineEditor implements NewlineListener
 			cursorpos = defaultString.length();
 		}
 		
+		int count = 0;
 		boolean editing = true;
 		while(editing)
 		{
@@ -734,6 +734,12 @@ public class LineEditor implements NewlineListener
 			        try
 			        {
 			            ch = this.innerReadCharacter(flags);
+			            if(++count > SHUTDOWN_LIMIT)
+			            {
+			                m_out.println();
+			                m_out.println("Suspected DOS-attack!!! Shutting down!");
+			                throw new InterruptedException();
+			            }
 			            break;
 			        }
 			        catch(EventDeliveredException e)
@@ -918,19 +924,16 @@ public class LineEditor implements NewlineListener
 							buffer.insert(cursorpos++, ch);
 							throw new LineOverflowException(buffer.toString());
 						}
-						else
-						{
-							// Don't break. Just make noise and ignore keystroke
-							//
-							m_out.write(BELL);
-							m_out.flush();
-							break; 
-						}
+						// Don't break. Just make noise and ignore keystroke
+						//
+						m_out.write(BELL);
+						m_out.flush();
+						break; 
 					}
 					
 					// Store the character. But only if it's printable
 					//
-					if(ch < 32)
+					if(ch < 32 && ch != TAB)
 					    continue;
 					buffer.insert(cursorpos++, ch);
 						
@@ -987,8 +990,12 @@ public class LineEditor implements NewlineListener
 	
 	public void shutdown()
 	{
-		m_eventPoller.interrupt();
-		m_keystrokePoller.interrupt();
+	    if(m_eventPoller != null)
+	        m_eventPoller.interrupt();
+		if(m_keystrokePoller != null)
+		    m_keystrokePoller.interrupt();
+		m_eventPoller = null;
+		m_keystrokePoller = null;
 	}
 
 	protected synchronized void handleEvent(Event e)
