@@ -291,7 +291,7 @@ public class Parser
         int i = 0;
         for (Iterator iter = candidates.iterator(); iter.hasNext();)
         {
-            String candidate = (String) iter.next();
+            String candidate = iter.next().toString();
             String cookedCandidate = NameUtils.normalizeName(candidate);
             if (NameUtils.match(cookedInput, cookedCandidate, allowPrefixes))
             {
