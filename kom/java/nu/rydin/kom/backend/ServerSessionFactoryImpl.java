@@ -171,19 +171,22 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
         }
 		finally
 		{
-			if(!committed && da != null)
+			if(da != null)
 			{
-                try
-                {
-                    da.rollback();
-                } 
-				catch (UnexpectedException e)
-                {
-				    // This is probably bad if it happens.
-				    throw new ModuleException(e);
-                }
+			    if (!committed)
+			    {
+	                try
+	                {
+	                    da.rollback();
+	                } 
+					catch (UnexpectedException e)
+	                {
+					    // This is probably bad if it happens.
+					    throw new ModuleException(e);
+	                }
+			    }
+			    DataAccessPool.instance().returnDataAccess(da);
 			}
-			DataAccessPool.instance().returnDataAccess(da);
 		}
 	    
 	    m_sessionManager = new SessionManager();
