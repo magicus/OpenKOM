@@ -477,6 +477,10 @@ public class MessageManager
 			//
 			long id = ((com.mysql.jdbc.PreparedStatement) m_addMessageStmt).getLastInsertID();
 			
+			// Create message occurrence record
+			//
+			MessageOccurrence result = this.createMessageOccurrence(id, ACTION_CREATED, author, authorName, conference); 
+			
 			//Duplicate into search table
 			//
 			m_addMessageSearchStmt.clearParameters();
@@ -485,9 +489,7 @@ public class MessageManager
 			m_addMessageSearchStmt.setString(3, body);
 			m_addMessageSearchStmt.executeUpdate();
 			
-			// Create message occurrence record
-			//
-			return this.createMessageOccurrence(id, ACTION_CREATED, author, authorName, conference);
+			return result; 
 		}
 		finally
 		{
