@@ -89,7 +89,7 @@ public class ChangeTimeZone extends AbstractCommand
         String answer = in.readLine();
         try
         {
-            return matches[Integer.parseInt(answer)];
+            return matches[Integer.parseInt(answer)-1];
         }
         catch(NumberFormatException e)
         {
