@@ -6,10 +6,12 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
@@ -355,6 +357,40 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 				
 			userInfo = null; // Don't need it anymore... Let it be GC'd
 			
+			// Run the login script (if any)
+			//
+			try
+			{
+				String script = null;
+				try
+				{
+				    script = m_session.readFile(this.getLoggedInUserId(), ".login.cmd");
+				}
+				catch(ObjectNotFoundException e)
+				{
+				    // No login script. Not much to do
+				    //
+				}
+				if(script != null)
+				{
+				    this.getDisplayController().normal();
+				    this.executeScript(script);
+				}
+			}
+			catch(KOMException e)
+			{
+			    m_out.println(e.formatMessage(this));
+			    m_out.println();
+			}
+			catch(IOException e)
+			{
+			    e.printStackTrace(m_out);
+			}
+			catch(InterruptedException e)
+			{
+			    return;
+			}
+			
 			// Start heartbeat sender
 			//
 			m_heartbeatSender.start();
@@ -443,7 +479,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			// Everything seems fine! We're in!
 			//
 			m_in.setSession(m_session);
-			m_loggedIn = true;
+			m_loggedIn = true;			
 			return user;
 		}
 	}
@@ -458,6 +494,27 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			m_session.close();
 			m_session = null;
 		}
+	}
+	
+	public void executeScript(String script)
+	throws IOException, InterruptedException, KOMException
+	{
+	    this.executeScript(new BufferedReader(new StringReader(script)));
+	}
+	
+	public void executeScript(BufferedReader rdr)
+	throws IOException, InterruptedException, KOMException
+	{
+	    String line;
+	    while((line = rdr.readLine()) != null)
+	    {
+	        line = line.trim();
+	        if(line.length() == 0 || line.charAt(0) == '#')
+	            continue;
+		    ExecutableCommand executableCommand = m_parser.parse(this, line);
+	        executableCommand.executeBatch(this);	        
+	        m_out.println();
+	    }
 	}
 		
 	public void mainloop()

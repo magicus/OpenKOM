@@ -6,11 +6,14 @@
  */
 package nu.rydin.kom.frontend.text.editor;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Date;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.BadParameterException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -188,4 +191,17 @@ public class EditorContext implements Context
 	{
 	    return m_underlying.resolveMessageSpecifier(specifier);
 	}
+	
+	public void executeScript(String script)
+	throws IOException, InterruptedException, KOMException
+	{
+	    m_underlying.executeScript(script);
+	}
+	
+	public void executeScript(BufferedReader rdr)
+	throws IOException, InterruptedException, KOMException
+	{
+	    m_underlying.executeScript(rdr);
+	}
+
 }

@@ -42,26 +42,39 @@ public class Parser
 	/** Map[Command->CommandLinePart[]] */
 	private Map m_commandToPartsMap = new HashMap();
 
-	public static class ExecutableCommand {
+	public static class ExecutableCommand 
+	{
 	    private Object[] m_parameterArray;
 	    private Command m_command;
 	    
-        public ExecutableCommand(Command command, Object[] parameterArray) {
+        public ExecutableCommand(Command command, Object[] parameterArray) 
+        {
             m_command = command;
             m_parameterArray = parameterArray;
         }
         
-        public Command getCommand() {
+        public Command getCommand() 
+        {
             return m_command;
         }
-        public Object[] getParameterArray() {
+        
+        public Object[] getParameterArray() 
+        {
             return m_parameterArray;
         }
         
-        public void execute(Context context) throws KOMException, IOException, InterruptedException {
+        public void execute(Context context) 
+        throws KOMException, IOException, InterruptedException 
+        {
     		m_command.printPreamble(context.getOut());
     	    m_command.execute(context, m_parameterArray);
     		m_command.printPostamble(context.getOut());
+        }
+        
+        public void executeBatch(Context context)
+        throws KOMException, IOException, InterruptedException
+        {
+            m_command.execute(context, m_parameterArray);
         }
 	}
 	

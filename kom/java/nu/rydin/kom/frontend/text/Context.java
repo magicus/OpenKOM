@@ -6,12 +6,15 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Date;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.BadParameterException;
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -162,4 +165,27 @@ public interface Context extends TerminalSettingsProvider
 	 */
 	public MessageHeader resolveMessageSpecifier(String specifier)
 	throws MessageNotFoundException, AuthorizationException, UnexpectedException, BadParameterException;
+	
+	/**
+	 * Runs script file or OpenKOM commands.
+	 * 
+	 * @param script The contents of the script file.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws KOMException
+	 */
+	public void executeScript(String script)
+	throws IOException, InterruptedException, KOMException;
+	
+	/**
+	 * Runs script file or OpenKOM commands.
+	 * 
+	 * @param rdr A BufferedReader reading the commands.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws KOMException
+	 */
+	public void executeScript(BufferedReader rdr)
+	throws IOException, InterruptedException, KOMException;
+
 }

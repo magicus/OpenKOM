@@ -42,8 +42,10 @@ public class ListNews extends AbstractCommand
 		}
 		if(total > 0)
 		{
-			out.println();
+		    out.println();
 			out.println(formatter.format("list.news.total", new Integer(total)));
 		}
+		else
+		    out.println(formatter.format("list.news.no.news"));
 	}
 }
