@@ -19,7 +19,6 @@ import nu.rydin.kom.backend.SQLUtils;
 import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.GlobalMessageSearchResult;
-import nu.rydin.kom.structs.LocalMessageHeader;
 import nu.rydin.kom.structs.LocalMessageSearchResult;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;
@@ -64,11 +63,12 @@ public class MessageManager
 	private final PreparedStatement m_findLastOccurrenceInConferenceWithAttrStmt;
 	private final PreparedStatement m_getLatestMagicMessageStmt;
 	private final PreparedStatement m_updateConferenceLasttext;
-    private final PreparedStatement m_searchMessagesLocally;
+	private final PreparedStatement m_searchMessagesLocally;
     private final PreparedStatement m_grepMessagesLocally;
 	private final PreparedStatement m_listAllMessagesLocally;
     private final PreparedStatement m_listMessagesLocallyByAuthor;
     private final PreparedStatement m_listMessagesGloballyByAuthor;
+    private final PreparedStatement m_countStmt;
 	
 	private final Connection m_conn; 
 	
@@ -182,13 +182,18 @@ public class MessageManager
 			 "where mo.conference = ? and ma.kind = ? and ma.value = ? " +
 			 "order by mo.message desc " +
 			 "limit 1 offset 0");
-		
+				
 		m_searchMessagesLocally = conn.prepareStatement(
 				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
 				"FROM messagesearch ms, messageoccurrences mo " +
 				"WHERE ms.id = mo.message AND mo.conference = ? AND MATCH(subject, body) AGAINST (? IN BOOLEAN MODE) " +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
+		
+		// Selecting from messagesearch is a couple of 1000 times faster. InnoDB...
+		//
+		m_countStmt = conn.prepareStatement(
+		        "SELECT COUNT(*) FROM messagesearch");
 
 		m_grepMessagesLocally = conn.prepareStatement(
 				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
@@ -213,12 +218,10 @@ public class MessageManager
 		        "ORDER BY localnum DESC " +
 		        "LIMIT ? OFFSET ?");
 		
-		//FIXME Skrolle Check access!
 		m_listMessagesGloballyByAuthor = conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.conference, mo.user, mo.user_name, m.subject " +
-		        "FROM messages m JOIN messageoccurrences mo " +
-		        "ON m.id = mo.message " +
-		        "WHERE mo.user = ? " +
+		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject " +
+		        "FROM messages m, messageoccurrences mo, names n " +
+		        "WHERE m.id = mo.message AND n.id = mo.conference AND mo.user = ? AND n.id = mo.conference " +
 		        "ORDER BY mo.action_ts DESC " +
 		        "LIMIT ? OFFSET ?");
 	}
@@ -272,6 +275,8 @@ public class MessageManager
 			m_findLastOccurrenceInConferenceWithAttrStmt.close();
 		if(m_getLatestMagicMessageStmt != null)
 			m_getLatestMagicMessageStmt.close();
+		if(m_countStmt != null)
+		    m_countStmt.close();
 	}
 	
 	public void finalize()
@@ -1078,8 +1083,8 @@ public class MessageManager
             l.add(new LocalMessageSearchResult(
                     rs.getLong(1), // globalid
                     rs.getInt(2), // localid
-                    rs.getLong(3), // authorid
-                    new Name(rs.getString(4), Visibilities.PUBLIC), // authorname
+                    new NameAssociation(rs.getLong(3), // authorid
+                    new Name(rs.getString(4), Visibilities.PUBLIC)), // authorname
                     rs.getString(5)) // subject	
                     );
         }
@@ -1098,8 +1103,8 @@ public class MessageManager
         
         return innerGlobalSearch(this.m_listMessagesGloballyByAuthor);        
     }
-	
-	private GlobalMessageSearchResult[] innerGlobalSearch(PreparedStatement globalSearchStatement) throws SQLException
+    
+    private GlobalMessageSearchResult[] innerGlobalSearch(PreparedStatement globalSearchStatement) throws SQLException
 	{
         ResultSet rs = globalSearchStatement.executeQuery();
         List l = new ArrayList();
@@ -1108,14 +1113,32 @@ public class MessageManager
             l.add(new GlobalMessageSearchResult(
                     rs.getLong(1), // globalid
                     rs.getInt(2), // localid
-                    rs.getLong(3), // conferenceid
-                    rs.getLong(4), // authorid
-                    new Name(rs.getString(5), Visibilities.PUBLIC), // authorname
-                    rs.getString(6)) // subject	
+                    new NameAssociation(rs.getLong(3), // conferenceid
+                            new Name(rs.getString(4), rs.getShort(5))),
+                    new NameAssociation(rs.getLong(6), // authorid
+                            new Name(rs.getString(7), Visibilities.PUBLIC)), // authorname
+                    rs.getString(8)) // subject	
                     );
         }
         GlobalMessageSearchResult[] lmsr = new GlobalMessageSearchResult[l.size()];
         l.toArray(lmsr);
         return lmsr;
 	}
+    
+    public long countMessages()
+    throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            rs = m_countStmt.executeQuery();
+            rs.first();
+            return rs.getLong(1);
+        }
+        finally
+        {
+            if(rs != null)
+                rs.close();
+        }
+    }
 }

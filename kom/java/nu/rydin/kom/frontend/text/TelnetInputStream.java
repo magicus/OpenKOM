@@ -41,6 +41,7 @@ public class TelnetInputStream extends InputStream
 	private static final byte CHAR_DONT		= -2;
 	private static final byte CHAR_IAC		= -1;
 	
+	private static final int OPT_BINARY		= 0;
 	private static final int OPT_ECHO		= 1;
 	private static final int OPT_SUPPRESS_GA= 3;
 	private static final int OPT_NAOCRD		= 10;
@@ -70,6 +71,10 @@ public class TelnetInputStream extends InputStream
 	{
 		m_input 	= input;
 		m_output 	= output; 
+		
+		// We do use binary mode
+		//
+		this.sendOption(CHAR_DO, OPT_BINARY);
 		
 		// We will echo
 		//

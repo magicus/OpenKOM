@@ -12,6 +12,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import nu.rydin.kom.structs.CacheInformation;
+
 import com.frameworx.util.MRUCache;
 
 /**
@@ -23,6 +25,10 @@ public class KOMCache extends MRUCache
 	
 	private Map m_dirtyData = new HashMap();
 	
+	private long m_numAccesses = 0;
+	
+	private long m_numHits = 0;
+	
 	public KOMCache(int maxSize)
 	{
 		super(maxSize);
@@ -31,6 +37,30 @@ public class KOMCache extends MRUCache
 	public KOMCache(int maxSize, EvictionPolicy evictionPolicy)
 	{
 		super(maxSize, evictionPolicy);
+	}
+	
+	public Object get(Object key)
+	{
+	    Object answer = super.get(key);
+	    ++m_numAccesses;
+	    if(answer != null)
+	        ++m_numHits;
+	    return answer;
+	}
+	
+	public long getNumAccesses()
+	{
+	    return m_numAccesses;
+	}
+	
+	public long getNumHits()
+	{
+	    return m_numHits;
+	}
+	
+	public CacheInformation getStatistics()
+	{
+	    return new CacheInformation(m_numAccesses, m_numHits);
 	}
 	
 	public synchronized void registerInvalidation(Object key)

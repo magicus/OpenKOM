@@ -48,6 +48,7 @@ public class UserManager
 	private final PreparedStatement m_updateLastloginStmt;
 	private final PreparedStatement m_updateTimeZoneStmt;
 	private final PreparedStatement m_getSysopStmt;
+	private final PreparedStatement m_countStmt;
 	
 	private final NameManager m_nameManager;
 	
@@ -88,6 +89,8 @@ public class UserManager
 		    "UPDATE users SET timezone = ? WHERE id = ?");
 		m_getSysopStmt = conn.prepareStatement(
 		    "SELECT id FROM users WHERE userid = 'sysop'");
+		m_countStmt = conn.prepareStatement(
+		    "SELECT COUNT(*) from users");
 	}
 	
 	/**
@@ -120,6 +123,8 @@ public class UserManager
 		    m_updateTimeZoneStmt.close();
 		if(m_getSysopStmt != null)
 		    m_getSysopStmt.close();
+		if(m_countStmt != null)
+		    m_countStmt.close();
 	}
 	
 	/**
@@ -537,6 +542,23 @@ public class UserManager
 	        rs = m_getSysopStmt.executeQuery();
 	        if(!rs.next())
 	            throw new ObjectNotFoundException("Sysop not found!!!");
+	        return rs.getLong(1);
+	    }
+	    finally
+	    {
+	        if(rs != null)
+	            rs.close();
+	    }
+	}
+	
+	public long countUsers()
+	throws SQLException
+	{
+	    ResultSet rs = null;
+	    try
+	    {
+	        rs = m_countStmt.executeQuery();
+	        rs.first();
 	        return rs.getLong(1);
 	    }
 	    finally

@@ -15,30 +15,22 @@ public abstract class MessageSearchResult implements Serializable
 {
     private final long m_globalid;
     protected final int m_localid;
-    private final long m_authorid;
-    private final Name m_authorname;
+    private final NameAssociation m_author;
     private final String m_subject;
 
-    public MessageSearchResult(long globalid, int localid, long authorid, Name authorname,
+    public MessageSearchResult(long globalid, int localid, NameAssociation author,
             String subject)
     {
         m_globalid = globalid;
         m_localid = localid;
-        m_authorid = authorid;
-        m_authorname = authorname;
+        m_author = author;
         m_subject = subject;
     }
 
-    public long getAuthorId()
+    public NameAssociation getAuthor()
     {
-        return m_authorid;
+        return m_author;
     }
-
-    public Name getAuthorName()
-    {
-        return m_authorname;
-    }
-
     public long getGlobalId()
     {
         return m_globalid;

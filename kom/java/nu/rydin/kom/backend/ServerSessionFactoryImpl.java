@@ -15,12 +15,12 @@ import java.sql.SQLException;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
-import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
 import nu.rydin.kom.exceptions.AlreadyLoggedInException;
 import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.LoginProhibitedException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.structs.UserInfo;
@@ -46,57 +46,16 @@ public class ServerSessionFactoryImpl
 	    // Make sure the DataAccess pool is initialized.
 	    //
 	    DataAccessPool.instance();
-	}
+	}	
 	
-	public void requestShutdown(String user, String password)
+	public void killSession(String user, String password)
 	throws AuthenticationException, UnexpectedException, InterruptedException
 	{
-		// Authenticate user
-		//
-		long id = this.authenticate(user, password);
-		ServerSession session = m_sessionManager.getSession(id);
-		
-		// Not logged in? Nothing to shut down. Fail silently.
-		//
-		if(session == null)
-			return;
-			
-		// Post shutdown event
-		//
-		session.postEvent(new SessionShutdownEvent());
-		
-		// Wait for session to terminate
-		//
-		int top = ServerSettings.getSessionShutdownRetries();
-		long delay = ServerSettings.getSessionShutdownDelay();
-		while(top-- > 0)
-		{
-			// Has it disappeared yet?
-			//
-			if(m_sessionManager.getSession(id) == null)
-				return;
-			Thread.sleep(delay);
-		}
-		
-		// Bummer! The session did not shut down when we asked
-		// it nicely. Mark it as invalid so that the next request
-		// to the server is guaranteed to fail.
-		//
-		ServerSessionImpl ssi = (ServerSessionImpl) m_sessionManager.getSession(id);
-		
-		// Did it dissapear while we were fiddling around? 
-		// Well... That's exactly what we want!
-		// Note that it may also disappear while we're marking
-		// it as invalid, but since that race-condition is completely
-		// harmless, we don't waste time synchronizing.
-		//
-		if(ssi == null)
-			return;
-		ssi.markAsInvalid();
+	    m_sessionManager.killSession(this.authenticate(user, password));
 	}
 	
 	public ServerSession login(String user, String password)
-	throws AuthenticationException, AlreadyLoggedInException, UnexpectedException
+	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
 	{
 		boolean committed = false;
 		DataAccess da = DataAccessPool.instance().getDataAccess();
@@ -118,6 +77,12 @@ public class ServerSessionFactoryImpl
 			// Authenticate user
 			//
 			long id = um.authenticate(user, password);
+			UserInfo ui = um.loadUser(id);
+			
+			// Login prohibited? Allow login only if sysop
+			//
+			if(!m_sessionManager.canLogin() && (ui.getRights() & UserPermissions.ADMIN) == 0)
+			    throw new LoginProhibitedException();
 			
 			// Was the user already logged in?
 			//
@@ -133,7 +98,6 @@ public class ServerSessionFactoryImpl
 			// Successfully logged in!
 			// Broadcast message.
 			//
-			UserInfo ui = um.loadUser(id);
 			m_sessionManager.broadcastEvent(new UserAttendanceEvent(id, ui.getName(), UserAttendanceEvent.LOGIN));
 
 			//  Create transactional wrapper and return 

@@ -77,4 +77,9 @@ nu.rydin.kom.frontend.text.commands.DeleteProfile
 nu.rydin.kom.frontend.text.commands.ListCommands
 nu.rydin.kom.frontend.text.commands.ShowLicense
 nu.rydin.kom.frontend.text.commands.ChangeWelcomeMessage
+nu.rydin.kom.frontend.text.commands.KillSession
+nu.rydin.kom.frontend.text.commands.ProhibitLogin
+nu.rydin.kom.frontend.text.commands.AllowLogin
+nu.rydin.kom.frontend.text.commands.ShowSystemInfo
+nu.rydin.kom.frontend.text.commands.EnterSingleUserMode
 nu.rydin.kom.frontend.text.commands.Help

@@ -11,17 +11,17 @@ package nu.rydin.kom.structs;
  */
 public class GlobalMessageSearchResult extends MessageSearchResult
 {
-    private final long m_conferenceid;
+    private final NameAssociation m_conference;
 
-    public GlobalMessageSearchResult(long globalid, int localid, long conferenceid, long authorid,
-            Name authorname, String subject)
+    public GlobalMessageSearchResult(long globalid, int localid, NameAssociation conference, 
+            NameAssociation author, String subject)
     {
-        super(globalid, localid, authorid, authorname, subject);
-        m_conferenceid = conferenceid;
+        super(globalid, localid, author, subject);
+        m_conference = conference;
     }
     
-    public long getConferenceid()
+    public NameAssociation getConference()
     {
-        return m_conferenceid;
+        return m_conference;
     }
 }

@@ -1292,4 +1292,47 @@ public interface ServerSession
      */
     public HeartbeatListener getHeartbeatListener();
 
+    /**
+     * Kills a user session. Tries to request the frontend to shut down
+     * the connection to the user.
+     * 
+     * @param userId The user who's session we want to shutdown
+     * @throws AuthenticationException
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public void killSession(long userId)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Kills all user sessions.
+     * 
+     * @throws AuthorizationException
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public void killAllSessions()
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Prohibits logins for users other than sysop.
+     * 
+     * @throws AuthenticationException
+     */
+    public void prohibitLogin()
+    throws AuthorizationException;
+
+    /**
+     * Allows login for everyone.
+     * 
+     * @throws AuthenticationException
+     */
+    public void allowLogin()
+    throws AuthorizationException;
+    
+    /**
+     * Returns information and statistics about the system.
+     */
+    public SystemInformation getSystemInformation()
+    throws UnexpectedException;
 }

@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -39,7 +37,7 @@ public abstract class SearchLocalCommand extends SearchCommand
                 String.valueOf(lmsr.getLocalId()), LOCALID_COL_WIDTH);
         out.print(" ");
         PrintUtils.printLeftJustified(out, 
-                context.formatObjectName(lmsr.getAuthorName(), lmsr.getAuthorId()), AUTHOR_COL_WIDTH);
+                context.formatObjectName(lmsr.getAuthor()), AUTHOR_COL_WIDTH);
         out.print(" ");
         PrintUtils.printLeftJustified(out, 
                 lmsr.getSubject(), SUBJECT_COL_WIDTH);

@@ -11,6 +11,8 @@ import java.util.LinkedList;
 
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
+import nu.rydin.kom.events.SessionShutdownEvent;
+import nu.rydin.kom.exceptions.UnexpectedException;
 
 /**
  * Holds the currently active sessions.
@@ -99,9 +101,72 @@ public class SessionManager
 	
 	private Broadcaster m_broadcaster = new Broadcaster();
 	
+	private boolean m_allowLogin;
+	
 	public SessionManager()
 	{
 		m_broadcaster.start();
+		m_allowLogin = true;
+	}
+	
+	public boolean canLogin()
+	{
+	    return m_allowLogin;
+	}
+	
+	public void allowLogin()
+	{
+	    m_allowLogin = true;
+	}
+	
+	public void prohibitLogin()
+	{
+	    m_allowLogin = false;
+	}
+	
+	public void killSession(long sessionId)
+	throws UnexpectedException, InterruptedException
+	{
+		ServerSession session = this.getSession(sessionId);
+		
+		// Not logged in? Nothing to shut down. Fail silently.
+		//
+		if(session == null)
+			return;
+			
+		// Post shutdown event
+		//
+		session.postEvent(new SessionShutdownEvent());
+		
+		// Wait for session to terminate
+		//
+		int top = ServerSettings.getSessionShutdownRetries();
+		long delay = ServerSettings.getSessionShutdownDelay();
+		while(top-- > 0)
+		{
+			// Has it disappeared yet?
+			//
+			if(this.getSession(sessionId) == null)
+				return;
+			Thread.sleep(delay);
+		}
+		
+		// Bummer! The session did not shut down when we asked
+		// it nicely. Mark it as invalid so that the next request
+		// to the server is guaranteed to fail.
+		//
+		ServerSessionImpl ssi = (ServerSessionImpl) this.getSession(sessionId);
+		this.unRegisterSession(ssi);
+		
+		// Did it dissapear while we were fiddling around? 
+		// Well... That's exactly what we want!
+		// Note that it may also disappear while we're marking
+		// it as invalid, but since that race-condition is completely
+		// harmless, we don't waste time synchronizing.
+		//
+		if(ssi == null)
+			return;
+		ssi.markAsInvalid();
 	}
 		
 	/**

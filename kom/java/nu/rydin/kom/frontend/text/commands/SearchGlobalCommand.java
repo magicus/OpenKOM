@@ -6,14 +6,11 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.GlobalMessageSearchResult;
-import nu.rydin.kom.structs.LocalMessageSearchResult;
 import nu.rydin.kom.structs.MessageSearchResult;
 import nu.rydin.kom.utils.HeaderPrinter;
 import nu.rydin.kom.utils.PrintUtils;
@@ -46,7 +43,7 @@ public abstract class SearchGlobalCommand extends SearchCommand
 		out.print(" ");
 		//FIXME Skrolle Must print conference name, not authorname. :-)
 		PrintUtils.printLeftJustified(out, 
-		        context.formatObjectName(gmsr.getAuthorName(), gmsr.getConferenceid()), CONFERENCE_COL_WIDTH);
+		        context.formatObjectName(gmsr.getConference()), CONFERENCE_COL_WIDTH);
 		out.print(" ");
 		PrintUtils.printLeftJustified(out, 
 		        gmsr.getSubject(), SUBJECT_COL_WIDTH);

@@ -37,7 +37,7 @@ import nu.rydin.kom.utils.Logger;
 public class ClientSession implements Runnable, Context, EventTarget, TerminalSizeListener
 {
 	private static final int MAX_LOGIN_RETRIES = 3;
-	private static final String DEFAULT_CHARSET = "US-ASCII";
+	private static final String DEFAULT_CHARSET = "ISO-8859-1";
 	
 	private LineEditor m_in;
 	private KOMWriter m_out;
@@ -221,7 +221,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		{
 			// There're NO WAY we don't support US-ASCII!
 			//
-			throw new UnexpectedException(-1, "US-ASCII not supported. Your JVM is broken!");
+			throw new UnexpectedException(-1, DEFAULT_CHARSET + " not supported. Your JVM is broken!");
 		}		
 	}
 	 
@@ -253,6 +253,10 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 						new PrintStream(m_rawOut).println(m_formatter.format("login.failure"));
 					}
 				}
+			}
+			catch(LoginProhibitedException e)
+			{
+			    m_out.println(e.getMessage());
 			}
 			catch(LoginNotAllowedException e)
 			{
@@ -482,7 +486,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 
 	protected UserInfo login()
 	throws AuthenticationException, LoginNotAllowedException, UnexpectedException, IOException, 
-	InterruptedException, OperationInterruptedException
+	InterruptedException, OperationInterruptedException, LoginProhibitedException
 	{
 		// Collect information
 		//
@@ -519,7 +523,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 					
 				// Ask server to shut down the other session
 				//
-				ssf.requestShutdown(userid, password);
+				ssf.killSession(userid, password);
 				
 				// Try to login again
 				//

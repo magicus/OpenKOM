@@ -45,6 +45,7 @@ public class ConferenceManager // extends NameManager
 	private final PreparedStatement m_isMailboxStmt;
 	private final PreparedStatement m_listByDateStmt;
 	private final PreparedStatement m_listByNameStmt;
+	private final PreparedStatement m_countStmt;
 	
 	public ConferenceManager(Connection conn, NameManager nameManager)
 	throws SQLException
@@ -76,6 +77,7 @@ public class ConferenceManager // extends NameManager
 		     "FROM conferences c, names n " +
 		     "WHERE n.id = c.id AND n.kind = " + NameManager.CONFERENCE_KIND + ' '+
 		     "ORDER BY n.norm_name");
+		m_countStmt = conn.prepareStatement("SELECT count(*) FROM conferences");
 	}
 	
 	public void close()
@@ -99,7 +101,9 @@ public class ConferenceManager // extends NameManager
 			if(m_listByDateStmt != null)
 			    m_listByDateStmt.close();
 			if(m_listByNameStmt != null)
-			    m_listByNameStmt.close();			
+			    m_listByNameStmt.close();
+			if(m_countStmt != null)
+			    m_countStmt.close();
 		}
 		catch(SQLException e)
 		{
@@ -362,6 +366,23 @@ public class ConferenceManager // extends NameManager
 				rs.close();
 			}
 		}	    	    
+	}
+	
+	public long countCounferences()
+	throws SQLException
+	{
+	    ResultSet rs = null;
+	    try
+	    {
+	        rs = m_countStmt.executeQuery();
+	        rs.first();
+	        return rs.getLong(1);
+	    }
+	    finally
+	    {
+	        if(rs != null)
+	            rs.close();
+	    }
 	}
 	
 	public ConferenceListItem[] listByName()

@@ -2136,6 +2136,67 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    return new HeartbeatListenerImpl();
 	}
 	
+    public void killSession(long userId)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+    {
+        // We have to be sysops to do this!
+        //
+        this.checkRights(UserPermissions.ADMIN);
+        
+        // SET THEM UP THE BOMB! FOR GREAT FREEDOM!
+        //
+        try
+        {
+            m_sessions.killSession(userId);
+        }
+        catch(InterruptedException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }
+    }
+    
+    public void killAllSessions()
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+    {
+        // We have to be sysops to do this!
+        //
+        this.checkRights(UserPermissions.ADMIN);
+
+        // Disallow new logins
+        //
+        this.prohibitLogin();
+        
+        // SET UP US THE BIG BOMB!! 
+        // Kill all sessions (except this one)
+        //
+        ServerSession[] sessions = m_sessions.listSessions();
+        int top = sessions.length;
+        for(int idx = 0; idx < top; ++idx)
+        {
+            ServerSession each = sessions[idx];
+            if(each != this)
+                this.killSession(each.getLoggedInUserId());
+        }
+    }
+    
+    public void prohibitLogin()
+    throws AuthorizationException
+    {
+        // We have to be sysops to do this!
+        //
+        this.checkRights(UserPermissions.ADMIN);
+        m_sessions.prohibitLogin();
+    }
+
+    public void allowLogin()
+    throws AuthorizationException
+    {
+        // We have to be sysops to do this!
+        //
+        this.checkRights(UserPermissions.ADMIN);
+        m_sessions.allowLogin();
+    }
+    
     public UserLogItem[] listUserLog(Timestamp start, Timestamp end, int offset, int length)
     throws UnexpectedException
     {
@@ -2783,12 +2844,16 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     {
 		try
 		{
-			return m_da.getMessageManager().listMessagesGloballyByAuthor(user, offset, length);
+			return this.censorMessages(m_da.getMessageManager().listMessagesGloballyByAuthor(user, offset, length));
 		}
 		catch (SQLException e)
 		{
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
 		}
+		catch (ObjectNotFoundException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}		
     }
 	
 	public MessageHeader getMessageHeader(long globalId)
@@ -2927,11 +2992,28 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}		
 	}
-    
+	
+	public SystemInformation getSystemInformation()
+	throws UnexpectedException
+	{
+	    try
+	    {
+		    CacheManager cm = CacheManager.instance();
+		    return new SystemInformation(m_sessions.canLogin(), cm.getNameCache().getStatistics(),
+		            cm.getUserCache().getStatistics(), cm.getConferenceCache().getStatistics(),
+		            m_da.getUserManager().countUsers(), m_da.getConferenceManager().countCounferences(),
+		            m_da.getMessageManager().countMessages());
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException(this.getLoggedInUserId(), e);
+	    }
+	}
+
     public LocalMessageSearchResult[] searchMessagesLocally(long conference, String searchterm, int offset, int length)
     throws UnexpectedException
 	{
-    	try
+		try
 		{
     		return m_da.getMessageManager().searchMessagesLocally(conference, searchterm, offset, length);
 		}
@@ -2984,6 +3066,22 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
     		throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
+    }
+    
+    protected GlobalMessageSearchResult[] censorMessages(GlobalMessageSearchResult[] messages)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        ArrayList list = new ArrayList(messages.length);
+        int top = messages.length;
+        for(int idx = 0; idx < top; ++idx)
+        {
+            GlobalMessageSearchResult each = messages[idx];
+            if(this.hasMessageReadPermissions(each.getGlobalId()))
+                list.add(each);
+        }
+        GlobalMessageSearchResult[] answer = new GlobalMessageSearchResult[list.size()];
+        list.toArray(answer);
+        return answer;
     }
     
     protected NameAssociation[] censorNames(NameAssociation[] names)
