@@ -35,6 +35,7 @@ public class CreateConference extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new RawParameter("create.conference.param.0.ask", true) });
 	}
 	
+	//FIXME Command should be rewritten using better parameter!
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException
 	{
