@@ -135,6 +135,17 @@ public class Parser
             }
         }
 
+        public String getOriginalCommandline()
+        {
+            String result = "";
+            for (int i = 0; i < m_matches.size(); i++)
+            {
+                result += ((Match)m_matches.get(i)).getMatchedString();
+                result += " ";
+            }
+            return result;
+        }
+        
         public String toString()
         {
             return "CommandToMatches:[command=" + m_command + ", matches="
@@ -350,7 +361,7 @@ public class Parser
                         // rest of
                         // the command name parameters.
                         throw new CommandNotFoundException(
-                                new Object[] { "ADD ORIGINAL COMMANDLINE HERE" });
+                                new Object[] { target.getOriginalCommandline() + remainder });
                     } else
                     {
                         // User have entered an invalid parameter. This should
