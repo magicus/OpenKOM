@@ -800,7 +800,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		return this.storeReplyToLocal(msg, this.getCurrentConferenceId(), replyToLocalnum);
 	}
 	
-	public long localToGobal(long conferenceId, int localnum)
+	public long localToGlobal(long conferenceId, int localnum)
 	throws ObjectNotFoundException, UnexpectedException
 	{
 		try
@@ -929,7 +929,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 				throw new AuthorizationException();
 			}
 			MessageManager mm = m_da.getMessageManager();
-			long globId = this.localToGobal(sourceConfId, localNum);
+			long globId = this.localToGlobal(sourceConfId, localNum);
 
 			// Start by creating the new occurrence (TODO: Fix localToGobal misspelling.)
 			// We must retain the message occurrence, as we'll be using it in the broadcast event.

@@ -29,6 +29,8 @@ public class EditorContext implements Context
 	
 	private Buffer m_buffer;
 	
+	private String m_subject;
+	
 	public EditorContext(Context underlying)
 	{
 		m_underlying = underlying;
@@ -80,6 +82,16 @@ public class EditorContext implements Context
 	public long getLoggedInUserId()
 	{
 		return m_underlying.getLoggedInUserId();
+	}
+	
+	public String getSubject()
+	{
+		return m_subject;
+	}
+	
+	public void setSubject(String subject)
+	{
+		m_subject = subject;
 	}
 
 	public MessageEditor getMessageEditor()

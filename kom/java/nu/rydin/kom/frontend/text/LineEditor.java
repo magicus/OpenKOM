@@ -499,17 +499,18 @@ public class LineEditor
 					//
 					if(stopChars != null && stopChars.indexOf(ch) != -1)
 						throw new StopCharException(buffer.toString(), ch);
-
-					buffer.insert(idx++, ch);
-										
+					
 					// Are we exceeding max length?
 					//
-					if(maxLength != 0 && buffer.length() > maxLength)
+					if(maxLength != 0 && buffer.length() >= maxLength - 1)
 					{
 						// Break on overflow?
 						//
 						if((flags & FLAG_STOP_ON_EOL) != 0)
+						{
+							buffer.insert(idx++, ch);
 							throw new LineOverflowException(buffer.toString());
+						}
 						else
 						{
 							// Don't break. Just make noise and ignore keystroke
@@ -520,6 +521,9 @@ public class LineEditor
 						}
 					}
 					
+					// Store the character
+					//
+					buffer.insert(idx++, ch);
 						
 					if((flags & FLAG_ECHO) != 0)
 						m_out.write(ch);

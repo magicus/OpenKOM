@@ -65,13 +65,13 @@ public class SimpleEditor implements MessageEditor
 			//
 			out.print(formatter.format("simple.editor.subject"));
 			out.flush();
-			String subject = in.readLine(oldSubject);
+			context.setSubject(in.readLine(oldSubject));
 						
 			// Enter the main editor loop
 			//
 			if(!this.mainloop(context))
 				throw new OperationInterruptedException();			
-			return new UnstoredMessage(subject, context.getBuffer().toString());
+			return new UnstoredMessage(context.getSubject(), context.getBuffer().toString());
 		}
 		catch(IOException e)
 		{
@@ -88,7 +88,7 @@ public class SimpleEditor implements MessageEditor
 		LineEditor in = context.getIn();
 		MessageFormatter formatter = context.getMessageFormatter();
 		Buffer buffer = context.getBuffer();
-		int width = context.getTerminalSettings().getWidth() - 6;
+		int width = context.getTerminalSettings().getWidth() - 5;
 		
 		// Mainloop
 		//

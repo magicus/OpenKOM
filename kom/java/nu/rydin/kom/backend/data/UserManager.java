@@ -22,6 +22,7 @@ import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.CacheManager;
+import nu.rydin.kom.backend.KOMCache;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.structs.UserInfo;
 
@@ -295,13 +296,11 @@ public class UserManager
 	{
 		// First, try cache
 		//
-		/*
-		 * TODO: Not yet... 
-		 
-		UserInfo cached = (UserInfo) m_cacheManager.getUserCache().get(new Long(id));
+		KOMCache cache = m_cacheManager.getUserCache();
+		Long key = new Long(id);
+		UserInfo cached = (UserInfo) cache.get(key);
 		if(cached != null)
 			return cached;
-		*/
 			
 		// Load from database
 		//
@@ -313,7 +312,7 @@ public class UserManager
 			rs = m_loadUserStmt.executeQuery();
 			if(!rs.next())
 				throw new ObjectNotFoundException("id=" + id);
-			return new UserInfo(
+			UserInfo answer = new UserInfo(
 				id,					// id
 				rs.getString(1),	// userid
 				rs.getString(2),	// name
@@ -336,6 +335,8 @@ public class UserManager
 				rs.getTimestamp(19),// created
 				rs.getTimestamp(20) // last login
 			);
+			cache.deferredPut(key, answer);
+			return answer;
 		}
 		finally
 		{
@@ -428,5 +429,4 @@ public class UserManager
 			throw new ObjectNotFoundException("user id=" + userId);
 		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
 	}
-
 }
