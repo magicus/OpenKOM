@@ -13,7 +13,7 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.MissingArgumentException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.backend.data.ObjectManager;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -44,9 +44,28 @@ public class SendChatMessage extends AbstractCommand
 		PrintWriter out = context.getOut();
 		ServerSession session = context.getSession();
 		String me = session.getLoggedInUser().getName();
-				
+
+		
+		
+		
+		
+		
+		
 		// Print prompt
 		//
+		
+/*		if (user == -1)
+		{
+		    //Special case, sending to all users
+		    out.println(context.getMessageFormatter().format("chat.saytoall"));
+		}
+		else
+		{
+		    //Print username
+		    out.println(context.getMessageFormatter().format("chat.saytouser", session.getName(user)));
+		}
+	    out.println("");
+	*/	
 		out.print(me);
 		out.print(": ");
 		out.flush();
@@ -86,7 +105,7 @@ public class SendChatMessage extends AbstractCommand
 			{
 				try
 				{
-					destinations[i] = NamePicker.resolveName(uarray[i], ObjectManager.UNKNOWN_KIND, context);
+					destinations[i] = NamePicker.resolveName(uarray[i], NameManager.UNKNOWN_KIND, context);
 				}
 				catch (ObjectNotFoundException e)
 				{
