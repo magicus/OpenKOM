@@ -60,7 +60,7 @@ public class FilterUtils
         
         // Create array of the correct derived type.
         //
-        data = (NameAssociation[]) Array.newInstance(data.getClass().getComponentType(), list.size());
+        data = (Object[]) Array.newInstance(data.getClass().getComponentType(), list.size());
         list.toArray(data);
         return data;
     }
