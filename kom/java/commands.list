@@ -9,6 +9,7 @@ nu.rydin.kom.frontend.text.commands.CreateConference
 nu.rydin.kom.frontend.text.commands.ListUsers
 nu.rydin.kom.frontend.text.commands.ListConferences
 nu.rydin.kom.frontend.text.commands.Signup
+nu.rydin.kom.frontend.text.commands.SignOff
 nu.rydin.kom.frontend.text.commands.GotoConference
 nu.rydin.kom.frontend.text.commands.WriteMessage
 nu.rydin.kom.frontend.text.commands.Reply

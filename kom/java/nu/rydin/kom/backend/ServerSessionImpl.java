@@ -34,7 +34,6 @@ import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
-import nu.rydin.kom.backend.data.ObjectManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.BroadcastMessageEvent;
@@ -845,6 +844,27 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
+	}
+	
+	public String signoff (long conferenceId)
+	throws ObjectNotFoundException, UnexpectedException, NotMemberException
+	{
+		long userId = this.getLoggedInUserId();
+		try
+		{
+			if (!m_da.getMembershipManager().isMember(userId, conferenceId))
+			{
+				throw new NotMemberException();
+			}
+			m_da.getMembershipManager().signoff(userId, conferenceId);
+			return m_da.getNameManager().getNameById(conferenceId);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(userId, e);
+		}
+		// Return full name of conference
+		//
 	}
 	
 	public UserInfo getUser(long userId)

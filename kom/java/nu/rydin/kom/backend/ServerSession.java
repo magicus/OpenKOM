@@ -414,6 +414,18 @@ public interface ServerSession
 	throws ObjectNotFoundException, AlreadyMemberException, UnexpectedException, AuthorizationException;
 
 	/**
+	 * Signs off from a conference.
+	 * @param conferenceId Object identifier.
+	 * @return Name of conference.
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 * @throws NotMemberException
+	 */
+
+	public String signoff(long conferenceId)
+	throws ObjectNotFoundException, UnexpectedException, NotMemberException;
+	
+	/**
 	 * Returns a user record based on a global id
 	 * @param userId The global id
 	 * 
