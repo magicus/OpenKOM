@@ -42,4 +42,5 @@ nu.rydin.kom.frontend.text.commands.ChangePassword
 nu.rydin.kom.frontend.text.commands.ListFlags
 nu.rydin.kom.frontend.text.commands.SetFlag
 nu.rydin.kom.frontend.text.commands.ClearFlag
+nu.rydin.kom.frontend.text.commands.Encouragement
 nu.rydin.kom.frontend.text.ClientSession$ListCommands
