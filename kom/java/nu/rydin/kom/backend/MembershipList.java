@@ -167,6 +167,7 @@ public class MembershipList
 	{
 		MembershipInfo mi = this.get(confId);
 		mi.setReadMessages(new MessageRangeList(new MessageRange(low, high)));
+		m_dirty.add(mi);
 	}
 	
 	public long getNextConferenceWithUnreadMessages(long startId, ConferenceManager cm)
