@@ -341,12 +341,27 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	{
 		try
 		{
-			long confId = this.getCurrentConferenceId(); 
-			int next = m_memberships.getNextMessageInConference(confId, m_da.getConferenceManager());
-			if(next == -1)
-				throw new NoMoreMessagesException();
-			this.pushReplies(confId, next);
-			return this.readLocalMessage(confId, next);
+			// Keep on trying until we've skipped all deleted messages
+			//
+			for(;;)
+			{
+				long confId = this.getCurrentConferenceId(); 
+				int next = m_memberships.getNextMessageInConference(confId, m_da.getConferenceManager());
+				if(next == -1)
+					throw new NoMoreMessagesException();
+				try
+				{
+					this.pushReplies(confId, next);
+					return this.readLocalMessage(confId, next);
+				}
+				catch(ObjectNotFoundException e)
+				{
+					// We hit a deleted message. Mark it as read
+					// and continue.
+					//
+					m_memberships.markAsRead(confId, next);
+				}
+			}
 		}
 		catch(SQLException e)
 		{

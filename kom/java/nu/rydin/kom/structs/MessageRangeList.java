@@ -137,4 +137,29 @@ public class MessageRangeList extends ListAtom implements Serializable
 		//
 		return false;
 	}
+	
+	public MessageRangeList intersect(MessageRange r)
+	{
+		MessageRangeList answer = null;
+		MessageRangeList each = this;
+		do
+		{
+			MessageRange mr = each.getRange().intersect(r);
+			if(mr == null)
+				continue;
+			MessageRangeList mrl = new MessageRangeList(mr);
+			if(answer == null)
+				answer = mrl;
+			else
+				answer.succeed(mrl);
+		} while(each != this);
+		return answer != null
+			? answer
+			: new MessageRangeList(new MessageRange(0, 0));
+	}
+	
+	public boolean containedIn(MessageRange r)
+	{
+		return r.getMin() <= this.getRange().getMin() && r.getMax() >= this.getRange().getMax();
+	}
 }

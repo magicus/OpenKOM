@@ -130,6 +130,15 @@ public class MessageRange implements Serializable
 		return new MessageRangeList(new MessageRange(r1.getMin(), r2.getMax())); 
 	}
 	
+	public MessageRange intersect(MessageRange r)
+	{
+		// Completely disjoined? No intersection
+		//
+		if(this.getMax() < r.getMin() || this.getMin() > r.getMax())
+			return null;
+		return new MessageRange(Math.max(this.getMin(), r.getMin()), Math.min(this.getMax(), r.getMax()));
+	}
+	
 	public int countOverlapping(MessageRangeList ranges)
 	{
 		if(m_min == 0 && m_max == 0)

@@ -86,7 +86,22 @@ public class MembershipList
 		ConferenceInfo ci = cm.loadConference(conference);
 		MessageRange total = new MessageRange(ci.getFirstMessage(), ci.getLastMessage());
 		MembershipInfo mi = (MembershipInfo) m_conferenceTable.get(new Long(conference));
-		return total.countOverlapping(mi.getReadMessages());
+		
+		// Check that the list of unread messages is fully conteined 
+		// in the list of existing messages. If not, adjust!
+		//
+		MessageRangeList read = mi.getReadMessages();
+		if(read != null && !read.containedIn(total))
+		{
+			// Ooops... List of read messages is not contained by the list of
+			// what we think are existing messages. Someone has deleted a message
+			// and we need to adjust the list of read messages
+			//
+			read = read.intersect(total);
+			mi.setReadMessages(read);
+			m_dirty.add(mi);
+		}
+		return total.countOverlapping(read);
 	}
 	
 	public int getNextMessageInConference(long confId, ConferenceManager cm)
