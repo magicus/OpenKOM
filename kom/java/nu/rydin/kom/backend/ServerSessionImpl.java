@@ -1996,7 +1996,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public void changePassword(long userId, String oldPassword, String password)
-	throws ObjectNotFoundException, AuthorizationException, AuthenticationException, UnexpectedException	
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException, BadPasswordException	
 	{
 		try
 		{
@@ -2015,7 +2015,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		catch(NoSuchAlgorithmException e)
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}					
+		}
+		catch(AuthenticationException e)
+		{
+		    throw new BadPasswordException();
+		}
 	}
 	
 	public void changeUserFlags(long[] set, long[] reset)

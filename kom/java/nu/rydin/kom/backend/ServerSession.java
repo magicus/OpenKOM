@@ -969,7 +969,7 @@ public interface ServerSession
 	 * @param newPassword The new password
 	 */
 	public void changePassword(long userId, String oldPassword, String newPassword)
-	throws ObjectNotFoundException, AuthorizationException, AuthenticationException, UnexpectedException;	
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException, BadPasswordException;	
 	
 	/**
 	 * Sets or resets user flags of the logged in user
