@@ -9,6 +9,7 @@ CREATE TABLE names
 	PRIMARY KEY(id),
 	UNIQUE INDEX norm_name_ix(norm_name)
 ) TYPE=INNODB;
+
 CREATE TABLE users 
 (
 	id BIGINT NOT NULL,
@@ -29,8 +30,9 @@ CREATE TABLE users
 	url VARCHAR(200),
 	PRIMARY KEY(id),
 	FOREIGN KEY (id) REFERENCES names(id) ON DELETE CASCADE,
-	INDEX userid_ix(userid),
+	INDEX userid_ix(userid)
 ) TYPE=INNODB;
+
 CREATE TABLE conferences 
 (
 	id BIGINT NOT NULL,
@@ -45,6 +47,7 @@ CREATE TABLE conferences
 	INDEX replyConf_ix(replyConf),
 	FOREIGN KEY (replyConf) REFERENCES conferences(id) ON DELETE SET NULL
 ) TYPE=INNODB;
+
 CREATE TABLE memberships
 (
 	conference BIGINT NOT NULL,
@@ -61,6 +64,7 @@ CREATE TABLE memberships
 	INDEX mbruser_ix(user),
 	FOREIGN KEY (user) REFERENCES users(id) ON DELETE CASCADE		
 ) TYPE=INNODB;
+
 CREATE TABLE messages
 (
 	id BIGINT NOT NULL AUTO_INCREMENT,
@@ -78,6 +82,7 @@ CREATE TABLE messages
 	INDEX msgreply_ix(reply_to),
 	FOREIGN KEY (reply_to) REFERENCES messages(id) ON DELETE SET NULL
 ) TYPE=INNODB;
+
 CREATE TABLE messageoccurrences
 (
 	localnum INT NOT NULL,
@@ -93,5 +98,5 @@ CREATE TABLE messageoccurrences
 	INDEX occuser_ix(user),
 	FOREIGN KEY (user) REFERENCES users(id) ON DELETE SET NULL,
 	INDEX occmessage_ix(message),
-	FOREIGN KEY (message) REFERENCES messages(id) ON DELETE CASCADE,
+	FOREIGN KEY (message) REFERENCES messages(id) ON DELETE CASCADE
 ) TYPE=INNODB;
