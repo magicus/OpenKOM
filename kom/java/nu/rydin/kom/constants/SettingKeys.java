@@ -20,9 +20,4 @@ public class SettingKeys
      * Holds conference id of conference presentations
      */
     public static final String CONFERENCE_PRESENTATIONS 	= "CONFERENCE_PRESENTATIONS";
-    
-    /**
-     * Holds conference id notes
-     */
-    public static final String NOTES 						= "NOTES";
 }
