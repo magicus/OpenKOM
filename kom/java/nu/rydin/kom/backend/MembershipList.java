@@ -60,10 +60,17 @@ public class MembershipList
 		}
 	}
 	
+	public MembershipInfo getOrNull(long conference)
+	throws ObjectNotFoundException
+	{
+		return (MembershipInfo) m_conferenceTable.get(new Long(conference));
+	}
+
+	
 	public MembershipInfo get(long conference)
 	throws ObjectNotFoundException
 	{
-		MembershipInfo mi = (MembershipInfo) m_conferenceTable.get(new Long(conference));
+		MembershipInfo mi = this.getOrNull(conference);
 		if(mi == null)
 			throw new ObjectNotFoundException("Membership conference=" + conference);
 		return mi;

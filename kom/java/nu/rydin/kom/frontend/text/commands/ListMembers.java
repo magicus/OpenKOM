@@ -14,6 +14,7 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -32,12 +33,11 @@ public class ListMembers extends AbstractCommand
 	{
 	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
 	    long confid;
-	    if (nameAssociation == null) {
+	    if (nameAssociation == null) 
 	        confid = context.getSession().getCurrentConference().getId();
-	    } else {
+	    else
 	        confid = nameAssociation.getId();
-	    }
-		String[] mbrs = context.getSession().listMemberNamesByConference(confid);
+		Name[] mbrs = context.getSession().listMemberNamesByConference(confid);
 					  	
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();

@@ -37,11 +37,12 @@ public class ChangeSuffix extends AbstractCommand
 	{
 		ServerSession session = context.getSession();
 	    long id = -1;
-	    if (parameterArray[0] != null) {
+	    if (parameterArray[0] != null) 
+	    {
 			// Are we trying to change the suffix of another user? We need the
 			// CHANGE_ANY_NAME to do that!
+	        //
 			session.checkRights(UserPermissions.CHANGE_ANY_NAME);
-			
 	        NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
 	        id = nameAssociation.getId();
 	    }
@@ -51,7 +52,7 @@ public class ChangeSuffix extends AbstractCommand
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
 		
-		String oldName = NameUtils.stripSuffix(session.getName(id != -1 ? id : context.getLoggedInUserId())).trim();
+		String oldName = NameUtils.stripSuffix(session.getName(id != -1 ? id : context.getLoggedInUserId()).getName()).trim();
 
 		// Get the new suffix
 		//

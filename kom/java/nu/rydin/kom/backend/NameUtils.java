@@ -153,6 +153,8 @@ public class NameUtils
 	
 	public static boolean match(String pattern, String candidate)
 	{
+	    if(pattern == null || "%".equals(pattern) || "".equals(pattern))
+	        return true;
 		String[] patternParts = splitName(normalizeName(pattern));
 		String[] candidateParts = splitName(normalizeName(candidate));
 		int pTop = patternParts.length;

@@ -20,6 +20,8 @@ public class CacheManager
 	
 	private KOMCache m_messageCache = new KOMCache(100); // TODO: Read from config
 	
+	private KOMCache m_nameCache = new KOMCache(1000); // TODO: Read from config
+	
 	public static CacheManager instance()
 	{
 		return s_instance;
@@ -30,12 +32,14 @@ public class CacheManager
 		m_userCache.performDeferredOperations();
 		m_conferenceCache.performDeferredOperations();
 		m_messageCache.performDeferredOperations();
+		m_nameCache.performDeferredOperations();
 	}
 	
 	public void rollback()
 	{
 		m_userCache.discardDeferredInvalidations();
 		m_conferenceCache.discardDeferredInvalidations();
+		m_messageCache.discardDeferredInvalidations();
 		m_messageCache.discardDeferredInvalidations();
 	}
 	 
@@ -52,5 +56,10 @@ public class CacheManager
 	public KOMCache getMessageCache()
 	{
 		return m_messageCache;
+	}
+	
+	public KOMCache getNameCache()
+	{
+	    return m_nameCache;
 	}
 }

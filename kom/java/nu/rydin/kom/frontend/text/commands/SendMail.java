@@ -11,6 +11,7 @@ import java.io.IOException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.structs.MessageOccurrence;
@@ -30,12 +31,16 @@ public class SendMail extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray)
 		throws KOMException, IOException, InterruptedException
 	{
-	    long user = ((NameAssociation)parameterArray[0]).getId();
+	    NameAssociation user = (NameAssociation)parameterArray[0];
+	    long userId = user.getId();
 		
 		// Get editor and execute it
 		//
-		UnstoredMessage msg = context.getMessageEditor().edit(-1);
-		MessageOccurrence occ = context.getSession().storeMail(msg, user, -1);
+	    MessageEditor editor = context.getMessageEditor();
+	    editor.setRecipient(user);
+		UnstoredMessage msg = editor.edit(-1);
+		MessageOccurrence occ = context.getSession().storeMail(msg, 
+		        editor.getRecipient().getId(), -1);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));
 	}	

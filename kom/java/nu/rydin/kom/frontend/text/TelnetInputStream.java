@@ -138,8 +138,10 @@ public class TelnetInputStream extends InputStream
 			}
 			
 			// End of file. Nothing more to do!
+			// We treat zero bytes returned as an EOF
+			// condition as well.
 			//
-			if(n == -1)
+			if(n <= 0)
 				return -1;
 			n = this.handleBuffer(buffer, off, n);
 			

@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import nu.rydin.kom.structs.MessageLogItem;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -41,7 +42,7 @@ public class MessageLogManager
                 "FROM messagelog ml, messagelogpointers mlp WHERE mlp.logid = ml.id AND " +
                 "mlp.recipient = ? AND mlp.kind = ? ORDER BY ml.id DESC LIMIT ? OFFSET 0");
         m_listRecipientsStmt = conn.prepareStatement(
-                "SELECT mlp.recipient, n.fullname FROM messagelogpointers mlp, names n " +
+                "SELECT mlp.recipient, n.fullname, n.visibility FROM messagelogpointers mlp, names n " +
                 "WHERE n.id = mlp.recipient AND mlp.logid = ? AND mlp.sent = 0");
     }
     
@@ -160,8 +161,9 @@ public class MessageLogManager
 	        while(rs.next())
 	        {
 	            list.add(new NameAssociation(
-	                    rs.getLong(1),		// Id
-	                    rs.getString(2)));	// Name
+	                    rs.getLong(1),				// Id
+	                    new Name(rs.getString(2), 
+	                            rs.getShort(3))));	// Name
 	        }
 	        NameAssociation[] answer = new NameAssociation[list.size()];
 	        list.toArray(answer);

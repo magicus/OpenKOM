@@ -22,6 +22,7 @@ import nu.rydin.kom.structs.ConferencePermission;
 import nu.rydin.kom.structs.MembershipInfo;
 import nu.rydin.kom.structs.MessageRange;
 import nu.rydin.kom.structs.MessageRangeList;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -75,7 +76,7 @@ public class MembershipManager
 			"FROM conferences c, memberships m " +
 			"WHERE m.user = ? AND c.id = ? AND m.conference = c.id");
 		m_listPermissionsStmt = conn.prepareStatement(
-			"SELECT m.user, n.fullname, m.permissions, m.negation_mask FROM memberships m, users u " +
+			"SELECT m.user, n.fullname, n.visibility, m.permissions, m.negation_mask FROM memberships m, users u " +
 			"WHERE m.user = n.id AND c.conference = ?");			
 		m_activateMembershipStmt = conn.prepareStatement(
 			"UPDATE memberships SET active = 1 WHERE user = ? AND conference = ?");
@@ -203,9 +204,10 @@ public class MembershipManager
 				list.add(new ConferencePermission(
 					new NameAssociation(
 						rs.getLong(1), 		// Conf id
-						rs.getString(2)), 	// Conf name
-						rs.getInt(3), 		// Permissions
-						rs.getInt(4)		// Negations
+						new Name(rs.getString(2),
+						rs.getShort(3))), 	// Conf name
+						rs.getInt(4), 		// Permissions
+						rs.getInt(5)		// Negations
 						));
 			}
 			ConferencePermission[] answer = new ConferencePermission[list.size()];

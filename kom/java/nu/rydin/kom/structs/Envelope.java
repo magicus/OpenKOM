@@ -19,16 +19,16 @@ public class Envelope implements Serializable
 		
 		private final long m_author;
 		
-		private final String m_authorName;
+		private final Name m_authorName;
 		
 		private final long m_conference;
 		
-		private final String m_conferenceName; 
+		private final Name m_conferenceName; 
 		
 		private final boolean m_local;
 		
-		public RelatedMessage(MessageOccurrence occurrence, long author, String authorName, long conference, 
-		        String conferenceName, boolean local)
+		public RelatedMessage(MessageOccurrence occurrence, long author, Name authorName, long conference, 
+		        Name conferenceName, boolean local)
 		{
 			m_occurrence 	= occurrence;
 			m_author		= author;
@@ -43,7 +43,7 @@ public class Envelope implements Serializable
 		    return m_author;
 		}
 
-		public String getAuthorName() 
+		public Name getAuthorName() 
 		{
 			return m_authorName;
 		}
@@ -53,7 +53,7 @@ public class Envelope implements Serializable
 		    return m_conference;
 		}
 		
-		public String getConferenceName()
+		public Name getConferenceName()
 		{
 			return m_conferenceName;
 		}

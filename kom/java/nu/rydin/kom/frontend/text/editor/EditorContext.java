@@ -27,6 +27,7 @@ import nu.rydin.kom.frontend.text.TerminalSettings;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
 
@@ -42,6 +43,8 @@ public class EditorContext implements Context
 	private String m_subject;
 	
 	private NameAssociation m_recipient;
+	
+	private long m_replyTo = -1;
 	
 	public EditorContext(Context underlying)
 	{
@@ -189,6 +192,11 @@ public class EditorContext implements Context
 	    return m_underlying.formatObjectName(name, id);
 	}
 	
+	public String formatObjectName(Name name, long id)
+	{
+	    return m_underlying.formatObjectName(name, id);
+	}
+	
 	public String formatObjectName(NameAssociation object)
 	{
 	    return m_underlying.formatObjectName(object);
@@ -227,6 +235,15 @@ public class EditorContext implements Context
     {
         // FIXME: Ihse -- what is the correct thing to do???
         return m_underlying.getParser();
+    }
+    
+    public long getReplyTo()
+    {
+        return m_replyTo;
+    }
+    public void setReplyTo(long replyTo)
+    {
+        m_replyTo = replyTo;
     }
 
     public String[] getExistingFlagLabels()

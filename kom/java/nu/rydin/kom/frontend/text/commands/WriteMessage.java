@@ -48,7 +48,8 @@ public class WriteMessage extends AbstractCommand
 				
 		// Store text
 		//
-		MessageOccurrence occ = session.storeMessage(msg);
+		MessageOccurrence occ = session.storeMessage(
+		        editor.getRecipient().getId(), msg);
 		context.getOut().println();
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));

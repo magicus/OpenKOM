@@ -47,7 +47,7 @@ public class RenameObject extends AbstractCommand
 		if(!session.userCanChangeNameOf(id))
 			throw new AuthorizationException();
 		
-		String oldName = session.getName(id);
+		String oldName = session.getName(id).getName();
 		
 		// Print prompt
 		//

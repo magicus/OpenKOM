@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -44,24 +45,33 @@ public class SQLUtils
 		return answer;
 	}
 
-	public static String[] extractStrings(ResultSet rs, int index)
+
+	public static Name[] extractStrings(ResultSet rs, int nameIndex, int visibilityIndex, String pattern)
 	throws SQLException
 	{
 		List l = new ArrayList();
 		while(rs.next())
-			l.add(rs.getString(index));
+		{
+		    String name = rs.getString(nameIndex);
+		    if(NameUtils.match(pattern, name))
+		        l.add(new Name(name, rs.getShort(visibilityIndex)));
+		}
 		int top = l.size();
-		String[] answer = new String[top];
+		Name[] answer = new Name[top];
 		l.toArray(answer);
 		return answer;
 	}
 	
-	public static NameAssociation[] extractNames(ResultSet rs, int idIndex, int nameIndex)
+	public static NameAssociation[] extractNames(ResultSet rs, int idIndex, int nameIndex, int visibilityIndex, String pattern)
 	throws SQLException
 	{
 		List l = new ArrayList();
 		while(rs.next())
-			l.add(new NameAssociation(rs.getLong(idIndex), rs.getString(nameIndex)));
+		{
+		    String name = rs.getString(nameIndex);
+		    if(NameUtils.match(pattern, name))
+		        l.add(new NameAssociation(rs.getLong(idIndex), new Name(name, rs.getShort(visibilityIndex))));
+		}
 		int top = l.size();
 		NameAssociation[] answer = new NameAssociation[top];
 		l.toArray(answer);

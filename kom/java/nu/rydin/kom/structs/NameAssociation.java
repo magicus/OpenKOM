@@ -8,6 +8,8 @@ package nu.rydin.kom.structs;
 
 import java.io.Serializable;
 
+import nu.rydin.kom.constants.Visibilities;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
@@ -15,12 +17,18 @@ public class NameAssociation implements Serializable
 {
 	private long m_id;
 	
-	private String m_name;
+	private Name m_name;
+	
+	public NameAssociation(long id, Name name)
+	{
+		m_id 	= id;
+		m_name 	= name;
+	}
 	
 	public NameAssociation(long id, String name)
 	{
 		m_id 	= id;
-		m_name 	= name;
+		m_name 	= new Name(name, Visibilities.PUBLIC);
 	}
 	
 	public long getId()
@@ -28,7 +36,7 @@ public class NameAssociation implements Serializable
 		return m_id;
 	}
 
-	public String getName()
+	public Name getName()
 	{
 		return m_name;
 	}

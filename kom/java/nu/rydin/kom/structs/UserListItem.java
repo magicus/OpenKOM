@@ -15,11 +15,11 @@ public class UserListItem implements Serializable
 {
 	public final long m_userId;
 	
-	public final String m_userName;
+	public final Name m_userName;
 	
 	public final short m_action;
 	
-	public final String m_conferenceName;
+	public final Name m_conferenceName;
 	
 	public final boolean m_inMailbox;
 	
@@ -27,7 +27,7 @@ public class UserListItem implements Serializable
 	
 	public final long m_lastHeartbeat;
 	
-	public UserListItem(long userId, String userName, short action, String conferenceName, boolean inMailbox,
+	public UserListItem(long userId, Name userName, short action, Name conferenceName, boolean inMailbox,
 	        long loginTime, long lastHeartbeat)
 	{
 		m_userId 			= userId;
@@ -44,7 +44,7 @@ public class UserListItem implements Serializable
 		return m_action;
 	}
 
-	public String getConferenceName()
+	public Name getConferenceName()
 	{
 		return m_conferenceName;
 	}
@@ -54,7 +54,7 @@ public class UserListItem implements Serializable
 		return m_userId;
 	}
 
-	public String getUserName()
+	public Name getUserName()
 	{
 		return m_userName;
 	}

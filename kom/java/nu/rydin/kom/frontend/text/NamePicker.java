@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.frontend.text.parser.Parser;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -30,7 +32,7 @@ public class NamePicker
             long id = Long.parseLong(name);
             if (id > 0)
             {
-                return new NameAssociation(id, null);
+                return new NameAssociation(id, (String) null);
             }
         } catch (NumberFormatException e)
         {
@@ -52,7 +54,7 @@ public class NamePicker
             NameAssociation[] newBuff = new NameAssociation[top + 1];
             System.arraycopy(assocs, 0, newBuff, 0, top);
             long me = ctx.getLoggedInUserId();
-            newBuff[top] = new NameAssociation(me, mailboxName);
+            newBuff[top] = new NameAssociation(me, new Name(mailboxName, Visibilities.PUBLIC));
             assocs = newBuff;
         }
         if (assocs.length == 0)

@@ -19,6 +19,8 @@ public interface DisplayController
     
     public void messageBody();
     
+    public void quotedMessageBody();
+    
     public void messageFooter();
     
     public void messageSubject();

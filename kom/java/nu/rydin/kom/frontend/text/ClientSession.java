@@ -733,11 +733,18 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		return m_session;
 	}
 	
+    public String formatObjectName(nu.rydin.kom.structs.Name name, long id)
+    {
+        return this.formatObjectName(name.getName(), id);
+    }
+    
     public String formatObjectName(String name, long id)
     {
         try
         {
 	        StringBuffer sb = new StringBuffer(name.length() + 10);
+	        if(name.length() == 0)
+	            name = m_formatter.format("misc.protected.conference");
 	        sb.append(name);
 	        if((this.getCachedUserInfo().getFlags1() & UserFlags.SHOW_OBJECT_IDS) != 0)
 	        {
@@ -753,6 +760,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
             throw new RuntimeException(e);
         }        
     }
+
     
     public String formatObjectName(NameAssociation object)
     {

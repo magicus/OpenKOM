@@ -22,6 +22,7 @@ import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
 
@@ -135,6 +136,13 @@ public interface Context extends TerminalSettingsProvider
 	 * Returns terminal information
 	 */
 	public TerminalSettings getTerminalSettings();
+	
+	/**
+	 * Formats an object name according to user settings
+	 * @param name Object name
+	 * @param id Object id
+	 */
+	public String formatObjectName(Name name, long id);
 	
 	/**
 	 * Formats an object name according to user settings

@@ -14,11 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nu.rydin.kom.backend.CacheManager;
+import nu.rydin.kom.backend.KOMCache;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.SQLUtils;
 import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -28,13 +30,10 @@ import nu.rydin.kom.structs.NameAssociation;
 public class NameManager
 {
     // Different kinds of named objects
+    //
 	public static final short UNKNOWN_KIND = -1;
     public static final short USER_KIND = 0;
     public static final short CONFERENCE_KIND = 1;
-
-    public static final short PUBLIC = 0;
-	public static final short PROTCTED = 1;
-	public static final short INVISIBLE = 2;
 	
 	protected final Connection m_conn;
 	private final PreparedStatement m_getNameByIdStmt;
@@ -57,33 +56,33 @@ public class NameManager
 	{
 		m_conn = conn;
 		m_getNameByIdStmt = conn.prepareStatement(
-			"SELECT fullname FROM names WHERE id = ?");		
+			"SELECT fullname, visibility FROM names WHERE id = ?");		
 		m_getIdByNameStmt = conn.prepareStatement(
-			"SELECT id FROM names WHERE norm_name = ? AND visibility != 2");		
+			"SELECT id FROM names WHERE norm_name = ?");		
 			
 		// TODO: Handle protected names!
 		//
 		m_getIdsByPatternStmt = conn.prepareStatement(
-			"SELECT id FROM names WHERE norm_name LIKE ? AND visibility != 2");
+			"SELECT id FROM names WHERE norm_name LIKE ?");
 		m_getNamesByPatternStmt = conn.prepareStatement(
-			"SELECT fullname FROM names WHERE norm_name LIKE ? AND visibility != 2 " +			"ORDER BY fullname");
+			"SELECT fullname FROM names WHERE norm_name LIKE ? " +			"ORDER BY fullname");
 		m_getIdsByPatternAndKindStmt = conn.prepareStatement(
-			"SELECT id FROM names WHERE norm_name LIKE ? AND kind = ? AND visibility != 2");
+			"SELECT id FROM names WHERE norm_name LIKE ? AND kind = ?");
 		m_getNamesByPatternAndKindStmt = conn.prepareStatement(
-			"SELECT fullname FROM names WHERE norm_name LIKE ? AND kind = ? " +			"AND visibility != 2 ORDER BY fullname");
+			"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +			"ORDER BY fullname");
 		m_getNamesByPatternAndKindAndNameStmt = conn.prepareStatement(
-				"SELECT fullname FROM names WHERE norm_name LIKE ? AND kind = ? " +
-				"AND visibility != 2 ORDER BY fullname");
+				"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +
+				"ORDER BY fullname");
 		m_getNamesByPatternAndKindAndDateStmt = conn.prepareStatement(
-				"SELECT fullname FROM names WHERE norm_name LIKE ? AND kind = ? " +
-				"AND visibility != 2 ORDER BY lastdate");
+				"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +
+				"ORDER BY lastdate");
 		m_addNameStmt  = conn.prepareStatement(
 			"INSERT INTO names(norm_name, fullname, kind, visibility) VALUES(?, ?, ?, ?)");
 		m_getAssociationsByPatternStmt = conn.prepareStatement(
-			"SELECT id, fullname FROM names WHERE norm_name LIKE ? AND visibility != 2 " +
+			"SELECT id, fullname, visibility FROM names WHERE norm_name LIKE ? " +
 			"ORDER BY fullname");			
 		m_getAssociationsByPatternAndKindStmt = conn.prepareStatement(
-			"SELECT id, fullname FROM names WHERE norm_name LIKE ? AND visibility != 2 " +
+			"SELECT id, fullname, visibility FROM names WHERE norm_name LIKE ? " +
 			"AND kind = ? ORDER BY fullname");
 		m_renameObjectStmt = conn.prepareStatement(
 			"UPDATE names SET fullname = ?, norm_name = ? WHERE id = ?");
@@ -138,9 +137,15 @@ public class NameManager
 	/**
 	 * Returns the name for and id
 	 */
-	public String getNameById(long id)
+	public Name getNameById(long id)
 	throws ObjectNotFoundException, SQLException
 	{
+	    // Check cache first!
+	    //
+	    KOMCache cache = CacheManager.instance().getNameCache();
+	    Name name = (Name) cache.get(new Long(id));
+	    if(name != null)
+	        return name;
 		m_getNameByIdStmt.clearParameters();
 		m_getNameByIdStmt.setLong(1, id);
 		ResultSet rs = null;
@@ -149,7 +154,9 @@ public class NameManager
 			rs = m_getNameByIdStmt.executeQuery();
 			if(!rs.next())
 				throw new ObjectNotFoundException("id=" + id);
-			return rs.getString(1);
+			Name answer = new Name(rs.getString(1), rs.getShort(2));
+			cache.put(new Long(id), answer);
+			return answer;
 		}
 		finally
 		{
@@ -165,22 +172,18 @@ public class NameManager
 	 * @param pattern The search pattern
 	 * @throws SQLException
 	 */
-	public String[] getNamesByPattern(String pattern)
+	public Name[] getNamesByPattern(String pattern)
 	throws SQLException
 	{		
-		// Transform expressions from "Po (The Man) Ry" to "PO% RY%".
-		//
-		pattern = this.createKey(pattern);
-		
 		// Run query
 		//
 		m_getNamesByPatternStmt.clearParameters();
-		m_getNamesByPatternStmt.setString(1, pattern);
+		m_getNamesByPatternStmt.setString(1, this.createKey(pattern));
 		ResultSet rs = null;
 		try
 		{
 			rs = m_getNamesByPatternStmt.executeQuery();
-			return SQLUtils.extractStrings(rs, 1);
+			return SQLUtils.extractStrings(rs, 1, 2, pattern);
 		}
 		finally
 		{
@@ -199,24 +202,15 @@ public class NameManager
 	public NameAssociation[] getAssociationsByPattern(String pattern)
 	throws SQLException
 	{		
-		// Transform expressions from "Po (The Man) Ry" to "PO% RY%".
-		//
-		pattern = this.createKey(pattern);
-		
 		// Run query
 		//
 		m_getAssociationsByPatternStmt.clearParameters();
-		m_getAssociationsByPatternStmt.setString(1, pattern);
+		m_getAssociationsByPatternStmt.setString(1, this.createKey(pattern));
 		ResultSet rs = null;
 		try
 		{
-			List list = new ArrayList(100);
 			rs = m_getAssociationsByPatternStmt.executeQuery();
-			while(rs.next())
-				list.add(new NameAssociation(rs.getLong(1), rs.getString(2)));
-			NameAssociation[] answer = new NameAssociation[list.size()];
-			list.toArray(answer);
-			return answer;
+			return SQLUtils.extractNames(rs, 1, 2, 3, pattern);
 		}
 		finally
 		{
@@ -235,25 +229,17 @@ public class NameManager
 	public NameAssociation[] getAssociationsByPatternAndKind(String pattern, short kind)
 	throws SQLException
 	{		
-		// Transform expressions from "Po (The Man) Ry" to "PO% RY%".
-		//
-		pattern = this.createKey(pattern);
-		
 		// Run query
 		//
 		m_getAssociationsByPatternAndKindStmt.clearParameters();
-		m_getAssociationsByPatternAndKindStmt.setString(1, pattern);
+		m_getAssociationsByPatternAndKindStmt.setString(1, this.createKey(pattern));
 		m_getAssociationsByPatternAndKindStmt.setShort(2, kind);
 		ResultSet rs = null;
 		try
 		{
 			List list = new ArrayList(100);
 			rs = m_getAssociationsByPatternAndKindStmt.executeQuery();
-			while(rs.next())
-				list.add(new NameAssociation(rs.getLong(1), rs.getString(2)));
-			NameAssociation[] answer = new NameAssociation[list.size()];
-			list.toArray(answer);
-			return answer;
+			return SQLUtils.extractNames(rs, 1, 2, 3, pattern);
 		}
 		finally
 		{
@@ -270,23 +256,20 @@ public class NameManager
 	 * @param pattern The search pattern
 	 * @throws SQLException
 	 */
-	public String[] getNamesByPatternAndKind(String pattern, short kind)
+	public Name[] getNamesByPatternAndKind(String pattern, short kind)
 	throws SQLException
 	{		
-		// Transform expressions from "Po (The Man) Ry" to "PO% RY%".
-		//
-		pattern = NameUtils.normalizeName(pattern).replaceAll(" ", "% ");
-		
-		// Run query
+	    // Run query
 		//
 		m_getNamesByPatternAndKindStmt.clearParameters();
-		m_getNamesByPatternAndKindStmt.setString(1, pattern);
+		m_getNamesByPatternAndKindStmt.setString(1, 
+		        NameUtils.normalizeName(pattern).replaceAll(" ", "% "));
 		m_getNamesByPatternAndKindStmt.setShort(2, kind);
 		ResultSet rs = null;
 		try
 		{
 			rs = m_getNamesByPatternAndKindStmt.executeQuery();
-			return SQLUtils.extractStrings(rs, 1);
+			return SQLUtils.extractStrings(rs, 1, 2, pattern);
 		}
 		finally
 		{
@@ -479,6 +462,7 @@ public class NameManager
 		CacheManager cmgr = CacheManager.instance();
 		cmgr.getUserCache().registerInvalidation(key);
 		cmgr.getConferenceCache().registerInvalidation(key);
+		cmgr.getNameCache().registerInvalidation(key);
 	}
 	
 	
@@ -533,5 +517,6 @@ public class NameManager
 		CacheManager cmgr = CacheManager.instance();
 		cmgr.getUserCache().registerInvalidation(key);
 		cmgr.getConferenceCache().registerInvalidation(key);		
+		cmgr.getNameCache().registerInvalidation(key);
 	}
 }

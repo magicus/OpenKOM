@@ -68,6 +68,7 @@ public class Reply extends AbstractCommand
 		if(confInfo.getReplyConf() != -1)
 		    confInfo = session.getConference(confInfo.getReplyConf());
 		editor.setRecipient(new NameAssociation(confInfo.getId(), confInfo.getName()));
+		editor.setReplyTo(replyToId);
 		UnstoredMessage msg = editor.edit(replyToId);
 		
 		// Store the message

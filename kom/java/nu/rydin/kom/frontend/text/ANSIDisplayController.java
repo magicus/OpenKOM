@@ -40,6 +40,12 @@ public class ANSIDisplayController implements DisplayController
         m_writer.print(ANSISequences.WHITE);
     }
     
+    public void quotedMessageBody()
+    {
+        m_writer.print(ANSISequences.RESET_ATTRIBUTES);
+        m_writer.print(ANSISequences.WHITE);
+    }
+    
     public void chatMessageBody() 
     {
         m_writer.print(ANSISequences.BRIGHT);

@@ -94,4 +94,9 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 	{
 	    return m_context.getRecipient();
 	}
+	
+	public void setReplyTo(long replyTo)
+	{
+	    m_context.setReplyTo(replyTo);
+	}
 }

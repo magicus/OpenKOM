@@ -130,7 +130,7 @@ public class Status extends AbstractCommand
 		PrintUtils.printLabelled(out, formatter.format("status.conference.id"), 30, Long.toString(info.getId()));
 		PrintUtils.printLabelled(out, formatter.format("status.conference.name"), 30, info.getName());
 		PrintUtils.printLabelled(out, formatter.format("status.conference.admin"), 30, 
-			context.getSession().getName(info.getAdministrator()));
+			context.getSession().getName(info.getAdministrator()).getName());
 		PrintUtils.printLabelled(out, formatter.format("status.conference.messages"), 30, 
 					Integer.toString(info.getFirstMessage()) + " - " + 
 					Integer.toString(info.getLastMessage()));			

@@ -17,6 +17,8 @@ import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.Name;
+import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author Magnus Ihse
@@ -186,16 +188,16 @@ public class Parser
         
         // Ask user to chose
         //
-        if (printHeading) {
+        if (printHeading) 
             out.println(fmt.format(headingKey));
-        }
         int top = candidates.size();
         for(int idx = 0; idx < top; ++idx)
         {
-            String candidate = (String) candidates.get(idx);
+            String candidate = ((Name) candidates.get(idx)).getName();
             int printIndex = idx + 1;
-            // Ugly but sortof-working padding, sorry :-) /Ihse 
-        	out.println((printIndex < 10 ? " " : "") + printIndex + ". " + candidate); 
+            PrintUtils.printRightJustified(out, Integer.toString(printIndex), 2);
+            out.print(". ");
+            out.println(candidate);
         }
         out.print(fmt.format(promptKey));
         out.flush();

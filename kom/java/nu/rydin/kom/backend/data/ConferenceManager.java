@@ -20,6 +20,7 @@ import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageRange;
+import nu.rydin.kom.structs.Name;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -216,7 +217,7 @@ public class ConferenceManager // extends NameManager
 	 * @param pattern The search pattern
 	 * @throws SQLException
 	 */
-	public String[] getConferenceNamesByPattern(String pattern)
+	public Name[] getConferenceNamesByPattern(String pattern)
 	throws SQLException
 	{
 		return m_nameManager.getNamesByPatternAndKind(pattern, NameManager.CONFERENCE_KIND);

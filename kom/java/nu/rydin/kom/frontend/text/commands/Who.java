@@ -46,7 +46,7 @@ public class Who extends AbstractCommand
 			UserListItem each = users[idx];
 			String confName = each.isInMailbox() 
 				? formatter.format("misc.mailboxtitle")
-				: each.getConferenceName();
+				: each.getConferenceName().getName();
 			long now = System.currentTimeMillis();
 			PrintUtils.printRightJustified(out, StringUtils.formatElapsedTime(now - each.getLoginTime()), 6);
 			long idle = now - each.getLastHeartbeat();

@@ -18,12 +18,14 @@ import java.sql.Timestamp;
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.KOMCache;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.AlreadyMemberException;
 import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Base64;
 import nu.rydin.kom.utils.MD5Crypt;
@@ -186,7 +188,7 @@ public class UserManager
 				throw new DuplicateNameException(fullname);
 			// First, add the name
 			//
-			long nameId = m_nameManager.addName(fullname, NameManager.USER_KIND, NameManager.PUBLIC);
+			long nameId = m_nameManager.addName(fullname, NameManager.USER_KIND, Visibilities.PUBLIC);
 			Timestamp now = new Timestamp(System.currentTimeMillis());
 
 			// Now, add the user
@@ -287,7 +289,7 @@ public class UserManager
 	 * @param pattern The search pattern
 	 * @throws SQLException
 	 */
-	public String[] getUserNamesByPattern(String pattern)
+	public Name[] getUserNamesByPattern(String pattern)
 	throws SQLException
 	{
 		return m_nameManager.getNamesByPatternAndKind(pattern, NameManager.USER_KIND);

@@ -22,6 +22,10 @@ public class DummyDisplayController implements DisplayController
     public void messageBody() 
     {
     }
+    
+    public void quotedMessageBody()
+    {
+    }
 
     public void messageSubject() 
     {

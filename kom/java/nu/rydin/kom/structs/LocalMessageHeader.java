@@ -17,7 +17,7 @@ public class LocalMessageHeader extends MessageHeader implements Serializable
 	private final long m_conference;
 	private final int m_localnum;
 	
-	public LocalMessageHeader(long id, Timestamp created, long author, String authorName, long replyTo, String subject, long conference, int localnum)
+	public LocalMessageHeader(long id, Timestamp created, long author, Name authorName, long replyTo, String subject, long conference, int localnum)
 	{
 		super(id, created, author, authorName, replyTo, subject);
 		m_conference = conference;

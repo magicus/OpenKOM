@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.KOMException;
@@ -119,10 +120,12 @@ public class CreateConference extends AbstractCommand
 			new String[] 
 			{
 				fmt.format("create.conference.public"), 
-				fmt.format("create.conference.exclusive")
+				fmt.format("create.conference.exclusive"),
+				fmt.format("create.conference.protected"),
 			}, 0, error); 
 		if(choice == 0)
 			flags |= ConferencePermissions.READ_PERMISSION;
+		short visibility = choice == 2 ? Visibilities.PROTECTED : Visibilities.PUBLIC;
 			
 		// Get permission to write
 		//
@@ -191,11 +194,11 @@ public class CreateConference extends AbstractCommand
 		{
 			if (doMagic)
 			{
-				context.getSession().createMagicConference(fullname, flags, nonmemberFlags, NameManager.PUBLIC, replyConf, magicType);
+				context.getSession().createMagicConference(fullname, flags, nonmemberFlags, visibility, replyConf, magicType);
 			}
 			else
 			{
-				context.getSession().createConference(fullname, flags, nonmemberFlags, NameManager.PUBLIC, replyConf);
+				context.getSession().createConference(fullname, flags, nonmemberFlags, visibility, replyConf);
 			}
 		}
 		catch(DuplicateNameException e)

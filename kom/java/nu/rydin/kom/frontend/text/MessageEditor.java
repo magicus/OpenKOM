@@ -22,4 +22,6 @@ public interface MessageEditor
 	public NameAssociation getRecipient();
 	
 	public void setRecipient(NameAssociation recipient);
+	
+	public void setReplyTo(long replyTo);
 }

@@ -16,6 +16,7 @@ import java.util.List;
 
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.SQLUtils;
+import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.LocalMessageHeader;
 import nu.rydin.kom.structs.Message;
@@ -23,6 +24,8 @@ import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.MessageSearchResult;
+import nu.rydin.kom.structs.Name;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.utils.Logger;
 
 /**
@@ -289,8 +292,8 @@ public class MessageManager
 				id,
 				rs.getTimestamp(1),		// created
 				rs.getLong(2), 			// author
-				rs.getString(3),		// Author name
-				rs.getObject(4) != null ? rs.getLong(4) : -1, // reply to
+				new Name(rs.getString(3), Visibilities.PUBLIC),	// Author name
+				rs.getObject(4) != null ? rs.getLong(4) : -1, 	// reply to
 				rs.getString(5),		// subject
 				rs.getString(6),		// body
 				this.getOccurrences(id)
@@ -327,8 +330,8 @@ public class MessageManager
 				id,
 				rs.getTimestamp(2),		// created
 				rs.getLong(3), 			// author
-				rs.getString(4), 		// author name				
-				rs.getObject(5) != null ? rs.getLong(5) : -1, // reply to
+				new Name(rs.getString(4), Visibilities.PUBLIC),	// author name				
+				rs.getObject(5) != null ? rs.getLong(5) : -1, 	// reply to
 				rs.getString(6),		// subject
 				rs.getString(7),		// body 
 				this.getOccurrences(id)
@@ -364,8 +367,8 @@ public class MessageManager
 		   		id,
 			   	rs.getTimestamp(1),		// created
 			   	rs.getLong(2), 			// author
-			   	rs.getString(3),		// author name	
-			   	rs.getObject(4) != null ? rs.getLong(4) : -1,			// reply to
+			   	new Name(rs.getString(3), Visibilities.PUBLIC),		// author name	
+			   	rs.getObject(4) != null ? rs.getLong(4) : -1,		// reply to
 			   	rs.getString(5)		
 			   	);
 			
@@ -439,7 +442,7 @@ public class MessageManager
 			// 
 			CacheManager.instance().getConferenceCache().registerInvalidation(new Long(conference));
 			
-			return new MessageOccurrence(globalId, now, kind, user, userName, conference, num);
+			return new MessageOccurrence(globalId, now, kind, new NameAssociation(user, userName), conference, num);
    		}
    		finally
    		{
@@ -514,8 +517,8 @@ public class MessageManager
    					rs.getLong(1),		// message id
    					rs.getTimestamp(2),	// Timestamp
    					rs.getShort(3),		// Kind,
-   					rs.getLong(4),		// User
-					rs.getString(5),	// User name
+   					new NameAssociation(rs.getLong(4),		// User
+   					        rs.getString(5)),	// User name
    					rs.getLong(6),		// Conference
    					rs.getInt(7)		// Localnum
    					));
@@ -556,8 +559,8 @@ public class MessageManager
 				rs.getLong(1),		// Global id
 				rs.getTimestamp(2),	// Timestamp
 				rs.getShort(3),		// Kind,
-				rs.getLong(4),		// User
-				rs.getString(5),	// User name
+				new NameAssociation(rs.getLong(4),		// User
+				rs.getString(5)),	// User name
 				rs.getLong(6),		// Conference
 				rs.getInt(7)		// Localnum
 				);
@@ -625,8 +628,8 @@ public class MessageManager
 				rs.getLong(1),		// Global id
 				rs.getTimestamp(2),	// Timestamp
 				rs.getShort(3),		// Kind,
-				rs.getLong(4),		// User
-				rs.getString(5),	// User name
+				new NameAssociation(rs.getLong(4),		// User
+				rs.getString(5)),	// User name
 				conference,
 				localnum
 				); 
@@ -665,8 +668,8 @@ public class MessageManager
 				rs.getLong(1),		// Global id
 				rs.getTimestamp(2),	// Timestamp
 				rs.getShort(3),		// Kind,
-				rs.getLong(4),		// User
-				rs.getString(5),	// User name
+				new NameAssociation(rs.getLong(4),		// User
+				rs.getString(5)),	// User name
 				rs.getLong(6),		// Conference
 				rs.getInt(7)		// Localnum
 				);
@@ -729,8 +732,8 @@ public class MessageManager
 								rs.getLong(1),		// Global id
 								rs.getTimestamp(2),	// Timestamp
 								rs.getShort(3),		// Kind
-								rs.getLong(4),		// User
-								rs.getString(5),	// User name
+								new NameAssociation(rs.getLong(4),		// User
+								rs.getString(5)),	// User name
 								rs.getLong(6),		// Conference
 								rs.getInt(7)		// Localnum
 								));
@@ -769,7 +772,7 @@ public class MessageManager
 					 rs.getLong(1),
 					 rs.getTimestamp(2),	// created
 					 rs.getLong(3), 		// author
-					 rs.getString(4),		// author name	
+					 new Name(rs.getString(4), Visibilities.PUBLIC),// author name	
 					 rs.getObject(4) != null ? rs.getLong(5) : -1,	// reply to
 					 rs.getString(6)		// subject	
 					 ));
@@ -932,7 +935,7 @@ public class MessageManager
 					rs.getInt(1),
 					rs.getTimestamp(2),
 					rs.getLong(3),
-					rs.getString(4),
+					new Name(rs.getString(4), Visibilities.PUBLIC),
 					-1,
 					rs.getString(5)));
 		}
@@ -1036,7 +1039,7 @@ public class MessageManager
      		   		rs.getLong(1),			// Global id
     			   	rs.getTimestamp(2),		// created
     			   	rs.getLong(3), 			// author
-    			   	rs.getString(4),		// author name	
+    			   	new Name(rs.getString(4), Visibilities.PUBLIC),		// author name	
     			   	rs.getObject(5) != null ? rs.getLong(5) : -1, // reply to
     			   	rs.getString(6),		// subject
 					rs.getLong(7),			// conference
@@ -1063,7 +1066,7 @@ public class MessageManager
  		   		rs.getLong(1),			// Global id
 			   	rs.getInt(2),			// Local id
 				rs.getLong(3),			// user id
-			   	rs.getString(4),		// username
+			   	new Name(rs.getString(4), Visibilities.PUBLIC),	// username
 			   	rs.getString(5))		// subject	
 			   	);
         }

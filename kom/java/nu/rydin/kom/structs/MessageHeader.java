@@ -17,11 +17,11 @@ public class MessageHeader implements Serializable
 	private final long m_id;
 	private final Timestamp m_created;	
 	private final long m_author;
-	private final String m_authorName;
+	private final Name m_authorName;
 	private final long m_replyTo;
 	private final String m_subject;
 	
-	public MessageHeader(long id, Timestamp created, long author, String authorName, long replyTo, String subject)
+	public MessageHeader(long id, Timestamp created, long author, Name authorName, long replyTo, String subject)
 	{
 		m_id			= id;
 		m_created 		= created;
@@ -41,7 +41,7 @@ public class MessageHeader implements Serializable
 		return m_author;
 	}
 	
-	public String getAuthorName()
+	public Name getAuthorName()
 	{
 		return m_authorName;
 	}	

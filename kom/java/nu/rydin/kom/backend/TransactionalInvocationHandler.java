@@ -51,6 +51,7 @@ public class TransactionalInvocationHandler implements InvocationHandler
 			//
 			da.commit();
 			m_cacheManager.commit();
+			m_session.flushEvents();
 			committed = true;
 			return result;
 		}
@@ -66,6 +67,7 @@ public class TransactionalInvocationHandler implements InvocationHandler
 			{
 				da.rollback();
 				m_cacheManager.rollback();
+				m_session.discardEvents();
 			}
 			DataAccessPool.instance().returnDataAccess(da);
 			m_session.releaseMutex();

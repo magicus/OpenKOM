@@ -16,11 +16,11 @@ public class MessageSearchResult implements Serializable
 	private final long m_id;
 	private final int m_localnum;
 	private final long m_user;
-	private final String m_username;
+	private final Name m_username;
 	private final String m_subject;
 	 
 	
-	public MessageSearchResult(long id, int localnum, long user, String username, String subject)
+	public MessageSearchResult(long id, int localnum, long user, Name username, String subject)
 	{
 		m_id = id;
 		m_localnum = localnum;
@@ -44,7 +44,7 @@ public class MessageSearchResult implements Serializable
 		return m_user;
 	}
 	
-	public String getUsername() 
+	public Name getUsername() 
 	{
 		return m_username;
 	}

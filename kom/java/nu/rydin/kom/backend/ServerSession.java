@@ -36,6 +36,7 @@ import nu.rydin.kom.structs.MessageLogItem;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageSearchResult;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.NamedObject;
 import nu.rydin.kom.structs.UnstoredMessage;
@@ -112,6 +113,20 @@ public interface ServerSession
 	 */
 	public abstract short suggestNextAction() 
 	throws UnexpectedException;
+	
+	/** 
+	 * Checks for permissions in a conference and throws an
+	 * <tt>AuthorizationException</tt> if the calling user does not
+	 * have the requested permissions in that conference.
+	 * 
+	 * @param conferenceId The conference
+	 * @param mask The permission mask to check for
+	 * @throws AuthorizationException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public void assertConferencePermission(long conferenceId, int mask)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 
 	/**
 	 * Returns name associations (of users or conferences) based on a pattern.
@@ -279,11 +294,12 @@ public interface ServerSession
 	/**
 	 * Stores a message in the current conference
 	 * 
+	 * @param conf The conference to store the message in
 	 * @param msg The message
 	 * @return Newly create message occurrence
 	 * @throws UnexpectedException
 	 */
-	public MessageOccurrence storeMessage(UnstoredMessage msg)
+	public MessageOccurrence storeMessage(long conf, UnstoredMessage msg)
 	throws AuthorizationException, UnexpectedException;
 	
 	/**
@@ -568,7 +584,7 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
-	public String[] listMemberNamesByConference(long confId)
+	public Name[] listMemberNamesByConference(long confId)
 	throws ObjectNotFoundException, UnexpectedException;
 	
 	
@@ -579,7 +595,7 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */	
-	public String getName(long id)
+	public Name getName(long id)
 	throws ObjectNotFoundException, UnexpectedException;
 	
 	/**
@@ -589,7 +605,7 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
-	public String[] getNames(long[] id)
+	public Name[] getNames(long[] id)
 	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
@@ -1191,10 +1207,11 @@ public interface ServerSession
      * 
      * @param parent The id of the parent object
      * @param pattern The pattern to search for
+     * @throws ObjectNotFoundException
      * @throws UnexpectedException
      */
     public FileStatus[] listFiles(long parent, String pattern)
-    throws UnexpectedException;
+    throws ObjectNotFoundException, UnexpectedException;
     
     /**
      * Returns the contents of a file

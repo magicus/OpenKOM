@@ -85,7 +85,7 @@ public abstract class AbstractEditor
 			{
 				// TODO: Handle chat messages n'stuff.
 				//
-				 line = in.readLine(defaultLine, "\u0003\u001a\u0004", width,
+				 line = in.readLine(defaultLine, "\u0003\u001a\u0004\u000c", width,
 				 	LineEditor.FLAG_ECHO | LineEditor.FLAG_STOP_ON_BOL | LineEditor.FLAG_STOP_ON_EOL);
 				 	
 				 // Check if we got a command
@@ -189,6 +189,17 @@ public abstract class AbstractEditor
 						return true;
 					case '\u0003': // Ctrl-C
 						return false;
+					case '\u000c': // Ctrl-L
+					    try
+					    {
+					        out.println();
+					        new Show(m_context, "").execute(m_context, new Object[0]);
+					    }
+					    catch(KOMException e1)
+					    {
+					        throw new RuntimeException(e1);
+					    }
+					    break;
 				}
 			}				
 		}

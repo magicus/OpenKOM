@@ -106,7 +106,7 @@ public class BasicMessagePrinter implements MessagePrinter
 				case MessageManager.ACTION_COPIED:
 					PrintUtils.printRepeated(out, ' ', space);
 					out.println(formatter.format("BasicMessagePrinter.copied", 
-						new Object[] { context.formatObjectName(occ.getUserName(), occ.getUser()), 
+						new Object[] { context.formatObjectName(occ.getUser()), 
 					        context.smartFormatDate(occ.getTimestamp()) }));
 					break;
 				case MessageManager.ACTION_MOVED:
@@ -122,8 +122,7 @@ public class BasicMessagePrinter implements MessagePrinter
 					}
 					PrintUtils.printRepeated(out, ' ', space);
 					out.println(formatter.format("BasicMessagePrinter.moved.long", 
-						new Object[] { movedFrom, context.formatObjectName(occ.getUserName(), 
-						        occ.getUser()), context.smartFormatDate(occ.getTimestamp()) }));
+						new Object[] { movedFrom, context.formatObjectName(occ.getUser()), context.smartFormatDate(occ.getTimestamp()) }));
 					break;					
 			}
 		} 
@@ -144,7 +143,17 @@ public class BasicMessagePrinter implements MessagePrinter
 		WordWrapper ww = context.getWordWrapper(message.getBody());
 		String line;
 		while((line = ww.nextLine()) != null)
+		{
+		    boolean quoted = false;
+		    if(line.startsWith("> "))
+		    {
+		        dc.quotedMessageBody();
+		        quoted = true;
+		    }
 			out.println(line);
+			if(quoted)
+			    dc.messageBody();
+		}
 		out.println();
 		dc.messageFooter();
 		

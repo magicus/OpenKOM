@@ -606,6 +606,18 @@ public class LineEditor implements NewlineListener
 	}
 	
 	/**
+	 * Returns the next character from the input buffer or waits
+	 * for a keystroke.
+	 * 
+	 * @param flags The flags
+	 */
+	public char readCharacter(int flags)
+	throws IOException, InterruptedException, EventDeliveredException
+	{
+	    return this.innerReadCharacter(flags);
+	}
+	
+	/**
 	 * Reads a single character from the user without echoing back. Throws InputInterruptedException on ctrl-c.
 	 * @param flags If FLAG_STOP_ON_EVENT is true, the method will throw event exception on event.
 	 * @return The character read from user.

@@ -35,14 +35,14 @@ public class GenerateTestdata extends AbstractCommand
 	{
 		int generate = 20;
 		Integer numValue = (Integer) parameterArray[0];
-		if (numValue != null) {
+		if (numValue != null) 
 		    generate = numValue.intValue();
-		}
 		ServerSession session = context.getSession();
+		long conf = session.getCurrentConferenceId();
 		for(int idx = 0; idx < generate; ++idx)
 		{
-			session.storeMessage(new UnstoredMessage(s_subject, s_body1));
-			session.storeMessage(new UnstoredMessage(s_subject, s_body2));
+			session.storeMessage(conf, new UnstoredMessage(s_subject, s_body1));
+			session.storeMessage(conf, new UnstoredMessage(s_subject, s_body2));
 		}
 	}
 }

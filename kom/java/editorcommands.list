@@ -13,3 +13,5 @@ nu.rydin.kom.frontend.text.editor.simple.Insert
 nu.rydin.kom.frontend.text.editor.simple.Change
 nu.rydin.kom.frontend.text.editor.simple.ChangeSubject
 nu.rydin.kom.frontend.text.editor.simple.Show
+nu.rydin.kom.frontend.text.editor.simple.Move
+nu.rydin.kom.frontend.text.editor.simple.Quote

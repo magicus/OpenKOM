@@ -19,16 +19,14 @@ public class MessageOccurrence implements Serializable
 	private final int m_localnum;
 	private final Timestamp m_timestamp;
 	private final short m_kind;
-	private final long m_user; 
-	private final String m_userName;
+	private final NameAssociation m_user;
 	
-	public MessageOccurrence(long globalId, Timestamp timestamp, short kind, long user, String userName, long conference, int localnum)
+	public MessageOccurrence(long globalId, Timestamp timestamp, short kind, NameAssociation user, long conference, int localnum)
 	{
 		m_globalId		= globalId;
 		m_timestamp 	= timestamp;
 		m_kind 			= kind;
 		m_user 			= user;
-		m_userName		= userName;
 		m_conference 	= conference;
 		m_localnum 		= localnum;
 	}
@@ -58,13 +56,8 @@ public class MessageOccurrence implements Serializable
 		return m_timestamp;
 	}
 
-	public long getUser()
+	public NameAssociation getUser()
 	{
 		return m_user;
-	}
-	
-	public String getUserName()
-	{
-		return m_userName;
-	}
+	}	
 }
