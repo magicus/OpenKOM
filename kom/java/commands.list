@@ -40,6 +40,7 @@ nu.rydin.kom.frontend.text.commands.SendMail
 nu.rydin.kom.frontend.text.commands.ReadOriginal
 nu.rydin.kom.frontend.text.commands.Who
 nu.rydin.kom.frontend.text.commands.SendChatMessage
+nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage
 nu.rydin.kom.frontend.text.commands.ChangeCharacterset
 nu.rydin.kom.frontend.text.commands.AddPermissions
 nu.rydin.kom.frontend.text.commands.ReadNextReply
