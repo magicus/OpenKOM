@@ -395,7 +395,13 @@ public class LineEditor
 		m_out.flush();
 		
 		try {
-			char ch = waitForCharacter((String.valueOf(yesChars) + String.valueOf(noChars)).toCharArray());
+			//Concatenate yesChars and noChars
+			char[] tmp = new char[yesChars.length + noChars.length];
+			System.arraycopy(yesChars, 0, tmp, 0, yesChars.length);
+			System.arraycopy(noChars, 0, tmp, yesChars.length, noChars.length);
+			
+
+			char ch = waitForCharacter(tmp);
 			for (int i = 0; i < yesChars.length; i++) {
 				if (yesChars[i] == ch)
 				{
