@@ -112,7 +112,7 @@ public class LineEditor implements NewlineListener
 			                TOKEN_RIGHT, 		// Ctrl-F
 			                TOKEN_LEFT, 		// <esc> [ D
 			                TOKEN_LEFT,			// Ctrl-B
-			                TOKEN_ABORT,		// Ctrl-B
+			                TOKEN_ABORT,		// Ctrl-C
 		    				TOKEN_PREV,			// Ctrl-P
 		    				TOKEN_NEXT });		// Ctrl-N
 	    }
