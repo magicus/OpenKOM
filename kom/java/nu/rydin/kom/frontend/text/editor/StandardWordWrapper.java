@@ -150,9 +150,7 @@ public class StandardWordWrapper implements WordWrapper
 		    if(ch == '-')
 			{
 		        //TODO Fix editor so it doesn't eat hyphens while wrapping.
-		        //p = idx+1;
-			    p = idx;
-			    advance=true;
+		        p = idx+1;
 			    break;
 			}
 		}

@@ -163,10 +163,10 @@ public abstract class AbstractEditor
 				if(defaultLine == null)
 					defaultLine = "";
 				
-				// Erase wrapped portion
+				// Erase wrapped portion, but don't erase the character around which we wrap.
 				//
 				int top = defaultLine.length();
-				for(int idx = 0; idx < top; ++idx)
+				for(int idx = 1; idx < top; ++idx)
 					out.print("\b \b");
 				out.println();
 			}
@@ -194,7 +194,10 @@ public abstract class AbstractEditor
 					case '\u000c': // Ctrl-L
 					    try
 					    {
-					        out.println();
+							s = e.getLine();
+							if(s.length() > 0)
+								buffer.add(s);
+							out.println();
 					        refresh();
 					    }
 					    catch(KOMException e1)
