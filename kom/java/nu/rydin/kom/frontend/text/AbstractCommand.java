@@ -75,14 +75,23 @@ public abstract class AbstractCommand implements Command
     
 	private CommandNamePart[] splitName(String name)
 	{
-		String cooked = CommandLinePart.cookString(name);
-		String[] cookedParts = cooked.split(" ");
-		CommandNamePart[] result = new CommandNamePart[cookedParts.length];
-		for (int i = 0; i < cookedParts.length; i++)
-		{
-			String cookedPart = cookedParts[i];
-			result[i] = new CommandNamePart(cookedPart, true);
-		}
+	    CommandNamePart[] result;
+	    
+	    if ("".equals(name))
+	    {
+	        result = new CommandNamePart[0];
+	    }
+	    else
+	    {
+			String cooked = CommandLinePart.cookString(name);
+			String[] cookedParts = cooked.split(" ");
+			result = new CommandNamePart[cookedParts.length];
+			for (int i = 0; i < cookedParts.length; i++)
+			{
+				String cookedPart = cookedParts[i];
+				result[i] = new CommandNamePart(cookedPart, true);
+			}
+	    }
 		return result;
 	}
     
