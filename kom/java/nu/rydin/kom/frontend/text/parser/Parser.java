@@ -6,24 +6,37 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.SAXException;
-
 import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.exceptions.*;
+import nu.rydin.kom.exceptions.CommandNotFoundException;
+import nu.rydin.kom.exceptions.InvalidChoiceException;
+import nu.rydin.kom.exceptions.InvalidParametersException;
+import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
+import nu.rydin.kom.exceptions.TooManyParametersException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.utils.PrintUtils;
+
+import org.xml.sax.SAXException;
 
 /**
  * @author Magnus Ihse
@@ -32,6 +45,8 @@ import nu.rydin.kom.utils.PrintUtils;
 public class Parser
 {
     private Command[] m_commands;
+    
+    private final TreeSet m_categories = new TreeSet();
 
     /** Map[Command->CommandLinePart[]] */
     //	private Map m_commandToPartsMap = new HashMap();
@@ -155,10 +170,15 @@ public class Parser
         }
     }
 
-    private Parser(List commands)
+    private Parser(List commands, Map categories)
     {
         m_commands = new Command[commands.size()];
         commands.toArray(m_commands);
+	    for(Iterator itor = categories.entrySet().iterator(); itor.hasNext();)
+	    {
+	        Map.Entry each = (Map.Entry) itor.next();
+	        m_categories.add(each.getValue());
+	    }
     }
     
     public void addAlias(String alias, String actualCommand)
@@ -560,6 +580,11 @@ public class Parser
         }
         return potentialTargets;
     }
+    
+    public TreeSet getCategories()
+    {
+        return m_categories;
+    }
 
     private static final Class[] s_commandCtorSignature = new Class[]
     { Context.class, String.class };
@@ -586,7 +611,7 @@ public class Parser
             CommandListParser handler = new CommandListParser(context);
             p.parse(is, handler);
             is.close();
-            return new Parser(handler.getCommands());
+            return new Parser(handler.getCommands(), handler.getCategories());
         } 
         catch (SAXException e)
         {

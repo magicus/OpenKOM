@@ -16,11 +16,14 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ShowVersion"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.Who"/>
 		<command class="nu.rydin.kom.frontend.text.commands.WhoAmI"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.Status"/>				
 	</category>
 	<category id="navigation" i18n="command.category.navigation" order="20">
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeUnread"/>
 		<command class="nu.rydin.kom.frontend.text.commands.GotoConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.GotoNextConference"/>		
+	</category>
+	<category id="navigation" i18n="command.category.choose" order="25">
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeUnread"/>
 		<command class="nu.rydin.kom.frontend.text.commands.MarkAsUnread"/>
 		<command class="nu.rydin.kom.frontend.text.commands.MarkTreeAsUnread"/>
 		<command class="nu.rydin.kom.frontend.text.commands.MarkSubjectAsUnread"/>		
@@ -30,8 +33,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.SignOff"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SkipGlobalSubject"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SkipSubject"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SkipTree"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.Status"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.SkipTree"/>			
 	</category>
 	<category id="read" i18n="command.category.read" order="30">
 		<command class="nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain"/>
