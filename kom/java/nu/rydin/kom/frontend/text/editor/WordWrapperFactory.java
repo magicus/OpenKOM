@@ -12,4 +12,6 @@ package nu.rydin.kom.frontend.text.editor;
 public interface WordWrapperFactory
 {
 	public WordWrapper create(String text, int width);
+
+	public WordWrapper create(String text, int width, int offset);
 }

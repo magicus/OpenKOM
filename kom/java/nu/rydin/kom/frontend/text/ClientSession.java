@@ -62,6 +62,7 @@ import nu.rydin.kom.utils.StringUtils;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
+ * @author Henrik Schröder
  */
 public class ClientSession implements Runnable, Context, EventTarget, TerminalSizeListener
 {
@@ -109,38 +110,52 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	
 	private class EventPrinter implements EventTarget
 	{
+		private void printWrapped(String message, int offset)
+		{
+		    WordWrapper ww = getWordWrapper(message, getTerminalSettings().getWidth(), offset);
+		    String line = null;
+		    while((line = ww.nextLine()) != null)
+		    {
+		    	m_out.println(line);
+		    }
+		}
+		
 		public void onEvent(Event event) {
 		}
-
+	
 		public void onEvent(ChatMessageEvent event) {
 			getDisplayController().normal();
-			m_out.print(m_formatter.format("event.chat", new Object[] { event.getUserName() }));
+			String header = m_formatter.format("event.chat", new Object[] { event.getUserName() }); 
+			m_out.print(header);
 			getDisplayController().chatMessageBody();
-			m_out.println(event.getMessage());
-//			m_out.println();
+			printWrapped(event.getMessage(), header.length());
+			m_out.println();
 		}
 
 		public void onEvent(BroadcastMessageEvent event) {
 			getDisplayController().normal();
-			m_out.print(m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() }));
+			String header = m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() }); 
+			m_out.print(header);
 			getDisplayController().broadcastMessageBody();
-			m_out.println(event.getMessage());
-//			m_out.println();
+			printWrapped(event.getMessage(), header.length());
+			m_out.println();
 		}
 
 		public void onEvent(ChatAnonymousMessageEvent event) {
 			getDisplayController().normal();
-			m_out.print(m_formatter.format("event.broadcast.anonymous"));
+			String header = m_formatter.format("event.broadcast.anonymous");
+			m_out.print(header);
 			getDisplayController().broadcastMessageBody();
-			m_out.println(event.getMessage());
+			printWrapped(event.getMessage(), header.length());
 			m_out.println();			
 		}
 
 		public void onEvent(BroadcastAnonymousMessageEvent event) {
 			getDisplayController().normal();
-			m_out.print(m_formatter.format("event.broadcast.anonymous"));
+			String header = m_formatter.format("event.broadcast.anonymous");
+			m_out.print(header);
 			getDisplayController().broadcastMessageBody();
-			m_out.println(event.getMessage());
+			printWrapped(event.getMessage(), header.length());
 			m_out.println();			
 		}
 
@@ -737,7 +752,13 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	{
 		return m_wordWrapperFactory.create(content, width);
 	}
-		
+
+	public WordWrapper getWordWrapper(String content, int width, int offset)
+	{
+		return m_wordWrapperFactory.create(content, width, offset);
+	}
+
+	
 	public String[] getFlagLabels()
 	{
 		return m_flagLabels;
