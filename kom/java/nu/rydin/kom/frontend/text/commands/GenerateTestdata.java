@@ -7,6 +7,8 @@
 package nu.rydin.kom.frontend.text.commands;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -29,6 +31,11 @@ public class GenerateTestdata extends AbstractCommand
 	{
 		super(fullName, new CommandLineParameter[] { new IntegerParameter(false)});
 	}
+	
+    public void checkAccess(Context context) throws AuthorizationException
+    {
+        context.getSession().checkRights(UserPermissions.ADMIN);
+    }
 	
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
