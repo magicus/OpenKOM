@@ -57,7 +57,7 @@ public class SimpleMessageEditor extends AbstractEditor
 				
 			// Print receiver
 			//
-			out.println(formatter.format("simple.editor.receiver", "pelles möte"));
+			out.println(formatter.format("simple.editor.receiver", "Tornado (I väntan på riktiga mötet)"));
 			
 			// Read subject
 			//
