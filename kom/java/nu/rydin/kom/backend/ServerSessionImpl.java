@@ -3228,10 +3228,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 		    // Do we have the right to do this?
 		    //
-		    if(!(this.hasPermissionInConference(conference, ConferencePermissions.ADMIN_PERMISSION)
-		       || this.getLoggedInUser().hasRights(UserPermissions.CONFERENCE_ADMIN)))
-		       throw new AuthorizationException();
-		    
+		    this.assertModifyConference(conference);
+
 		    // So far so, so good. Go ahead and delete!
 		    //
 			m_da.getMessageManager().deleteConference(conference);
