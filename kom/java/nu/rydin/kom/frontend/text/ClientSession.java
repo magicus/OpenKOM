@@ -499,6 +499,8 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			// MAIN SCREEN TURN ON!
 			//		
 			this.mainloop();
+			m_out.println();
+			m_out.println();
 			m_out.println(m_formatter.format("login.goodbye", m_session.getLoggedInUser().getName()));			
 			}
 		finally

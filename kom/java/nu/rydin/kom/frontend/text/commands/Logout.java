@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import java.io.PrintWriter;
+
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.ClientSession;
@@ -30,5 +32,14 @@ public class Logout extends AbstractCommand
 
         context.getSession().updateLastlogin();
         ((ClientSession) context).logout();
+    }
+    
+    public void printPostamble(PrintWriter out)
+    {
+        //
+    }
+    public void printPreamble(PrintWriter out)
+    {
+        //
     }
 }
