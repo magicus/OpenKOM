@@ -8,9 +8,9 @@ package nu.rydin.kom.frontend.text.editor.simple;
 
 
 import java.io.IOException;
+import java.util.Collection;
 
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.Parser;
 
@@ -21,9 +21,8 @@ public class ListCommands extends nu.rydin.kom.frontend.text.commands.ListComman
 		super(context, fullName);
 	}
 
-    protected Command[] getCommandList(Context context) throws KOMException, IOException 
+    protected Collection getCategories(Context context) throws KOMException, IOException 
     {
-        Command[] cmds = Parser.load("/editorcommands.xml", context).getCommandList();
-		return cmds;
+        return Parser.load("/editorcommands.xml", context).getCategories();
     }
 }

@@ -4,7 +4,6 @@
 		<command class="nu.rydin.kom.frontend.text.editor.simple.ListCommands"/>
 	</category>
 	<category id="chat" i18n="command.category.chat" order="20">
-		<command class="nu.rydin.kom.frontend.text.commands.Who"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SendChatMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadMessage"/>

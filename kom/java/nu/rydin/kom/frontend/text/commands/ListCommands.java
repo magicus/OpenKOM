@@ -8,6 +8,7 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -30,12 +31,10 @@ public class ListCommands extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	protected Command[] getCommandList(Context context) throws IOException, KOMException 
+	protected Collection getCategories(Context context) throws IOException, KOMException 
 	{
-		Command[] cmds = ((ClientSession) context).getCommandList();
-		return cmds;
+		return context.getParser().getCategories();
 	}
-
 	
 	public void execute(Context context, Object[] parameterArray)
     throws KOMException, IOException 
@@ -43,13 +42,14 @@ public class ListCommands extends AbstractCommand
 		PrintWriter out = context.getOut();
 		DisplayController dc = context.getDisplayController();
 		MessageFormatter formatter = context.getMessageFormatter();
-		TreeSet cats = context.getParser().getCategories();
+		Collection cats = this.getCategories(context);
 		for(Iterator itor = cats.iterator(); itor.hasNext();)
 		{
 		    // Print category header
 		    //
 		    CommandCategory cat = (CommandCategory) itor.next();
 		    dc.highlight();
+		    out.println();
 		    out.println(formatter.format(cat.getI18nKey()));
 		    
 		    // Print commands
