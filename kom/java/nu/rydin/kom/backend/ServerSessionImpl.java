@@ -2748,7 +2748,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Put it in the read log. Notice that we log only one occurrence, as
 			// it would confuse users if implicitly read occurences were included.
 			//
-			this.appendToReadLog(occs[0]);
+			if(top > 0)
+			    this.appendToReadLog(occs[0]);
 			
 			// Create Envelope and return
 			//

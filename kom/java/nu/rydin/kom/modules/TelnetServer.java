@@ -105,6 +105,7 @@ public class TelnetServer implements Module, Runnable
 		try
 		{
 			m_socket = new ServerSocket(port);
+			m_socket.setReceiveBufferSize(65536);
 		}
 		catch(IOException e)
 		{
@@ -151,7 +152,8 @@ public class TelnetServer implements Module, Runnable
 				// Wait for someone to connect
 				//
 				Socket incoming = m_socket.accept();
-				Logger.info(this, "Incoming connection from " + incoming.getInetAddress().getHostAddress());
+				Logger.info(this, "Incoming connection from " + incoming.getInetAddress().getHostAddress() +
+				        ". Buffer size=" + incoming.getReceiveBufferSize());
 				try
 				{
 					// Create session

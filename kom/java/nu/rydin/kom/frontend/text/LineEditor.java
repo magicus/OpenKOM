@@ -404,6 +404,10 @@ public class LineEditor implements NewlineListener
 		m_session = session;
 		m_keystrokePoller.setSession(session);
 		m_eventPoller.setSession(session);
+		
+		// Set priority somewhere between the normal and the maximum
+		//
+		m_eventPoller.setPriority((Thread.NORM_PRIORITY + Thread.MAX_PRIORITY) / 2);
 		m_eventPoller.start();
 		
 	}
