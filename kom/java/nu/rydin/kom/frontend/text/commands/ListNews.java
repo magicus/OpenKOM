@@ -49,7 +49,9 @@ public class ListNews extends AbstractCommand
 			MembershipListItem each = list[idx];
 			out.println(formatter.format("list.news.item", new Object[] 
 				{ new Integer(each.getUnread()), 
-			        context.formatObjectName(each.getConference().getName(), each.getConference().getId()) }));
+			        each.getConference().getId() == context.getLoggedInUserId()
+			            ? formatter.format("misc.mailboxtitle")
+			            : context.formatObjectName(each.getConference().getName(), each.getConference().getId()) }));
 			total += each.getUnread();
 		}
 		if(total > 0)
