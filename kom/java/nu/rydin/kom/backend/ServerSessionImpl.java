@@ -499,15 +499,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				            continue;
 				        }
 
-				        // Already read?
-			            //
-			            if(m_memberships.isUnread(occ.getConference(), occ.getLocalnum()))
-			            {
-			                // Discard from reply stack and continue looking
-			                //
-			                this.popReply();
-			                continue;
-			            }
 				        if(hasFilters && this.applyFiltersForMessage(nextReply, occ.getConference(), occ.getLocalnum(), FilterFlags.MESSAGES))
 				            continue;
 				        return answer;
