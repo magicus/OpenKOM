@@ -271,7 +271,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			UserInfo userInfo = null;
 			try
 			{
-				for(int idx = 0; idx < 3; ++idx)
+				for(int idx = 0; idx < MAX_LOGIN_RETRIES; ++idx)
 				{
 					try
 					{
@@ -287,6 +287,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 					    if(m_useTicket)
 					        return;
 						m_out.println(m_formatter.format("login.failure"));
+						Logger.info(this, "Failed login");
 					}
 				}
 			}
@@ -304,12 +305,18 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 				//
 				return;
 			}
+			catch(OperationInterruptedException e)
+			{
+				// Interrupted during login
+				//
+				return;
+			}
 			catch(Exception e)
 			{
 				// Unhandled exception while logging in? 
 				// I'm afraid the ride is over...
 				//
-				e.printStackTrace();
+			    Logger.warn(this, "Unhandled exception during login?", e);
 				return;
 			}
 			
@@ -415,7 +422,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 					        m_out.println(name.substring(9, name.length() - 4));
 					    }
 					    m_out.println();
-					    m_out.print(m_formatter.format("login.chose.profile"));
+					    m_out.print(m_formatter.format("login.choose.profile"));
 					    try
 					    {
 					        String choiceStr = m_in.innerReadLine("1", "", 3, 0);
@@ -536,6 +543,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			m_out.print(m_formatter.format("login.user"));
 			m_out.flush();
 			userid = m_in.readLine();
+			Logger.info(this, "Trying to login as: " + userid);
 			m_out.print(m_formatter.format("login.password"));
 			m_out.flush();
 			password = m_in.readPassword();
@@ -691,9 +699,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
     			if(cmdString.trim().length() > 0)
     			{	
     			    ExecutableCommand executableCommand = m_parser.parseCommandLine(this, cmdString);
-    			    //executableCommand.getCommand().printPreamble(getOut());
 			        executableCommand.execute(this);
-			        //executableCommand.getCommand().printPostamble(getOut());
     			}
     			else
     			{
