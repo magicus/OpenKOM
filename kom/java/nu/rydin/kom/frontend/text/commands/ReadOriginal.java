@@ -13,7 +13,6 @@ import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UserException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Envelope;
 
 /**
@@ -21,9 +20,9 @@ import nu.rydin.kom.structs.Envelope;
  */
 public class ReadOriginal extends AbstractCommand
 {
-	public ReadOriginal(MessageFormatter formatter)
+	public ReadOriginal(String fullName)
 	{
-		super(formatter);
+		super(fullName);
 	}
 
 	public void execute(Context context, String[] parameters)

@@ -22,9 +22,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class Signup extends AbstractCommand
 {
-	public Signup(MessageFormatter formatter)
+	public Signup(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] parameters) 

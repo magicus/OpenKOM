@@ -11,16 +11,15 @@ import java.io.IOException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class ReadNextMessage extends AbstractCommand
 {
-	public ReadNextMessage(MessageFormatter formatter)
+	public ReadNextMessage(String fullName)
 	{
-		super(formatter);
+		super(fullName);
 	}
 	
 	public void execute(Context context, String[] parameters) 

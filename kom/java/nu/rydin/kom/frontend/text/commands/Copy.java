@@ -24,9 +24,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class Copy extends AbstractCommand
 {
-	public Copy(MessageFormatter formatter)
+	public Copy(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] parameters) 

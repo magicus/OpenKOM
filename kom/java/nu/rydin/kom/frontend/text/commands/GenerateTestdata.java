@@ -12,7 +12,6 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -25,9 +24,9 @@ public class GenerateTestdata extends AbstractCommand
 	private static final String s_body1 = "Katter är solitära";
 	private static final String s_body2 = "Jag har ingen TV";
 	
-	public GenerateTestdata(MessageFormatter formatter)
+	public GenerateTestdata(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] parameters) 

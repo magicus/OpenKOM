@@ -10,16 +10,15 @@ import java.util.Date;
 
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class ShowTime extends AbstractCommand
 {
-	public ShowTime(MessageFormatter formatter)
+	public ShowTime(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] args)

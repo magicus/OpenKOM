@@ -28,9 +28,9 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class Status extends AbstractCommand
 {
-	public Status(MessageFormatter formatter)
+	public Status(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] parameters) 

@@ -21,9 +21,9 @@ import nu.rydin.kom.structs.Envelope;
  */
 public class ReadMessage extends AbstractCommand
 {
-	public ReadMessage(MessageFormatter formatter)
+	public ReadMessage(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] parameters) 

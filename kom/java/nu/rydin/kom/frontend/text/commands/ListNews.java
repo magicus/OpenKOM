@@ -20,9 +20,9 @@ import nu.rydin.kom.structs.MembershipListItem;
  */
 public class ListNews extends AbstractCommand
 {
-	public ListNews(MessageFormatter formatter)
+	public ListNews(String fullName)
 	{
-		super(formatter);
+		super(fullName);
 	}
 
 	public void execute(Context context, String[] parameters)

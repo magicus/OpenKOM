@@ -14,7 +14,6 @@ import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.UnstoredMessage;
 
@@ -23,9 +22,9 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class SendMail extends AbstractCommand
 {
-	public SendMail(MessageFormatter formatter)
+	public SendMail(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 
 	public void execute(Context context, String[] parameters)

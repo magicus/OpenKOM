@@ -6,13 +6,21 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import nu.rydin.kom.AlreadyLoggedInException;
 import nu.rydin.kom.AuthenticationException;
@@ -32,33 +40,11 @@ import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
-import nu.rydin.kom.frontend.text.commands.AddPermissions;
-import nu.rydin.kom.frontend.text.commands.ChangeCharacterset;
-import nu.rydin.kom.frontend.text.commands.ChangeUnread;
-import nu.rydin.kom.frontend.text.commands.Copy;
-import nu.rydin.kom.frontend.text.commands.CreateConference;
-import nu.rydin.kom.frontend.text.commands.CreateUser;
-import nu.rydin.kom.frontend.text.commands.DisplayCurrentConference;
-import nu.rydin.kom.frontend.text.commands.GenerateTestdata;
-import nu.rydin.kom.frontend.text.commands.GotoConference;
 import nu.rydin.kom.frontend.text.commands.GotoNextConference;
-import nu.rydin.kom.frontend.text.commands.ListConferences;
-import nu.rydin.kom.frontend.text.commands.ListNews;
-import nu.rydin.kom.frontend.text.commands.ListUsers;
 import nu.rydin.kom.frontend.text.commands.Logout;
-import nu.rydin.kom.frontend.text.commands.PrintDebug;
-import nu.rydin.kom.frontend.text.commands.ReadMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextReply;
-import nu.rydin.kom.frontend.text.commands.ReadOriginal;
-import nu.rydin.kom.frontend.text.commands.Reply;
-import nu.rydin.kom.frontend.text.commands.SendChatMessage;
-import nu.rydin.kom.frontend.text.commands.SendMail;
 import nu.rydin.kom.frontend.text.commands.ShowTime;
-import nu.rydin.kom.frontend.text.commands.Signup;
-import nu.rydin.kom.frontend.text.commands.Status;
-import nu.rydin.kom.frontend.text.commands.Who;
-import nu.rydin.kom.frontend.text.commands.WriteMessage;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.UserInfo;
@@ -69,7 +55,10 @@ import nu.rydin.kom.structs.UserInfo;
 public class ClientSession implements Runnable, Context, EventTarget
 {
 	private static final int MAX_LOGIN_RETRIES = 3;
-	private static final String DEFAULT_CHARSET = "US-ASCII";	
+	private static final String DEFAULT_CHARSET = "US-ASCII";
+	
+	private static final Class[] s_commandCtorSignature = new Class[] { String.class };
+	
 	private LineEditor m_in;
 	private KOMPrinter m_out;
 	private final InputStream m_rawIn;
@@ -85,64 +74,35 @@ public class ClientSession implements Runnable, Context, EventTarget
 	//
 	private final MessagePrinter m_messagePrinter = new BasicMessagePrinter();
 	
-	// Commands. TODO: Move somewhere else (config file)
-	//
-	private Command[] m_commandList = 
-	{ 
-		new ShowTime(m_formatter),
-		new Logout(m_formatter),
-		new CreateUser(m_formatter),
-		new CreateConference(m_formatter),
-		new ListUsers(m_formatter),
-		new ListConferences(m_formatter),
-		new Signup(m_formatter),
-		new GotoConference(m_formatter),
-		new WriteMessage(m_formatter),
-		new Reply(m_formatter),
-		new ReadMessage(m_formatter),
-		new Status(m_formatter),
-		new PrintDebug(m_formatter),
-		new GenerateTestdata(m_formatter),
-		new GotoNextConference(m_formatter),
-		new ReadNextMessage(m_formatter),
-		new DisplayCurrentConference(m_formatter),
-		new ChangeUnread(m_formatter),
-		new ListNews(m_formatter),
-		new SendMail(m_formatter),
-		new ReadOriginal(m_formatter),
-		new Who(m_formatter),
-		new SendChatMessage(m_formatter),
-		new ChangeCharacterset(m_formatter),
-		new AddPermissions(m_formatter),
-		new ReadNextReply(m_formatter),
-		new Copy(m_formatter),
-		new ListCommands(m_formatter) //
-		};
+	private Command[] m_commandList;
+	private final Map m_primaryCommands = new HashMap(); 
 		
-	private class ListCommands extends AbstractCommand
+	private static class ListCommands extends AbstractCommand
 	{
-		public ListCommands(MessageFormatter formatter)
+		public ListCommands(String fullName)
 		{
-			super(formatter);
+			super(fullName);
 		}
 		
 		public void execute(Context context, String[] args)
 		{
 			PrintWriter out = context.getOut();
-			Command[] cmds = ClientSession.this.m_commandList;
+			Command[] cmds = ((ClientSession) context).m_commandList;
 			int top = cmds.length;
 			for(int idx = 0; idx < top; ++idx)
 				out.println(cmds[idx].getFullName());
 		}
 	}
 		
-	private CommandParser m_parser = new CommandParser(m_commandList);
+	private CommandParser m_parser; 
 	
 	public ClientSession(InputStream in, OutputStream out)
 	throws UnexpectedException
 	{
 		m_rawIn = in;
 		m_rawOut = out;
+		this.installCommands();
+		m_parser = new CommandParser(m_commandList);
 		try
 		{
 			m_out = new KOMPrinter(m_rawOut, DEFAULT_CHARSET);
@@ -465,16 +425,16 @@ public class ClientSession implements Runnable, Context, EventTarget
 		switch(m_session.suggestNextAction())
 		{
 			case ServerSession.NEXT_REPLY:
-				return new ReadNextReply(m_formatter);
+				return (Command) m_primaryCommands.get(ReadNextReply.class);
 			case ServerSession.NEXT_MESSAGE:
-				return new ReadNextMessage(m_formatter);
+				return (Command) m_primaryCommands.get(ReadNextMessage.class);
 			case ServerSession.NEXT_CONFERENCE:
-				return new GotoNextConference(m_formatter);
+				return (Command) m_primaryCommands.get(GotoNextConference.class);
 			case ServerSession.NO_ACTION:
-				return new ShowTime(m_formatter);
+				return (Command) m_primaryCommands.get(ShowTime.class);
 			default:
 				// TODO: Print warning
-				return new ShowTime(m_formatter);
+				return (Command) m_primaryCommands.get(ShowTime.class);
 		}
 	}
 	
@@ -594,5 +554,89 @@ public class ClientSession implements Runnable, Context, EventTarget
 		// Not much to do. Command loop will reevaluate default command
 		// and try again.
 		//
+	}
+	
+	protected void installCommands()
+	throws UnexpectedException
+	{
+		try
+		{
+			List list = new ArrayList();
+			BufferedReader rdr = new BufferedReader(
+				new InputStreamReader(this.getClass().getResourceAsStream("/commands.list")));
+			
+			// Read command list
+			//
+			String line;
+			while((line = rdr.readLine()) != null)
+			{
+				line = line.trim();
+				if(!line.startsWith("#"))
+					list.add(line);
+			}
+			rdr.close();
+			
+			// Instantiate commands
+			//
+			int top = list.size();
+			List commandList = new ArrayList();
+			for(int idx = 0; idx < top; ++idx)
+			{
+				Class clazz = Class.forName((String) list.get(idx));
+				Constructor ctor = clazz.getConstructor(s_commandCtorSignature); 
+				
+				// Install primary command
+				//
+				String name = m_formatter.format(clazz.getName() + ".name");
+				Command primaryCommand = (Command) ctor.newInstance(new Object[] { name });
+				commandList.add(primaryCommand);
+				m_primaryCommands.put(clazz, primaryCommand); 
+				
+				// Install aliases
+				//
+				int aliasIdx = 1;
+				for(;; ++aliasIdx)
+				{
+					// Try alias key
+					//
+					String alias = m_formatter.getStringOrNull(clazz.getName() + ".name." + aliasIdx);
+					if(alias == null)
+						break; // No more aliases
+					
+					// We found an alias! Create command.
+					//
+					commandList.add(ctor.newInstance(new Object[] { alias }));
+				}
+			}
+			
+			// Copy to command array
+			// 
+			m_commandList = new Command[commandList.size()];
+			commandList.toArray(m_commandList);
+		}
+		catch(IOException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(ClassNotFoundException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(NoSuchMethodException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(InstantiationException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(IllegalAccessException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(InvocationTargetException e)
+		{
+			throw new UnexpectedException(-1, e.getCause());
+		}		
 	}
 }

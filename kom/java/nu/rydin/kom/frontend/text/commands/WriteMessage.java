@@ -13,7 +13,6 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.UnstoredMessage;
 
@@ -22,9 +21,9 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class WriteMessage extends AbstractCommand
 {
-	public WriteMessage(MessageFormatter formatter)
+	public WriteMessage(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] parameters) 

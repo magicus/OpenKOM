@@ -21,9 +21,9 @@ import nu.rydin.kom.structs.UserListItem;
 public class Who extends AbstractCommand
 {
 
-	public Who(MessageFormatter formatter)
+	public Who(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] parameters)

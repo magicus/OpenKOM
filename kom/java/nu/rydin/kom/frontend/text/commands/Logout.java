@@ -8,16 +8,15 @@ package nu.rydin.kom.frontend.text.commands;
 
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class Logout extends AbstractCommand
 {
-	public Logout(MessageFormatter formatter)
+	public Logout(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context ctx, String[] args)

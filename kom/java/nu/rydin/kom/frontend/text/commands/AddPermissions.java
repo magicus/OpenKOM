@@ -25,9 +25,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class AddPermissions extends AbstractCommand
 {
-	public AddPermissions(MessageFormatter formatter)
+	public AddPermissions(String fullName)
 	{
-		super(formatter);
+		super(fullName);
 	}
 
 	public void execute(Context context, String[] parameters)

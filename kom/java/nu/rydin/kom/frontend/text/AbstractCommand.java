@@ -7,7 +7,6 @@
 package nu.rydin.kom.frontend.text;
 
 import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -17,9 +16,9 @@ public abstract class AbstractCommand implements Command
 	protected String m_fullName;
 	protected String[] m_nameParts;
 	
-	protected AbstractCommand(MessageFormatter formatter)
+	protected AbstractCommand(String fullName)
 	{
-		m_fullName = formatter.format(this.getClass().getName() + ".name"); 
+		m_fullName = fullName;  
 		m_nameParts = NameUtils.splitName(m_fullName);
 	}
 	

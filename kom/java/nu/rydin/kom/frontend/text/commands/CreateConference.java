@@ -27,9 +27,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class CreateConference extends AbstractCommand
 {
-	public CreateConference(MessageFormatter formatter)
+	public CreateConference(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 	
 	public void execute(Context context, String[] parameters) 

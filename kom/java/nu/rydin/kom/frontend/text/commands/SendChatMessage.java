@@ -18,7 +18,6 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
-import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -26,9 +25,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
 public class SendChatMessage extends AbstractCommand
 {
 
-	public SendChatMessage(MessageFormatter formatter)
+	public SendChatMessage(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 
 	public void execute(Context context, String[] parameters)

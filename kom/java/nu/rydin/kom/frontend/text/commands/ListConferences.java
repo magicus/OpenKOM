@@ -13,7 +13,6 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -21,9 +20,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ListConferences extends AbstractCommand
 {
-	public ListConferences(MessageFormatter formatter)
+	public ListConferences(String fullName)
 	{
-		super(formatter);	
+		super(fullName);	
 	}
 
 	public void execute(Context context, String[] args) 

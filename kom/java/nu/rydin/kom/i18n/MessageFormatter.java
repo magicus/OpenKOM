@@ -7,6 +7,7 @@
 package nu.rydin.kom.i18n;
 
 import java.text.MessageFormat;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -45,6 +46,18 @@ public class MessageFormatter
 	public String format(String key, Object[] args)
 	{
 		return this.getFormat(key).format(args);
+	}
+	
+	public String getStringOrNull(String key)
+	{
+		try
+		{
+			return m_resource.getString(key);
+		}
+		catch(MissingResourceException e)
+		{
+			return null;
+		}
 	}
 
 	public MessageFormat getFormat(String key)
