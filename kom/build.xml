@@ -35,15 +35,15 @@
 	</target>
 
 	<target name="release" depends="build-jar">
-		<zip destfile="openkom.zip">
-			<zipfileset dir="." includes="OpenKOM.LICENSE, run.sh"/>
+		<zip destfile="openkom.1.0.1.6.zip">
+			<zipfileset dir="." includes="OpenKOM.LICENSE, INSTALL, run.sh, run.bat"/>
 			<zipfileset dir="${libPath}/" prefix="${libPath}/" />
 			<zipfileset dir="${distrPath}/" prefix="${distrPath}/" />
 			<zipfileset dir="${confPath}/" prefix="${confPath}/" />
 			<zipfileset dir="${sqlPath}/" prefix="${sqlPath}/" />
 		</zip>
 	</target>
-	
+
 	<target name="run" depends="build-jar">
 		<java classname="nu.rydin.kom.boot.Bootstrap" classpathref="kom.class.path" fork="yes"/>
 	</target>

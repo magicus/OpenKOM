@@ -1,0 +1,37 @@
+Prerequirements:
+
+* A working MySQL installation, version 4.0 or higher.
+
+* A working Java SDK installation, version 1.3 or higher.
+
+Database initialization:
+
+Apply the script sql/initmysql.sql to your database. It creates a database 
+named "kom", and create a user "kom" with password "kom" with access to this.
+
+SSH2:
+
+You need to create a server host key-file with an empty passpphrase and place
+it in the top openkom directory with the name "server_host_key". Check for example
+http://www.openssh.com for a keygen.
+
+Configuration:
+
+conf/modules.xml contains all server configuration. Check the JDBC URL, port numbers,
+and the name of the server host key-file.
+
+conf/log4j.properties contains all logging configuration, check the log4j documentation
+at http://logging.apache.org/log4j/docs/documentation.html. The default settings will
+log everything to stdout. If you want to log to a file, it is strongly recommended
+to do that through log4j by exchanging the consoleappender for a fileappender.
+
+Running OpenKOM:
+
+Check run.sh or run.bat for a simple example which assumes that "java" on your command
+line will start a working JVM and that all environment variables it needs are ok.
+
+In general, the start class is nu.rydin.kom.boot.Bootstrap, and all the included 
+jar-files plus the conf-directory must be in the classpath.
+
+When OpenKOM starts for the first time it will create the user sysop/sysop. Use this
+account to create other users, and remember to change the password of the sysop account.
