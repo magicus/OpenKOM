@@ -7,6 +7,7 @@
 package nu.rydin.kom.modules.ssh;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import nu.rydin.kom.backend.ServerSessionFactory;
 import nu.rydin.kom.exceptions.AuthenticationException;
@@ -16,6 +17,7 @@ import nu.rydin.kom.modules.Modules;
 
 import com.sshtools.daemon.platform.NativeAuthenticationProvider;
 import com.sshtools.daemon.platform.PasswordChangeException;
+import com.sshtools.j2ssh.SshThread;
 
 /**
  * @author Henrik Schröder
@@ -23,16 +25,38 @@ import com.sshtools.daemon.platform.PasswordChangeException;
  */
 public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 {
-
+    private static final HashMap s_tickets = new HashMap();
+    
     public OpenKOMAuthenticationProvider()
     {
         super();
     }
+    
+    public static void postTicket(String ticket)
+    {
+        synchronized(s_tickets)
+        {
+            // Use the session id as key
+            //
+            s_tickets.put(((SshThread) Thread.currentThread()).getSessionIdString(), ticket);
+        }
+    }
+    
+    public static String claimTicket()
+    {
+        synchronized(s_tickets)
+        {
+            // Use the session id as key
+            //
+            return (String) s_tickets.remove(((SshThread) Thread.currentThread()).getSessionIdString());
+        }
+    }
 
     public String getHomeDirectory(String username) throws IOException
     {
-        //???
-        return "/home/foo/bar";
+        // We don'r provide a home directory.
+        //
+        return "/no/way/jose";
     }
 
     public boolean logonUser(String username, String password)
@@ -40,8 +64,9 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
     {
         try
         {
-            ((ServerSessionFactory) Modules.getModule("Backend")).authenticate(
+            String ticket = ((ServerSessionFactory) Modules.getModule("Backend")).generateTicket(
                     username, password);
+            postTicket(ticket);
             return true;
         } catch (AuthenticationException e)
         {
@@ -70,5 +95,4 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
         //No way.
         return false;
     }
-
 }

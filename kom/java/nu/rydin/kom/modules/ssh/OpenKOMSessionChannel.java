@@ -15,6 +15,7 @@ import nu.rydin.kom.exceptions.InternalException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.ClientSession;
 import nu.rydin.kom.frontend.text.TerminalSizeListener;
+import nu.rydin.kom.utils.Logger;
 
 import com.sshtools.j2ssh.connection.ChannelOutputStream;
 import com.sshtools.j2ssh.connection.IOChannel;
@@ -85,18 +86,21 @@ public class OpenKOMSessionChannel extends IOChannel
             connection.sendChannelRequestSuccess(this);
             try
             {
-                ClientSession client = new ClientSession(getInputStream(), getOutputStream(), false);
+                String ticket = OpenKOMAuthenticationProvider.claimTicket();
+                Logger.debug(this, "Ticket: " + ticket);
+                ClientSession client = new ClientSession(getInputStream(), getOutputStream(), true);
                 addSizeListener(client);
+                client.setTicket(ticket);
                 Thread clientThread = new Thread(client, "Session (not logged in)");
 				clientThread.start();
             } catch (UnexpectedException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Logger.error(this, e);
+                throw new IOException();
             } catch (InternalException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Logger.error(this, e);
+                throw new IOException();
             }
         }
         else if (requestType.equals("pty-req"))

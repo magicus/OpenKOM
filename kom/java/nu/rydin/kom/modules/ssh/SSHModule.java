@@ -38,7 +38,7 @@ import com.sshtools.j2ssh.transport.TransportProtocolEventAdapter;
 import com.sshtools.j2ssh.transport.TransportProtocolEventHandler;
 import com.sshtools.j2ssh.util.StartStopState;
 
-public class SSHModule implements Module, Runnable
+public class SSHModule implements Module
 {
     InnerJ2SSHServer myserver;
 
@@ -342,21 +342,7 @@ public class SSHModule implements Module, Runnable
 
     public void join() throws InterruptedException
     {
-        //???
-    }
-
-    public void run()
-    {
-        //???
-        for (;;)
-        {
-            try
-            {
-                Thread.sleep(10000);
-            } catch (InterruptedException e)
-            {
-            }
-        }
+        // There's nothing to wait for, so just return
     }
 
     protected boolean sanityChecks()

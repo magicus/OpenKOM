@@ -109,6 +109,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private DateFormatSymbols m_dateSymbols;
 	private final boolean m_useTicket;
 	private SessionState m_state;
+	private String m_ticket;
 
 	private Parser m_parser;
     private boolean m_loggedIn;	
@@ -1256,6 +1257,10 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	protected String waitForTicket()
 	throws InterruptedException, IOException
 	{
+	    // Do we already have a ticket?
+	    //
+	    if(m_ticket != null)
+	        return m_ticket;
 	    for(;;)
 	    {
 		    try
@@ -1345,6 +1350,11 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	public Parser getParser()
 	{
 	    return m_parser;
+	}
+	
+	public void setTicket(String ticket)
+	{
+	    m_ticket = ticket;
 	}
 	
     public void logout() 
