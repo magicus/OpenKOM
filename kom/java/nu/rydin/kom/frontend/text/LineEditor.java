@@ -42,6 +42,7 @@ public class LineEditor implements NewlineListener
 	public static final int FLAG_STOP_ONLY_WHEN_EMPTY	= 0x10;
 	public static final int FLAG_RECORD_HISTORY			= 0x20;
 	public static final int FLAG_INHIBIT_ABORT			= 0x40;
+	public static final int FLAG_ALLOW_HISTORY			= 0x80;
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
@@ -763,7 +764,7 @@ public class LineEditor implements NewlineListener
 		    	    break;
 		    	case TOKEN_PREV:
 		    	case TOKEN_UP:
-		    	    if(historyPos > 0)
+		    	    if(historyPos > 0 && (flags & FLAG_ALLOW_HISTORY) != 0)
 		    	    {
 				    	this.deleteLine(buffer, cursorpos);
 						cursorpos = 0;						
@@ -777,7 +778,7 @@ public class LineEditor implements NewlineListener
 		    		break;
 		    	case TOKEN_NEXT:
 		    	case TOKEN_DOWN:
-		    	    if(historyPos < m_history.size() - 1)
+		    	    if(historyPos < m_history.size() - 1 && (flags & FLAG_ALLOW_HISTORY) != 0)
 		    	    {
 				    	this.deleteLine(buffer, cursorpos);
 						cursorpos = 0;						
