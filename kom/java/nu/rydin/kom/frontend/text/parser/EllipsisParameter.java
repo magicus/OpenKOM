@@ -79,7 +79,7 @@ public abstract class EllipsisParameter extends CommandLineParameter
     public String getUserDescription(Context context) 
     {
 		MessageFormatter fmt = context.getMessageFormatter();
-		String result = fmt.format(innerParameter.getUserDescriptionKey()) + innerParameter.getSeparator() + "...";
+		String result = fmt.format(innerParameter.getUserDescriptionKey()) + innerParameter.getSeparator() + " ...";
         if (isRequired()) 
             return "<" + result + ">";
         else
