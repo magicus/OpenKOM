@@ -208,12 +208,12 @@ public interface ServerSession
 	 * @param permissions Default permissions
 	 * @param visibility Visibility level.
 	 * @param replyConf Conference to send replies to. -1 if same conference.
-	 * 
+	 * @return New conference ID.
 	 * @throws UnexpectedException
 	 * @throws AmbiguousNameException
 	 * @throws DuplicateNameException
 	 */	
-	public void createConference(String fullname, int permissions, short visibility, long replyConf)
+	public long createConference(String fullname, int permissions, short visibility, long replyConf)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException;
 
 	/**
@@ -279,6 +279,31 @@ public interface ServerSession
 	public MessageOccurrence storeMessage(UnstoredMessage msg)
 	throws AuthorizationException, UnexpectedException;
 	
+	/**
+	 * Store a magic message. Conference determined by kind of magic.
+	 * 
+	 * @param msg Unstored message.
+	 * @param kind Magic type (see ConferenceManager.MAGIC_XXXXXXXX).
+	 * @return The local occurrence.
+	 * @throws UnexpectedException
+	 * @throws AuthorizationException
+	 */
+	
+	public MessageOccurrence storeMagicMessage(UnstoredMessage msg, short kind, long object)
+	throws UnexpectedException, AuthorizationException;
+
+	/**
+	 * Reads a magic message.
+	 * 
+	 * @param kind Kind of magic (user presentation, conference presentation or note).
+	 * @param object Object identifier (unser or conference ID).
+	 * @return The envelope around the latest matching message.
+	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
+	 */
+	public Envelope readMagicMessage(short kind, long object)
+	throws UnexpectedException, ObjectNotFoundException;
+
 	/**
 	 * Stores a reply to a message
 	 * 
@@ -942,6 +967,18 @@ public interface ServerSession
 	 */
 	public void deleteConference (long conference)
 	throws UnexpectedException;
+	
+	public void createMagicConference (String fullname, int permissions, short visibility, long replyConf, short kind)
+	throws DuplicateNameException, UnexpectedException, AuthorizationException, AmbiguousNameException;
+
+	public long getMagicConference (short kind)
+	throws ObjectNotFoundException, UnexpectedException;
+
+	public boolean isMagicConference (long conference)
+	throws UnexpectedException;
+	
+	public short getObjectKind (long conference)
+	throws ObjectNotFoundException;
 	
 	/**
 	 * Returns the Envelope for the last rule posting (which is the last message which has a 

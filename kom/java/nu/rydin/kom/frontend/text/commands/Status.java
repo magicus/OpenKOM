@@ -13,6 +13,7 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
@@ -25,6 +26,7 @@ import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class Status extends AbstractCommand
 {
@@ -82,10 +84,22 @@ public class Status extends AbstractCommand
 			30, info.getEmail2());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.url"), 
 			30, info.getUrl());
-			
+		out.println();
+		
+		// Has the user left a note?
+		//
+		try
+		{
+			out.print(context.getSession().readMagicMessage(MessageManager.ATTR_NOTE, info.getId()).getMessage().getBody());
+			out.println();
+		}
+		catch (UnexpectedException e)
+		{
+			//
+		}		
+		
 		// List memberships
 		//
-		out.println();
 		out.println(formatter.format("status.user.memberof"));
 		NameAssociation[] memberships = context.getSession().listMemberships(info.getId()); 
 		int top = memberships.length;

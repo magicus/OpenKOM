@@ -402,7 +402,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}			
 		
-	public void createConference(String fullname, int permissions, short visibility, long replyConf)
+	public long createConference(String fullname, int permissions, short visibility, long replyConf)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException
 	{
 		this.checkRights(UserPermissions.CREATE_CONFERENCE);
@@ -418,6 +418,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			// Flush membership cache
 			//
 			this.reloadMemberships();
+			return confId;
 		}
 		catch(SQLException e)
 		{
@@ -599,6 +600,55 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		if(m_lastReadMessageId == -1)
 			throw new NoCurrentMessageException();
 		return this.storeReplyInCurrentConference(msg, m_lastReadMessageId);	
+	}
+
+	public MessageOccurrence storeMagicMessage(UnstoredMessage msg, short kind, long object)
+	throws UnexpectedException, AuthorizationException
+	{
+		try
+		{
+			if (-1L == object)
+			{
+				object = this.getLoggedInUserId();
+			}
+			long conference = this.getMagicConferenceForObject(kind, object);
+			MessageManager mm = m_da.getMessageManager();  
+			MessageOccurrence occ = mm.addMessage(this.getLoggedInUserId(),
+				m_da.getNameManager().getNameById(this.getLoggedInUserId()),
+				conference, -1, msg.getSubject(), msg.getBody());
+			this.markMessageAsRead(conference, occ.getLocalnum());
+			this.broadcastEvent(
+				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
+					occ.getGlobalId()));
+			this.m_da.getMessageManager().addMessageAttribute(occ.getGlobalId(), kind, new Long(object).toString());
+			return occ;
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+		catch(ObjectNotFoundException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}	
+	}
+
+	public Envelope readMagicMessage(short kind, long object)
+	throws UnexpectedException, ObjectNotFoundException
+	{
+		try
+		{
+			if (-1 == object)
+			{
+				object = this.getLoggedInUserId();
+			}
+			long magicConference = getMagicConferenceForObject(kind, object);
+			return this.innerReadMessage(m_da.getMessageManager().getLatestMagicMessageFor(magicConference, object, kind));
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
 	}
 	
 	public MessageOccurrence storeReplyInCurrentConference(UnstoredMessage msg, long replyTo)
@@ -1368,6 +1418,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
+	public short getObjectKind(long object)
+	throws ObjectNotFoundException
+	{
+		return m_da.getNameManager().getObjectKind(object);
+	}
+	
 	public void updateCharacterset(String charset)
 	throws UnexpectedException
 	{
@@ -2131,6 +2187,55 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			MessageOccurrence mo = this.storeReplyInCurrentConference(msg, -1L);
 			m_da.getMessageManager().addMessageAttribute(mo.getGlobalId(), MessageManager.ATTR_RULEPOST, null);
 			return mo;
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+	
+	public void createMagicConference (String fullname, int permissions, short visibility, long replyConf, short kind)
+	throws DuplicateNameException, UnexpectedException, AuthorizationException, AmbiguousNameException
+	{
+		try
+		{
+			m_da.getConferenceManager().setMagicConference(this.createConference(fullname, permissions, visibility, replyConf), kind);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+	
+	public long getMagicConference (short kind)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		try
+		{
+			return m_da.getConferenceManager().getMagicConference(kind);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+	
+	public long getMagicConferenceForObject(short kind, long object)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		return this.getMagicConference(MessageManager.ATTR_PRESENTATION == kind ? 
+											UserManager.USER_KIND == this.getObjectKind(object) ? 
+												ConferenceManager.MAGIC_USERPRESENTATIONS : 
+												ConferenceManager.MAGIC_CONFPRESENTATIONS :
+											ConferenceManager.MAGIC_NOTE);		
+	}
+	
+	public boolean isMagicConference (long conference)
+	throws UnexpectedException
+	{
+		try
+		{
+			return m_da.getConferenceManager().isMagic(conference);
 		}
 		catch (SQLException e)
 		{

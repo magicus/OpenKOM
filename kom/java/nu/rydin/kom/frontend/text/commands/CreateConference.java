@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
+import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.constants.ConferencePermissions;
@@ -24,6 +25,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class CreateConference extends AbstractCommand
 {
@@ -51,12 +53,72 @@ public class CreateConference extends AbstractCommand
 		if(fullname.length() == 0)
 			return;
 		
+		// There must be a better way to do this..
+		//
+		boolean canDoMagic = false;
+		boolean doMagic = false;
+		short magicType = -1;
+		try
+		{
+			context.getSession().checkRights(UserPermissions.CONFERENCE_ADMIN);
+			canDoMagic = true;
+		}
+		catch (AuthorizationException e)
+		{
+			// Ignore, user simply doesn´t have conference_admin privileges. 
+		}
+		
+		int choice = 0;
+
+		// User may create magic conferences. Do it?
+		//		
+		String error = fmt.format("create.conference.invalid.choice"); 
+		if (canDoMagic)
+		{
+			choice = in.getChoice(fmt.format("create.conference.magic") + " (" + fmt.format("misc.y") + "/" + fmt.format("misc.n") + ")? ", 
+								  new String[] { fmt.format("misc.y"), fmt.format("misc.n") },
+								  1, error);
+		}
+		if (0 == choice)
+		{
+			doMagic = true;
+			out.println(fmt.format("magic.conference.presentation.users"));
+			out.println(fmt.format("magic.conference.presentation.conferences"));
+			out.println(fmt.format("magic.conference.notes"));
+			choice = in.getChoice("magic.conference.kind" + " (1/2/3)? ",
+								  new String[] { "1", "2", "3" }, -1, error);
+			
+			if (-1 != choice)
+			{
+				magicType = (short)choice;
+				long oldMagic = -1;
+				try
+				{
+					oldMagic = context.getSession().getMagicConference((short)choice);
+					choice = in.getChoice(fmt.format("magic.conference.exists", context.getSession().getName(oldMagic)),
+										  new String[] { fmt.format("misc.yes"), fmt.format("misc.no") },
+										  1, error);
+					if (0 != choice)
+					{
+						doMagic = false;
+					}
+				}
+				catch (KOMException e)
+				{
+					// There was no previous magic conference of this kind. 
+				}
+			}
+			else
+			{
+				doMagic = false;
+			}
+		}
+		
 		short flags = 0;
 		
 		// Get conference type
 		//
-		String error = fmt.format("create.conference.invalid.choice"); 
-		int choice = in.getChoice(fmt.format("create.conference.type"),
+		choice = in.getChoice(fmt.format("create.conference.type"),
 			new String[] 
 			{
 				fmt.format("create.conference.public"), 
@@ -105,7 +167,14 @@ public class CreateConference extends AbstractCommand
 		//			
 		try
 		{
-			context.getSession().createConference(fullname, flags, NameManager.PUBLIC, replyConf);
+			if (doMagic)
+			{
+				context.getSession().createMagicConference(fullname, flags, NameManager.PUBLIC, replyConf, magicType);
+			}
+			else
+			{
+				context.getSession().createConference(fullname, flags, NameManager.PUBLIC, replyConf);
+			}
 		}
 		catch(DuplicateNameException e)
 		{

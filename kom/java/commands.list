@@ -23,6 +23,9 @@ nu.rydin.kom.frontend.text.commands.ReadMessage
 nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain
 nu.rydin.kom.frontend.text.commands.DeleteMessage
 nu.rydin.kom.frontend.text.commands.Status
+nu.rydin.kom.frontend.text.commands.PresentObject
+nu.rydin.kom.frontend.text.commands.ViewPresentation
+nu.rydin.kom.frontend.text.commands.WriteNote
 nu.rydin.kom.frontend.text.commands.PrintDebug
 nu.rydin.kom.frontend.text.commands.GenerateTestdata
 nu.rydin.kom.frontend.text.commands.GotoNextConference

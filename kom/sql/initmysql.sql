@@ -124,4 +124,11 @@ CREATE TABLE IF NOT EXISTS messageattributes
 	FOREIGN KEY (message) REFERENCES messages(id) ON DELETE CASCADE,
 	INDEX messagekind_ix(message, kind)
 ) TYPE=INNODB;
-	
+
+CREATE TABLE IF NOT EXISTS magicconferences
+(
+	conference BIGINT NOT NULL,
+	kind SMALLINT NOT NULL,
+	PRIMARY KEY(conference, kind),
+	FOREIGN KEY (conference) REFERENCES conferences(id) ON DELETE CASCADE
+) TYPE=INNODB;

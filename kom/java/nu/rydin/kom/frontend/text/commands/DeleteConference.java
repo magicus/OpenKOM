@@ -42,6 +42,10 @@ public class DeleteConference extends AbstractCommand
 		MessageFormatter mf = new MessageFormatter();
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
+		if (ss.isMagicConference(conference))
+		{
+			out.println(mf.format("delete.magic.warning"));
+		}
 		out.println(mf.format("delete.conference.warning"));
 		int choice = in.getChoice(mf.format("delete.conference.confirm",
 											ss.getName(conference)) +

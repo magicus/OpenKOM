@@ -53,6 +53,7 @@ public class MessageManager
 	private final PreparedStatement m_dropConferenceStmt;
 	private final PreparedStatement m_getGlobalBySubjectStmt;
 	private final PreparedStatement m_findLastOccurrenceInConferenceWithAttrStmt;
+	private final PreparedStatement m_getLatestMagicMessageStmt;
 	
 	private final Connection m_conn; 
 	
@@ -63,6 +64,8 @@ public class MessageManager
 	public static final short ATTR_NOCOMMENT = 0;
 	public static final short ATTR_MOVEDFROM = 1;
 	public static final short ATTR_RULEPOST = 2;
+	public static final short ATTR_PRESENTATION = 3;
+	public static final short ATTR_NOTE = 4;
 	
 	public MessageManager(Connection conn)
 	throws SQLException
@@ -152,6 +155,14 @@ public class MessageManager
 			 "where MA.kind = ? and MO.conference = ? " +
 			 "order by MO.Message desc " +
 			 "limit 1 offset 0");
+		m_getLatestMagicMessageStmt = conn.prepareStatement(
+			 "select MO.Message " +
+			 "from MessageOccurrences as MO " +
+			 "join MagicConferences as MC on MO.Conference = MC.Conference " +
+			 "join MessageAttributes as MA on MO.Message = MA.Message " +
+			 "where MO.Conference = ? and MA.Kind = ? and MA.Value = ? " +
+			 "order by MO.Message desc " +
+			 "limit 1 offset 0");
 	}
 	
 	public void close()
@@ -201,6 +212,8 @@ public class MessageManager
 			m_getGlobalBySubjectStmt.close();
 		if(m_findLastOccurrenceInConferenceWithAttrStmt != null)
 			m_findLastOccurrenceInConferenceWithAttrStmt.close();
+		if(m_getLatestMagicMessageStmt != null)
+			m_getLatestMagicMessageStmt.close();
 	}
 	
 	public void finalize()
@@ -881,5 +894,29 @@ public class MessageManager
 		rs.close();
 		rs = null;		
 		return i;
+	}
+	
+	public long getLatestMagicMessageFor (long conference, long objectId, short kind)
+	throws SQLException
+	{
+		ResultSet rs = null;
+		try
+		{
+			this.m_getLatestMagicMessageStmt.clearParameters();
+			this.m_getLatestMagicMessageStmt.setLong(1, conference);
+			this.m_getLatestMagicMessageStmt.setShort(2, kind);
+			this.m_getLatestMagicMessageStmt.setString(3, new Long(objectId).toString());
+			rs = this.m_getLatestMagicMessageStmt.executeQuery();
+			rs.first();
+			return rs.getLong(1);
+		}
+		finally
+		{
+			if (null != rs)
+			{
+				rs.close();
+			}
+		}
+		
 	}
 }

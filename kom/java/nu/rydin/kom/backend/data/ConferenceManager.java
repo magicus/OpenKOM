@@ -25,11 +25,18 @@ public class ConferenceManager // extends NameManager
 {
 	public static final short CONFERENCE_KIND = 1;
 	
+	public static final short MAGIC_USERPRESENTATIONS = 0;
+	public static final short MAGIC_CONFPRESENTATIONS = 1;
+	public static final short MAGIC_NOTE = 2;
+	
 	private final NameManager m_nameManager;
 	
 	private final PreparedStatement m_addConfStmt;
 	private final PreparedStatement m_loadConfStmt;
 	private final PreparedStatement m_loadRangeStmt;
+	private final PreparedStatement m_getMagicConfStmt;
+	private final PreparedStatement m_setMagicConfStmt;
+	private final PreparedStatement m_isMagicConfStmt;
 	
 	public ConferenceManager(Connection conn, NameManager nameManager)
 	throws SQLException
@@ -43,6 +50,12 @@ public class ConferenceManager // extends NameManager
 			"WHERE c.id = ? AND n.id = c.id");
 		m_loadRangeStmt = conn.prepareStatement(	
 			"SELECT MIN(localnum), MAX(localnum) FROM messageoccurrences WHERE conference = ?");
+		m_getMagicConfStmt = conn.prepareStatement(
+			 "select conference from magicconferences where kind = ?");
+		m_setMagicConfStmt = conn.prepareStatement(
+			 "replace into magicconferences(conference, kind) values(?, ?)");
+		m_isMagicConfStmt = conn.prepareStatement(
+			 "select count(*) from magicconferences where conference = ?");
 	}
 	
 	public void close()
@@ -55,6 +68,12 @@ public class ConferenceManager // extends NameManager
 				m_loadConfStmt.close();
 			if(m_loadRangeStmt != null)
 				m_loadRangeStmt.close();
+			if(m_getMagicConfStmt != null)
+				m_getMagicConfStmt.close();
+			if(m_setMagicConfStmt != null)
+				m_setMagicConfStmt.close();
+			if(m_isMagicConfStmt != null)
+				m_isMagicConfStmt.close();
 		}
 		catch(SQLException e)
 		{
@@ -188,5 +207,62 @@ public class ConferenceManager // extends NameManager
 	throws SQLException
 	{
 		return m_nameManager.getIdsByPatternAndKind(pattern, CONFERENCE_KIND);
+	}
+	
+	/**
+	 * Returns the conference ID for a magic conference.
+	 * 
+	 * @param kind ConferenceManager.MAGIC_XXXXXXXX
+	 * @return Conference ID.
+	 */
+	public long getMagicConference(short kind)
+	throws SQLException
+	{
+		ResultSet rs = null;
+		try
+		{
+			m_getMagicConfStmt.clearParameters();
+			m_getMagicConfStmt.setShort(1, kind);
+			rs = m_getMagicConfStmt.executeQuery();
+			rs.first();
+			return rs.getLong(1);
+		}
+		finally
+		{
+			if (null != rs)
+			{
+				rs.close();
+			}
+		}
+	}
+	
+	public void setMagicConference(long conference, short kind)
+	throws SQLException
+	{
+		m_setMagicConfStmt.clearParameters();
+		m_setMagicConfStmt.setLong(1, conference);
+		m_setMagicConfStmt.setShort(2, kind);
+		m_setMagicConfStmt.execute();
+	}
+	
+	public boolean isMagic(long conference)
+	throws SQLException
+	{
+		ResultSet rs = null;
+		try
+		{
+			m_isMagicConfStmt.clearParameters();
+			m_isMagicConfStmt.setLong(1, conference);
+			rs = m_isMagicConfStmt.executeQuery();
+			rs.first();
+			return (0 != rs.getInt(1)) ? true : false;
+		}
+		finally
+		{
+			if (null != rs)
+			{
+				rs.close();
+			}
+		}
 	}
 }
