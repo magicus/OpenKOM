@@ -334,17 +334,21 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			{
 				// Print any pending chat messages
 				//
+			    DisplayController dc = this.getDisplayController();
 				synchronized(m_displayMessageQueue)
 				{
 					while(!m_displayMessageQueue.isEmpty())
 					{
+					    dc.chatMessage();
 						m_out.println((String) m_displayMessageQueue.removeFirst());
 						m_out.println();
 					}
 				}
 				Command defaultCommand = this.getDefaultCommand();
+				dc.prompt();
 				String prompt = defaultCommand.getFullName() + " - "; 
 				m_out.print(prompt);
+				dc.normal();
 				m_out.flush();
 				
 				// Read command
@@ -431,7 +435,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			}			
 			catch(InterruptedException e)
 			{
-				// Someone wants us dead. Let's get out of here!
+				// Someone set up us the bomb! Let's get out of here!
 				//
 				return;
 			}			
@@ -496,6 +500,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	        sb.append(name);
 	        if((this.getCachedUserInfo().getFlags1() & UserFlags.SHOW_OBJECT_IDS) != 0)
 	        {
+	            sb.append(' ');
 	            sb.append('<');
 	            sb.append(id);
 	            sb.append('>');
@@ -511,6 +516,24 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
             throw new RuntimeException(e);
         }        
     }
+    
+    public DisplayController getDisplayController()
+    {
+        try
+        {
+	        return (this.getCachedUserInfo().getFlags1() & UserFlags.ANSI_ATTRIBUTES) != 0
+	        	? (DisplayController) new ANSIDisplayController(m_out)
+	        	: (DisplayController) new DummyDisplayController();
+        }
+        catch(UnexpectedException e)
+        {
+            throw new RuntimeException(e);
+        }
+        catch(ObjectNotFoundException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 			
 	public void printCurrentConference()
 	throws ObjectNotFoundException, UnexpectedException
@@ -518,6 +541,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		// Determine name of conference. Give a generic name
 		// to mailboxes.
 		//
+	    this.getDisplayController().normal();
 		ConferenceInfo conf = m_session.getCurrentConference();
 		long id = conf.getId();
 		String confName = id == m_session.getLoggedInUserId()

@@ -30,6 +30,7 @@ public class BasicMessagePrinter implements MessagePrinter
 	public void printMessage(Context context, Envelope envelope)
 		throws KOMException
 	{
+	    DisplayController dc = context.getDisplayController();
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
 		Message message = envelope.getMessage();
@@ -42,6 +43,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		
 		// Could we figure out the local number?
 		//
+		dc.messageHeader();
 		out.print(formatter.format("BasicMessagePrinter.textnumber"));
 		if(primaryOcc != null)
 			out.print(primaryOcc.getLocalnum());
@@ -135,11 +137,13 @@ public class BasicMessagePrinter implements MessagePrinter
 		
 		// Print body
 		//
+		dc.messageBody();
 		WordWrapper ww = context.getWordWrapper(message.getBody());
 		String line;
 		while((line = ww.nextLine()) != null)
 			out.println(line);
 		out.println();
+		dc.messageFooter();
 		
 		// Print text footer if requested
 		//

@@ -54,7 +54,8 @@ public class ChangeCharacterset extends AbstractCommand
 				PrintUtils.printLeftJustified(out, name, 20);
 				out.print(' ');
 				out.setCharset(name);
-				out.println(formatter.format("change.charset.samplestring"));
+				// out.println(formatter.format("change.charset.samplestring"));
+				out.println();
 			}
 			
 			// Pick one!

@@ -221,7 +221,8 @@ public class KOMWriter extends PrintWriter
 		        for(Iterator itor = m_newlineListeners.iterator(); itor.hasNext();)
 		            ((NewlineListener) itor.next()).onNewline();
 		    }
-		}
+		} else if(c == '\r')
+		    m_writer.flush();
 	}
 
 	public void write(String str) 

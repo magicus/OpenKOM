@@ -696,7 +696,7 @@ public class LineEditor implements NewlineListener
 	    {
 		    if(m_dontCount)
 		        return;
-		    if(++m_lineCount >= m_tsProvider.getTerminalSettings().getHeight())
+		    if(++m_lineCount >= m_tsProvider.getTerminalSettings().getHeight() - 1)
 		    {
 		        m_dontCount = true;
 		        if(!this.getYesNo(m_morePrompt, m_formatter.format("misc.more.yeschars").toCharArray(), 

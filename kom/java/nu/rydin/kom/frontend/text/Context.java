@@ -121,4 +121,9 @@ public interface Context extends TerminalSettingsProvider
 	 * @param id Object id
 	 */
 	public String formatObjectName(String name, long id);
+	
+	/**
+	 * Returns a <tt>DisplayController</tt> according to the user preferences
+	 */
+	public DisplayController getDisplayController();
 }

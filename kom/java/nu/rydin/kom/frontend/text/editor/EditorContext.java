@@ -10,6 +10,7 @@ import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
@@ -158,5 +159,10 @@ public class EditorContext implements Context
 	public String formatObjectName(String name, long id)
 	{
 	    return m_underlying.formatObjectName(name, id);
+	}
+	
+	public DisplayController getDisplayController()
+	{
+	    return m_underlying.getDisplayController();
 	}
 }
