@@ -6,7 +6,10 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
-
+/**
+ * @author Magnus Ihse
+ * @author Henrik Schröder
+ */
 public final class Match
 {
 	private boolean m_isMatching;

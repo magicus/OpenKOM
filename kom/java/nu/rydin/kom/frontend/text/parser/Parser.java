@@ -32,10 +32,8 @@ import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
- * @author Henrik
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * @author Magnus Ihse
+ * @author Henrik Schröder
  */
 public class Parser
 {

@@ -1,6 +1,8 @@
 /*
  * Created on 2004-aug-19
- *
+ * 
+ * Distributed under the GPL license.
+ * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text.parser;
 
