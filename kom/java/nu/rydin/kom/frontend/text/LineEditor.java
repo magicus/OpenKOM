@@ -126,7 +126,7 @@ public class LineEditor implements NewlineListener
 	
 	private final KeystrokeTokenizer m_tokenizer;
 	
-	final ReaderProxy m_in;
+	private final ReaderProxy m_in;
 	
 	private final InputStream m_inStream;
 	
@@ -134,7 +134,7 @@ public class LineEditor implements NewlineListener
 	
 	private final EventTarget m_target;
 	
-	ServerSession m_session;
+	private ServerSession m_session;
 	
 	private boolean m_dontCount = false;
 	
@@ -814,7 +814,8 @@ public class LineEditor implements NewlineListener
 					break;
 				case TOKEN_CR:
 					editing = false;
-					m_out.println();
+					m_out.write('\r');					
+					m_out.write('\n');
 					break;
 				case TOKEN_BS:
 					if(cursorpos == 0)
