@@ -9,12 +9,8 @@ package nu.rydin.kom.modules.ssh;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.util.Map;
 
-import nu.rydin.kom.exceptions.UnexpectedException;
-import nu.rydin.kom.frontend.text.ClientSession;
-import nu.rydin.kom.frontend.text.TelnetInputStream;
 import nu.rydin.kom.utils.Logger;
 
 import com.sshtools.daemon.platform.NativeProcessProvider;
@@ -24,9 +20,9 @@ import com.sshtools.j2ssh.io.DynamicBuffer;
  * @author Henrik Schröder
  *  
  */
-public class TestProcProv extends NativeProcessProvider
-{   
-	
+public class OpenKOMProcessProvider extends NativeProcessProvider
+{
+
     private static String message = "This server does not provide shell access";
 
     DynamicBuffer stdin = new DynamicBuffer();
@@ -60,9 +56,11 @@ public class TestProcProv extends NativeProcessProvider
 
     public void start() throws IOException
     {
-        Logger.fatal(this, "-------------------------Init ProcessProvider-----------------------");
+        Logger
+                .fatal(this,
+                        "-------------------------Init ProcessProvider-----------------------");
         stdin.getOutputStream().write(message.getBytes());
-		
+
     }
 
     public String getDefaultTerminalProvider()
@@ -78,7 +76,8 @@ public class TestProcProv extends NativeProcessProvider
     public boolean allocatePseudoTerminal(String term, int cols, int rows,
             int width, int height, String modes)
     {
-        Logger.debug(this, "AllocatePseudoTerminal: " + term + ":" + cols + "x" + rows + ".");
+        Logger.debug(this, "AllocatePseudoTerminal: " + term + ":" + cols + "x"
+                + rows + ".");
         return true;
     }
 
@@ -123,7 +122,7 @@ public class TestProcProv extends NativeProcessProvider
             {
                 try
                 {
-                    Thread.sleep(1000); // Crude but necersary
+                    Thread.sleep(1000); // Crude but necessary
                 } catch (InterruptedException ex)
                 {
                 }

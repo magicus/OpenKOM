@@ -19,15 +19,15 @@ import com.sshtools.daemon.platform.PasswordChangeException;
 
 /**
  * @author Henrik Schröder
- *
+ *  
  */
-public class TestAuthProv extends NativeAuthenticationProvider
+public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 {
 
     /**
-     * 
+     *  
      */
-    public TestAuthProv()
+    public OpenKOMAuthenticationProvider()
     {
         super();
     }
@@ -43,16 +43,14 @@ public class TestAuthProv extends NativeAuthenticationProvider
     {
         try
         {
-            ((ServerSessionFactory) Modules.getModule("Backend")).authenticate(username, password);
+            ((ServerSessionFactory) Modules.getModule("Backend")).authenticate(
+                    username, password);
             return true;
-        }
-        catch(AuthenticationException e)
+        } catch (AuthenticationException e)
         {
-        } 
-        catch (UnexpectedException e)
+        } catch (UnexpectedException e)
         {
-        } 
-        catch (NoSuchModuleException e)
+        } catch (NoSuchModuleException e)
         {
         }
         return false;
@@ -69,7 +67,8 @@ public class TestAuthProv extends NativeAuthenticationProvider
         //???
     }
 
-    public boolean changePassword(String username, String oldpassword, String newpassword)
+    public boolean changePassword(String username, String oldpassword,
+            String newpassword)
     {
         //No way.
         return false;
