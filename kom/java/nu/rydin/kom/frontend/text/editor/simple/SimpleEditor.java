@@ -177,6 +177,8 @@ public class SimpleEditor implements MessageEditor
 				line = wrapper.nextLine();
 				buffer.add(line);
 				defaultLine = wrapper.nextLine();
+				if(defaultLine == null)
+					defaultLine = "";
 				
 				// Erase wrapped portion
 				//

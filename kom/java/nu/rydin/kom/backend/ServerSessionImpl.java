@@ -931,7 +931,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			MessageManager mm = m_da.getMessageManager();
 			long globId = this.localToGlobal(sourceConfId, localNum);
 
-			// Start by creating the new occurrence (TODO: Fix localToGobal misspelling.)
+			// Start by creating the new occurrence 
 			// We must retain the message occurrence, as we'll be using it in the broadcast event.
 			//
 			MessageOccurrence occ = mm.createMessageOccurrence(globId, 
