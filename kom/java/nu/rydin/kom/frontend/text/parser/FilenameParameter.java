@@ -7,6 +7,11 @@
 package nu.rydin.kom.frontend.text.parser;
 
 /**
+ * FilenameParameter represents a parameter that accepts a filename. A filename
+ * is for this purpose defined as a single word.
+ * 
+ * The "return type" for a FilenameParameter is a String.
+ * 
  * @author Henrik Schröder
  */
 public class FilenameParameter extends CommandLineParameter {

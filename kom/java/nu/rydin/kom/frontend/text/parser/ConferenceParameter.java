@@ -15,6 +15,10 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
 
 /**
+ * ConferenceParameter represents a parameter that only accepts (shortened) conference names.
+ * 
+ * The "return type" for a ConferenceParameter is a NameAssociation object.
+ * 
  * @author Magnus Ihse (magnus@ihse.net)
  */
 public class ConferenceParameter extends NamedObjectParameter

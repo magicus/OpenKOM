@@ -15,6 +15,10 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
 
 /**
+ * NamedObjectParameter represents a parameter that only accepts (shortened) object names.
+ * 
+ * The "return type" for a NamedObjectParameter is a NameAssociation object.
+ * 
  * @author Magnus Ihse (magnus@ihse.net)
  * @author Henrik Schröder
  */
@@ -45,10 +49,9 @@ public class NamedObjectParameter extends CommandLineParameter
         {
             // well, this _could_ be a name... check it later
             return new Match(true, matchingPart, remainder, cooked);
-        } else
-        {
-            return new Match(false, null, null, null);
         }
+
+        return new Match(false, null, null, null);
     }
 
     protected boolean isValidName(String name)

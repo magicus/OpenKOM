@@ -15,8 +15,13 @@ import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
- * @author Henrik Schröder
- *
+ * NamedObjectEllipsisParameter represents a parameter that only accepts a 
+ * comma-separated list of (shortened) object names.
+ * 
+ * The "return type" for a NamedObjectEllipsisParameter is an Object[] of 
+ * NameAssociation objects.
+ *  
+ * * @author Henrik Schröder
  */
 public class NamedObjectEllipsisParameter extends EllipsisParameter
 {

@@ -13,6 +13,11 @@ import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 
 /**
+ * OtherCommandParameter represents a parameter that accepts a (shortened) name
+ * of another command.
+ * 
+ * The "return type" for an OtherCommandParameter is a Command object.
+ * 
  * @author Magnus Ihse 
  */
 public class OtherCommandParameter extends CommandLineParameter
@@ -41,10 +46,7 @@ public class OtherCommandParameter extends CommandLineParameter
             // well, this _could_ be a command... check it later
             return new Match(true, matchingPart, remainder, cooked);
         } 
-        else
-        {
-            return new Match(false, null, null, null);
-        }
+        return new Match(false, null, null, null);
     }
 
     public Object resolveFoundObject(Context context, Match match)

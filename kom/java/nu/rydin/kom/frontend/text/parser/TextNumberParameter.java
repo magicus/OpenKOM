@@ -9,6 +9,11 @@ package nu.rydin.kom.frontend.text.parser;
 import nu.rydin.kom.structs.TextNumber;
 
 /**
+ * TextNumberParameter represents a parameter that accepts either a local or
+ * a global text number.
+ * 
+ * The "return type" for a TextNumberParameter is a TextNumber object.
+ * 
  * @author Magnus Ihse (magnus@ihse.net)
  */
 public class TextNumberParameter extends CommandLineParameter

@@ -7,6 +7,10 @@
 package nu.rydin.kom.frontend.text.parser;
 
 /**
+ * RawParameter represents a parameter that accepts everything.
+ * 
+ * The "return type" for a RawParameter is a String.
+ * 
  * @author Magnus Ihse
  */
 public class RawParameter extends CommandLineParameter {

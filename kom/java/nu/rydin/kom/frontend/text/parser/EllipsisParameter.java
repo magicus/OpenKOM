@@ -15,6 +15,12 @@ import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.utils.Logger;
 
 /**
+ * EllipsisParameter represents a parameter that only accepts a list of it's 
+ * wrapped type.
+ * 
+ * The "return type" for a EllipsisParameter is an Object[] of the "return type"
+ * of the wrapped type.
+ * 
  * @author Henrik Schröder
  */
 public abstract class EllipsisParameter extends CommandLineParameter

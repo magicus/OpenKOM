@@ -7,6 +7,11 @@
 package nu.rydin.kom.frontend.text.parser;
 
 /**
+ * LocalTextNumberParameter represents a parameter that only accepts a 
+ * local textnumber.
+ * 
+ * The "return type" for a LocalTextNumberParameter is a positive Integer.
+ * 
  * @author Henrik Schröder
  */
 public class LocalTextNumberParameter extends CommandLineParameter

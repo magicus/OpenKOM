@@ -15,6 +15,10 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
 
 /**
+ * UserParameter represents a parameter that only accepts (shortened) user names.
+ * 
+ * The "return type" for a UserParameter is a NameAssociation object.
+ * 
  * @author Magnus Ihse (magnus@ihse.net)
  * @author Henrik Schröder
  */
