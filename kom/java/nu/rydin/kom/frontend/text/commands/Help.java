@@ -251,7 +251,7 @@ public class Help extends AbstractCommand
             command = this;
         }
         
-	    HelpDocumentHandler myParser = new HelpDocumentHandler (command.getFullName());
+	    HelpDocumentHandler myParser = new HelpDocumentHandler (command.getClass().getName());
 	    HelpTextContainer htc = null;
 	    
 	    try
