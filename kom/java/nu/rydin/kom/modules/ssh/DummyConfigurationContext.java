@@ -235,7 +235,7 @@ class DummyConfigurationContext implements ConfigurationContext
 
         public String getListenAddress()
         {
-            return "0.0.0.0";
+            return "";
         }
 
         public int getMaxAuthentications()
