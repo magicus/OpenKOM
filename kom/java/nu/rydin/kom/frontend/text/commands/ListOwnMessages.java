@@ -47,7 +47,7 @@ public class ListOwnMessages extends AbstractCommand
 		out.print("  ");
 		PrintUtils.printLeftJustified(out, mf.format("list.own.heading.conference"), 30);
 		out.print("  ");
-		PrintUtils.printLeftJustified(out, mf.format("list.heading.subject"), 30);
+		PrintUtils.printLeftJustified(out, mf.format("list.own.heading.subject"), 30);
 		out.println();
 		out.println();
 		out.flush();
