@@ -68,12 +68,12 @@ public class MRUCache implements Map
 		/**
 		 * The key
 		 */
-		final Object m_key;
+		private final Object m_key;
 
 		/**
 		 * The value
 		 */
-		Object m_value;
+		private Object m_value;
 
 		/**
 		 * Constructs a new <code>CacheItem</code>
