@@ -9,15 +9,15 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.UserException;
+import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.backend.data.MessageManager;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
@@ -26,19 +26,15 @@ public class ViewPresentation extends AbstractCommand
 {
 	public ViewPresentation(String fullname)
 	{
-		super(fullname);
+		super(fullname, new CommandLineParameter[] { new NamedObjectParameter(true)});
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
-		if (0 == parameters.length)
-		{
-			throw new BadParameterException();
-		}
 		try
 		{
-			long objectId = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
+			long objectId = ((NameAssociation)parameterArray[0]).getId();
 			short kind = MessageManager.ATTR_PRESENTATION; 
 			context.getMessagePrinter().printMessage(context, context.getSession().readMagicMessage(kind, objectId));
 		}
@@ -47,10 +43,5 @@ public class ViewPresentation extends AbstractCommand
 			MessageFormatter formatter = context.getMessageFormatter();
 			throw new UserException(formatter.format("read.message.not.found"));
 		}
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

@@ -8,13 +8,13 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 
+import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.AuthorizationException;
-import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.structs.MessageOccurrence;
-import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
@@ -23,10 +23,10 @@ public class WriteRules extends AbstractCommand
 {
 	public WriteRules (String fullname)
 	{
-		super (fullname);
+		super (fullname, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
 		if(!context.getSession().hasPermissionInCurrentConference(ConferencePermissions.ADMIN_PERMISSION))

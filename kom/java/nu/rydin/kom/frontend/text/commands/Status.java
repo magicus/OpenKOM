@@ -12,18 +12,13 @@ import java.io.PrintWriter;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
-import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.ConferenceInfo;
-import nu.rydin.kom.structs.NameAssociation;
-import nu.rydin.kom.structs.NamedObject;
-import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.structs.*;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
@@ -35,34 +30,7 @@ public class Status extends AbstractCommand
     
 	public Status(String fullName)
 	{
-		super(fullName);
-		
-		//Initialize signature
-	    signature = new CommandLineParameter[1];
-	    signature[0] = new NamedObjectParameter(false);
-	}
-	
-	public void execute(Context context, String[] parameters) 
-	throws KOMException, IOException, InterruptedException
-	{	
-
-		// No parameters? That implies we're asking for our own status!
-		//
-		// Resolve name into id, possibly asking user to resolve
-		// ambiguities.
-		// 
-		long id = parameters.length == 0
-			? context.getLoggedInUserId()
-			: NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
-
-		// Call backend
-		//		
-		NamedObject no = context.getSession().getNamedObject(id);
-		if(no instanceof ConferenceInfo)
-			this.printConferenceStatus(context, (ConferenceInfo) no);
-		else if(no instanceof UserInfo)
-			this.printUserStatus(context, (UserInfo) no); 
-		
+		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(false) });		
 	}
 
 	public void execute2(Context context, Object[] parameters) 
@@ -175,10 +143,5 @@ public class Status extends AbstractCommand
 			//
 		}		
 			
-	}
-
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

@@ -23,18 +23,11 @@ public class Who extends AbstractCommand
 
 	public Who(String fullName)
 	{
-		super(fullName);	
+		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}
 	
     public void execute2(Context context, Object[] parameterArray)
             throws KOMException, IOException, InterruptedException {
-        // TODO Auto-generated method stub
-        this.execute(context, new String[0]);
-    }
-    
-	public void execute(Context context, String[] parameters)
-		throws KOMException, IOException, InterruptedException
-	{
 		MessageFormatter formatter = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
 		UserListItem[] users = context.getSession().listLoggedInUsers();
@@ -47,5 +40,5 @@ public class Who extends AbstractCommand
 				: each.getConferenceName();
 			out.println(formatter.format("who.format", new Object[] { each.getUserName(), confName }));
 		}
-	}
+    }
 }

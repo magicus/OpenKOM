@@ -19,11 +19,11 @@ public class ReadNextMessage extends AbstractCommand
 {
 	public ReadNextMessage(String fullName)
 	{
-		super(fullName);
+		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute(Context context, String[] parameters) 
-	throws KOMException, IOException
+	public void execute2(Context context, Object[] parameterArray) 
+	throws KOMException, IOException, InterruptedException
 	{
 		context.getMessagePrinter().printMessage(context, context.getSession().readNextMessage());
 	}

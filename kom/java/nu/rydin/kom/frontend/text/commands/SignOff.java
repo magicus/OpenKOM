@@ -10,32 +10,29 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.CantSignoffMailboxException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.MissingArgumentException;
-import nu.rydin.kom.CantSignoffMailboxException;
-import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class SignOff extends AbstractCommand 
 {
-	public SignOff (String fullname)
+	public SignOff (String fullName)
 	{
-		super(fullname);
+	    super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });
 	}
 	
-	public void execute(Context context, String[] parameters)
-	throws KOMException, IOException, InterruptedException 
+	public void execute2(Context context, Object[] parameterArray) 
+	throws KOMException, IOException, InterruptedException
 	{
-		if(parameters.length == 0)
-			throw new MissingArgumentException();
-		
-		long conference = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
+		long conference = ((NameAssociation)parameterArray[0]).getId();
 		if (context.getLoggedInUserId() == conference)
 		{
 			throw new CantSignoffMailboxException();
@@ -50,10 +47,5 @@ public class SignOff extends AbstractCommand
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();
 		out.println(fmt.format("signoff.confirmation", context.formatObjectName(name, conference)));		
-	}
-
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

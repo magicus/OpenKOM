@@ -9,9 +9,9 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.UnstoredMessage;
 
@@ -22,10 +22,10 @@ public class WriteNote extends AbstractCommand
 {
 	public WriteNote(String fullname)
 	{
-		super(fullname);
+		super(fullname, AbstractCommand.NO_PARAMETERS);
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
 		UnstoredMessage msg = context.getMessageEditor().edit(context, -1);

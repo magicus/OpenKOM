@@ -15,6 +15,8 @@ import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.IntegerParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageLogItem;
 import nu.rydin.kom.structs.NameAssociation;
@@ -26,35 +28,30 @@ public abstract class ViewMessageLog extends AbstractCommand
 {
     public ViewMessageLog(String fullName)
     {
-        super(fullName);
+        super(fullName, new CommandLineParameter[] { new IntegerParameter(false) });
     }
 
-    public abstract void execute(Context context, String[] parameters)
+    public abstract void execute2(Context context, Object[] parameterArray)
             throws KOMException, IOException, InterruptedException;
     
-    public void innerExecute(Context context, String[] parameters, short kind)
+    public void innerExecute(Context context, Object[] parameterArray, short kind)
     throws KOMException, IOException, InterruptedException
     {
         
         PrintWriter out = context.getOut();
         MessageFormatter formatter = context.getMessageFormatter();
         int num = -1;
-		if(parameters.length == 0)
+		if(parameterArray[0] == null)
 			num = 20;
 		else
 		{
-			try
-			{
-				num = Integer.parseInt(parameters[0]);
-			}
-			catch(NumberFormatException e)
-			{
-				throw new NumberFormatException(formatter.format("view.chat.log.invalid.number"));
-			}
+		    num = ((Integer)parameterArray[0]).intValue();
 			if(num > 1000) // TODO: Read from configuration
+			{
 			    throw new UserException(formatter.format("view.char.log.overflow"));
+			}
 		}
-		
+
 		// Fetch data
 		//
 		MessageLogItem[] messages = context.getSession().getMessagesFromLog(kind, num);

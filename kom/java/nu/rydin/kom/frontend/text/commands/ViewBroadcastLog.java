@@ -23,11 +23,11 @@ public class ViewBroadcastLog extends ViewMessageLog
         super(fullName);
     }
 
-    public void execute(Context context, String[] parameters)
+    public void execute2(Context context, Object[] parameterArray)
     throws KOMException, IOException, InterruptedException	
     {	
     	DisplayController dc = context.getDisplayController();
     	dc.broadcastMessageBody();
-        this.innerExecute(context, parameters, MessageLogKinds.BROADCAST);
+        this.innerExecute(context, parameterArray, MessageLogKinds.BROADCAST);
     }
 }

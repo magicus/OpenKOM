@@ -18,10 +18,10 @@ public class ShowTime extends AbstractCommand
 {
 	public ShowTime(String fullName)
 	{
-		super(fullName);	
+		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}
 	
-	public void execute(Context context, String[] args)
+	public void execute2(Context context, Object[] parameterArray)
 	{
 		context.getOut().println(context.getMessageFormatter().format("show.time.format", new Date()));
 	}

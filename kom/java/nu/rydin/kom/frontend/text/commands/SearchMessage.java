@@ -9,11 +9,9 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.MissingArgumentException;
-import nu.rydin.kom.frontend.text.AbstractCommand;
-import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.KOMWriter;
-import nu.rydin.kom.frontend.text.LineEditor;
+import nu.rydin.kom.frontend.text.*;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageSearchResult;
 import nu.rydin.kom.utils.PrintUtils;
@@ -27,26 +25,18 @@ public class SearchMessage extends AbstractCommand
     private static final int CHUNK_SIZE = 50;
 	public SearchMessage(String fullName) 
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new RawParameter("search.param.0.ask", true) });
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
 		KOMWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter mf = context.getMessageFormatter();
 
-		if(parameters.length == 0)
-			throw new MissingArgumentException();
-		
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < parameters.length; i++) {
-			sb.append(parameters[i]);
-			sb.append(" ");
-		}
 		//chop chop last space
-		String searchterm = sb.substring(0, sb.length() - 1);
+		String searchterm = ((String)parameterArray[0]).trim();
 				
 		// TODO: Get out of here if there are no messages
 		//
@@ -80,10 +70,5 @@ public class SearchMessage extends AbstractCommand
 				out.flush();
 			}
 		}
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

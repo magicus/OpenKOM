@@ -19,10 +19,10 @@ public class ReadNextReply extends AbstractCommand
 {
 	public ReadNextReply(String fullName)
 	{
-		super(fullName);
+		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute(Context context, String[] parameters) 
+	public void execute2(Context context, Object[] parameterArray) 
 	throws KOMException, IOException
 	{
 		context.getMessagePrinter().printMessage(context, context.getSession().readNextReply());

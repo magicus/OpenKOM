@@ -9,10 +9,10 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.backend.ServerSession;
 
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
@@ -21,10 +21,10 @@ public class SkipSubject extends AbstractCommand
 {
 	public SkipSubject (String fullname)
 	{
-		super(fullname);
+		super(fullname, AbstractCommand.NO_PARAMETERS);
 	}
 	
- 	public void execute(Context context, String[] parameters)
+ 	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
  		ServerSession ss = context.getSession();

@@ -14,8 +14,11 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.TextNumber;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -25,10 +28,10 @@ public class Reply extends AbstractCommand
 {
 	public Reply(String fullName)
 	{
-		super(fullName);	
+		super(fullName, new CommandLineParameter[] { new TextNumberParameter(false) });	
 	}
 	
-	public void execute(Context context, String[] parameters) 
+	public void execute2(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException
 	{
 		// Check permissions
@@ -41,10 +44,17 @@ public class Reply extends AbstractCommand
 		//
 		MessageFormatter formatter = context.getMessageFormatter();
 		ServerSession session = context.getSession();
+
 		long newMessageId = -1;
-		long replyTo = parameters.length == 0 
-			? session.getCurrentMessage()
-			: context.resolveMessageSpecifier(parameters[0]).getId();
+		TextNumber replyTo;
+		if (parameterArray[0] == null)
+		{
+		    replyTo = session.getCurrentMessage();
+		}
+		else
+		{
+		    replyTo = (TextNumber)parameterArray[0];
+		}
 			
 		// Get editor and execute it
 		//
@@ -55,10 +65,5 @@ public class Reply extends AbstractCommand
 		MessageOccurrence occ = context.getSession().storeReplyInCurrentConference(msg, replyTo);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

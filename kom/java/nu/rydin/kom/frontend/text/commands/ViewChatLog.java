@@ -23,11 +23,11 @@ public class ViewChatLog extends ViewMessageLog
         super(fullName);
     }
 
-    public void execute(Context context, String[] parameters)
+    public void execute2(Context context, Object[] parameterArray)
             throws KOMException, IOException, InterruptedException
     {
     	DisplayController dc = context.getDisplayController();
     	dc.chatMessageBody();
-        this.innerExecute(context, parameters, MessageLogKinds.CHAT);
+        this.innerExecute(context, parameterArray, MessageLogKinds.CHAT);
     }
 }

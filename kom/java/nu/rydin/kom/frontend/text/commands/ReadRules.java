@@ -9,15 +9,14 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.frontend.text.AbstractCommand;
-import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UserException;
-import nu.rydin.kom.backend.data.ConferenceManager;
-import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.AbstractCommand;
+import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.NameAssociation;
 
 
 /**
@@ -27,21 +26,21 @@ public class ReadRules extends AbstractCommand
 {
 	public ReadRules (String fullname)
 	{
-		super(fullname);
+		super(fullname, new CommandLineParameter[] { new ConferenceParameter(false) });
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
 		try
 		{
-			if (0 == parameters.length)
+			if (parameterArray[0] == null)
 			{
 				context.getMessagePrinter().printMessage(context, context.getSession().getLastRulePosting());
 			}
 			else
 			{
-				context.getMessagePrinter().printMessage(context, context.getSession().getLastRulePostingInConference(NamePicker.resolveNameToId(NameUtils.assembleName(parameters), NameManager.CONFERENCE_KIND, context)));
+				context.getMessagePrinter().printMessage(context, context.getSession().getLastRulePostingInConference(((NameAssociation)parameterArray[0]).getId()));
 			}
 		}
 		catch(ObjectNotFoundException e)
