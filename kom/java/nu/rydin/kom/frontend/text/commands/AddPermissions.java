@@ -39,7 +39,6 @@ public class AddPermissions extends AbstractCommand
 			
 		// Resolve user
 		//
-		assert (parameterArray[0] instanceof NameAssociation);
 		NameAssociation userAssoc = (NameAssociation) parameterArray[0];
 		long user = userAssoc.getId();
 		

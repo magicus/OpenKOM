@@ -17,6 +17,8 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
@@ -26,10 +28,10 @@ public class Copy extends AbstractCommand
 {
 	public Copy(String fullName)
 	{
-		super(fullName);	
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });	
 	}
 	
-	public void execute(Context context, String[] parameters) 
+	public void execute2(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException, NoCurrentMessageException
 	{
 		if(parameters.length == 0)
@@ -52,10 +54,4 @@ public class Copy extends AbstractCommand
 		out.println(fmt.format("copy.confirmation", 
 			new Object [] { new Long(message), session.getName(conference) } ));
 	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
-	}	
-
 }

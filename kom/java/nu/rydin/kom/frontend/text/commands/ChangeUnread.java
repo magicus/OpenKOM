@@ -28,7 +28,6 @@ public class ChangeUnread extends AbstractCommand
 	public void execute2(Context context, Object[] parameterArray)
 		throws KOMException, IOException
 	{
-	    assert (parameterArray[0] instanceof Integer);
 	    Integer number = (Integer) parameterArray[0];
 		
 		context.getSession().changeUnread(number.intValue());

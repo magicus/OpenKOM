@@ -28,7 +28,6 @@ public class LineNumberParameter extends IntegerParameter {
     }
 
     public Object resolveFoundObject(Context context, Match match) {
-        assert (context instanceof EditorContext);
         int line = ((Integer) (match.getParsedObject())).intValue();
 		Buffer buffer = ((EditorContext) context).getBuffer();
 		if(line < 1 || line > buffer.size()) {

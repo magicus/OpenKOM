@@ -46,7 +46,6 @@ public class ChangeSuffix extends AbstractCommand
 			// CHANGE_ANY_NAME to do that!
 			session.checkRights(UserPermissions.CHANGE_ANY_NAME);
 			
-	        assert (parameterArray[0] instanceof NameAssociation);
 	        NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
 	        id = nameAssociation.getId();
 	    }
@@ -60,7 +59,6 @@ public class ChangeSuffix extends AbstractCommand
 
 		// Get the new suffix
 		//
-        assert (parameterArray[1] instanceof String);
 	    String suffix = (String) parameterArray[1];
 		
 		// Execute

@@ -41,7 +41,6 @@ public class ChangePassword extends AbstractCommand
 		if(parameterArray[0] != null)
 		{
 			session.checkRights(UserPermissions.USER_ADMIN);
-			assert (parameterArray[0] instanceof NameAssociation);
 			NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
 			user = nameAssociation.getId();
 		}

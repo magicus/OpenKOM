@@ -24,7 +24,6 @@ public class Delete extends AbstractCommand
 	
 	public void execute2(Context context, Object[] parameterArray)
 	{
-	    assert (parameterArray[0] instanceof Integer);
 	    Integer lineInteger = (Integer) parameterArray[0];
 	    
 		int line = lineInteger.intValue();
