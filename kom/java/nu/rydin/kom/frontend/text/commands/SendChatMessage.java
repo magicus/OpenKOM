@@ -53,6 +53,17 @@ public class SendChatMessage extends AbstractCommand
 		
 		// Print prompt
 		//
+		if (user == -1)
+		{
+		    //Special case, sending to all users
+		    out.println(context.getMessageFormatter().format("chat.saytoall"));
+		}
+		else
+		{
+		    //Print username
+		    out.println(context.getMessageFormatter().format("chat.saytouser", session.getName(user)));
+		}
+	    out.println("");
 		out.print(me);
 		out.print(": ");
 		out.flush();
