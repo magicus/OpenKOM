@@ -64,6 +64,8 @@ public class Envelope implements Serializable
 	
 	private final MessageOccurrence[] m_occurrences;
 	
+	//TODO (skrolle) Add MessageAttribute[]
+	
 	public Envelope(Message message, MessageOccurrence primaryOccurrence, RelatedMessage replyTo, 
 		String[] receivers, MessageOccurrence[] occurrences, RelatedMessage[] replies)
 	{

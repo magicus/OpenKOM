@@ -320,6 +320,21 @@ public interface ServerSession
 	public MessageOccurrence storeReplyToCurrentMessage(UnstoredMessage msg)
 	throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
 
+    /**
+     * Stores a "no comment" to the given message
+     * @param replyTo Global message id of the message not commented
+     * @return
+     */
+    public MessageOccurrence storeNoComment(long replyTo)
+    throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
+
+    /**
+     * Stores a "no comment" to the last message read
+     * @return
+     */
+    public MessageOccurrence storeNoCommentToCurrentMessage()
+    throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
+    
 	/**
 	 * Reads the "original message" of the current message, i.e. the message
 	 * to which it is a reply
@@ -673,4 +688,5 @@ public interface ServerSession
 	 * @return
 	 */
 	public String getDebugString();
+
 }

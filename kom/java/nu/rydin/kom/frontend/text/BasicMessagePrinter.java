@@ -86,21 +86,28 @@ public class BasicMessagePrinter implements MessagePrinter
 		int top = receivers.length;
 		for(int idx = 0; idx < top; ++idx)
 		{
-			out.println(formatter.format("BasicMessagePrinter.receiver", receivers[idx]));
 			MessageOccurrence occ = occs[idx];
-			switch(occ.getKind())
-			{
-				case MessageManager.ACTION_COPIED:
-					PrintUtils.printRepeated(out, ' ', space);
-					out.println(formatter.format("BasicMessagePrinter.copied", 
-						new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
-					break;
-				case MessageManager.ACTION_MOVED:
-					PrintUtils.printRepeated(out, ' ', space);
-					out.println(formatter.format("BasicMessagePrinter.moved", 
-						new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
-					break;					
-			}
+		    if (occ.getKind() == MessageManager.ACTION_NOCOMMENT)
+		    {
+		        //We probably shouldn't print the "no comments" in the header.
+		    }
+		    else
+		    {
+				out.println(formatter.format("BasicMessagePrinter.receiver", receivers[idx]));
+				switch(occ.getKind())
+				{
+					case MessageManager.ACTION_COPIED:
+						PrintUtils.printRepeated(out, ' ', space);
+						out.println(formatter.format("BasicMessagePrinter.copied", 
+							new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
+						break;
+					case MessageManager.ACTION_MOVED:
+						PrintUtils.printRepeated(out, ' ', space);
+						out.println(formatter.format("BasicMessagePrinter.moved", 
+							new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
+						break;					
+				}
+		    }
 		} 
 				
 		// Print subject
@@ -137,6 +144,17 @@ public class BasicMessagePrinter implements MessagePrinter
 					new Object[] { new Long(each.getOccurrence().getLocalnum()), 
 						each.getAuthorName(), each.getConferenceName() }));
 			}	
+		}
+		
+		// Print list of "no comments"
+		//
+		for(int idx = 0; idx < occs.length; ++idx)
+		{
+			MessageOccurrence occ = occs[idx];
+		    if (occ.getKind() == MessageManager.ACTION_NOCOMMENT)
+		    {
+		        out.println(formatter.format("BasicMessagePrinter.nocomment", occ.getUserName()));
+		    }
 		}
 	}
 }

@@ -639,6 +639,46 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}	
 	}
+
+	public MessageOccurrence storeNoCommentToCurrentMessage()
+	throws NoCurrentMessageException, AuthorizationException, UnexpectedException
+	{
+		if(m_lastReadMessageId == -1)
+			throw new NoCurrentMessageException();
+		return this.storeNoComment(m_lastReadMessageId);	
+	}
+	
+	public MessageOccurrence storeNoComment(long replyTo)
+	throws UnexpectedException, AuthorizationException
+	{
+		try
+		{
+			// Determine target conference
+			long targetConf = m_da.getMessageManager().getFirstOccurrence(replyTo).getConference();
+
+			// Check that we have the permission to write here.
+			this.assertConferencePermission(targetConf, ConferencePermissions.WRITE_PERMISSION);
+
+			MessageManager mm = m_da.getMessageManager(); 
+
+			long me = this.getLoggedInUserId();
+
+			MessageOccurrence occ = mm.createMessageOccurrence(replyTo, MessageManager.ACTION_NOCOMMENT, 
+				me, this.getName(me), targetConf);
+			
+			return occ;
+
+		}
+		catch(ObjectNotFoundException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+
 	
 	public MessageOccurrence storeReplyToLocal(UnstoredMessage msg, long replyToConfId, int replyToLocalnum)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
@@ -714,6 +754,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			// TODO: Maybe a special copy-permission would be cool?
 			//
 			long me = this.getLoggedInUserId();
+			
+			//TODO (skrolle) Why not use assertConferencePermission?
 			MembershipManager mbr = m_da.getMembershipManager();
 			if(!mbr.hasPermission(me, conferenceId, ConferencePermissions.WRITE_PERMISSION))
 				throw new AuthorizationException();

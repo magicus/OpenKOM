@@ -17,11 +17,13 @@ import java.util.List;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.SQLUtils;
 import nu.rydin.kom.structs.Message;
+import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageOccurrence;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author Henrik Schröder
  */
 public class MessageManager
 {
@@ -40,12 +42,15 @@ public class MessageManager
 	private final PreparedStatement m_getReplyIdsStmt;
 	private final PreparedStatement m_loadOccurrenceStmt;
 	private final PreparedStatement m_getVisibleOccurrencesStmt;
+	private final PreparedStatement m_getMessageAttributesStmt;
+	private final PreparedStatement m_addMessageAttributeStmt;
 	
 	private final Connection m_conn; 
 	
 	public static final short ACTION_CREATED 	= 0;
 	public static final short ACTION_COPIED	= 1;
 	public static final short ACTION_MOVED		= 2;
+	public static final short ACTION_NOCOMMENT = 3;
 	
 	public MessageManager(Connection conn)
 	throws SQLException
@@ -88,7 +93,13 @@ public class MessageManager
 			"WHERE conference = ? AND localnum = ?");
 		m_getVisibleOccurrencesStmt = conn.prepareStatement(
 			"SELECT o.message, o.action_ts, o.kind, o.user, o.user_name, o.conference, o.localnum " +			"FROM messageoccurrences o, memberships m " +			"WHERE o.conference = m.conference AND m.user = ? AND o.message = ?");
-
+		m_getMessageAttributesStmt = conn.prepareStatement(
+		    "SELECT message, kind, created, value " +
+		    "FROM messageattributes " +
+		    "WHERE message = ?");
+		m_addMessageAttributeStmt = conn.prepareStatement(
+		    "INSERT INTO messageattributes (message, kind, created, value) " +
+		    "VALUES (?, ?, ?, ?)");
 	}
 	
 	public void close()
@@ -640,4 +651,54 @@ public class MessageManager
 
 	}
 	
+	/**
+	 * Returns the attributes to a message
+	 * 
+	 * @param messageId
+	 * @throws SQLException
+	 */
+	public MessageAttribute[] getMessageAttributes(long messageId)
+	throws SQLException
+	{
+	    List list = new ArrayList();
+	    m_getMessageAttributesStmt.clearParameters();
+	    m_getMessageAttributesStmt.setLong(1, messageId);
+	    ResultSet rs = null;
+	    try
+	    {
+	        rs = m_getMessageAttributesStmt.executeQuery();
+	        while(rs.next())
+	        {
+	            list.add(new MessageAttribute(
+	                    rs.getLong(1),		//message
+	                    rs.getInt(2),		//kind
+	                    rs.getTimestamp(3),	//created
+	                    rs.getString(4)));	//value
+	        }
+	        MessageAttribute[] result = new MessageAttribute[list.size()];
+	        list.toArray(result);
+	        return result;
+	    }
+		finally
+		{
+			if(rs != null)
+				rs.close();
+		}
+	}
+	
+	public MessageAttribute addMessageAttribute(long message, int kind, Timestamp created, String value)
+	throws ObjectNotFoundException, SQLException
+	{
+		// Create messageattribute
+		//			
+		Timestamp now = new Timestamp(System.currentTimeMillis());
+		m_addMessageAttributeStmt.clearParameters();
+		m_addMessageAttributeStmt.setLong(1, message);
+		m_addMessageAttributeStmt.setInt(2, kind);
+		m_addMessageAttributeStmt.setTimestamp(3,created);
+		m_addMessageAttributeStmt.setString(4, value);
+		m_addMessageAttributeStmt.executeUpdate();
+
+		return new MessageAttribute(message, kind, created, value);
+	}
 }
