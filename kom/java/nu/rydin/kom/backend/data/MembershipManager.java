@@ -30,7 +30,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class MembershipManager
 {
-	private static final long PRIO_INCREMENT = 1000;
+	private static final long PRIO_INCREMENT = 1;
 	
 	private final PreparedStatement m_listMbrForUserStmt;
 	private final PreparedStatement m_listMbrForConfStmt;
@@ -45,6 +45,9 @@ public class MembershipManager
 	private final PreparedStatement m_activateMembershipStmt;
 	private final PreparedStatement m_getDefaultPermissionsStmt;
 	private final PreparedStatement m_getNonmemberPermissionsStmt;
+	private final PreparedStatement m_updatePriorityStmt;
+	private final PreparedStatement m_movePrioritiesUpStmt;
+	private final PreparedStatement m_movePrioritiesDownStmt;
 	
 	private final Connection m_conn;
 	
@@ -84,6 +87,12 @@ public class MembershipManager
 			"SELECT permissions FROM conferences WHERE id = ?");
 		m_getNonmemberPermissionsStmt = m_conn.prepareStatement(
 		    "SELECT nonmember_permissions FROM conferences WHERE id = ?");
+		m_updatePriorityStmt = m_conn.prepareStatement(
+	    "UPDATE memberships SET priority = ? WHERE user = ? AND conference = ?");
+		m_movePrioritiesUpStmt = m_conn.prepareStatement(
+	    "UPDATE memberships SET priority = priority - 1 WHERE user = ? AND priority <= ? AND priority > ?");
+		m_movePrioritiesDownStmt = m_conn.prepareStatement(
+	    "UPDATE memberships SET priority = priority + 1 WHERE user = ? AND priority >= ? AND priority < ?");
 	}	
 	
 	public void close()
@@ -115,6 +124,12 @@ public class MembershipManager
 			m_getDefaultPermissionsStmt.close();
 		if(m_getNonmemberPermissionsStmt != null)
 		    m_getNonmemberPermissionsStmt.close();
+		if(m_updatePriorityStmt != null)
+		    m_updatePriorityStmt.close();
+		if(m_movePrioritiesUpStmt != null)
+		    m_movePrioritiesUpStmt.close();
+		if(m_movePrioritiesDownStmt != null)
+		    m_movePrioritiesDownStmt.close();
 	}
 	
 	public void finalize()
@@ -133,7 +148,7 @@ public class MembershipManager
 	
 	/**
 	 * Returns the memberships records for a user, i.e. lists the conferences
-	 * that user is a member of.
+	 * that user is a member of, in order of prioritization.
 	 * 
 	 * @param user The user id
 	 * @throws ObjectNotFoundException
@@ -343,10 +358,10 @@ public class MembershipManager
 			rs = null;
 			try
 			{
+			    long prio = 1;
 				rs = m_getLastPriorityStmt.executeQuery();
-				if(!rs.next())
-					throw new ObjectNotFoundException("Membership(user=" + user + ")");
-				long prio = rs.getLong(1) + PRIO_INCREMENT;
+				if(rs.next())
+				    prio = rs.getLong(1) + PRIO_INCREMENT;
 				
 				// Now, add membership record
 				//
@@ -366,6 +381,50 @@ public class MembershipManager
 					rs.close();
 			}
 		}
+	}
+	
+	public long prioritizeConference(long user, long conference, long targetconference)
+	throws ObjectNotFoundException, SQLException
+	{
+	    long oldprio = loadMembership(user, conference).getPriority();
+	    long newprio = loadMembership(user, targetconference).getPriority();
+	    long result = 0;
+	    
+	    if (newprio == oldprio)
+	    {
+	        //Do nothing.
+	        return result;
+	    }
+	    else if (newprio < oldprio)
+	    {
+	        // Move everyone else in between down one step.
+	        //
+	        m_movePrioritiesDownStmt.clearParameters();
+	        m_movePrioritiesDownStmt.setLong(1, user);
+	        m_movePrioritiesDownStmt.setLong(2, newprio);
+	        m_movePrioritiesDownStmt.setLong(3, oldprio);
+	        result = m_movePrioritiesDownStmt.executeUpdate();
+	    }
+	    else
+	    {
+	        // Move everyone else in between up one step.
+	        //
+	        m_movePrioritiesUpStmt.clearParameters();
+	        m_movePrioritiesUpStmt.setLong(1, user);
+	        m_movePrioritiesUpStmt.setLong(2, newprio);
+	        m_movePrioritiesUpStmt.setLong(3, oldprio);
+	        result = -m_movePrioritiesUpStmt.executeUpdate();
+	    }
+	    
+        // Then, move the target conference to it's new position.
+	    //
+        m_updatePriorityStmt.clearParameters();
+        m_updatePriorityStmt.setLong(1, newprio);	        
+        m_updatePriorityStmt.setLong(2, user);
+        m_updatePriorityStmt.setLong(3, conference);
+        m_updatePriorityStmt.executeUpdate();
+        
+        return result;
 	}
 	
 	public void updateMarkers(long user, long conference, MessageRangeList markers)
@@ -479,15 +538,36 @@ public class MembershipManager
 			// but we have some rights in it. Useful for example when replies are sent
 			// to a conference that the user is not a member of.
 			//
-			m_addMembershipStmt.clearParameters();
-			m_addMembershipStmt.setLong(1, user);
-			m_addMembershipStmt.setLong(2, conference);
-			m_addMembershipStmt.setBoolean(3, false); // Active flag
-			m_addMembershipStmt.setLong(4, 0);
-			m_addMembershipStmt.setLong(5, 0);
-			m_addMembershipStmt.setInt(6, permissions);
-			m_addMembershipStmt.setInt(7, negations);
-			m_addMembershipStmt.executeUpdate();
+		    ResultSet rs = null;
+			try
+			{
+				// Get hold of last priority number
+				//
+			    long prio = 1;
+				m_getLastPriorityStmt.clearParameters();
+				m_getLastPriorityStmt.setLong(1, user);
+				rs = m_getLastPriorityStmt.executeQuery();
+				if(rs.next())
+				    prio = rs.getLong(1) + PRIO_INCREMENT;
+				
+				// Now, add membership record
+				//
+				m_addMembershipStmt.clearParameters();
+				m_addMembershipStmt.setLong(1, user);
+				m_addMembershipStmt.setLong(2, conference);
+				m_addMembershipStmt.setBoolean(3, false); // Active flag
+				m_addMembershipStmt.setLong(4, prio);
+				m_addMembershipStmt.setLong(5, 0);
+				m_addMembershipStmt.setInt(6, permissions);
+				m_addMembershipStmt.setInt(7, negations);
+				m_addMembershipStmt.executeUpdate();
+			}
+			finally
+			{
+				if(rs != null)
+					rs.close();
+			}
+			
 		}
 	}
 	

@@ -548,6 +548,20 @@ public interface ServerSession
 	throws ObjectNotFoundException, UnexpectedException, NotMemberException;
 	
 	/**
+	 * Re-prioritizes conferences for the current user, placing the given conference 
+	 * at the position of the given targetconference, and shifting every conference 
+	 * in between either up or down.
+	 * @param conference
+	 * @param targetconference
+	 * @return The number of steps the given conference was shuffled, negative means it was shuffled down.
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 * @throws NotMemberException
+	 */
+	public long prioritizeConference(long conference, long targetconference)
+	throws ObjectNotFoundException, UnexpectedException, NotMemberException;
+	
+	/**
 	 * Returns a user record based on a global id
 	 * @param userId The global id
 	 * 
@@ -579,7 +593,8 @@ public interface ServerSession
 	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
-	 * List the conferences the specified user is a member of
+	 * List the conferences the specified user is a member of in 
+	 * order of prioritization
 	 * 
 	 * @param userId The global id of the user
 	 * @throws ObjectNotFoundException If the user could not be found

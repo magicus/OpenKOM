@@ -1338,6 +1338,28 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		//
 	}
 	
+	public long prioritizeConference(long conference, long targetconference)
+	throws ObjectNotFoundException, UnexpectedException, NotMemberException
+	{
+	    long user = this.getLoggedInUserId();
+	    try
+	    {
+	        if (!m_da.getMembershipManager().isMember(user, conference))
+	        {
+	            throw new NotMemberException(new Object[] { this.getCensoredName(conference).getName() });
+	        }
+	        if (!m_da.getMembershipManager().isMember(user, targetconference))
+	        {
+	            throw new NotMemberException(new Object[] { this.getCensoredName(targetconference).getName() });
+	        }
+	        return m_da.getMembershipManager().prioritizeConference(user, conference, targetconference);
+	     }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException(user, e);
+	    }
+	}
+	
 	public UserInfo getUser(long userId)
 	throws ObjectNotFoundException, UnexpectedException
 	{

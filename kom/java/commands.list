@@ -56,6 +56,7 @@ nu.rydin.kom.frontend.text.commands.NoComment
 nu.rydin.kom.frontend.text.commands.PersonalReply
 nu.rydin.kom.frontend.text.commands.PresentObject
 nu.rydin.kom.frontend.text.commands.PrintDebug
+nu.rydin.kom.frontend.text.commands.Prioritize
 nu.rydin.kom.frontend.text.commands.ProhibitLogin
 nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain
 nu.rydin.kom.frontend.text.commands.ReadMessage
