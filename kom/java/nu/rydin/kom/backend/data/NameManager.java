@@ -22,6 +22,7 @@ import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class NameManager
 {
