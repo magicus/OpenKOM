@@ -146,8 +146,6 @@ public class Status extends AbstractCommand
 		MessageFormatter formatter = context.getMessageFormatter();
 		PrintUtils.printLabelled(out, formatter.format("status.conference.id"), LABEL_LENGTH, Long.toString(info.getId()));
 		PrintUtils.printLabelled(out, formatter.format("status.conference.name"), LABEL_LENGTH, info.getName());
-		// TODO: Handle protected conferences
-		//
 		PrintUtils.printLabelled(out, formatter.format("status.conference.type"), LABEL_LENGTH, 
 		        (info.getPermissions() & ConferencePermissions.READ_PERMISSION) != 0 ? formatter.format("conference.public")
 		                : formatter.format("conference.exclusive"));

@@ -32,7 +32,6 @@ public class SendChatMessage extends AbstractCommand
 	public SendChatMessage(Context context, String fullName)
 	{
 	    // Säg foo, bar: Du är bäst!
-	    //TODO: Fix messages, they're totally screwed up!
 		super(fullName, new CommandLineParameter[] { new EllipsisParameter("chat.fulhack.raw.ask", true, new ChatRececipientParameter(true)), new RawParameter("chat.fulhack.raw.ask", false)});	
 	}
 
