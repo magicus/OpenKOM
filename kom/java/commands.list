@@ -69,4 +69,5 @@ nu.rydin.kom.frontend.text.commands.DeleteFile
 nu.rydin.kom.frontend.text.commands.ListFiles
 nu.rydin.kom.frontend.text.commands.RunScript
 nu.rydin.kom.frontend.text.commands.ChangeLoginScript
+nu.rydin.kom.frontend.text.commands.EditProfile
 nu.rydin.kom.frontend.text.commands.ListCommands

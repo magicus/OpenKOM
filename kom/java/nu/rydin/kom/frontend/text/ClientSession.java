@@ -58,6 +58,7 @@ import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
+import nu.rydin.kom.structs.FileStatus;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Logger;
@@ -357,25 +358,85 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 				
 			userInfo = null; // Don't need it anymore... Let it be GC'd
 			
-			// Run the login script (if any)
+			
+			// Run the login and profile script
 			//
+			this.getDisplayController().normal();
 			try
 			{
-				String script = null;
+				// Get profile scripts
+				//
+				FileStatus[] profiles = m_session.listFiles(this.getLoggedInUserId(), ".profile.%.cmd");
+				int nProfiles = profiles.length;
+				String profile = null;
+				if(nProfiles == 1)
+				    profile = profiles[0].getName();
+				else if(nProfiles > 1)
+				{
+				    // More than one profile. Ask user.
+				    //
+				    for(;;)
+				    {
+					    m_out.println(m_formatter.format("login.profiles"));
+					    for(int idx = 0; idx < nProfiles; ++idx)
+					    {
+					        String name = profiles[idx].getName();
+					        m_out.print(idx + 1);
+					        m_out.print(". ");
+					        m_out.println(name.substring(9, name.length() - 4));
+					    }
+					    m_out.println();
+					    m_out.print(m_formatter.format("login.chose.profile"));
+					    try
+					    {
+					        String choiceStr = m_in.innerReadLine("1", "", 3, 0);
+					        try
+					        {
+					            int choice = Integer.parseInt(choiceStr);
+					            profile = profiles[choice - 1].getName();
+					            break;
+					        }
+					        catch(NumberFormatException e)
+					        {
+					            // Bad choice 
+					            //
+					            m_out.println();
+					            m_out.println(m_formatter.format("login.profil.invalid.choice"));
+					        }
+					        catch(ArrayIndexOutOfBoundsException e)
+					        {
+					            // Bad choice 
+					            //
+					            m_out.println();
+					            m_out.println(m_formatter.format("login.profil.invalid.choice"));
+					        }					        
+					    }
+					    catch(EventDeliveredException e)
+					    {
+					        // Should not happen
+					        //
+					        throw new UnexpectedException(this.getLoggedInUserId(), e);
+					    }
+				    }
+				}
+				
+				String loginScript = null;
+				String profileScript = null;
 				try
 				{
-				    script = m_session.readFile(this.getLoggedInUserId(), ".login.cmd");
+				    loginScript = m_session.readFile(this.getLoggedInUserId(), ".login.cmd");
+				    if(profile != null)
+				        profileScript = m_session.readFile(this.getLoggedInUserId(), profile);
 				}
 				catch(ObjectNotFoundException e)
 				{
 				    // No login script. Not much to do
 				    //
 				}
-				if(script != null)
-				{
-				    this.getDisplayController().normal();
-				    this.executeScript(script);
-				}
+				if(profileScript != null)
+				    this.executeScript(profileScript);
+				if(loginScript != null)
+				    this.executeScript(loginScript);
 			}
 			catch(KOMException e)
 			{
