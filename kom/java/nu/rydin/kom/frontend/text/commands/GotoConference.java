@@ -6,14 +6,12 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.MissingArgumentException;
-import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -22,21 +20,16 @@ public class GotoConference extends AbstractCommand
 {
 	public GotoConference(String fullName)
 	{
-		super(fullName);	
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true)});
 	}
 	
-	public void execute(Context context, String[] parameters) 
-	throws KOMException, IOException, InterruptedException
+	public void execute2(Context context, Object[] parameterArray) 
+	throws KOMException
 	{
-		if(parameters.length == 0)
-			throw new MissingArgumentException();
-		long id = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
+	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
+	    
+		long id = nameAssociation.getId();
 		context.getSession().gotoConference(id);
 		context.printCurrentConference();
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

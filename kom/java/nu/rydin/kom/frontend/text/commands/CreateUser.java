@@ -25,10 +25,10 @@ public class CreateUser extends AbstractCommand
 {
 	public CreateUser(String fullName)
 	{
-		super(fullName);	
+		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}
 	
-	public void execute(Context context, String[] args) 
+	public void execute2(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException
 	{
 		// Do we have the permission to do this?

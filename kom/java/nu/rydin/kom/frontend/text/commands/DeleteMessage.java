@@ -6,15 +6,15 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.MissingArgumentException;
-import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
+import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.TextNumber;
 
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
@@ -23,36 +23,24 @@ public class DeleteMessage extends AbstractCommand
 {
 	public DeleteMessage(String fullName) 
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true)});
 	}
 
-	public void execute(Context context, String[] parameters)
-	throws KOMException, IOException, InterruptedException 
+	public void execute2(Context context, Object[] parameterArray)
+	throws KOMException 
 	{
-		if (0 == parameters.length) 
-		{
-			throw new MissingArgumentException();
+	    TextNumber textNumber = (TextNumber) parameterArray[0];
+		int n = textNumber.getNumber();
+		if (textNumber.isGlobal()) {
+		    // FIXME: Ihse: Do the right thing here
+		    return;
+		} else {
+		    context.getSession().deleteMessageInCurrentConference(n);
 		}
-		
-		int n = -1;
-		try
-		{
-			n = Integer.parseInt(parameters[0]);
-		}
-		catch (NumberFormatException e)
-		{
-			throw new BadParameterException();
-		}
-		context.getSession().deleteMessageInCurrentConference(n);
 
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();
 		out.println(fmt.format("delete.confirmation", 
 			new Object [] { new Long(n) } ));	
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

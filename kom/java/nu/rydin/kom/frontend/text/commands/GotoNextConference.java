@@ -17,14 +17,13 @@ public class GotoNextConference extends AbstractCommand
 {
 	public GotoNextConference(String fullName)
 	{
-		super(fullName);
+		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	public void execute(Context context, String[] parameters) 
+	public void execute2(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
 		long id = context.getSession().gotoNextConference();
 		context.printCurrentConference();
 	}
-
 }

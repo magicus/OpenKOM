@@ -6,14 +6,11 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UserException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-//import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Envelope;
 
 /**
@@ -24,11 +21,11 @@ public class ReadLastMessageAgain extends AbstractCommand
 {
 	public ReadLastMessageAgain(String fullName) 
 	{
-		super(fullName);
+		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 
-	public void execute(Context context, String[] parameters)
-	throws KOMException, IOException, InterruptedException, UserException 
+	public void execute2(Context context, Object[] parameterArray)
+	throws KOMException, UserException 
 	{
 		try
 		{

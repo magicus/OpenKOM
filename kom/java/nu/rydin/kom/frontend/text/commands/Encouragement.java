@@ -6,11 +6,9 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Random;
 
-import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 
@@ -21,11 +19,10 @@ public class Encouragement extends AbstractCommand
 {
 	public Encouragement(String fullName)
 	{
-		super(fullName);	
+		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}
 
-	public void execute(Context context, String[] parameters)
-		throws KOMException, IOException
+	public void execute2(Context context, Object[] parameterArray)
 	{
 	    Random rand = new Random();
 	    //Note: Probability of getting the specified upper int is *very* low, 

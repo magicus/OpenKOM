@@ -23,13 +23,13 @@ public class ListCommands extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 	
-	protected Command[] getCommandList(Context context) throws KOMException, IOException {
+	protected Command[] getCommandList(Context context) throws IOException, KOMException {
 		Command[] cmds = context.getClientSession().getCommandList();
 		return cmds;
 	}
 
 	public void execute2(Context context, Object[] parameterArray)
-            throws KOMException, IOException, InterruptedException {
+            throws KOMException, IOException {
 		PrintWriter out = context.getOut();
 		Command[] cmds = getCommandList(context);
 		int top = cmds.length;

@@ -6,16 +6,16 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UserException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.Envelope;
+import nu.rydin.kom.structs.TextNumber;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -24,45 +24,21 @@ public class ReadMessage extends AbstractCommand
 {
 	public ReadMessage(String fullName)
 	{
-		super(fullName);	
+		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true)});	
 	}
 	
-	public void execute(Context context, String[] parameters) 
-	throws KOMException, IOException
+	public void execute2(Context context, Object[] parameterArray) 
+	throws KOMException
 	{
-		// Parse parameters
-		//
-	    boolean global = false;
-		MessageFormatter formatter = context.getMessageFormatter();
-		if(parameters.length == 0)
-			throw new UserException(formatter.format("read.message.no.args"));
-		
-		// Check if a global message number was given on the form "(messagenumber)"
-		//
-		String p = parameters[0];
-		if(p.charAt(0) == '(' && p.charAt(p.length() - 1) == ')')
-		{
-		    // Global number! Strip parenteses.
-		    //
-		    p = p.substring(1, p.length() - 1);
-		    global = true;
-		}
-		int num = -1;
-		try
-		{
-			num = Integer.parseInt(p);
-		}
-		catch(NumberFormatException e)
-		{
-			throw new NumberFormatException(formatter.format("read.message.no.args"));
-		}
+	    TextNumber textNum = (TextNumber) parameterArray[0];
+		int num = textNum.getNumber();
 		
 		try
 		{
 			// Retreive message
 			//
 		    ServerSession session = context.getSession();
-			Envelope env = global
+			Envelope env = textNum.isGlobal()
 				? session.readGlobalMessage(num)
 				: session.readLocalMessage(num);
 			
@@ -72,17 +48,7 @@ public class ReadMessage extends AbstractCommand
 		}
 		catch(ObjectNotFoundException e)
 		{
-			throw new UserException(formatter.format("read.message.not.found"));
+			throw new UserException(context.getMessageFormatter().format("read.message.not.found"));
 		}		
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
-	}
-	
-	public boolean expectsNumericParameter()
-	{
-	    return true;
 	}
 }

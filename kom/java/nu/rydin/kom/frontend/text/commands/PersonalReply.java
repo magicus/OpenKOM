@@ -14,9 +14,11 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.TextNumber;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -26,10 +28,10 @@ public class PersonalReply extends AbstractCommand
 {
     public PersonalReply(String fullName)
     {
-        super(fullName);
+        super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)});
     }
 
-	public void execute(Context context, String[] parameters) 
+	public void execute2(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException
 	{
 		// Check permissions
@@ -40,12 +42,15 @@ public class PersonalReply extends AbstractCommand
 		// Parse parameters. No parameters means we're replying to the
 		// last text read.
 		//
-		MessageFormatter formatter = context.getMessageFormatter();
+		TextNumber textNumber = (TextNumber) parameterArray[0];
+		MessageHeader mh;
 		ServerSession session = context.getSession();
-		long newMessageId = -1;
-		MessageHeader mh = parameters.length == 0 
-			? session.getMessageHeader(session.getCurrentMessage())
-			: context.resolveMessageSpecifier(parameters[0]);
+		if (textNumber == null) {
+		    mh = session.getMessageHeader(session.getCurrentMessage());
+		} else {
+		    mh = context.resolveMessageSpecifier(Integer.toString(textNumber.getNumber()));
+		    // FIXME:Ihse: Does this handle global numbers?
+		}
 			
 		// Get editor and execute it
 		//
@@ -56,10 +61,5 @@ public class PersonalReply extends AbstractCommand
 		MessageOccurrence occ = session.storeMail(msg, mh.getAuthor(), mh.getId());
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

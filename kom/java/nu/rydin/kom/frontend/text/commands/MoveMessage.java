@@ -6,19 +6,16 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.BadParameterException;
-import nu.rydin.kom.backend.data.ConferenceManager;
-import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
+import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
@@ -28,18 +25,15 @@ public class MoveMessage extends AbstractCommand
 {
 	public MoveMessage(String fullName) 
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true)});
 	}
 
-	public void execute(Context context, String[] parameters)
-	throws KOMException, IOException, InterruptedException 
+	public void execute2(Context context, Object[] parameterArray)
+	throws KOMException
 	{
-		if (0 == parameters.length)
-		{
-			throw new BadParameterException();
-		}
+	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
 		
-		long conference=NamePicker.resolveNameToId(NameUtils.assembleName(parameters), NameManager.CONFERENCE_KIND, context);
+		long conference = nameAssociation.getId();
 		ServerSession ss = context.getSession();
 		int localNum = ss.globalToLocalInConference(ss.getCurrentConferenceId(), 
 													ss.getLastMessageHeader().getId()).getLocalnum();
@@ -48,10 +42,6 @@ public class MoveMessage extends AbstractCommand
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();
 		out.println(fmt.format("move.confirmation", 
-			new Object [] { new Long(localNum), context.getSession().getName(conference) } ));	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
+			new Object [] { new Long(localNum), context.getSession().getName(conference) } ));	
 	}
 }

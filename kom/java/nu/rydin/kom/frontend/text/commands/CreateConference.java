@@ -9,12 +9,11 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.ObjectNotFoundException;
-import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -22,6 +21,7 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
@@ -32,15 +32,10 @@ public class CreateConference extends AbstractCommand
 {
 	public CreateConference(String fullName)
 	{
-		super(fullName);
+		super(fullName, new CommandLineParameter[] { new RawParameter("create.conference.param.0.ask", true) });
 	}
 	
-    public void execute2(Context context, Object[] parameterArray)
-    throws KOMException, IOException, InterruptedException {
-        this.execute(context, new String[0]);
-    }
-	
-	public void execute(Context context, String[] parameters) 
+	public void execute2(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException
 	{
 		// Do we have the permission to do this?
@@ -52,24 +47,8 @@ public class CreateConference extends AbstractCommand
 		MessageFormatter fmt = context.getMessageFormatter();
 
 		// Have we already gotten a conference name?
-		String fullname;
-		
-		if (parameters.length > 0) {
-			// FIXME: Ihse -- this only gives us the name up to the first space (and in UPPER CASE)
-			// Awaiting Pontus "raw parameter" fix...
-			fullname = parameters[0];
-			out.println(fmt.format("create.conference.nameconfirmation", fullname));
-		} else {
-			out.print(fmt.format("create.conference.fullname"));
-			out.flush();
-			fullname = in.readLine();
-			
-			// Empty name? User interrupted
-			//
-			if(fullname.length() == 0)
-				return;
-		}
-		
+		String fullname = (String) parameterArray[0];
+
 		// There must be a better way to do this..
 		//
 		boolean canDoMagic = false;
@@ -197,13 +176,5 @@ public class CreateConference extends AbstractCommand
 		{
 			out.println(context.getMessageFormatter().format("create.conference.ambiguous", e.getMessage()));
 		}
-
 	}
-
-	/* (non-Javadoc)
-	 * @see nu.rydin.kom.frontend.text.Command#acceptsParameters()
-	 */
-	public boolean acceptsParameters() {
-		return true;
-	}	
 }

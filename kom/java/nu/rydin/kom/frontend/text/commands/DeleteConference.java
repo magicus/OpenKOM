@@ -9,17 +9,15 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.MissingArgumentException;
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.NamePicker;
-import nu.rydin.kom.backend.data.ConferenceManager;
-import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.frontend.text.LineEditor;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
+import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
@@ -28,17 +26,14 @@ public class DeleteConference extends AbstractCommand
 {
 	public DeleteConference (String fullname)
 	{
-		super(fullname);
+		super(fullname, new CommandLineParameter[] { new ConferenceParameter(true)});
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
-		if (0 == parameters.length)
-		{
-			throw new MissingArgumentException();
-		}
-		long conference=NamePicker.resolveNameToId(NameUtils.assembleName(parameters), NameManager.CONFERENCE_KIND, context);
+	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
+		long conference = nameAssociation.getId();
 		ServerSession ss = context.getSession();
 		MessageFormatter mf = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
@@ -63,10 +58,5 @@ public class DeleteConference extends AbstractCommand
 		{
 			ss.deleteConference(conference);
 		}
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

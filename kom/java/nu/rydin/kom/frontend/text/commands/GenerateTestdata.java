@@ -6,12 +6,12 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.IntegerParameter;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -27,23 +27,16 @@ public class GenerateTestdata extends AbstractCommand
 	
 	public GenerateTestdata(String fullName)
 	{
-		super(fullName);	
+		super(fullName, new CommandLineParameter[] { new IntegerParameter(false)});
 	}
 	
-	public void execute(Context context, String[] parameters) 
-	throws KOMException, IOException
+	public void execute2(Context context, Object[] parameterArray) 
+	throws KOMException
 	{
 		int generate = 20;
-		if (parameters.length != 0)
-		{
-			try
-			{
-				generate = Integer.parseInt(parameters[0]);
-			}
-			catch (NumberFormatException e)
-			{
-				// NaN
-			}
+		Integer numValue = (Integer) parameterArray[0];
+		if (numValue != null) {
+		    generate = numValue.intValue();
 		}
 		ServerSession session = context.getSession();
 		for(int idx = 0; idx < generate; ++idx)
@@ -51,10 +44,5 @@ public class GenerateTestdata extends AbstractCommand
 			session.storeMessage(new UnstoredMessage(s_subject, s_body1));
 			session.storeMessage(new UnstoredMessage(s_subject, s_body2));
 		}
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

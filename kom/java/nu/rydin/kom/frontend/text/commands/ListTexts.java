@@ -6,17 +6,16 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.frontend.text.LineEditor; 
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.utils.PrintUtils;
+import nu.rydin.kom.frontend.text.LineEditor;
+import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author Jepson
@@ -29,11 +28,11 @@ public class ListTexts extends AbstractCommand
     
 	public ListTexts(String fullName) 
 	{
-		super(fullName);
+		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
 
-	public void execute(Context context, String[] parameters)
-	throws KOMException, IOException, InterruptedException 
+	public void execute2(Context context, Object[] parameterArray)
+	throws KOMException 
 	{		
 		MessageFormatter mf = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
@@ -68,10 +67,5 @@ public class ListTexts extends AbstractCommand
 				out.flush();
 			}
 		}
-	}
-	
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }

@@ -9,13 +9,13 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
-import nu.rydin.kom.frontend.text.NamePicker;
-import nu.rydin.kom.backend.NameUtils;
 
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
@@ -24,26 +24,19 @@ public class PresentObject extends AbstractCommand
 {
 	public PresentObject (String fullname)
 	{
-		super(fullname);
+		super(fullname, new CommandLineParameter[] { new NamedObjectParameter(true)});
 	}
 	
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
-		if (0 == parameters.length)
-		{
-			throw new BadParameterException();
-		}
-		long objectId = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
+	    NameAssociation nameAssociation = (NameAssociation) parameterArray[0];
+	    
+		long objectId = nameAssociation.getId();
 		short kind = context.getSession().getObjectKind(objectId);
 		UnstoredMessage msg = context.getMessageEditor().edit(context, -1);
 		MessageOccurrence occ = context.getSession().storeMagicMessage(msg, kind, objectId);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));
-	}
-
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }
