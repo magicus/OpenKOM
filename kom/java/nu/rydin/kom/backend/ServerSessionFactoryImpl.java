@@ -11,7 +11,6 @@ import java.lang.reflect.Proxy;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,6 +96,7 @@ public class ServerSessionFactoryImpl
 		{
 			UserManager um = da.getUserManager();
 			 
+			//FIXME Move to a bootstrapping sql-script.
 			// Make sure there is at least a sysop in the database.
 			//
 			if(!um.userExists("sysop"))
