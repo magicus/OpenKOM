@@ -41,7 +41,8 @@ public class ChangeSuffix extends AbstractCommand
 		// CHANGE_ANY_NAME to do that!
 		//
 		ServerSession session = context.getSession();
-		session.checkRights(UserPermissions.CHANGE_ANY_NAME);
+		if(id != -1)
+			session.checkRights(UserPermissions.CHANGE_ANY_NAME);
 		
 		// Set up
 		//
