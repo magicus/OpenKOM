@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author Henrik Schröder
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 
