@@ -24,7 +24,6 @@ public class ShowLicense extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray)
 	{
 	    PrintWriter out = context.getOut();
-	    out.println(context.getMessageFormatter().format("license.version"));
 	    out.println(context.getMessageFormatter().format("license.text1"));
 	    out.println(context.getMessageFormatter().format("license.text2"));
 	}

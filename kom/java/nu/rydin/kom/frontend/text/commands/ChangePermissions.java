@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
@@ -23,9 +24,9 @@ import nu.rydin.kom.structs.NameAssociation;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class AddPermissions extends AbstractCommand
+public class ChangePermissions extends AbstractCommand
 {
-	public AddPermissions(Context context, String fullName)
+	public ChangePermissions(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new UserParameter(true) });
 	}
