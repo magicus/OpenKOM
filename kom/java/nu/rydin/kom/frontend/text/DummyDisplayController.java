@@ -6,14 +6,12 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.PrintWriter;
-
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class DummyDisplayController implements DisplayController 
 {   
-    public DummyDisplayController(PrintWriter writer)
+    public DummyDisplayController()
     {
     }
     

@@ -37,11 +37,17 @@ public class ClearFlag extends AbstractCommand
         reset[flagNumber / 64] = 1 << (flagNumber % 64);
         context.getSession().changeUserFlags(set, reset);
 
+        // Only necessary if flag reset was ANSI...
+        //
+        context.getDisplayController().reset();
+        
         // Clear cache
         //
         context.clearUserInfoCache();
-        // Only necessary if flag reset was ANSI...
-        context.getDisplayController().reset();
+        
+        // Only necessary if flag set was ANSI...
+        //
+        context.getDisplayController().output();
         
         // Display confirmation
         //
