@@ -12,7 +12,7 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public abstract class KOMException extends Exception
 {
-    private Object[] m_msgArgs;
+    protected Object[] m_msgArgs;
     
 	public KOMException()
 	{
