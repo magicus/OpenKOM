@@ -27,6 +27,14 @@ public class NamePicker
 	throws ObjectNotFoundException, AmbiguousNameException, UnexpectedException, IOException, 
 		InterruptedException, OperationInterruptedException, InvalidChoiceException
 	{
+		try
+		{
+			return Long.parseLong(name);
+		}
+		catch (NumberFormatException e)
+		{
+			// Not a numeric ID, need to parse and resolve it. 
+		}
 		NameAssociation[] assocs = kind == -1
 			? ctx.getSession().getAssociationsForPattern(name)
 			: ctx.getSession().getAssociationsForPatternAndKind(name, kind);
