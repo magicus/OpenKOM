@@ -33,12 +33,14 @@ import nu.rydin.kom.UserException;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
+import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.BroadcastMessageEvent;
 import nu.rydin.kom.events.ChatMessageEvent;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
+import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
 import nu.rydin.kom.frontend.text.commands.GotoNextConference;
 import nu.rydin.kom.frontend.text.commands.Logout;
@@ -67,6 +69,8 @@ public class ClientSession implements Runnable, Context, EventTarget
 	private ServerSession m_session;
 	private long m_userId;
 	private LinkedList m_displayMessageQueue = new LinkedList();
+	private UserInfo m_thisUserCache;
+	private String[] m_flagLabels;
 
 	
 	// This could be read from some kind of user config if the
@@ -99,10 +103,18 @@ public class ClientSession implements Runnable, Context, EventTarget
 	public ClientSession(InputStream in, OutputStream out)
 	throws UnexpectedException
 	{
+		// Set up I/O
+		//
 		m_rawIn = in;
 		m_rawOut = out;
+		
+		// Install commands and init parser
+		//
 		this.installCommands();
 		m_parser = new CommandParser(m_commandList);
+		
+		// More I/O
+		//
 		try
 		{
 			m_out = new KOMPrinter(m_rawOut, DEFAULT_CHARSET);
@@ -114,6 +126,10 @@ public class ClientSession implements Runnable, Context, EventTarget
 			//
 			throw new UnexpectedException(-1, "US-ASCII not supported. Your JVM is broken!");
 		}
+		
+		// Set up flag table
+		//
+		this.loadFlagTable();
 	}
 	 
 	public void run()
@@ -509,6 +525,30 @@ public class ClientSession implements Runnable, Context, EventTarget
 		return m_userId;
 	}
 	
+	public synchronized UserInfo getCachedUserInfo()
+	throws UnexpectedException, ObjectNotFoundException
+	{
+		if(m_thisUserCache == null)
+			m_thisUserCache = m_session.getUser(this.getLoggedInUserId());
+		return m_thisUserCache;
+	}
+	
+	public synchronized void clearUserInfoCache()
+	{
+		m_thisUserCache = null;
+	}
+	
+	public boolean isFlagSet(int flagWord, long mask)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		return (this.getCachedUserInfo().getFlags()[flagWord] & mask) == mask; 
+	}
+	
+	public String[] getFlagLabels()
+	{
+		return m_flagLabels;
+	}
+	
 	// Implementation of EventTarget
 	//
 	public void onEvent(Event e)
@@ -547,6 +587,13 @@ public class ClientSession implements Runnable, Context, EventTarget
 			m_displayMessageQueue.addLast(m_formatter.format("event.attendance." + event.getType(), 
 								new Object[] { event.getUserName() }));
 		}				
+	}
+	
+	public synchronized void onEvent(ReloadUserProfileEvent event)
+	{
+		// Invalidate user info cache
+		//
+		m_thisUserCache = null;
 	}
 	
 	public void onEvent(NewMessageEvent event)
@@ -638,5 +685,33 @@ public class ClientSession implements Runnable, Context, EventTarget
 		{
 			throw new UnexpectedException(-1, e.getCause());
 		}		
+	}
+	
+	public void loadFlagTable()
+	{
+		m_flagLabels = new String[UserFlags.NUM_FLAGS];
+		for(int idx = 0; idx < UserFlags.NUM_FLAGS; ++idx)
+		{
+			// Calculate flag word and flag bit index
+			//
+			int flagWord = 1 + (idx / 64);
+			long flagBit = (long) 1 << (long) (idx % 64);
+			String hex = Long.toHexString(flagBit);
+			
+			// Build message key
+			//
+			StringBuffer buf = new StringBuffer();
+			buf.append("userflags.");
+			buf.append(flagWord);
+			buf.append('.');
+			int top = 8 - hex.length();
+			for(int idx2 = 0; idx2 < top; ++idx2)
+				buf.append('0');
+			buf.append(hex);
+			
+			// Get flag label
+			//
+			m_flagLabels[idx] = m_formatter.getStringOrNull(buf.toString());			
+		}
 	}
 }

@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -62,7 +63,8 @@ public class CreateUser extends AbstractCommand
 			// TODO: Ask for rights!
 			//
 			context.getSession().createUser(login, password, fullname, "", "", "", "", "", "", "", "", "", 
-				"ISO-8859-1", 0, UserPermissions.NORMAL);
+				"ISO-8859-1", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, UserFlags.DEFAULT_FLAGS3, 
+				UserFlags.DEFAULT_FLAGS4, UserPermissions.NORMAL);
 		}
 		catch(DuplicateNameException e)
 		{

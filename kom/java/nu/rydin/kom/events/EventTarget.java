@@ -21,4 +21,6 @@ public interface EventTarget
 	public void onEvent(NewMessageEvent event);
 	
 	public void onEvent(UserAttendanceEvent event);
+	
+	public void onEvent(ReloadUserProfileEvent event);
 }

@@ -19,6 +19,7 @@ import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.UserManager;
+import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
@@ -105,7 +106,8 @@ public class ServerSessionFactoryImpl
 			if(!um.userExists("sysop"))
 			{
 				um.addUser("sysop", "sysop", "Sysop", "", "", "", "", "", "", "", "", "", 
-					"ISO-8859-1", UserManager.SYSOP_FLAG, UserPermissions.EVERYTHING);
+					"ISO-8859-1", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, 
+				UserFlags.DEFAULT_FLAGS3, UserFlags.DEFAULT_FLAGS4, UserPermissions.EVERYTHING);
 				da.commit();
 				committed = true;
 			}

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import nu.rydin.kom.AllRecipientsNotReachedException;
 import nu.rydin.kom.AlreadyMemberException;
 import nu.rydin.kom.AmbiguousNameException;
+import nu.rydin.kom.AuthenticationException;
 import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.NoCurrentMessageException;
@@ -215,7 +216,10 @@ public interface ServerSession
 	 * @param email1 Email
 	 * @param email2 Alternate email
 	 * @param url URL to homepage
-	 * @param flags User flags
+	 * @param flags1 Flagword 1
+	 * @param flags2 Flagword 2
+	 * @param flags3 Flagword 3
+	 * @param flags4 Flagword 4
 	 * @param rights User privilege bits
 	 * 
 	 * @throws UnexpectedException
@@ -226,7 +230,7 @@ public interface ServerSession
 	public void createUser(String userid, String password, String fullname, String address1,
 		String address2, String address3, String address4, String phoneno1, 
 		String phoneno2, String email1, String email2, String url, String charset, 
-		long flags, long rights)
+		long flags1, long flags2, long flags3, long flags4, long rights)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException;
 
 	/**
@@ -781,4 +785,22 @@ public interface ServerSession
 	 */
 	public boolean userCanChangeNameOf(long id)
 	throws DuplicateNameException, UnexpectedException;	
+
+	/**
+	 * Changes the password of a user.
+	 * @param userId The id of the user to change the password for
+	 * @param oldPassword The old password. Not checked if the caller holds the USER_ADMIN
+	 * privilege.
+	 * @param newPassword The new password
+	 */
+	public void changePassword(long userId, String oldPassword, String newPassword)
+	throws ObjectNotFoundException, AuthorizationException, AuthenticationException, UnexpectedException;	
+	
+	/**
+	 * Sets or resets user flags of the logged in user
+	 * @param set The flags to set
+	 * @param reset The flags to reset
+	 */
+	public void changeUserFlags(long[] set, long[] reset)
+	throws ObjectNotFoundException, UnexpectedException;
 }

@@ -19,6 +19,7 @@ import java.util.Iterator;
 import nu.rydin.kom.AllRecipientsNotReachedException;
 import nu.rydin.kom.AlreadyMemberException;
 import nu.rydin.kom.AmbiguousNameException;
+import nu.rydin.kom.AuthenticationException;
 import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.NoCurrentMessageException;
@@ -35,12 +36,14 @@ import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.BroadcastMessageEvent;
 import nu.rydin.kom.events.ChatMessageEvent;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
+import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
 import nu.rydin.kom.structs.*;
 import nu.rydin.kom.structs.ConferenceInfo;
@@ -446,14 +449,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	
 	public void createUser(String userid, String password, String fullname, String address1,
 		String address2, String address3, String address4, String phoneno1, 
-		String phoneno2, String email1, String email2, String url, String charset, long flags, long rights)
+		String phoneno2, String email1, String email2, String url, String charset, long flags1, 
+		long flags2, long flags3, long flags4, long rights)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException
 	{
-		this.checkRights(UserPermissions.CREATE_USER);
+		this.checkRights(UserPermissions.USER_ADMIN);
 		try
 		{
 			m_da.getUserManager().addUser(userid, password, fullname, address1, address2, address3, address4, 
-				phoneno1, phoneno2, email1, email2, url, charset, flags, rights);
+				phoneno1, phoneno2, email1, email2, url, charset, flags1, flags2, flags3, flags4, rights);
 		}
 		catch(SQLException e)
 		{
@@ -1419,7 +1423,56 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			return false;
 		}
 	}
-
+	
+	public void changePassword(long userId, String oldPassword, String password)
+	throws ObjectNotFoundException, AuthorizationException, AuthenticationException, UnexpectedException	
+	{
+		try
+		{
+			// Check permissions unless we change our own password
+			//
+			if(userId != this.getLoggedInUserId())
+				this.checkRights(UserPermissions.USER_ADMIN);
+			else
+				m_da.getUserManager().authenticate(this.getUser(userId).getUserid(), oldPassword);
+			m_da.getUserManager().changePassword(userId, password);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+		catch(NoSuchAlgorithmException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}					
+	}
+	
+	public void changeUserFlags(long[] set, long[] reset)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		try
+		{
+			// Load current flags.
+			// TODO: Might be a little inefficient to load the entire UserInfo
+			//
+			UserInfo ui = this.getLoggedInUser();
+			long[] oldFlags = ui.getFlags();
+			
+			// Calculate new flags sets
+			//
+			long[] flags = new long[UserFlags.NUM_FLAG_WORD];
+			for(int idx = 0; idx < UserFlags.NUM_FLAG_WORD; ++idx)
+				flags[idx] = (oldFlags[idx] | set[idx]) & ~reset[idx];
+			
+			// Store in database
+			//
+			m_da.getUserManager().changeFlags(this.getLoggedInUserId(), flags);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}		
+	}
 
 	protected void markAsInvalid()
 	{
@@ -1686,6 +1739,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	}
 	
 	public void onEvent(UserAttendanceEvent e)
+	{
+		// Just post it!
+		// 
+		this.postEvent(e);
+	}
+	
+	public void onEvent(ReloadUserProfileEvent e)
 	{
 		// Just post it!
 		// 

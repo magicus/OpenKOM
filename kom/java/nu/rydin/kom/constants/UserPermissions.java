@@ -19,19 +19,19 @@ public class UserPermissions
 	public static final long CREATE_CONFERENCE 		= 0x0001L;
 	
 	/**
-	 * Permission to create new users
+	 * Permission to create, delete and change users 
 	 */
-	public static final long CREATE_USER			= 0x0002L;
+	public static final long USER_ADMIN				= 0x0002L;
 	
 	/**
 	 * Permission to delete conferences
 	 */
-	public static final long DELETE_CONFERENCE		= 0x0004L;
+	public static final long CONFERENCE_ADMIN		= 0x0004L;
 	
 	/**
-	 * Permission to delete users
+	 * Obsolete. User this when defining a new bit
 	 */
-	public static final long DELETE_USER			= 0x0008L;
+	public static final long OBSOLETE1				= 0x0008L;
 	
 	/**
 	 * Disregard conference permissions, i.e. enter any conference
@@ -47,7 +47,7 @@ public class UserPermissions
 	 * Permission to change the name of any object
 	 */
 	public static final long CHANGE_ANY_NAME		= 0x0040L;
-	
+		
 	/**
 	 * Permission to log in
 	 */

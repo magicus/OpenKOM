@@ -34,7 +34,7 @@ public class UserInfo extends NamedObject
 	private String m_email2;
 	private String m_url;
 	private String m_charset;
-	private final long m_flags;
+	private final long[] m_flags = new long[4];
 	private final long m_rights;
 	private String m_locale;
 	
@@ -42,7 +42,8 @@ public class UserInfo extends NamedObject
 	
 	public UserInfo(long id, String name, String userid, String address1, String address2,
 		String address3, String address4, String phoneno1, String phoneno2, String email1,
-		String email2, String url, String charset, long flags, long rights, String locale)
+		String email2, String url, String charset, long flags1, long flags2, long flags3, long flags4,
+		long rights, String locale)
 	{
 		super(id, name);
 		m_userid	= userid;
@@ -56,7 +57,10 @@ public class UserInfo extends NamedObject
 		m_email2 	= email2;
 		m_url 		= url;
 		m_charset	= charset;
-		m_flags 	= flags;
+		m_flags[0] 	= flags1;
+		m_flags[1] 	= flags2;
+		m_flags[2] 	= flags3;
+		m_flags[2] 	= flags4;
 		m_rights	= rights;
 		m_locale 	= locale;
 	}
@@ -91,7 +95,27 @@ public class UserInfo extends NamedObject
 		return m_email2;
 	}
 
-	public long getFlags()
+	public long getFlags1()
+	{
+		return m_flags[0];
+	}
+	
+	public long getFlags2()
+	{
+		return m_flags[1];
+	}
+	
+	public long getFlags3()
+	{
+		return m_flags[2];
+	}
+	
+	public long getFlags4()
+	{
+		return m_flags[3];
+	}	
+	
+	public long[] getFlags()
 	{
 		return m_flags;
 	}

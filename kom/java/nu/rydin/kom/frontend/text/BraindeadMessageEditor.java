@@ -23,8 +23,7 @@ public class BraindeadMessageEditor implements MessageEditor
 	{
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
-		MessageFormatter formatter = context.getMessageFormatter();
-			
+		MessageFormatter formatter = context.getMessageFormatter();			
 		try
 		{
 			// Read subject

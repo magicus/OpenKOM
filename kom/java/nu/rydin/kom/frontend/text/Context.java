@@ -12,6 +12,7 @@ import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.UserInfo;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -72,4 +73,33 @@ public interface Context
 	 * Returns the id of the logged in user
 	 */
 	public long getLoggedInUserId();
+
+	/**
+	 * Return cached user information. NOTE: Although an effort is made to
+	 * keep this info up to date, it is not 100% reliable. Don't use for 
+	 * operations where slightly stale data could cause problems.
+	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
+	 */	
+	public UserInfo getCachedUserInfo()
+	throws UnexpectedException, ObjectNotFoundException;
+	
+	/**
+	 * Invalidates user info cache.
+	 */
+	public void clearUserInfoCache();
+	
+	/**
+	 * Returns true if the specified flag in the specified flag word i set
+	 * @param flagWord The flag word index
+	 * @param mask The mask to check
+	 * @return
+	 */
+	boolean isFlagSet(int flagWord, long mask)
+	throws ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * Returns localized names of user flags.
+	 */
+	public String[] getFlagLabels();
 }

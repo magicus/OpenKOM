@@ -6,30 +6,50 @@
  */
 package nu.rydin.kom.backend;
 
-import com.frameworx.util.MRUCache;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class CacheManager
 {
-	private MRUCache m_userCache = new MRUCache(50); // TODO: Read from config
-	
-	private MRUCache m_conferenceCache = new MRUCache(50); // TODO: Read from config
-	
-	private MRUCache m_messageCache = new MRUCache(50); // TODO: Read from config
+	private static CacheManager s_instance = new CacheManager();
 	 
-	public MRUCache getUserCache()
+	private KOMCache m_userCache = new KOMCache(50); // TODO: Read from config
+	
+	private KOMCache m_conferenceCache = new KOMCache(50); // TODO: Read from config
+	
+	private KOMCache m_messageCache = new KOMCache(50); // TODO: Read from config
+	
+	public static CacheManager instance()
+	{
+		return s_instance;
+	}
+	
+	public void commit()
+	{
+		m_userCache.performDeferredInvalidations();
+		m_conferenceCache.performDeferredInvalidations();
+		m_messageCache.performDeferredInvalidations();
+	}
+	
+	public void rollback()
+	{
+		m_userCache.discardDeferredInvalidations();
+		m_conferenceCache.discardDeferredInvalidations();
+		m_messageCache.discardDeferredInvalidations();
+	}
+	 
+	public KOMCache getUserCache()
 	{
 		return m_userCache;
 	}
 	
-	public MRUCache getConferenceCache()
+	public KOMCache getConferenceCache()
 	{
 		return m_conferenceCache;
 	}
 	
-	public MRUCache getMessageCache()
+	public KOMCache getMessageCache()
 	{
 		return m_messageCache;
 	}

@@ -10,6 +10,8 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.data.MessageManager;
+import nu.rydin.kom.constants.UserFlags;
+import nu.rydin.kom.frontend.text.ansi.ANSISequences;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.Message;
@@ -30,6 +32,10 @@ public class BasicMessagePrinter implements MessagePrinter
 		Message message = envelope.getMessage();
 		MessageOccurrence primaryOcc = envelope.getPrimaryOccurrence();
 		
+		// Clear screen if requested by user
+		//
+		if(context.isFlagSet(0, UserFlags.CLEAR_SCREEN_BEFORE_MESSAGE))
+			out.print(ANSISequences.CLEAR_DISPLAY);
 		
 		// Could we figure out the local number?
 		//
@@ -115,11 +121,17 @@ public class BasicMessagePrinter implements MessagePrinter
 		//
 		out.println(message.getBody());
 		
+		// Print text footer if requested
+		//
+		if(context.isFlagSet(0, UserFlags.SHOW_TEXT_FOOTER))
+			out.println(formatter.format("BasicMessagePrinter.footer", 
+				new Object[] { new Long(primaryOcc.getLocalnum()), message.getAuthorName() }));
+		
 		// Print list of replies
 		//
 		Envelope.RelatedMessage[] replies = envelope.getReplies();
 		top = replies.length;
-		if(top > 0)
+		if(!context.isFlagSet(0, UserFlags.SHOW_TEXT_FOOTER) && top > 0)
 			out.println();
 		for(int idx = 0; idx < top; ++idx)
 		{
@@ -152,6 +164,5 @@ public class BasicMessagePrinter implements MessagePrinter
 				out.println(formatter.format("BasicMessagePrinter.nocomment", each.getNoCommentUsername()));		        
 		    }
 		}
-
 	}
 }

@@ -20,43 +20,51 @@ import nu.rydin.kom.AuthenticationException;
 import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.ObjectNotFoundException;
+import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.structs.UserInfo;
 
-public class UserManager // extends NameManager 
+public class UserManager 
 {	
 	private final PreparedStatement m_getIdByLoginStmt;
 	private final PreparedStatement m_authenticateStmt;
 	private final PreparedStatement m_addUserStmt;
 	private final PreparedStatement m_loadUserStmt;
 	private final PreparedStatement m_updateCharsetStmt;
+	private final PreparedStatement m_changePasswordStmt;
+	private final PreparedStatement m_changeFlagsStmt;
 	
 	private final NameManager m_nameManager;
 	
-	private final Connection m_conn;
+	private final CacheManager m_cacheManager;
 	
-	public static final long SYSOP_FLAG = 1L;
+	private final Connection m_conn;
 	
 	public static final short USER_KIND = 0;
 	
-	public UserManager(Connection conn, NameManager nameManager)
+	public UserManager(Connection conn, CacheManager cacheManager, NameManager nameManager)
 	throws SQLException
 	{
 		m_conn = conn;
 		m_nameManager = nameManager;
+		m_cacheManager = cacheManager;
 		m_getIdByLoginStmt = conn.prepareStatement(
 			"SELECT id FROM users WHERE userid = ?");
 		m_authenticateStmt = conn.prepareStatement(
 			"SELECT u.id, u.pwddigest FROM users u, names n WHERE u.userid = ? AND n.id = u.id");
 		m_addUserStmt = conn.prepareStatement(
 			"INSERT INTO users(userid, pwddigest, address1, address2, " +
-			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, flags, rights) " +
-			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights) " +
+			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?)");
 		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, u.address1, u.address2, u.address3, u.address4, " +
-			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags, u.rights, u.locale " +
+			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_updateCharsetStmt = conn.prepareStatement(
 			"UPDATE users SET charset = ? WHERE id = ?");
+		m_changePasswordStmt = conn.prepareStatement(
+			"UPDATE users SET pwddigest = ? WHERE id = ?");
+		m_changeFlagsStmt = conn.prepareStatement(
+			"UPDATE users SET flags1 = ?, flags2 = ?, flags3 = ?, flags4 = ? WHERE id = ?");
 	}
 	
 	/**
@@ -74,7 +82,11 @@ public class UserManager // extends NameManager
 		if(m_loadUserStmt != null)
 			m_loadUserStmt.close();
 		if(m_updateCharsetStmt != null)
-			m_updateCharsetStmt.close();																	
+			m_updateCharsetStmt.close();
+		if(m_changePasswordStmt != null)
+			m_changePasswordStmt.close();
+		if(m_changeFlagsStmt != null)
+			m_changeFlagsStmt.close();																	
 	}
 	
 	/**
@@ -129,7 +141,8 @@ public class UserManager // extends NameManager
 	 */
 	public void addUser(String userid, String password, String fullname, String address1,
 		String address2, String address3, String address4, String phoneno1, 
-		String phoneno2, String email1, String email2, String url, String charset, long flags, long rights)
+		String phoneno2, String email1, String email2, String url, String charset, long flags1, 
+		long flags2, long flags3, long flags4, long rights)
 		throws DuplicateNameException, SQLException, NoSuchAlgorithmException,
 		AmbiguousNameException
 		{
@@ -157,8 +170,11 @@ public class UserManager // extends NameManager
 			m_addUserStmt.setString(11, url);
 			m_addUserStmt.setString(12, charset);
 			m_addUserStmt.setLong(13, nameId);
-			m_addUserStmt.setLong(14, flags);
-			m_addUserStmt.setLong(15, rights);
+			m_addUserStmt.setLong(14, flags1);
+			m_addUserStmt.setLong(15, flags2);
+			m_addUserStmt.setLong(16, flags3);
+			m_addUserStmt.setLong(17, flags4);
+			m_addUserStmt.setLong(18, rights);
 			
 			// Lock cache while updating
 			//
@@ -254,6 +270,18 @@ public class UserManager // extends NameManager
 	public UserInfo loadUser(long id)
 	throws ObjectNotFoundException, SQLException
 	{
+		// First, try cache
+		//
+		/*
+		 * TODO: Not yet... 
+		 
+		UserInfo cached = (UserInfo) m_cacheManager.getUserCache().get(new Long(id));
+		if(cached != null)
+			return cached;
+		*/
+			
+		// Load from database
+		//
 		m_loadUserStmt.clearParameters();
 		m_loadUserStmt.setLong(1, id);
 		ResultSet rs = null;
@@ -276,9 +304,12 @@ public class UserManager // extends NameManager
 				rs.getString(10),	// email2
 				rs.getString(11),	// url,
 				rs.getString(12),	// charset
-				rs.getLong(13),		// flags,
-				rs.getLong(14),		// rights
-				rs.getString(15)	// locale
+				rs.getLong(13),		// flags1,
+				rs.getLong(14),		// flags2,
+				rs.getLong(15),		// flags3,
+				rs.getLong(16),		// flags4,
+				rs.getLong(17),		// rights
+				rs.getString(18)	// locale
 			);
 		}
 		finally
@@ -304,8 +335,41 @@ public class UserManager // extends NameManager
 		int n = m_updateCharsetStmt.executeUpdate();
 		if(n == 0)
 			throw new ObjectNotFoundException();
+		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
 	}
 	
+	/**
+	 * Changes the password of a user
+	 * 
+	 * @param userId
+	 * @param password
+	 * @throws ObjectNotFoundException
+	 * @throws SQLException
+	 */
+	public void changePassword(long userId, String password)
+	throws ObjectNotFoundException, NoSuchAlgorithmException, SQLException
+	{
+		m_changePasswordStmt.clearParameters();
+		m_changePasswordStmt.setBytes(1, this.passwordDigest(password));
+		m_changePasswordStmt.setLong(2, userId);
+		if(m_changePasswordStmt.executeUpdate() == 0)
+			throw new ObjectNotFoundException("user id=" + userId);
+		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
+	}
+	
+	public void changeFlags(long userId, long[] flags)
+	throws ObjectNotFoundException, SQLException
+	{
+		m_changeFlagsStmt.clearParameters();
+		m_changeFlagsStmt.setLong(1, flags[0]);
+		m_changeFlagsStmt.setLong(2, flags[1]);
+		m_changeFlagsStmt.setLong(3, flags[2]);
+		m_changeFlagsStmt.setLong(4, flags[3]);
+		m_changeFlagsStmt.setLong(5, userId);
+		if(m_changeFlagsStmt.executeUpdate() == 0)
+			throw new ObjectNotFoundException("id=" + userId);
+		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
+	}
 	
 	/**
 	 * Calculates an MD5 digest of a password

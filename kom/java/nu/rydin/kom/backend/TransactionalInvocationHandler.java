@@ -19,6 +19,8 @@ public class TransactionalInvocationHandler implements InvocationHandler
 {
 	private final ServerSessionImpl m_session;
 	
+	private final CacheManager m_cacheManager = CacheManager.instance();
+	
 	public TransactionalInvocationHandler(ServerSessionImpl session)
 	{
 		m_session = session;
@@ -38,7 +40,11 @@ public class TransactionalInvocationHandler implements InvocationHandler
 		{
 			Object result = method.invoke(m_session, args);
 			m_session.setDataAccess(null);
+			
+			// TODO: Synch the two commits
+			//
 			da.commit();
+			m_cacheManager.commit();
 			committed = true;
 			return result;
 		}
@@ -51,7 +57,10 @@ public class TransactionalInvocationHandler implements InvocationHandler
 		finally
 		{
 			if(!committed)
+			{
 				da.rollback();
+				m_cacheManager.rollback();
+			}
 			DataAccessPool.instance().returnDataAccess(da);
 		} 
 	}

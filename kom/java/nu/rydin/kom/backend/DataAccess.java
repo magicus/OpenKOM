@@ -13,8 +13,8 @@ import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageManager;
-import nu.rydin.kom.backend.data.ObjectManager;
 import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.backend.data.ObjectManager;
 import nu.rydin.kom.backend.data.UserManager;
 
 /**
@@ -61,7 +61,7 @@ public class DataAccess
 		try
 		{
 			m_nameManager		= new NameManager(conn);
-			m_userManager	 	= new UserManager(conn, m_nameManager);
+			m_userManager	 	= new UserManager(conn, CacheManager.instance(), m_nameManager);
 			m_conferenceManager = new ConferenceManager(conn, m_nameManager);
 			m_membershipManager = new MembershipManager(conn);
 			m_messageManager 	= new MessageManager(conn);
