@@ -26,12 +26,23 @@ public class TextNumberParameter extends CommandLineParameter
 	protected Match innerMatch(String matchingPart, String remainder)
 	{
 		boolean global = false;
-		String cooked = cookString(matchingPart);
-		if (cooked.charAt(0) == '#') {
-			// It's a global text number
-			global = true;
-			cooked = cooked.substring(1);
+		String cooked = matchingPart.trim();
+		
+		int top = cooked.length();
+		
+		if (top == 0)
+		{
+		    // I don't think this can actually happen, but better safe than sorry...
+		    return new Match(false, null, null, null);
 		}
+		
+		if ((cooked.length() > 2) && (cooked.charAt(0) == '(') && (cooked.charAt(top-1) == ')'))
+		{
+		    // It might be a global number!
+		    global = true;
+		    cooked = cooked.substring(1, top-1);
+		}
+		
 		try
 		{
 			int number = Integer.parseInt(cooked);
