@@ -589,7 +589,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		
 			// Move focus...
 			//
-			this.setCurrentConferenceId(nextId);	
+			this.setCurrentConferenceId(nextId);
+			
+			// Clear reply stack
+			//
+			m_replyStack = null;
 			return nextId;
 		}
 		catch(SQLException e)

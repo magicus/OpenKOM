@@ -20,6 +20,7 @@ import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.exceptions.EventDeliveredException;
+import nu.rydin.kom.exceptions.ImmediateShutdownException;
 import nu.rydin.kom.exceptions.LineOverflowException;
 import nu.rydin.kom.exceptions.LineUnderflowException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
@@ -138,6 +139,8 @@ public class LineEditor implements NewlineListener
 	private boolean m_dontCount = false;
 	
 	private int m_lineCount = 0;
+	
+	private boolean m_bypass = false;
 	
 	private final MessageFormatter m_formatter;
 	
@@ -1007,7 +1010,7 @@ public class LineEditor implements NewlineListener
 	{
 	    try
 	    {
-		    if(m_dontCount)
+		    if(m_dontCount || m_bypass)
 		        return;
 		    if(++m_lineCount >= m_tsProvider.getTerminalSettings().getHeight() - 1)
 		    {
@@ -1020,7 +1023,14 @@ public class LineEditor implements NewlineListener
 	    }
 	    catch(InterruptedException e)
 	    {
-	        // Not much to do
+	        // We can't throw an InterruptedException here, since it would have to be
+	        // passed through the Writer interface.
+	        //
+	        // Don't page-break after this, since it could interefere with a session
+	        // trying to wind down it's operations.
+	        //
+	        m_bypass = true;
+	        throw new ImmediateShutdownException();
 	    }
 	    catch(IOException e)
 	    {

@@ -440,6 +440,10 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			{
 			    return;
 			}
+			catch(ImmediateShutdownException e)
+			{
+			    return;
+			}
 			
 			// Start heartbeat sender
 			//
@@ -649,12 +653,6 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			m_out.println(e.formatMessage(this));
     			m_out.println();
     		}    		    		
-    		catch(KOMRuntimeException e)
-    		{
-    			m_out.println(e.formatMessage(this));
-    			m_out.println();
-    			Logger.error(this, e);
-    		}			
     		catch(UserException e)
     		{
     			m_out.println(e.formatMessage(this));
@@ -662,12 +660,24 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     		}
     		catch(InterruptedException e)
     		{
-    			// Someone set up us the bomb! Let's get out of here!
+    			// SOMEONE SET UP US THE BOMB! Let's get out of here!
     			// Can happen if connection is lost, or if an admin 
     		    // requested shutdown.
     		    //
     			return;
     		}			
+    		catch(ImmediateShutdownException e)
+    		{
+    		    // SOMEONE SET UP US THE *BIG* BOMB!
+    		    //
+    		    return;
+    		}
+    		catch(KOMRuntimeException e)
+    		{
+    			m_out.println(e.formatMessage(this));
+    			m_out.println();
+    			Logger.error(this, e);
+    		}			    		
     		catch(Exception e)
     		{
     			e.printStackTrace(m_out);
