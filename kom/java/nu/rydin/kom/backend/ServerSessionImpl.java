@@ -39,6 +39,7 @@ import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
+import nu.rydin.kom.structs.*;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferencePermission;
 import nu.rydin.kom.structs.Envelope;
@@ -640,34 +641,33 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}	
 	}
 
-	public MessageOccurrence storeNoCommentToCurrentMessage()
+	//TODO (skrolle) Why did I create this when it's never used? :-)
+	public void storeNoCommentToCurrentMessage()
 	throws NoCurrentMessageException, AuthorizationException, UnexpectedException
 	{
 		if(m_lastReadMessageId == -1)
 			throw new NoCurrentMessageException();
-		return this.storeNoComment(m_lastReadMessageId);	
+		this.storeNoComment(m_lastReadMessageId);	
 	}
 	
-	public MessageOccurrence storeNoComment(long replyTo)
+	public void storeNoComment(long message)
 	throws UnexpectedException, AuthorizationException
 	{
 		try
 		{
-			// Determine target conference
-			long targetConf = m_da.getMessageManager().getFirstOccurrence(replyTo).getConference();
+			// Determine conference of message
+			long targetConf = m_da.getMessageManager().getFirstOccurrence(message).getConference();
 
-			// Check that we have the permission to write here.
+			// Check that we have the permission to write there.
 			this.assertConferencePermission(targetConf, ConferencePermissions.WRITE_PERMISSION);
 
 			MessageManager mm = m_da.getMessageManager(); 
 
 			long me = this.getLoggedInUserId();
 
-			MessageOccurrence occ = mm.createMessageOccurrence(replyTo, MessageManager.ACTION_NOCOMMENT, 
-				me, this.getName(me), targetConf);
-			
-			return occ;
-
+			//TODO (skrolle) Add userid to payload
+			//TODO (skrolle) Scrap temporary shitty payload construction mechanism
+			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructNoCommentPayload(this.getLoggedInUser().getName()));
 		}
 		catch(ObjectNotFoundException e)
 		{
@@ -1337,7 +1337,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			String[] receivers = new String[top]; 
 			for(int idx = 0; idx < top; ++idx)
 				receivers[idx] = nm.getNameById(occ[idx].getConference());  
-						
+			
+			// Create attributes list
+			//
+			MessageAttribute[] attr = mm.getMessageAttributes(message.getId());
+			
 			// Create list of replies
 			//
 			MessageHeader[] replyHeaders = mm.getReplies(message.getId());
@@ -1365,7 +1369,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			
 			// Create Envelope and return
 			//
-			return new Envelope(message, primaryOcc, replyTo, receivers, occ, replies);
+			return new Envelope(message, primaryOcc, replyTo, receivers, occ, attr, replies);
 		}
 		catch(SQLException e)
 		{

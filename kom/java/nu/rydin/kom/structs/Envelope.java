@@ -64,10 +64,10 @@ public class Envelope implements Serializable
 	
 	private final MessageOccurrence[] m_occurrences;
 	
-	//TODO (skrolle) Add MessageAttribute[]
+	private final MessageAttribute[] m_attributes;
 	
 	public Envelope(Message message, MessageOccurrence primaryOccurrence, RelatedMessage replyTo, 
-		String[] receivers, MessageOccurrence[] occurrences, RelatedMessage[] replies)
+		String[] receivers, MessageOccurrence[] occurrences, MessageAttribute[] attributes, RelatedMessage[] replies)
 	{
 		m_message 			= message;
 		m_primaryOccurrence = primaryOccurrence;
@@ -75,6 +75,7 @@ public class Envelope implements Serializable
 		m_receivers 		= receivers;
 		m_replies 			= replies;		
 		m_occurrences 		= occurrences;
+		m_attributes		= attributes;
 	}
 
 	public Message getMessage()
@@ -102,6 +103,11 @@ public class Envelope implements Serializable
 		return m_occurrences;
 	}
 
+    public MessageAttribute[] getAttributes() 
+    {
+        return m_attributes;
+    }
+	
 	public RelatedMessage getReplyTo()
 	{
 		return m_replyTo;

@@ -15,7 +15,6 @@ import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.MessageOccurrence;
 
 /**
  * @author Henrik Schröder
@@ -40,13 +39,13 @@ public class NoComment extends AbstractCommand
 		//
 		MessageFormatter formatter = context.getMessageFormatter();
 		ServerSession session = context.getSession();
-		long replyTo = parameters.length == 0 
+		long message = parameters.length == 0 
 			? session.getCurrentMessage()
-			: Long.parseLong(parameters[0]);
+			: Long.parseLong(parameters[0]); //TODO (skrolle) Convert local to global messageid
 			
 		// Store the "no comment"
 		//
-		MessageOccurrence occ = context.getSession().storeNoComment(replyTo);
+		context.getSession().storeNoComment(message);
 		context.getOut().println(context.getMessageFormatter().format(
 			"no.comment.saved"));
 	}

@@ -50,7 +50,8 @@ public class MessageManager
 	public static final short ACTION_CREATED 	= 0;
 	public static final short ACTION_COPIED	= 1;
 	public static final short ACTION_MOVED		= 2;
-	public static final short ACTION_NOCOMMENT = 3;
+
+	public static final short ATTR_NOCOMMENT = 0;
 	
 	public MessageManager(Connection conn)
 	throws SQLException
@@ -671,7 +672,7 @@ public class MessageManager
 	        {
 	            list.add(new MessageAttribute(
 	                    rs.getLong(1),		//message
-	                    rs.getInt(2),		//kind
+	                    rs.getShort(2),		//kind
 	                    rs.getTimestamp(3),	//created
 	                    rs.getString(4)));	//value
 	        }
@@ -686,7 +687,7 @@ public class MessageManager
 		}
 	}
 	
-	public MessageAttribute addMessageAttribute(long message, int kind, Timestamp created, String value)
+	public MessageAttribute addMessageAttribute(long message, short kind, String value)
 	throws ObjectNotFoundException, SQLException
 	{
 		// Create messageattribute
@@ -694,11 +695,11 @@ public class MessageManager
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		m_addMessageAttributeStmt.clearParameters();
 		m_addMessageAttributeStmt.setLong(1, message);
-		m_addMessageAttributeStmt.setInt(2, kind);
-		m_addMessageAttributeStmt.setTimestamp(3,created);
+		m_addMessageAttributeStmt.setShort(2, kind);
+		m_addMessageAttributeStmt.setTimestamp(3,now);
 		m_addMessageAttributeStmt.setString(4, value);
 		m_addMessageAttributeStmt.executeUpdate();
 
-		return new MessageAttribute(message, kind, created, value);
+		return new MessageAttribute(message, kind, now, value);
 	}
 }

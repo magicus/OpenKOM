@@ -9,6 +9,8 @@ package nu.rydin.kom.structs;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+import nu.rydin.kom.backend.data.MessageManager;
+
 /**
  * @author Henrik Schröder
  *
@@ -16,11 +18,11 @@ import java.sql.Timestamp;
 public class MessageAttribute implements Serializable
 {
 	private final long m_message;
-	private final int m_kind;
+	private final short m_kind;
 	private final Timestamp m_created;	
 	private final String m_value;
 
-	public MessageAttribute(long message, int kind, Timestamp created, String value)
+	public MessageAttribute(long message, short kind, Timestamp created, String value)
 	{
 	    m_message = message;
 	    m_kind = kind;
@@ -33,7 +35,7 @@ public class MessageAttribute implements Serializable
         return m_message;
     }
 	
-    public int getKind() 
+    public short getKind() 
     {
         return m_kind;
     }
@@ -47,4 +49,23 @@ public class MessageAttribute implements Serializable
 	{
         return m_value;
     }
+	
+	//TODO (skrolle) FIX THIS TEMPORARY SHIT!
+	public static String constructNoCommentPayload(String username)
+	{
+	    return username;
+	}
+
+	//TODO (skrolle) FIX THIS TEMPORARY SHIT!
+	public String getNoCommentUsername()
+	{
+	    if (m_kind == MessageManager.ATTR_NOCOMMENT)
+	    {
+	        return m_value;
+	    }
+	    else
+	    {
+	        return m_value;
+	    }
+	}
 }

@@ -13,6 +13,7 @@ import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.Message;
+import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -87,27 +88,20 @@ public class BasicMessagePrinter implements MessagePrinter
 		for(int idx = 0; idx < top; ++idx)
 		{
 			MessageOccurrence occ = occs[idx];
-		    if (occ.getKind() == MessageManager.ACTION_NOCOMMENT)
-		    {
-		        //We probably shouldn't print the "no comments" in the header.
-		    }
-		    else
-		    {
-				out.println(formatter.format("BasicMessagePrinter.receiver", receivers[idx]));
-				switch(occ.getKind())
-				{
-					case MessageManager.ACTION_COPIED:
-						PrintUtils.printRepeated(out, ' ', space);
-						out.println(formatter.format("BasicMessagePrinter.copied", 
-							new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
-						break;
-					case MessageManager.ACTION_MOVED:
-						PrintUtils.printRepeated(out, ' ', space);
-						out.println(formatter.format("BasicMessagePrinter.moved", 
-							new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
-						break;					
-				}
-		    }
+			out.println(formatter.format("BasicMessagePrinter.receiver", receivers[idx]));
+			switch(occ.getKind())
+			{
+				case MessageManager.ACTION_COPIED:
+					PrintUtils.printRepeated(out, ' ', space);
+					out.println(formatter.format("BasicMessagePrinter.copied", 
+						new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
+					break;
+				case MessageManager.ACTION_MOVED:
+					PrintUtils.printRepeated(out, ' ', space);
+					out.println(formatter.format("BasicMessagePrinter.moved", 
+						new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
+					break;					
+			}
 		} 
 				
 		// Print subject
@@ -148,13 +142,16 @@ public class BasicMessagePrinter implements MessagePrinter
 		
 		// Print list of "no comments"
 		//
-		for(int idx = 0; idx < occs.length; ++idx)
+		MessageAttribute[] attributes = envelope.getAttributes();
+		for(int idx = 0; idx < attributes.length; ++idx)
 		{
-			MessageOccurrence occ = occs[idx];
-		    if (occ.getKind() == MessageManager.ACTION_NOCOMMENT)
+		    MessageAttribute each = attributes[idx];
+		    
+		    if(each.getKind() == MessageManager.ATTR_NOCOMMENT)
 		    {
-		        out.println(formatter.format("BasicMessagePrinter.nocomment", occ.getUserName()));
+				out.println(formatter.format("BasicMessagePrinter.nocomment", each.getNoCommentUsername()));		        
 		    }
 		}
+
 	}
 }

@@ -322,17 +322,17 @@ public interface ServerSession
 
     /**
      * Stores a "no comment" to the given message
-     * @param replyTo Global message id of the message not commented
+     * @param message Global message id of the message not commented
      * @return
      */
-    public MessageOccurrence storeNoComment(long replyTo)
+    public void storeNoComment(long message)
     throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
 
     /**
      * Stores a "no comment" to the last message read
      * @return
      */
-    public MessageOccurrence storeNoCommentToCurrentMessage()
+    public void storeNoCommentToCurrentMessage()
     throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
     
 	/**
