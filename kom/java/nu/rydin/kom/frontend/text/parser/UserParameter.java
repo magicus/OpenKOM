@@ -40,7 +40,7 @@ public class UserParameter extends NamedObjectParameter
     private boolean isValidName(String name)
     {
         // TODO Auto-generated method stub
-        return NameUtils.isValidUserName(toString());
+        return NameUtils.isValidUserName(name);
     }
     
     protected String getUserDescriptionKey()

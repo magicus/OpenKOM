@@ -33,6 +33,7 @@ public class NamedObjectParameter extends CommandLineParameter
     protected Match innerMatch(String matchingPart, String remainder)
     {
         //Sanity-check.
+        //FIXME: This doesn't seem to work? It's me! I suxxor!
         if (!this.isValidName(matchingPart.trim()))
         {
             return new Match(false, null, null, null);
@@ -53,7 +54,7 @@ public class NamedObjectParameter extends CommandLineParameter
     private boolean isValidName(String name)
     {
         // TODO Auto-generated method stub
-        return NameUtils.isValidName(toString());
+        return NameUtils.isValidName(name);
     }
 
     public Object resolveFoundObject(Context context, Match match)
