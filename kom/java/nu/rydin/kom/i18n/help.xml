@@ -218,9 +218,19 @@
  </command>
  <command class="nu.rydin.kom.frontend.text.commands.SkipSubject">
   <description>
-   <block>Kommandot hoppar över alla inlägg med samma ärende som det du just läste. Det innebär att alla inlägg med samma ärende markeras som lästa.</block>
+   <block>Kommandot hoppar över alla inlägg med samma ärende som det du just läste. Det innebär att alla inlägg med samma ärende, i det möte du befinner dig i, markeras som lästa.</block>
   </description>
   <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SkipGlobalSubject"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SkipTree"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SkipGlobalSubject">
+  <description>
+   <block>Kommandot hoppar över alla inlägg med samma ärende som det du just läste. Det innebär att alla inlägg med samma ärende, i alla möten du är med i, markeras som lästa.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SkipSubject"/>
    <element type="command" value="nu.rydin.kom.frontend.text.commands.SkipTree"/>
   </seealso>
  </command>
@@ -871,6 +881,11 @@
   <description>
    <block>Kommandot listar de kommandon som finns tillgängliga i OpenKOM.</block>
    <block>Om du inte ändrat dina alias kan du använda '?' istället för 'lista kommandon'.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ShowLicense">
+  <description>
+   <block>Kommandot visar den licens, under vilken OpenKOM distribueras.</block>
   </description>
  </command>
 </commands>
