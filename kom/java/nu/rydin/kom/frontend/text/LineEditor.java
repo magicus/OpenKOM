@@ -6,15 +6,24 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 
-import nu.rydin.kom.*;
+import nu.rydin.kom.EventDeliveredException;
+import nu.rydin.kom.LineOverflowException;
+import nu.rydin.kom.LineUnderflowException;
+import nu.rydin.kom.OutputInterruptedException;
+import nu.rydin.kom.StopCharException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.utils.Logger;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
@@ -240,7 +249,8 @@ public class LineEditor implements NewlineListener
 	{
 		private final int POLL_INTERVAL = ClientSettings.getEventPollInterval();
 		
-		public EventPoller() {
+		public EventPoller() 
+		{
 			super("EventPoller");
 		}
 		
@@ -259,14 +269,15 @@ public class LineEditor implements NewlineListener
 			{
 				// Exiting gracefully...
 				//
-				System.out.println("Exiting event poller...");
+				Logger.debug(this, "Exiting event poller");
 			}
 		}
 	}
 	
 	private class KeystrokePoller extends LineEditorHelper
 	{
-		public KeystrokePoller() {
+		public KeystrokePoller() 
+		{
 			super("KeystrokePoller");
 		}
 		
@@ -292,7 +303,7 @@ public class LineEditor implements NewlineListener
 					break;
 				}
 			}	
-			System.out.println("Exiting keystroke poller...");		
+			Logger.info(this, "Exiting keystroke poller");		
 		}		
 	}
 	

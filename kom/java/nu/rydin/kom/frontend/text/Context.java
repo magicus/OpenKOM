@@ -62,14 +62,7 @@ public interface Context extends TerminalSettingsProvider
 	 * @return
 	 */
 	public ServerSession getSession();
-	
-	/**
-	 * Returns the client session.
-	 * 
-	 * @return The current client session.
-	 */
-	public ClientSession getClientSession();
-	
+		
 	/**
 	 * Prints information about the current conference
 	 *
@@ -90,7 +83,7 @@ public interface Context extends TerminalSettingsProvider
 	 * @throws ObjectNotFoundException
 	 */	
 	public UserInfo getCachedUserInfo()
-	throws UnexpectedException, ObjectNotFoundException;
+	throws UnexpectedException;
 	
 	/**
 	 * Invalidates user info cache.
@@ -142,7 +135,8 @@ public interface Context extends TerminalSettingsProvider
 	 * @param date The date to format
 	 * @return A formatted date
 	 */
-	public String smartFormatDate(Date date);
+	public String smartFormatDate(Date date)
+	throws UnexpectedException;
 	
 	/**
 	 * Returns a <tt>DisplayController</tt> according to the user preferences

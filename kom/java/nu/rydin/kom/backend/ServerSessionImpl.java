@@ -1575,6 +1575,23 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
+	public void updateTimeZone(String timeZone)
+	throws UnexpectedException
+	{
+		try
+		{
+			m_da.getUserManager().changeTimezone(this.getLoggedInUserId(), timeZone);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+		catch(ObjectNotFoundException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+		
 	public void setConferencePermissions(long conf, long user, int permissions)
 	throws UnexpectedException
 	{

@@ -11,13 +11,10 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.i18n.MessageFormatter;

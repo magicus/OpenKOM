@@ -26,6 +26,9 @@ import nu.rydin.kom.backend.KOMCache;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.structs.UserInfo;
 
+/**
+ * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ */
 public class UserManager 
 {	
 	private final PreparedStatement m_getIdByLoginStmt;
@@ -37,6 +40,7 @@ public class UserManager
 	private final PreparedStatement m_changePasswordStmt;
 	private final PreparedStatement m_changeFlagsStmt;
 	private final PreparedStatement m_updateLastloginStmt;
+	private final PreparedStatement m_updateTimeZoneStmt;
 	
 	private final NameManager m_nameManager;
 	
@@ -61,7 +65,7 @@ public class UserManager
 			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights, locale, created) " +
 			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?)");
 		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, u.address1, u.address2, u.address3, u.address4, " +
-			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.created, u.lastlogin " +
+			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.timezone, u.created, u.lastlogin " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_updateCharsetStmt = conn.prepareStatement(
 			"UPDATE users SET charset = ? WHERE id = ?");
@@ -70,7 +74,9 @@ public class UserManager
 		m_changeFlagsStmt = conn.prepareStatement(
 			"UPDATE users SET flags1 = ?, flags2 = ?, flags3 = ?, flags4 = ? WHERE id = ?");
 		m_updateLastloginStmt = conn.prepareStatement(
-		"UPDATE users SET lastlogin = ? WHERE id = ?");
+			"UPDATE users SET lastlogin = ? WHERE id = ?");
+		m_updateTimeZoneStmt = conn.prepareStatement(
+		    "UPDATE users SET timezone = ? WHERE id = ?");
 	}
 	
 	/**
@@ -94,7 +100,11 @@ public class UserManager
 		if(m_changePasswordStmt != null)
 			m_changePasswordStmt.close();
 		if(m_changeFlagsStmt != null)
-			m_changeFlagsStmt.close();																	
+			m_changeFlagsStmt.close();
+		if(m_updateLastloginStmt != null)
+		    m_updateLastloginStmt.close();
+		if(m_updateTimeZoneStmt != null)
+		    m_updateTimeZoneStmt.close();
 	}
 	
 	/**
@@ -331,8 +341,9 @@ public class UserManager
 				rs.getLong(16),		// flags4,
 				rs.getLong(17),		// rights
 				rs.getString(18),	// locale
-				rs.getTimestamp(19),// created
-				rs.getTimestamp(20) // last login
+				rs.getString(19),	// time zone
+				rs.getTimestamp(20),// created
+				rs.getTimestamp(21) // last login
 			);
 			cache.deferredPut(key, answer);
 			return answer;
@@ -425,6 +436,24 @@ public class UserManager
 		m_updateLastloginStmt.setTimestamp(1, now);
 		m_updateLastloginStmt.setLong(2, userId);
 		if(m_updateLastloginStmt.executeUpdate() == 0)
+			throw new ObjectNotFoundException("user id=" + userId);
+		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
+	}
+	
+	/**
+	 * Changes the time zone setting
+	 * @param userId Id of user to change
+	 * @param timeZone New tiome zone
+	 * @throws ObjectNotFoundException
+	 * @throws SQLException
+	 */
+	public void changeTimezone(long userId, String timeZone)
+	throws ObjectNotFoundException, SQLException
+	{
+	    m_updateTimeZoneStmt.clearParameters();
+	    m_updateTimeZoneStmt.setString(1, timeZone);
+	    m_updateTimeZoneStmt.setLong(2, userId);
+		if(m_updateTimeZoneStmt.executeUpdate() == 0)
 			throw new ObjectNotFoundException("user id=" + userId);
 		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
 	}

@@ -7,7 +7,6 @@
 package nu.rydin.kom.utils;
 
 import java.io.PrintWriter;
-import java.sql.Timestamp;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -53,15 +52,5 @@ public class PrintUtils
 			s = s.substring(0, width);
 		printRepeated(out, ' ', width - s.length());			
 		out.print(s);
-	}
-	
-	// TODO: ugly, fix later...
-	public static String printDate(Timestamp d)
-	{
-		if(d != null)
-			return d.toString();
-		else
-			return "aldrig";
-	}
-	
+	}	
 }

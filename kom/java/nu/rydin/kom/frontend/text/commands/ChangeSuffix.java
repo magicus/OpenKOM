@@ -9,16 +9,12 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import com.sun.corba.se.ActivationIDL.InitialNameServicePackage.NameAlreadyBound;
-
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.frontend.text.parser.UserParameter;

@@ -6,6 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
@@ -34,9 +35,9 @@ public class Status extends AbstractCommand
 	{
 		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(false) });		
 	}
-
+	
 	public void execute2(Context context, Object[] parameters) 
-	throws KOMException
+	throws KOMException, IOException, InterruptedException
 	{	
 
 		// Got null? That means user skipped optional parameter
@@ -89,10 +90,14 @@ public class Status extends AbstractCommand
 			30, info.getEmail2());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.url"), 
 			30, info.getUrl());
+		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.locale"), 
+				30, info.getLocale().toString());
+		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.time.zone"), 
+				30, info.getTimeZone().getID());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.created"), 
-				30, PrintUtils.printDate(info.getCreated()));
+				30, context.smartFormatDate(info.getCreated()));
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.lastlogin"), 
-				30, PrintUtils.printDate(info.getLastlogin()));
+				30, context.smartFormatDate(info.getLastlogin()));
 		out.println();
 		
 		// Has the user left a note?
@@ -109,6 +114,7 @@ public class Status extends AbstractCommand
 		
 		// List memberships
 		//
+		out.println();
 		out.println(formatter.format("status.user.memberof"));
 		NameAssociation[] memberships = context.getSession().listMemberships(info.getId()); 
 		int top = memberships.length;
@@ -117,7 +123,7 @@ public class Status extends AbstractCommand
 	}
 	
 	protected void printConferenceStatus(Context context, ConferenceInfo info)
-	throws ObjectNotFoundException, UnexpectedException
+	throws KOMException, IOException, InterruptedException
 	{
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
@@ -129,13 +135,13 @@ public class Status extends AbstractCommand
 					Integer.toString(info.getFirstMessage()) + " - " + 
 					Integer.toString(info.getLastMessage()));			
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.created"), 
-				30, PrintUtils.printDate(info.getCreated()));
+				30, context.smartFormatDate(info.getCreated()));
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.lasttext"), 
-				30, PrintUtils.printDate(info.getLasttext()));
+				30, context.smartFormatDate(info.getLasttext()));
 		
 		// TODO: fulkod
 		ListMembers l = new ListMembers("");
-		Object [] args = { new NameAssociation(info.getId(), null) };
+		String [] args = {info.getName()};
 		try
 		{
 			l.execute2(context, args);

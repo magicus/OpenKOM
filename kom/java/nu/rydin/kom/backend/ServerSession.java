@@ -663,6 +663,15 @@ public interface ServerSession
 	throws UnexpectedException;
 	
 	/**
+	 * Persistently updates the time zone setting of the current user.
+	 * 
+	 * @param timeZone The new time zone
+	 * @throws UnexpectedException
+	 */
+	public void updateTimeZone(String timeZone)
+	throws UnexpectedException;
+	
+	/**
 	 * Changes the permissions of a user in a conference
 	 * 
 	 * @param conf The id of the conference

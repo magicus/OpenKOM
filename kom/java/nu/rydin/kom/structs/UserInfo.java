@@ -7,6 +7,7 @@
 package nu.rydin.kom.structs;
 
 import java.sql.Timestamp;
+import java.util.TimeZone;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -24,6 +25,7 @@ public class UserInfo extends NamedObject
 	public static final int URL		 		= 0x00000100;
 	public static final int CHARSET	 		= 0x00000200;
 	public static final int LOCALE	 		= 0x00000400;
+	public static final int TIMEZONE		= 0x00000800;
 	
 	private final String m_userid;
 	private String m_address1;
@@ -39,6 +41,7 @@ public class UserInfo extends NamedObject
 	private final long[] m_flags = new long[4];
 	private final long m_rights;
 	private String m_locale;
+	private TimeZone m_timeZone;
 	private Timestamp m_created;
 	private Timestamp m_lastlogin;
 	
@@ -47,7 +50,7 @@ public class UserInfo extends NamedObject
 	public UserInfo(long id, String name, String userid, String address1, String address2,
 		String address3, String address4, String phoneno1, String phoneno2, String email1,
 		String email2, String url, String charset, long flags1, long flags2, long flags3, long flags4,
-		long rights, String locale, Timestamp created, Timestamp lastlogin)
+		long rights, String locale, String timeZone, Timestamp created, Timestamp lastlogin)
 	{
 		super(id, name);
 		m_userid	= userid;
@@ -67,6 +70,7 @@ public class UserInfo extends NamedObject
 		m_flags[2] 	= flags4;
 		m_rights	= rights;
 		m_locale 	= locale;
+		m_timeZone	= timeZone != null ? TimeZone.getTimeZone(timeZone) : TimeZone.getDefault();
 		m_created 	= created;
 		m_lastlogin = lastlogin;
 	}
@@ -139,6 +143,11 @@ public class UserInfo extends NamedObject
 	public String getLocale()
 	{
 		return m_locale;
+	}
+	
+	public TimeZone getTimeZone()
+	{
+	    return m_timeZone;
 	}
 
 	public String getPhoneno1()
@@ -272,6 +281,15 @@ public class UserInfo extends NamedObject
 		{
 			m_changeMask |= URL;
 			m_url = string;
+		}
+	}
+	
+	public void setTimeZone(TimeZone tz)
+	{
+		if(!tz.equals(m_timeZone))
+		{
+			m_changeMask |= TIMEZONE;
+			m_timeZone = tz;
 		}
 	}
 	

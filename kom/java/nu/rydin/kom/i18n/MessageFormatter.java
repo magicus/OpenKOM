@@ -6,10 +6,13 @@
  */
 package nu.rydin.kom.i18n;
 
+import java.text.Format;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.TimeZone;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -20,10 +23,17 @@ public class MessageFormatter
 	
 	private final Locale m_locale;
 	
+	private TimeZone m_timeZone = TimeZone.getDefault();
+	
 	public MessageFormatter(Locale locale)
 	{
 	    m_resource 	= ResourceBundle.getBundle("nu.rydin.kom.i18n.messages", locale);
 	    m_locale 	= locale;
+	}
+	
+	public void setTimeZone(TimeZone timeZone)
+	{
+	    m_timeZone = timeZone;
 	}
 		
 	public String format(String key)
@@ -71,8 +81,16 @@ public class MessageFormatter
 	public MessageFormat getFormat(String key)
 	{
 		String fmt = m_resource.getString(key);
-		return new MessageFormat(fmt != null
+		MessageFormat mf = new MessageFormat(fmt != null
 			? fmt
 			: "Unknown resource: " + key, m_locale);
+		Format[] subformats = mf.getFormats();
+		for (int idx = 0; idx < subformats.length; idx++)
+        {
+            Format each = subformats[idx];
+            if(each instanceof SimpleDateFormat)
+                ((SimpleDateFormat) each).setTimeZone(m_timeZone);
+        }
+		return mf;
 	}
 }

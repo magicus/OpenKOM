@@ -61,7 +61,7 @@ public class TelnetServer implements Runnable
 				{
 					e.printStackTrace();
 				}
-				System.out.println("Disconnected from " + m_socket.getInetAddress().getHostAddress());
+				Logger.info(this, "Disconnected from " + m_socket.getInetAddress().getHostAddress());
 			}
 			catch(InterruptedException e)
 			{
@@ -89,7 +89,7 @@ public class TelnetServer implements Runnable
 		//
 		if(!this.sanityChecks())
 		{
-			System.err.println("FATAL: Cannot start server due to the above errors.");
+			Logger.fatal(this, "FATAL: Cannot start server due to the above errors.");
 			System.exit(1);
 		}
 		
@@ -107,7 +107,7 @@ public class TelnetServer implements Runnable
 			e.printStackTrace();
 			return;
 		}
-		System.out.println("OpenKOM telnet server is accepting connections at port " + 
+		Logger.info(this, "OpenKOM telnet server is accepting connections at port " + 
 			ClientSettings.getTelnetPort());
 		for(;;)
 		{
@@ -116,7 +116,7 @@ public class TelnetServer implements Runnable
 				// Wait for someone to connect
 				//
 				Socket incoming = s.accept();
-				System.out.println("Incoming connection from " + incoming.getInetAddress().getHostAddress());
+				Logger.info(this, "Incoming connection from " + incoming.getInetAddress().getHostAddress());
 				try
 				{
 					// Create session
@@ -156,7 +156,6 @@ public class TelnetServer implements Runnable
 	
 	public static void main(String[] args)
 	{
-		Logger.info(new TelnetServer(), "1123FULRUNK1");
 		new TelnetServer().run();
 	}
 	
@@ -175,7 +174,7 @@ public class TelnetServer implements Runnable
 			}
 			catch(UnsupportedEncodingException e)
 			{
-				System.err.println("Character set " + charSet + " not supported. Do you have charsets.jar in you classpath?");
+				Logger.error(this, "Character set " + charSet + " not supported. Do you have charsets.jar in you classpath?");
 				ok = false;					
 			}
 		}

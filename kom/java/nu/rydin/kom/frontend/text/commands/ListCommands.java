@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
+import nu.rydin.kom.frontend.text.ClientSession;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -24,7 +25,7 @@ public class ListCommands extends AbstractCommand
 	}
 	
 	protected Command[] getCommandList(Context context) throws IOException, KOMException {
-		Command[] cmds = context.getClientSession().getCommandList();
+		Command[] cmds = ((ClientSession) context).getCommandList();
 		return cmds;
 	}
 

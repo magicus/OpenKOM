@@ -14,8 +14,6 @@ import nu.rydin.kom.MessageNotFoundException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.frontend.text.ClientSession;
-import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.KOMWriter;
@@ -66,7 +64,7 @@ public class EditorContext implements Context
 	}
 
 	public UserInfo getCachedUserInfo()
-		throws UnexpectedException, ObjectNotFoundException
+		throws UnexpectedException
 	{
 		return m_underlying.getCachedUserInfo();
 	}
@@ -170,6 +168,7 @@ public class EditorContext implements Context
 	}
 	
 	public String smartFormatDate(Date date)
+	throws UnexpectedException
 	{
 	    return m_underlying.smartFormatDate(date);
 	}
@@ -184,8 +183,4 @@ public class EditorContext implements Context
 	{
 	    return m_underlying.resolveMessageSpecifier(specifier);
 	}
-
-    public ClientSession getClientSession() {
-        return m_underlying.getClientSession();
-    }
 }

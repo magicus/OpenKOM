@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -80,6 +81,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	private int m_windowHeight = -1;
 	private int m_windowWidth = -1;
 	private EventPrinter eventPrinter = new EventPrinter();
+	private Locale m_locale;
+	private DateFormatSymbols m_dateSymbols;
 	
 	// This could be read from some kind of user config if the
 	// user wants an alternate message printer. 
@@ -101,10 +104,12 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		    }
 		}
 		
-		public void onEvent(Event event) {
+		public void onEvent(Event event) 
+		{
 		}
 	
-		public void onEvent(ChatMessageEvent event) {
+		public void onEvent(ChatMessageEvent event) 
+		{
 			getDisplayController().normal();
 			String header = m_formatter.format("event.chat", new Object[] { event.getUserName() }); 
 			m_out.print(header);
@@ -113,7 +118,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			m_out.println();
 		}
 
-		public void onEvent(BroadcastMessageEvent event) {
+		public void onEvent(BroadcastMessageEvent event) 
+		{
 			getDisplayController().normal();
 			String header = m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() }); 
 			m_out.print(header);
@@ -122,7 +128,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			m_out.println();
 		}
 
-		public void onEvent(ChatAnonymousMessageEvent event) {
+		public void onEvent(ChatAnonymousMessageEvent event) 
+		{
 			getDisplayController().normal();
 			String header = m_formatter.format("event.broadcast.anonymous");
 			m_out.print(header);
@@ -131,7 +138,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			m_out.println();			
 		}
 
-		public void onEvent(BroadcastAnonymousMessageEvent event) {
+		public void onEvent(BroadcastAnonymousMessageEvent event) 
+		{
 			getDisplayController().normal();
 			String header = m_formatter.format("event.broadcast.anonymous");
 			m_out.print(header);
@@ -140,21 +148,25 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			m_out.println();			
 		}
 
-		public void onEvent(NewMessageEvent event) {
+		public void onEvent(NewMessageEvent event) 
+		{
 			//This event should not be handled here
 		}
 
-		public void onEvent(UserAttendanceEvent event) {
+		public void onEvent(UserAttendanceEvent event) 
+		{
 			getDisplayController().normal();
 			m_out.println(m_formatter.format("event.attendance." + event.getType(), new Object[] { event.getUserName() }));
 			m_out.println();
 		}
 
-		public void onEvent(ReloadUserProfileEvent event) {
+		public void onEvent(ReloadUserProfileEvent event) 
+		{
 			//This event should not be handled here
 		}
 
-		public void onEvent(MessageDeletedEvent event) {
+		public void onEvent(MessageDeletedEvent event) 
+		{
 			//This event should not be handled here
 		}
 	}
@@ -267,7 +279,17 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			//
 			String locale = userInfo.getLocale();
 			if(locale != null)
-			    m_formatter = new MessageFormatter(new Locale(locale));
+			{
+			    int p = locale.indexOf('_');
+			    m_locale = p != -1 
+			    	? new Locale(locale.substring(0, p), locale.substring(p + 1))
+			    	: new Locale(locale);
+			    m_formatter = new MessageFormatter(m_locale);
+			}
+			else
+			    m_locale = Locale.getDefault();
+			m_dateSymbols = new DateFormatSymbols(m_locale);
+			m_formatter.setTimeZone(userInfo.getTimeZone());
 				
 			m_out.println(m_formatter.format("login.welcome", userInfo.getName()));
 			m_out.println();
@@ -375,7 +397,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	}
 		
 	public void mainloop()
-    {
+	{
     	try
     	{
     		this.printCurrentConference();
@@ -444,8 +466,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			}
     			else
     			{
-    			    //TODO: Use ExecutableCommand instead.
-    			    defaultCommand.execute2(this, new Object[0]);
+    			    new ExecutableCommand(defaultCommand, new Object[0]).execute(this);
     			}
     		}
     		catch(KOMException e)
@@ -534,10 +555,6 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	        }
 	        return sb.toString();
         }
-        catch(ObjectNotFoundException e)
-        {
-            throw new RuntimeException(e);
-        }
         catch(UnexpectedException e)
         {
             throw new RuntimeException(e);
@@ -545,14 +562,19 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     }
     
     public String smartFormatDate(Date date)
+    throws UnexpectedException
     {
+        if(date == null)
+            return m_formatter.format("date.never");
+        
         // Check number of days from today
         // TODO: Get locale and timezone from user data!
         //
         Calendar then = Calendar.getInstance();
         then.setTime(date);
-        String answer = m_formatter.format("timestamp.medium", date);
-        Calendar now = Calendar.getInstance();
+        then.setTimeZone(this.getCachedUserInfo().getTimeZone());
+        String answer = m_formatter.format("timestamp.short", then.getTime());
+        Calendar now = Calendar.getInstance(this.getCachedUserInfo().getTimeZone());
         now.setTimeInMillis(System.currentTimeMillis());
         
         // Today or yesterday?
@@ -573,18 +595,15 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
                 return answer;
         }
         int dayDiff = dayNow - dayThen;
-        switch(dayDiff)
-        {
-        	case 0:
-        	    answer = m_formatter.format("date.today");
-        	    break;
-        	case 1: 
-        	    answer = m_formatter.format("date.yesterday");
-        	    break;
-        	default:
-        	    return answer;
-        }
-        return answer + ", " + m_formatter.format("time.medium", date);
+        if(dayDiff == 0)
+            answer = m_formatter.format("date.today");
+        else if(dayDiff == 1)
+       	    answer = m_formatter.format("date.yesterday");
+        else if(dayDiff < 7)
+        	answer = m_dateSymbols.getWeekdays()[now.get(Calendar.DAY_OF_WEEK)];
+        else
+            return answer;
+        return answer + ", " + m_formatter.format("time.medium", then.getTime());
     }
     
     public DisplayController getDisplayController()
@@ -596,10 +615,6 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	        	: (DisplayController) new DummyDisplayController();
         }
         catch(UnexpectedException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch(ObjectNotFoundException e)
         {
             throw new RuntimeException(e);
         }
@@ -661,11 +676,18 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	}
 	
 	public synchronized UserInfo getCachedUserInfo()
-	throws UnexpectedException, ObjectNotFoundException
+	throws UnexpectedException
 	{
-		if(m_thisUserCache == null)
-			m_thisUserCache = m_session.getUser(this.getLoggedInUserId());
-		return m_thisUserCache;
+	    try
+	    {
+			if(m_thisUserCache == null)
+				m_thisUserCache = m_session.getUser(this.getLoggedInUserId());
+			return m_thisUserCache;
+	    }
+	    catch(ObjectNotFoundException e)
+	    {
+	        throw new UnexpectedException(this.getLoggedInUserId(), e);
+	    }
 	}
 	
 	public synchronized void clearUserInfoCache()
@@ -858,11 +880,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		return m_parser.getCommandList();
 	}
 
-    public ClientSession getClientSession() {
-        return this;
-    }
-
-    public void logout() {
+    public void logout() 
+    {
         m_loggedIn = false;
     }
 }

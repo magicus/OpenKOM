@@ -145,7 +145,6 @@ public class SendChatMessage extends AbstractCommand
 		//
 		AbstractEditor editor = new SimpleChatEditor(context.getMessageFormatter());
 		String message = editor.edit(context, -1).getBody();
-		// String message = in.readLine();
 		
 		// Empty message? User interrupted
 		//

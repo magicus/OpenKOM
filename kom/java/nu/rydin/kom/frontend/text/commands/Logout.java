@@ -8,6 +8,7 @@ package nu.rydin.kom.frontend.text.commands;
 
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
+import nu.rydin.kom.frontend.text.ClientSession;
 import nu.rydin.kom.frontend.text.Context;
 
 
@@ -28,6 +29,6 @@ public class Logout extends AbstractCommand
 		//       "log ska sova" broadcasts "Kalle Kula har loggat ut (ska sova)"
 
         context.getSession().updateLastlogin();
-        context.getClientSession().logout();
+        ((ClientSession) context).logout();
     }
 }
