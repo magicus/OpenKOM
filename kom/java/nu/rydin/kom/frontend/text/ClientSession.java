@@ -153,7 +153,10 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			    : event.getUserName() + ' ';
 			getDisplayController().broadcastMessageHeader();
 			m_out.print(header);
-			getDisplayController().broadcastMessageBody();
+			if (event.getKind() == MessageLogKinds.BROADCAST)
+			{
+			    getDisplayController().broadcastMessageBody();
+			}
 			printWrapped(event.getMessage(), header.length());
 			m_out.println();
 		}
