@@ -32,6 +32,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		throws KOMException
 	{
 	    DisplayController dc = context.getDisplayController();
+	    int width = context.getTerminalSettings().getWidth();
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
 		Message message = envelope.getMessage();
@@ -46,31 +47,34 @@ public class BasicMessagePrinter implements MessagePrinter
 		// Start printing header
 		//
 		dc.messageHeader();
-		out.print(formatter.format("BasicMessagePrinter.textnumber"));
+		StringBuffer sb = new StringBuffer(200);
+		sb.append(formatter.format("BasicMessagePrinter.textnumber"));
 
 		// If we have a primary occurence, AND if we are in the conference of this 
 		// occurence, then print the local messagenumber.
+		//
 		if((primaryOcc != null) && (primaryOcc.getConference() == context.getSession().getCurrentConferenceId()))
 		{
-			out.print(primaryOcc.getLocalnum());
-			out.print(" ");
+		    sb.append(primaryOcc.getLocalnum());
+		    sb.append(" ");
 		}
 		
 		// Print global numbber
 		//
-		out.print("(");
-		out.print(message.getId());
-		out.print(')');
+		sb.append("(");
+		sb.append(message.getId());
+		sb.append(')');
 		
 		// Print name of author
 		//
-		out.print("; ");
-		out.print(context.formatObjectName(message.getAuthorName(), message.getAuthor()));
+		sb.append("; ");
+		sb.append(context.formatObjectName(message.getAuthorName(), message.getAuthor()));
 				
 		// Print creation date
 		//
-		out.print("; ");
-		out.println(context.smartFormatDate(message.getCreated()));
+		sb.append("; ");
+		sb.append(context.smartFormatDate(message.getCreated()));
+		PrintUtils.printIndented(out, sb.toString(), width, 0);
 		
 		// Print the original mail recipient if this is a mail.
 		//
@@ -79,7 +83,9 @@ public class BasicMessagePrinter implements MessagePrinter
 		    MessageAttribute each = attributes[idx];
 		    if(each.getKind() == MessageManager.ATTR_MAIL_RECIPIENT && each.getUserId() != context.getLoggedInUserId())
 		    {
-		        out.println(formatter.format("BasicMessagePrinter.original.mail.recipient", context.formatObjectName(each.getUsername(), each.getUserId())));		        
+		        PrintUtils.printIndented(out,
+		                formatter.format("BasicMessagePrinter.original.mail.recipient", context.formatObjectName(each.getUsername(), each.getUserId())),
+		                width, 0);		        
 		    }
 		}
 		
@@ -94,31 +100,40 @@ public class BasicMessagePrinter implements MessagePrinter
 			{
 				// Simple case: Original text was in same conference
 				//
-				out.println(formatter.format("BasicMessagePrinter.reply.to.same.conference", 
+			    PrintUtils.printIndented(out,
+			        formatter.format("BasicMessagePrinter.reply.to.same.conference", 
 					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()), 
-						context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) } ));		
+						context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) } ),
+						width, 0);
 			}
 			else
 			{
 				// Complex case: Original text was in a different conference
 				//
-				out.println(formatter.format("BasicMessagePrinter.reply.to.different.conference", 
-					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
-				        new Long(replyTo.getOccurrence().getGlobalId()),
-				        context.formatConferenceName(replyTo.getConference(), replyTo.getConferenceName().getName()),
-				        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }));
+			    PrintUtils.printIndented(out, 
+			        formatter.format("BasicMessagePrinter.reply.to.different.conference", 
+			            new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
+			            new Long(replyTo.getOccurrence().getGlobalId()),
+			            context.formatConferenceName(replyTo.getConference(), replyTo.getConferenceName().getName()),
+			            context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }),
+			            width, 0); 
+			                    
+			    	
 			}
 		}
 		else
 		{
 		    // Even though this text looks like it's not a comment, it might be
 		    // a comment to a deleted text.
+		    //
 			for(int idx = 0; idx < attributes.length; ++idx)
 			{
 			    MessageAttribute each = attributes[idx];
 			    if(each.getKind() == MessageManager.ATTR_ORIGINAL_DELETED)
 			    {
-			        out.println(formatter.format("BasicMessagePrinter.reply.to.deleted.text", context.formatObjectName(each.getUsername(), each.getUserId())));		        
+			        PrintUtils.printIndented(out, 
+			                formatter.format("BasicMessagePrinter.reply.to.deleted.text", context.formatObjectName(each.getUsername(), each.getUserId())),
+			                width, 0);		        
 			    }
 			}
 		}
@@ -133,6 +148,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		for(int idx = 0; idx < top; ++idx)
 		{
 			MessageOccurrence occ = occs[idx];
+			
 			// Make sure we only print occurences in conferences we have read-permission in!
 			//
 			if (context.getSession().hasPermissionInConference(occ.getConference(), ConferencePermissions.READ_PERMISSION))
@@ -146,14 +162,17 @@ public class BasicMessagePrinter implements MessagePrinter
 			    {
 			        conferenceName = context.formatConferenceName(receivers[idx].getId(), receivers[idx].getName().getName()); 
 			    }
-				out.println(formatter.format("BasicMessagePrinter.receiver", conferenceName));
+				PrintUtils.printIndented(out, 
+				        formatter.format("BasicMessagePrinter.receiver", conferenceName), 
+				        width, 0);
 				switch(occ.getKind())
 				{
 					case MessageManager.ACTION_COPIED:
-						PrintUtils.printRepeated(out, ' ', space);
-						out.println(formatter.format("BasicMessagePrinter.copied", 
-							new Object[] { context.formatObjectName(occ.getUser()), 
-						        context.smartFormatDate(occ.getTimestamp()) }));
+						PrintUtils.printIndented(out, 
+						        formatter.format("BasicMessagePrinter.copied", 
+						                new Object[] { context.formatObjectName(occ.getUser()), 
+						                context.smartFormatDate(occ.getTimestamp()) }),
+						                width, space);
 						break;
 					case MessageManager.ACTION_MOVED:
 						for(int attrIdx = attributes.length-1; 0 <= attrIdx; --attrIdx)
@@ -165,9 +184,10 @@ public class BasicMessagePrinter implements MessagePrinter
 								break;
 							}
 						}
-						PrintUtils.printRepeated(out, ' ', space);
-						out.println(formatter.format("BasicMessagePrinter.moved.long", 
-							new Object[] { movedFrom, context.formatObjectName(occ.getUser()), context.smartFormatDate(occ.getTimestamp()) }));
+						PrintUtils.printIndented(out,
+						        formatter.format("BasicMessagePrinter.moved.long", 
+						                new Object[] { movedFrom, context.formatObjectName(occ.getUser()), context.smartFormatDate(occ.getTimestamp()) }),
+						                width, space);
 						break;					
 				}   
 			}
@@ -212,15 +232,19 @@ public class BasicMessagePrinter implements MessagePrinter
 			// messagenumber. 
 			if((primaryOcc != null) && (primaryOcc.getConference() == context.getSession().getCurrentConferenceId()))
 			{
-				out.println(formatter.format("BasicMessagePrinter.local.footer", 
+			    PrintUtils.printIndented(out, 
+			            formatter.format("BasicMessagePrinter.local.footer", 
 				        new Object[] { new Integer(primaryOcc.getLocalnum()), 
-				        	context.formatObjectName(message.getAuthorName(), message.getAuthor()) }));
+				        	context.formatObjectName(message.getAuthorName(), message.getAuthor()) }),
+				        	width, 0);
 			}
 			else
 			{
-				out.println(formatter.format("BasicMessagePrinter.global.footer", 
+			    PrintUtils.printIndented(out,
+			            formatter.format("BasicMessagePrinter.global.footer", 
 				        new Object[] { new Long(message.getId()), 
-				        	context.formatObjectName(message.getAuthorName(), message.getAuthor()) }));
+				        	context.formatObjectName(message.getAuthorName(), message.getAuthor()) }),
+				        	width, 0);
 			}
 		}
 		
@@ -237,14 +261,18 @@ public class BasicMessagePrinter implements MessagePrinter
 			//
 			if(each.isLocal())
 			{
-				out.println(formatter.format("BasicMessagePrinter.reply.same.conference",
-					new Object[] { new Long(occ.getLocalnum()), each.getAuthorName() }));
+			    PrintUtils.printIndented(out, 
+			            formatter.format("BasicMessagePrinter.reply.same.conference",
+			                    new Object[] { new Long(occ.getLocalnum()), each.getAuthorName() }),
+			                    width, 0);
 			}
 			else
 			{
-				out.println(formatter.format("BasicMessagePrinter.reply.different.conference",
-					new Object[] { new Long(occ.getLocalnum()), new Long(occ.getGlobalId()), 
-						each.getAuthorName(), each.getConferenceName() }));
+			    PrintUtils.printIndented(out,
+			            formatter.format("BasicMessagePrinter.reply.different.conference",
+			                    new Object[] { new Long(occ.getLocalnum()), new Long(occ.getGlobalId()), 
+			                    each.getAuthorName(), each.getConferenceName() }),
+			                    width, 0);
 			}	
 		}
 		
@@ -255,7 +283,10 @@ public class BasicMessagePrinter implements MessagePrinter
 		    MessageAttribute each = attributes[idx];
 		    if(each.getKind() == MessageManager.ATTR_NOCOMMENT)
 		    {
-		        out.println(formatter.format("BasicMessagePrinter.nocomment", context.formatObjectName(each.getUsername(), each.getUserId())));		        
+		        PrintUtils.printIndented(
+		                out,
+		                formatter.format("BasicMessagePrinter.nocomment", context.formatObjectName(each.getUsername(), each.getUserId())),
+		                width, 0);		        
 		    }
 		}
 	}

@@ -1014,6 +1014,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			if((myinf.getFlags1() & UserFlags.NARCISSIST) == 0)
 			    this.markMessageAsRead(conference, occ.getLocalnum());
 			
+			// Make this the "current" message
+			//
+			m_lastReadMessageId = occ.getGlobalId();
+			
 			// Notify the rest of the world that there is a new message!
 			//
 			this.broadcastEvent(
@@ -1064,6 +1068,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				{
 				    this.markMessageAsRead(me, copy.getLocalnum());
 				}
+			    
+				// Make this the "current" message
+				//
+				m_lastReadMessageId = occ.getGlobalId();			    
 			}
 
 			// Notify recipient of the new message.
@@ -1111,6 +1119,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
 					occ.getGlobalId()));
 			this.m_da.getMessageManager().addMessageAttribute(occ.getGlobalId(), MessageManager.ATTR_PRESENTATION, new Long(object).toString());
+			
+			// Make this the "current" message
+			//
+			m_lastReadMessageId = occ.getGlobalId();
 			return occ;
 		}
 		catch(SQLException e)
@@ -3142,6 +3154,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			//
 			if(top > 0)
 			    this.appendToReadLog(occs[0]);
+			
+			// Make this the "current" message
+			//
+			m_lastReadMessageId = primaryOcc.getGlobalId();
 			
 			// Create Envelope and return
 			//

@@ -76,17 +76,18 @@ public class MessageManager
 	
 	private final Connection m_conn; 
 	
-	public static final short ACTION_CREATED 	= 0;
-	public static final short ACTION_COPIED	= 1;
-	public static final short ACTION_MOVED		= 2;
+	public static final short ACTION_CREATED 		= 0;
+	public static final short ACTION_COPIED			= 1;
+	public static final short ACTION_MOVED			= 2;
 
-	public static final short ATTR_NOCOMMENT = 0;
-	public static final short ATTR_MOVEDFROM = 1;
-	public static final short ATTR_RULEPOST = 2;
-	public static final short ATTR_PRESENTATION = 3;
-	public static final short ATTR_NOTE = 4;
+	public static final short ATTR_NOCOMMENT 		= 0;
+	public static final short ATTR_MOVEDFROM 		= 1;
+	public static final short ATTR_RULEPOST 		= 2;
+	public static final short ATTR_PRESENTATION 	= 3;
+	public static final short ATTR_NOTE 			= 4;
 	public static final short ATTR_ORIGINAL_DELETED = 5;
-	public static final short ATTR_MAIL_RECIPIENT = 6;
+	public static final short ATTR_MAIL_RECIPIENT 	= 6;
+	public static final short ATTR_FOOTNOTE			= 7;
 	
 	public MessageManager(Connection conn)
 	throws SQLException
