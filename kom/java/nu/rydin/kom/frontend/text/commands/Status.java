@@ -126,7 +126,17 @@ public class Status extends AbstractCommand
 		NameAssociation[] memberships = context.getSession().listMemberships(info.getId()); 
 		int top = memberships.length;
 		for(int idx = 0; idx < top; ++idx)
-			out.println(memberships[idx].getName());
+		{
+		    if (memberships[idx].getId() == info.getId())
+		    {
+		        //The mailbox
+		        out.println(formatter.format("misc.mailboxtitle"));
+		    }
+		    else
+		    {
+		        out.println(memberships[idx].getName());
+		    }
+		}
 	}
 	
 	protected void printConferenceStatus(Context context, ConferenceInfo info)
