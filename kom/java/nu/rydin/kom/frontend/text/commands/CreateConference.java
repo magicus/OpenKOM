@@ -81,7 +81,7 @@ public class CreateConference extends AbstractCommand
 				out.println(fmt.format("magic.conference.presentation.users"));
 				out.println(fmt.format("magic.conference.presentation.conferences"));
 				out.println(fmt.format("magic.conference.notes"));
-				choice = in.getChoice("magic.conference.kind" + " (1/2/3)? ",
+				choice = in.getChoice(fmt.format("magic.conference.kind") + " (1/2/3)? ",
 									  new String[] { "1", "2", "3" }, -1, error);
 				
 				if (-1 != choice)
@@ -91,7 +91,7 @@ public class CreateConference extends AbstractCommand
 					try
 					{
 						oldMagic = context.getSession().getMagicConference((short)choice);
-						choice = in.getChoice(fmt.format("magic.conference.exists", context.getSession().getName(oldMagic) + "? "),
+						choice = in.getChoice(fmt.format("magic.conference.exists", context.getSession().getName(oldMagic)) + "? ",
 											  new String[] { fmt.format("misc.yes"), fmt.format("misc.no") },
 											  1, error);
 						if (0 != choice)
