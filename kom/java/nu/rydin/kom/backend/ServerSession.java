@@ -1004,6 +1004,18 @@ public interface ServerSession
     public GlobalMessageSearchResult[] listMessagesGloballyByAuthor(long user, int offset, int length)
 	throws UnexpectedException;
     
+    /**
+     * Returns an array of results from doing a global search on the given searchterm.
+     * 
+     * @param searchterm
+     * @param offset
+     * @param length
+     * @return
+     * @throws UnexpectedException
+     */
+    public GlobalMessageSearchResult[] searchMessagesGlobally(String searchterm, int offset, int length)
+	throws UnexpectedException;    
+    
 	/**
 	 * Returns the last message head.
 	 * 

@@ -68,6 +68,7 @@ public class MessageManager
 	private final PreparedStatement m_listAllMessagesLocally;
     private final PreparedStatement m_listMessagesLocallyByAuthor;
     private final PreparedStatement m_listMessagesGloballyByAuthor;
+    private final PreparedStatement m_searchMessagesGlobally;
     private final PreparedStatement m_countStmt;
 	
 	private final Connection m_conn; 
@@ -222,6 +223,14 @@ public class MessageManager
 		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject " +
 		        "FROM messages m, messageoccurrences mo, names n " +
 		        "WHERE m.id = mo.message AND n.id = mo.conference AND mo.user = ? AND n.id = mo.conference " +
+		        "ORDER BY mo.action_ts DESC " +
+		        "LIMIT ? OFFSET ?");
+		
+		m_searchMessagesGlobally = conn.prepareStatement(
+		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject " +
+		        "FROM messagesearch m, messageoccurrences mo, names n " +
+		        "WHERE m.id = mo.message AND n.id = mo.conference " +
+		        "AND MATCH(m.subject, m.body) AGAINST (? IN BOOLEAN MODE) " +
 		        "ORDER BY mo.action_ts DESC " +
 		        "LIMIT ? OFFSET ?");
 	}
@@ -1103,7 +1112,18 @@ public class MessageManager
         
         return innerGlobalSearch(this.m_listMessagesGloballyByAuthor);        
     }
-    
+
+	public GlobalMessageSearchResult[] searchMessagesGlobally(String searchterm,
+            int offset, int length) throws SQLException
+    {
+        this.m_searchMessagesGlobally.clearParameters();
+        this.m_searchMessagesGlobally.setString(1, searchterm);
+        this.m_searchMessagesGlobally.setInt(2, length);
+        this.m_searchMessagesGlobally.setInt(3, offset);
+        
+        return innerGlobalSearch(this.m_searchMessagesGlobally);        
+    }
+	
     private GlobalMessageSearchResult[] innerGlobalSearch(PreparedStatement globalSearchStatement) throws SQLException
 	{
         ResultSet rs = globalSearchStatement.executeQuery();

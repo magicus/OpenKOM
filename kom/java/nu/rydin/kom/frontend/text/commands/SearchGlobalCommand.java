@@ -20,7 +20,7 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public abstract class SearchGlobalCommand extends SearchCommand
 {
-    protected static final int GLOBALID_COL_WIDTH = 9;
+    protected static final int GLOBALID_COL_WIDTH = 10;
     protected static final int LOCALID_COL_WIDTH = 7;
     protected static final int AUTHOR_COL_WIDTH = 30;
     protected static final int CONFERENCE_COL_WIDTH = 30;

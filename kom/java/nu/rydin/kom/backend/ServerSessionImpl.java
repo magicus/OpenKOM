@@ -3010,6 +3010,23 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    }
 	}
 
+    public GlobalMessageSearchResult[] searchMessagesGlobally(String searchterm, int offset, int length)
+	throws UnexpectedException
+    {
+		try
+		{
+			return this.censorMessages(m_da.getMessageManager().searchMessagesGlobally(searchterm, offset, length));
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+		catch (ObjectNotFoundException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}		
+    }
+	
     public LocalMessageSearchResult[] searchMessagesLocally(long conference, String searchterm, int offset, int length)
     throws UnexpectedException
 	{
