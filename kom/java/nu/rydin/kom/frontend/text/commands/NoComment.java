@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.constants.ConferencePermissions;
-import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -28,13 +26,6 @@ public class NoComment extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
-		// Check permissions
-		//
-	    // TODO Should we really check this? What if user is not commenting a message
-	    // in a completely different conference?
-		if(!context.getSession().hasPermissionInCurrentConference(ConferencePermissions.REPLY_PERMISSION))
-			throw new AuthorizationException();
-
 		// Parse parameters. No parameters means we're "not commenting" to the
 		// last text read.
 		//
