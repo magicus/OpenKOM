@@ -56,6 +56,7 @@ public class MessageManager
 	private final PreparedStatement m_findLastOccurrenceInConferenceWithAttrStmt;
 	private final PreparedStatement m_getLatestMagicMessageStmt;
 	private final PreparedStatement m_updateConferenceLasttext;
+    private final PreparedStatement m_listGlobalMessagesByUserStmt;
 	
 	private final Connection m_conn; 
 	
@@ -168,6 +169,12 @@ public class MessageManager
 			 "order by MO.Message desc " +
 			 "limit 1 offset 0");
 		
+		//TODO (skrolle) Add subject!
+		m_listGlobalMessagesByUserStmt = conn.prepareStatement(
+		        "SELECT mo.message, mo.action_ts, mo.kind, mo.user, mo.user_name, " +
+		        "mo.conference, mo.localnum " +
+		        "FROM messageoccurrences mo " +
+		        "WHERE mo.user = ? AND mo.kind = ?");
 	}
 	
 	public void close()
@@ -950,4 +957,28 @@ public class MessageManager
 		}
 		
 	}
+
+	//TODO (skrolle) Fix this shit, add subject.
+    public MessageOccurrence[] getGlobalMessagesByUser(long userId) 
+    throws SQLException
+    {
+            this.m_listGlobalMessagesByUserStmt.clearParameters();
+            this.m_listGlobalMessagesByUserStmt.setLong(1, userId);
+            this.m_listGlobalMessagesByUserStmt.setLong(2, ACTION_CREATED);
+            ResultSet rs = this.m_listGlobalMessagesByUserStmt.executeQuery();
+            List l = new ArrayList();
+            while (rs.next()) {
+                l.add(new MessageOccurrence(
+                        rs.getLong(1),		// Global id
+            			rs.getTimestamp(2),	// Timestamp
+            			rs.getShort(3),		// Kind,
+            			rs.getLong(4),		// User
+            			rs.getString(5),	// User name
+            			rs.getLong(6),		// Conference
+            			rs.getInt(7)));		// Localnum
+            }
+			MessageOccurrence[] result = new MessageOccurrence[l.size()];
+			l.toArray(result);
+			return result;
+    }
 }

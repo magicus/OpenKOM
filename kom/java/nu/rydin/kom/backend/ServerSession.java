@@ -1023,5 +1023,13 @@ public interface ServerSession
 	 */	
 	public void updateLastlogin()
 	throws ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * List all messages by specified user
+	 * @return
+	 * @throws UnexpectedException
+	 */
+	public MessageOccurrence[] listGlobalMessagesByUser(long userId)
+	throws UnexpectedException;
 
 }

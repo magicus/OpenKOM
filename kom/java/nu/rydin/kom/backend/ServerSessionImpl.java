@@ -2256,4 +2256,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}		
 	}
 
+    public MessageOccurrence[] listGlobalMessagesByUser(long userId) throws UnexpectedException 
+	{
+		try
+		{
+			return m_da.getMessageManager().getGlobalMessagesByUser(userId);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
 }
