@@ -32,11 +32,28 @@ public class GenerateTestdata extends AbstractCommand
 	public void execute(Context context, String[] parameters) 
 	throws KOMException, IOException
 	{
+		int generate = 20;
+		if (parameters.length != 0)
+		{
+			try
+			{
+				generate = Integer.parseInt(parameters[0]);
+			}
+			catch (Exception e)
+			{
+				// Nope.
+			}
+		}
 		ServerSession session = context.getSession();
-		for(int idx = 0; idx < 20; ++idx)
+		for(int idx = 0; idx < generate; ++idx)
 		{
 			session.storeMessage(new UnstoredMessage(s_subject, s_body1));
 			session.storeMessage(new UnstoredMessage(s_subject, s_body2));
 		}
+	}
+	
+	public boolean acceptsParameters()
+	{
+		return true;
 	}
 }

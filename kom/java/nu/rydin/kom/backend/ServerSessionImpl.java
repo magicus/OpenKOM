@@ -291,6 +291,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
+	public MessageHeader getLastMessageHeader()
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		try
+		{
+			return m_da.getMessageManager().loadMessageHeader(this.m_lastReadMessageId);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+	
 	public Envelope readOriginalMessage()
 	throws NoCurrentMessageException, NotAReplyException, ObjectNotFoundException, UnexpectedException
 	{
@@ -1613,6 +1626,34 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}		
 	}
+	
+	public int skipMessagesBySubject (String subject)
+	throws UnexpectedException, ObjectNotFoundException
+	{
+		long loggedInUser = this.getLoggedInUserId();
+		int sillyCounter = 0;
+		try
+		{
+			MessageManager mm = m_da.getMessageManager();
+			MembershipManager msm = m_da.getMembershipManager();
+			
+			long[] globalIds = mm.getMessagesBySubject(subject, loggedInUser);
+			for (int i = 0; i < globalIds.length; ++i)
+			{
+				MessageOccurrence[] mos = mm.getVisibleOccurrences(loggedInUser, globalIds[i]);
+				for (int j = 0; j < mos.length; ++j)
+				{
+					MessageOccurrence mo = mos[j];
+					sillyCounter += this.markMessageAsReadEx(mo.getConference(), mo.getLocalnum()) ? 1 : 0;
+				}
+			}
+			return sillyCounter;
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (loggedInUser, e);
+		}
+	}
 
 	protected void markAsInvalid()
 	{
@@ -1640,6 +1681,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		if(m_memberships != null)
 			m_memberships.save(m_userId, m_da.getMembershipManager());
 		m_memberships = new MembershipList(m_da.getMembershipManager().listMembershipsByUser(m_userId));
+	}
+	
+	protected boolean markMessageAsReadEx(long conference, int localnum)
+	throws ObjectNotFoundException
+	{
+		return m_memberships.markAsReadEx(conference, localnum);
 	}
 	
 	protected void markMessageAsRead(long conference, int localnum)

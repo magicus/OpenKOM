@@ -24,6 +24,7 @@ import nu.rydin.kom.structs.MessageRangeList;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class MembershipList
 {
@@ -78,6 +79,20 @@ public class MembershipList
 		MessageRangeList l = mi.getReadMessages(); 
 		mi.setReadMessages(l == null ? new MessageRangeList(new MessageRange(localnum, localnum)) : l.add(localnum));
 		m_dirty.add(mi);
+	}
+	
+	public boolean markAsReadEx(long conference, int localnum)
+	throws ObjectNotFoundException
+	{
+		if (!this.isUnread(conference, localnum))
+		{
+			return false;
+		}
+		else
+		{
+			this.markAsRead(conference, localnum);
+			return true;
+		}
 	}
 	
 	public int countUnread(long conference, ConferenceManager cm)

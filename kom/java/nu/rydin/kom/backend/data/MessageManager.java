@@ -51,6 +51,7 @@ public class MessageManager
 	private final PreparedStatement m_listOccurrencesInConferenceStmt;
 	private final PreparedStatement m_getLocalIdsInConfStmt;
 	private final PreparedStatement m_dropConferenceStmt;
+	private final PreparedStatement m_getGlobalBySubjectStmt;
 	
 	private final Connection m_conn; 
 	
@@ -125,6 +126,16 @@ public class MessageManager
 			 "where mo.conference = ? " +
 			 "order by localnum desc limit ? offset ?;");
 
+		// Ooooh! There's room for optimization here :-) I suggest we optimize by moving to an
+		// RDBMS that supports indexed views (not to mention stored procedures..)
+		//		
+		m_getGlobalBySubjectStmt = conn.prepareStatement(
+			 "select Message " + 
+			 "from MessageOccurrences as mo " +
+			 "join Memberships as ms on mo.Conference = ms.Conference " +
+			 "join Messages on mo.Message = Messages.ID " +
+			 "where ms.User = ? and Subject = ?");
+		
 		// To speed things up, a special version to just retrieve the local ID.
 		//
 		m_getLocalIdsInConfStmt = conn.prepareStatement(
@@ -175,7 +186,9 @@ public class MessageManager
 		if(m_getLocalIdsInConfStmt != null)
 			m_getLocalIdsInConfStmt.close();
 		if(m_dropConferenceStmt != null)
-			m_dropConferenceStmt.close();		
+			m_dropConferenceStmt.close();
+		if(m_getGlobalBySubjectStmt != null)
+			m_getGlobalBySubjectStmt.close();
 	}
 	
 	public void finalize()
@@ -832,5 +845,15 @@ public class MessageManager
 				// we got to it.
 			}
 		}
+	}
+	
+	public long[] getMessagesBySubject (String subject, long user)
+	throws SQLException
+	{
+		this.m_getGlobalBySubjectStmt.clearParameters();
+		this.m_getGlobalBySubjectStmt.setLong(1, user);
+		this.m_getGlobalBySubjectStmt.setString(2, subject);
+		ResultSet rs = this.m_getGlobalBySubjectStmt.executeQuery();
+		return SQLUtils.extractLongs(rs, 1);	
 	}
 }

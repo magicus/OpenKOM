@@ -899,6 +899,28 @@ public interface ServerSession
 	throws UnexpectedException;
 	
 	/**
+	 * Returns the last message head.
+	 * 
+	 * @return
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	
+	public MessageHeader getLastMessageHeader()
+	throws ObjectNotFoundException, UnexpectedException;
+
+	/**
+	 * Skips all messages with the given subject in all conferences the user is a member of.
+	 * 
+	 * @param subject Subject to skip
+	 * @return Number of texts skipped
+	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
+	 */
+	public int skipMessagesBySubject (String subject)
+	throws UnexpectedException, ObjectNotFoundException;
+	
+	/**
 	 * This method drops a conference, including all message occurrences (and, sometimes, messages)
 	 * stored in it. Refer to the dropMessageOccurrence source for a discussion on when the message,
 	 * as opposed to the occurrence, is dropped.
