@@ -106,7 +106,8 @@ public class MessageManager
 		m_getMessageAttributesStmt = conn.prepareStatement(
 		    "SELECT message, kind, created, value " +
 		    "FROM messageattributes " +
-		    "WHERE message = ?");
+		    "WHERE message = ? " +
+			"order by created asc");
 		m_addMessageAttributeStmt = conn.prepareStatement(
 		    "INSERT INTO messageattributes (message, kind, created, value) " +
 		    "VALUES (?, ?, ?, ?)");
