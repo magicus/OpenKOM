@@ -11,9 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.text.MessageFormat;
 import java.util.LinkedList;
-import java.lang.Character;
 
 import nu.rydin.kom.EventDeliveredException;
 import nu.rydin.kom.LineOverflowException;
@@ -40,12 +38,16 @@ public class LineEditor implements NewlineListener
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
+	private static final char CTRL_A			= 1;
 	private static final char CTRL_C			= 3;
+	private static final char CTRL_E			= 5;
 	private static final char CTRL_U			= 21;
 	private static final char CTRL_W			= 23;
 	private static final char CTRL_X			= 24;
 	private static final char DEL				= 127;
 	private static final char ESC				= 27;
+	private static final char NEWLINE			= 14;
+	private static final char RET				= 18;
 	private static final char SPACE				= 32;
 	
 	private final ReaderProxy m_in;
@@ -630,7 +632,7 @@ public class LineEditor implements NewlineListener
 		    		}
 		    		else
 		    		{
-		    			//Unknown escape sequence, terminate.
+		    			//Unknown escape sequence, do nothing
 		    		}
 		    	}
 		    	else
@@ -646,6 +648,15 @@ public class LineEditor implements NewlineListener
 					case ESC:
 						escapemode = true;
 						escapecode = "";
+						break;
+					case '\r':
+						editing = false;
+						m_out.write('\r');					
+						m_out.write('\n');
+						break;
+					case NEWLINE:
+						// Skip
+						//
 						break;
 					case DEL:
 					case BS:
@@ -665,14 +676,25 @@ public class LineEditor implements NewlineListener
 							{
 								m_out.write(buffer.substring(cursorpos));
 								m_out.write(SPACE);
-								m_out.write(MessageFormat.format(ANSISequences.MOVE_CURSOR_LEFT, new Object[] { new Integer(buffer.length() - cursorpos + 1) } ));
+								m_out.write(ANSISequences.moveCursorLeft(buffer.length() - cursorpos + 1));
 							}
 						}	
 						break;
-					case '\r':
-						editing = false;
-						m_out.write('\n');
-						m_out.write('\r');					
+					case CTRL_A:
+						if(((flags & FLAG_ECHO) != 0) && cursorpos > 0)
+						{
+							//Advance cursor to beginning of line
+							m_out.write(ANSISequences.moveCursorLeft(cursorpos));
+							cursorpos = 0;
+						}
+						break;
+					case CTRL_E:
+						if(((flags & FLAG_ECHO) != 0) && cursorpos < buffer.length())
+						{
+							//Advance cursor to end of line
+							m_out.write(ANSISequences.moveCursorRight(buffer.length() - cursorpos));
+							cursorpos = buffer.length();
+						}
 						break;
 					case CTRL_X:
 					case CTRL_U:
@@ -683,7 +705,7 @@ public class LineEditor implements NewlineListener
 							//
 							int n = top  - cursorpos;
 							while(n-- > 0)
-								m_out.write(' ');
+								m_out.write(SPACE);
 							
 							// Delete to beginning of line
 							//
@@ -715,7 +737,7 @@ public class LineEditor implements NewlineListener
 								buffer.delete(i, cursorpos);
 								
 								//Move back cursor to i.
-								m_out.write(MessageFormat.format(ANSISequences.MOVE_CURSOR_LEFT, new Object[] { new Integer(cursorpos - i) } ));
+								m_out.write(ANSISequences.moveCursorLeft(cursorpos - i));
 								
 								//Print rest of buffer from i.
 								m_out.write(buffer.substring(i));
@@ -724,17 +746,13 @@ public class LineEditor implements NewlineListener
 								PrintUtils.printRepeated(m_out, SPACE, cursorpos - i);
 								
 								//Move back cursor to i.
-								m_out.write(MessageFormat.format(ANSISequences.MOVE_CURSOR_LEFT, new Object[] { new Integer(buffer.length() + (cursorpos - i) - i) } ));
+								m_out.write(ANSISequences.moveCursorLeft(buffer.length() + (cursorpos - i) - i));
 								
 								//Set new cursorpos
 								cursorpos = i;
 							}
 							break;
 						}
-					case '\n':
-						// Skip
-						//
-						break;
 					default:	
 						// A stopchar?
 						//
@@ -772,7 +790,7 @@ public class LineEditor implements NewlineListener
 							{
 								m_out.write(buffer.substring(cursorpos));
 								m_out.write(SPACE);
-								m_out.write(MessageFormat.format(ANSISequences.MOVE_CURSOR_LEFT, new Object[] { new Integer(buffer.length() - cursorpos + 1) } ));
+								m_out.write(ANSISequences.moveCursorLeft(buffer.length() - cursorpos + 1));
 							}
 						}
 						else {

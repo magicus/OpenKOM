@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.ansi;
 
+import java.text.MessageFormat;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
@@ -38,4 +40,14 @@ public class ANSISequences
     public static final String BRIGHT					= "\u001b[1m";
     public static final String RESET_ATTRIBUTES			= "\u001b[0m";
 
+    public static String moveCursorLeft(int moves)
+    {
+    	return MessageFormat.format(MOVE_CURSOR_LEFT, new Object[] { new Integer(moves) } );
+    }
+
+    public static String moveCursorRight(int moves)
+    {
+    	return MessageFormat.format(MOVE_CURSOR_RIGHT, new Object[] { new Integer(moves) } );
+    }
+    
 }
