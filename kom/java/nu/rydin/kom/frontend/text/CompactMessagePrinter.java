@@ -229,7 +229,7 @@ public class CompactMessagePrinter implements MessagePrinter
 		    
 		    if(each.getKind() == MessageManager.ATTR_NOCOMMENT)
 		    {
-				out.println(formatter.format("BasicMessagePrinter.nocomment", each.getNoCommentUsername()));		        
+				out.println(formatter.format("BasicMessagePrinter.nocomment", context.formatObjectName(each.getNoCommentUsername(), each.getNoCommentUserid())));
 		    }
 		}
 	}
