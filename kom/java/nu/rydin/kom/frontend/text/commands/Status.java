@@ -149,6 +149,9 @@ public class Status extends AbstractCommand
 		PrintUtils.printLabelled(out, formatter.format("status.conference.type"), LABEL_LENGTH, 
 		        (info.getPermissions() & ConferencePermissions.READ_PERMISSION) != 0 ? formatter.format("conference.public")
 		                : formatter.format("conference.exclusive"));
+		if (info.getReplyConf() != -1)
+			PrintUtils.printLabelled(out, formatter.format("status.conference.commentconference"), LABEL_LENGTH, 
+			    context.getSession().getConference(info.getReplyConf()).getName());
 		PrintUtils.printLabelled(out, formatter.format("status.conference.admin"), LABEL_LENGTH, 
 			context.getSession().getName(info.getAdministrator()).getName());
 		PrintUtils.printLabelled(out, formatter.format("status.conference.messages"), LABEL_LENGTH, 
