@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.editor.simple;
 
+import java.io.PrintWriter;
+
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
@@ -29,5 +31,15 @@ public class Insert extends LineNumberCommand
 	public boolean acceptsParameters()
 	{
 		return true;
+	}
+	
+	public void printPreamble(PrintWriter out)
+	{
+		// Nothing 
+	}
+	
+	public void printPostamble(PrintWriter out)
+	{
+		// Nothing 
 	}
 }

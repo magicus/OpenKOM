@@ -1,7 +1,7 @@
 /*
  * Created on Nov 10, 2003
  *
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text;
@@ -122,6 +122,7 @@ public class TelnetServer implements Runnable
 					TelnetInputStream eis = new TelnetInputStream(incoming.getInputStream(), 
 						incoming.getOutputStream());
 					ClientSession client = new ClientSession(eis, incoming.getOutputStream());
+					eis.addSizeListener(client);
 					
 					// Create a thread to handle the session and kick it off!
 					// Also create a SessionReaper that will be woken up when the

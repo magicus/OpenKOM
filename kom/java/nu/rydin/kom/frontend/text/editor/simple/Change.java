@@ -53,4 +53,14 @@ public class Change extends LineNumberCommand
 			throw new RuntimeException("This should not happen!");	
 		}
 	}
+	
+	public void printPreamble(PrintWriter out)
+	{
+		// Nothing 
+	}
+	
+	public void printPostamble(PrintWriter out)
+	{
+		// Nothing 
+	}
 }

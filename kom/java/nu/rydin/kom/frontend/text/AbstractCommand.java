@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.PrintWriter;
+
 import nu.rydin.kom.backend.NameUtils;
 
 /**
@@ -88,5 +90,13 @@ public abstract class AbstractCommand implements Command
 		return args;
 	}
 
+	public void printPreamble(PrintWriter out)
+	{
+		out.println();
+	}
 	
+	public void printPostamble(PrintWriter out)
+	{
+		out.println();
+	}	
 }

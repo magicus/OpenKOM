@@ -174,7 +174,9 @@ public class CommandParser
 				case 0:
 					// No match. The command was unknown.
 					//
+					out.println();
 					out.println(formatter.format("parser.unknown", command));
+					out.println();
 					return null;
 				case 1:
 					// Exactly one match. Go run it!

@@ -145,7 +145,9 @@ public class SimpleEditor implements MessageEditor
 				 			return false;
 				 		try
 				 		{
+				 			command.printPreamble(out);
 				 			command.execute(context, command.getParameters(parts));
+				 			command.printPostamble(out);
 				 		}
 				 		catch(KOMException e)
 				 		{

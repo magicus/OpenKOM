@@ -6,13 +6,11 @@
  */
 package nu.rydin.kom.frontend.text.editor;
 
-import java.io.PrintWriter;
-
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.KOMPrinter;
+import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.MessagePrinter;
@@ -74,11 +72,6 @@ public class EditorContext implements Context
 		return m_underlying.getIn();
 	}
 
-	public KOMPrinter getKOMPrinter()
-	{
-		return m_underlying.getKOMPrinter();
-	}
-
 	public long getLoggedInUserId()
 	{
 		return m_underlying.getLoggedInUserId();
@@ -110,7 +103,7 @@ public class EditorContext implements Context
 		return m_underlying.getMessagePrinter();
 	}
 
-	public PrintWriter getOut()
+	public KOMWriter getOut()
 	{
 		return m_underlying.getOut();
 	}

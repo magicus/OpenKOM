@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -20,13 +23,18 @@ public class TelnetInputStream extends InputStream
 	private static final short ON 		= 1;
 	private static final short HIDDEN 	= 2;
 	
-	private static final short STATE_NORMAL = 0;
-	private static final short STATE_IAC 	= 1;
-	private static final short STATE_WILL 	= 2;
-	private static final short STATE_DO 	= 3;
-	private static final short STATE_WONT 	= 4;
-	private static final short STATE_DONT 	= 5;
+	private static final short STATE_NORMAL 		= 0;
+	private static final short STATE_IAC 			= 1;
+	private static final short STATE_WILL 			= 2;
+	private static final short STATE_DO 			= 3;
+	private static final short STATE_WONT 			= 4;
+	private static final short STATE_DONT 			= 5;
+	private static final short STATE_SB				= 6;
+	private static final short STATE_DATA			= 7;
+	private static final short STATE_AFTER_COMMAND	= 8;
 	
+	private static final byte CHAR_SE		= -16;
+	private static final byte CHAR_SB		= -6;
 	private static final byte CHAR_WILL		= -5;
 	private static final byte CHAR_WONT		= -4;
 	private static final byte CHAR_DO		= -3;
@@ -37,6 +45,7 @@ public class TelnetInputStream extends InputStream
 	private static final int OPT_SUPPRESS_GA= 3;
 	private static final int OPT_NAOCRD		= 10;
 	private static final int OPT_FLOWCONTROL = 33;
+	private static final int OPT_NAWS		= 31;
 	private static final int OPT_LINEMODE	= 34;
 	private static final int OPT_ENVIRON	= 39;
 	
@@ -48,15 +57,41 @@ public class TelnetInputStream extends InputStream
 	
 	private OutputStream m_output;
 	
+	private int[] m_dataBuffer;
+	
+	private int m_dataState;
+	
+	private int m_dataIdx;
+	
+	private List m_sizeListeners = new LinkedList();
+	
 	public TelnetInputStream(InputStream input, OutputStream output)
 	throws IOException
 	{
 		m_input 	= input;
 		m_output 	= output; 
 		
+		// We will echo
+		//
 		this.sendOption(CHAR_WILL, OPT_ECHO);
+		
+		// Please don't use linemode
+		//
 		this.sendOption(CHAR_DONT, OPT_LINEMODE);
+		
+		// Please use NAWS if you support it!
+		//
+		this.sendOption(CHAR_DO, OPT_NAWS);
+		
 		m_output.flush();
+	}
+	
+	public void addSizeListener(TerminalSizeListener listener)
+	{
+		synchronized(m_sizeListeners)
+		{
+			m_sizeListeners.add(listener);
+		}
 	}
 	
 	public int read() 
@@ -186,6 +221,9 @@ public class TelnetInputStream extends InputStream
 					case CHAR_DONT:
 						m_state = STATE_DONT;
 						break;
+					case CHAR_SB:
+						m_state = STATE_SB;
+						break;
 					default: 
 						this.handleCommand(b);
 						m_state = STATE_NORMAL;
@@ -208,13 +246,51 @@ public class TelnetInputStream extends InputStream
 				this.handleDont(b);
 				m_state = STATE_NORMAL;
 				break;
+			case STATE_SB:
+				switch(b)
+				{
+					case OPT_NAWS:
+						m_dataBuffer = new int[4];
+						m_dataIdx = 0;
+						m_state = STATE_DATA;
+						break;
+				}
+				m_dataState = b;
+				break;
+			case STATE_DATA:
+				if(m_dataIdx < m_dataBuffer.length)
+					m_dataBuffer[m_dataIdx++] = b;
+				else if(b == CHAR_IAC)
+					m_state = STATE_AFTER_COMMAND;
+				else
+					m_state = STATE_NORMAL; // Invalid command, go back to normal
+				break;
+			case STATE_AFTER_COMMAND:				
+				if(b != CHAR_SE)
+				{
+					// Huh? Not end of subnegotiation? 
+					//
+					m_state = STATE_NORMAL;
+					break;
+				}
+				// End of command
+				//
+				switch(m_dataState)
+				{
+					case OPT_NAWS:
+						this.handleNaws();
+						// Fall thru...
+					default:
+						m_state = STATE_NORMAL;
+				}
+			break;
 		}
 		return false;
 	}
 	
 	protected void handleCommand(int ch)
 	{
-		// System.out.println("Command: " +ch);
+		System.out.println("Command: " +ch);
 	}
 	
 	protected void handleWill(int ch)
@@ -280,5 +356,21 @@ public class TelnetInputStream extends InputStream
 				break;
 		}
 
+	}
+	
+	protected void handleNaws()
+	{
+		int width = (complement2(m_dataBuffer[0]) << 8) + complement2(m_dataBuffer[1]);
+		int heigth = (complement2(m_dataBuffer[2]) << 8) + complement2(m_dataBuffer[3]);
+		synchronized(m_sizeListeners)
+		{
+			for(Iterator itor = m_sizeListeners.iterator(); itor.hasNext();)
+				((TerminalSizeListener) itor.next()).terminalSizeChanged(width, heigth);
+		}
+	}
+	
+	protected static int complement2(int n)
+	{
+		return n < 0 ? 256 - n : n;
 	}
 }

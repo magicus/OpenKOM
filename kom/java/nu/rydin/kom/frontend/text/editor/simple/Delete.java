@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.editor.simple;
 
+import java.io.PrintWriter;
+
 import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.MissingArgumentException;
@@ -54,4 +56,14 @@ public class Delete extends LineNumberCommand
 	{
 		return true;
 	}
+	
+	public void printPreamble(PrintWriter out)
+	{
+		// Nothing 
+	}
+	
+	public void printPostamble(PrintWriter out)
+	{
+		// Nothing 
+	}	
 }

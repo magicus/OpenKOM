@@ -19,6 +19,7 @@ import nu.rydin.kom.AuthenticationException;
 import nu.rydin.kom.AuthorizationException;
 import nu.rydin.kom.EventDeliveredException;
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.KOMRuntimeException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.UserException;
@@ -54,13 +55,13 @@ import nu.rydin.kom.structs.UserInfo;
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
-public class ClientSession implements Runnable, Context, EventTarget
+public class ClientSession implements Runnable, Context, EventTarget, TerminalSizeListener
 {
 	private static final int MAX_LOGIN_RETRIES = 3;
 	private static final String DEFAULT_CHARSET = "US-ASCII";
 	
 	private LineEditor m_in;
-	private KOMPrinter m_out;
+	private KOMWriter m_out;
 	private final InputStream m_rawIn;
 	private final OutputStream m_rawOut; 
 	private MessageFormatter m_formatter = new MessageFormatter();
@@ -70,6 +71,8 @@ public class ClientSession implements Runnable, Context, EventTarget
 	private UserInfo m_thisUserCache;
 	private String[] m_flagLabels;
 	private WordWrapperFactory m_wordWrapperFactory = new StandardWordWrapper.Factory();
+	private int m_windowHeight = -1;
+	private int m_windowWidth = -1;
 
 	
 	// This could be read from some kind of user config if the
@@ -112,8 +115,9 @@ public class ClientSession implements Runnable, Context, EventTarget
 		//
 		try
 		{
-			m_out = new KOMPrinter(m_rawOut, DEFAULT_CHARSET);
-			m_in = new LineEditor(m_rawIn, m_out, this, null, DEFAULT_CHARSET);
+			m_out = new KOMWriter(m_rawOut, DEFAULT_CHARSET);
+			m_in = new LineEditor(m_rawIn, m_out, this, this, null, m_formatter, DEFAULT_CHARSET);
+			m_out.addNewlineListener(m_in);
 		}
 		catch(UnsupportedEncodingException e)
 		{
@@ -131,6 +135,10 @@ public class ClientSession implements Runnable, Context, EventTarget
 	{ 
 		try
 		{
+		    // Start keystroke poller
+		    //
+		    m_in.start();
+
 			// Try to login
 			//
 			UserInfo userInfo = null;
@@ -357,7 +365,6 @@ public class ClientSession implements Runnable, Context, EventTarget
 					continue;
 				}
 				
-				m_out.println();
 				if(cmdString.length() > 0)
 				{
 					// Command given. Parse it!
@@ -373,7 +380,7 @@ public class ClientSession implements Runnable, Context, EventTarget
 
 						// Go ahead and execute it!
 						//
-						command.execute(this, args);
+						this.executeCommand(command, args);
 					}
 						
 					// Special case: Seeing a Logout command here
@@ -383,8 +390,7 @@ public class ClientSession implements Runnable, Context, EventTarget
 						break;
 				}
 				else
-					defaultCommand.execute(this, new String[0]);
-				m_out.println();					
+					this.executeCommand(defaultCommand, new String[0]);
 			}
 			catch(UserException e)
 			{
@@ -407,6 +413,11 @@ public class ClientSession implements Runnable, Context, EventTarget
 				m_out.println(e.formatMessage(this));
 				m_out.println();
 			}
+			catch(KOMRuntimeException e)
+			{
+				m_out.println(e.formatMessage(this));
+				m_out.println();
+			}			
 			catch(InterruptedException e)
 			{
 				// Someone wants us dead. Let's get out of here!
@@ -415,7 +426,7 @@ public class ClientSession implements Runnable, Context, EventTarget
 			}			
 			catch(Exception e)
 			{
-				e.printStackTrace(m_out.toPrintWriter());
+				e.printStackTrace(m_out);
 			}
 		}
 	}
@@ -446,16 +457,11 @@ public class ClientSession implements Runnable, Context, EventTarget
 		return m_in;
 	}
 	
-	public PrintWriter getOut()
-	{
-		return m_out.toPrintWriter();
-	}
-	
-	public KOMPrinter getKOMPrinter()
+	public KOMWriter getOut()
 	{
 		return m_out;
 	}
-		
+			
 	public MessageFormatter getMessageFormatter()
 	{
 		return m_formatter;
@@ -512,7 +518,7 @@ public class ClientSession implements Runnable, Context, EventTarget
 	{
 		// TODO: Get from telnet session etc.
 		//
-		return new TerminalSettings(24, 80, "ANSI");
+		return new TerminalSettings(m_windowHeight != -1 ? m_windowHeight : 24, m_windowWidth != -1 ? m_windowWidth : 80, "ANSI");
 	}
 	
 	public void printDebugInfo()
@@ -640,6 +646,14 @@ public class ClientSession implements Runnable, Context, EventTarget
 		//
 	}
 	
+	// Implementation of TerminalSizeListener
+	//
+	public void terminalSizeChanged(int width, int height)
+	{
+		m_windowWidth = width;
+		m_windowHeight = height;
+	}
+	
 	protected void installCommands()
 	throws UnexpectedException
 	{
@@ -652,6 +666,15 @@ public class ClientSession implements Runnable, Context, EventTarget
 		{
 			throw new UnexpectedException(-1, e);
 		}
+	}
+	
+	protected void executeCommand(Command command, String[] parameters)
+	throws InterruptedException, IOException, KOMException
+	{
+		PrintWriter out = this.getOut();
+		command.printPreamble(out);
+		command.execute(this, parameters);
+		command.printPostamble(out);
 	}
 	
 	public void loadFlagTable()

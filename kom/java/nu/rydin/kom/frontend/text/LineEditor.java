@@ -17,16 +17,19 @@ import nu.rydin.kom.EventDeliveredException;
 import nu.rydin.kom.InputInterruptedException;
 import nu.rydin.kom.LineOverflowException;
 import nu.rydin.kom.LineUnderflowException;
+import nu.rydin.kom.OutputInterruptedException;
 import nu.rydin.kom.StopCharException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
+import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class LineEditor
+public class LineEditor implements NewlineListener
 {
 	public static final int FLAG_STOP_ON_EVENT	= 0x01;
 	public static final int FLAG_ECHO			= 0x02;
@@ -44,11 +47,19 @@ public class LineEditor
 	
 	private final InputStream m_inStream;
 	
-	private final KOMPrinter m_out;
+	private final KOMWriter m_out;
 	
 	private final EventTarget m_target;
 	
 	private ServerSession m_session;
+	
+	private boolean m_dontCount = false;
+	
+	private int m_lineCount = 0;
+	
+	private final MessageFormatter m_formatter;
+	
+	private final String m_morePrompt;
 	
 	/**
 	 * Proxy to a reader. This allows us to replace the underlying reader
@@ -215,20 +226,46 @@ public class LineEditor
 	 */
 	private final LinkedList m_eventQueue = new LinkedList();
 	
+	private final TerminalSettingsProvider m_tsProvider;
+	
 		
-	public LineEditor(InputStream in, KOMPrinter out, EventTarget target, ServerSession session, String charset)
+	public LineEditor(InputStream in, KOMWriter out, EventTarget target, TerminalSettingsProvider tsProvider, 
+	        ServerSession session, MessageFormatter formatter, String charset)
 	throws UnsupportedEncodingException
 	{
 		m_in		= new ReaderProxy(new InputStreamReader(in, charset));
 		m_inStream  = in;
 		m_out		= out;
 		m_target	= target;
+		m_tsProvider= tsProvider;
+		m_formatter	= formatter;
+		
+		// Create "more" prompt
+		//
+		// Getting the more prompt
+		//
+		StringBuffer sb = new StringBuffer();
+		sb.append(m_formatter.format("misc.more"));
+		sb.append(" (");
+		sb.append(m_formatter.format("misc.y"));
+		sb.append("/");
+		sb.append(m_formatter.format("misc.n"));
+		sb.append(") ");
+		m_morePrompt = sb.toString();
 		
 		// Start pollers
 		//
 		if(session != null)
 			this.setSession(session);
-		m_keystrokePoller.start();
+		
+	}
+	
+	/**
+	 * Starts the keystroke poller. No input can be read until this method is called.
+	 */
+	public void start()
+	{
+	    m_keystrokePoller.start();
 	}
 	
 	public void setSession(ServerSession session)
@@ -412,8 +449,11 @@ public class LineEditor
 			//No need to check for a no character since waitForChar won't return
 			//on any other characters but the specified ones.
 			
-			//Print character and flush.
-			m_out.println(ch);
+			// Erase the prompt
+			//
+			m_out.print('\r');
+			PrintUtils.printRepeated(m_out, ' ', m_morePrompt.length());
+			m_out.print('\r');
 			m_out.flush();
 		} 
 		catch (InputInterruptedException e) 
@@ -444,11 +484,6 @@ public class LineEditor
 					}
 				}
 			} 
-			catch (InputInterruptedException e) 
-			{
-				// Input interrupted by user, throw event and exit.
-				throw e;
-			} 
 			catch (EventDeliveredException e) 
 			{
 				// HUH??!?!? We asked NOT TO have events interrupt us, but
@@ -465,56 +500,46 @@ public class LineEditor
 	 * @return The character read from user.
 	 */
 	protected char innerReadCharacter(int flags)
-	throws IOException, InterruptedException, EventDeliveredException, InputInterruptedException
+	throws IOException, InterruptedException, EventDeliveredException
 	{
 		while(true)
 		{
 			// Read next event from queue
 			//
-			Event e = this.getNextEvent();
+			Event ev = this.getNextEvent();
 			
 			// Not a keystroke? Handle event
-			if(!(e instanceof KeystrokeEvent))
+			if(!(ev instanceof KeystrokeEvent))
 			{
 				// IOException while reading user input? Pass it on!
 				//
-				if(e instanceof IOExceptionEvent)
+				if(ev instanceof IOExceptionEvent)
 				{
-					throw ((IOExceptionEvent) e).getException();
+					throw ((IOExceptionEvent) ev).getException();
 				}
 				
 				// Session shutdown? Get us out of here immediately!
 				//
-				if(e instanceof SessionShutdownEvent)
+				if(ev instanceof SessionShutdownEvent)
 				{
 					throw new InterruptedException();
 				}
 
 				//Dispatch event
 				//
-				e.dispatch(m_target);
+				ev.dispatch(m_target);
 				if((flags & FLAG_STOP_ON_EVENT) != 0)
-					throw new EventDeliveredException(e);
+					throw new EventDeliveredException(ev);
 				
 				// This is not the event we're looking for. Move along.
 				//
 				continue;
 			}
 			
-			//Getting here means we have a Keystroke event, let's handle it!
+			// Getting here means we have a Keystroke event, let's handle it!
 			//
-			char ch = ((KeystrokeEvent) e).getChar();
-			
-			//The only special character we handle is ctrl-c
-			//
-			if (ch == CTRL_C)
-			{
-				throw new InputInterruptedException();
-			}
-			else
-			{
-				return ch;
-			}
+			m_lineCount = 0;
+			return ((KeystrokeEvent) ev).getChar();
 		}
 	}
 	
@@ -542,37 +567,9 @@ public class LineEditor
 		boolean editing = true;
 		while(editing)
 		{
-			// Read next event from queue
-			//
-			Event e = this.getNextEvent();
-			
-			// Not a keystroke? If we already have keystrokes in the buffer
-			// we should not handle the event now, but wait until we're done
-			// editing.
-			//
-			if(!(e instanceof KeystrokeEvent))
-			{
-				// IOException while reading user input? Pass it on!
-				//
-				if(e instanceof IOExceptionEvent)
-					throw ((IOExceptionEvent) e).getException();
-				
-				// Session shutdown? Get us out of here immediately!
-				//
-				if(e instanceof SessionShutdownEvent)
-					throw new InterruptedException();
-				e.dispatch(m_target);
-				if(((flags & FLAG_STOP_ON_EVENT) != 0) && buffer.length() == 0)
-					throw new EventDeliveredException(e);
-				
-				// Done with this event!
-				//
-				continue;
-			}
-			
 			// Getting here means that we have a KeyStrokeEvent. Handle it!
 			//
-			char ch = ((KeystrokeEvent) e).getChar();
+		    char ch = this.innerReadCharacter(flags);
 			switch(ch)
 			{
 				case DEL:
@@ -629,12 +626,12 @@ public class LineEditor
 					// Skip
 					//
 					break;
-				default:
+				default:	
 					// A stopchar?
 					//
 					if(stopChars != null && stopChars.indexOf(ch) != -1)
-						throw new StopCharException(buffer.toString(), ch);
-					
+					    throw new StopCharException(buffer.toString(), ch);
+
 					// Are we exceeding max length?
 					//
 					if(maxLength != 0 && buffer.length() >= maxLength - 1)
@@ -690,4 +687,35 @@ public class LineEditor
 			this.wait();
 		return (Event) m_eventQueue.removeFirst();
 	}	
+	
+	// Implementation of NewlineListener
+	//
+	public void onNewline()
+	{
+	    try
+	    {
+		    if(m_dontCount)
+		        return;
+		    if(++m_lineCount >= m_tsProvider.getTerminalSettings().getHeight())
+		    {
+		        m_dontCount = true;
+		        if(!this.getYesNo(m_morePrompt, m_formatter.format("misc.more.yeschars").toCharArray(), 
+		                m_formatter.format("misc.more.nochars").toCharArray()))
+		            throw new OutputInterruptedException();
+		        m_lineCount = 0;
+		    }
+	    }
+	    catch(InterruptedException e)
+	    {
+	        // Not much to do
+	    }
+	    catch(IOException e)
+	    {
+	        throw new RuntimeException(e);
+	    }
+	    finally
+	    {
+	        m_dontCount = false;
+	    }
+	}
 }

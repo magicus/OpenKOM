@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.PrintWriter;
-
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
@@ -18,7 +16,7 @@ import nu.rydin.kom.structs.UserInfo;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public interface Context
+public interface Context extends TerminalSettingsProvider
 {
 	/**
 	 * Returns the <tt>Reader</tt> handling user input
@@ -29,13 +27,7 @@ public interface Context
 	 * Returns the <tt>PrintWriter</tt> used to write messages
 	 * to the user.
 	 */
-	public PrintWriter getOut();
-
-	/**
-	 * Returns a KOMPrinter, a Writer proxy that supports change of
-	 * character set.
-	 */
-	public KOMPrinter getKOMPrinter();	
+	public KOMWriter getOut();	
 		
 	/**
 	 * Returns the defaul message formatter

@@ -7,6 +7,7 @@
 package nu.rydin.kom.frontend.text;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
 
@@ -34,5 +35,19 @@ public interface Command
 	public boolean acceptsParameters();	
 	
 	public String[] getParameters(String[] parts);
+	
+	/**
+	 * Prints characters preceeding command output, typically 
+	 * a newline.
+	 * @param out The stream to print on
+	 */
+	public void printPreamble(PrintWriter out);
+	
+	/**
+	 * Prints characters succeeding command output, typically
+	 * a newline.
+	 * @param out The stream to print on
+	 */
+	public void printPostamble(PrintWriter out);
 
 }

@@ -8,12 +8,11 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.StringBuffer;
 
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.LineEditor; 
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.EmptyConferenceException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.utils.PrintUtils;
@@ -21,10 +20,13 @@ import nu.rydin.kom.structs.MessageHeader;
 
 /**
  * @author Jepson
+ * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 
 public class ListTexts extends AbstractCommand 
 {
+    private static final int CHUNK_SIZE = 50;
+    
 	public ListTexts(String fullName) 
 	{
 		super(fullName);
@@ -32,33 +34,10 @@ public class ListTexts extends AbstractCommand
 
 	public void execute(Context context, String[] parameters)
 	throws KOMException, IOException, InterruptedException 
-	{
-		int screenHeight = 25;	// TODO: Pull this from user term config.
-		int toprow = 0;			// Initial value: Start from top
-		
-		// Retrieve the first batch, if it exists
-		//
-		MessageHeader[] mh = context.getSession().listMessagesInCurrentConference(toprow, screenHeight);
-		if (0 == mh.length)
-		{
-			throw new EmptyConferenceException();
-		}
+	{		
 		MessageFormatter mf = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
-
-		// This prompt is used to ask the user if we should display another page.
-		//
-		StringBuffer sb = new StringBuffer();
-		sb.append(mf.format("misc.more"));
-		sb.append(" (");
-		sb.append(mf.format("misc.y"));
-		sb.append("/");
-		sb.append(mf.format("misc.n"));
-		sb.append(") ");
-		
-		String question = sb.toString();
-		sb = null;
 		
 		// Print headers and a blank line.
 		//
@@ -70,14 +49,15 @@ public class ListTexts extends AbstractCommand
 		out.println();
 		out.println();
 		out.flush();
-		
-		// Mainlupe
-		//
-		do
+		ServerSession session = context.getSession();
+
+		for(int offset = 0;; offset += CHUNK_SIZE)
 		{
-			// Dump what we retrieved
-			//
-			for (int i = 0; i < mh.length; ++i)
+		    MessageHeader[] mh = session.listMessagesInCurrentConference(offset, CHUNK_SIZE);
+		    int top = mh.length;
+		    if(top == 0)
+		        break;
+			for (int i = 0; i < top; ++i)
 			{
 				PrintUtils.printRightJustified(out, String.valueOf(mh[i].getId()), 7);
 				out.print("  "); /* Inject spaces to separate localnum from author*/
@@ -87,30 +67,7 @@ public class ListTexts extends AbstractCommand
 				out.println();
 				out.flush();
 			}
-			
-			// Fulkod. This can give a false positive, if the number of messages in the conference
-			// is a multiple of screenHeight. We should retrieve the message count before entering
-			// the main loop.
-			//
-			if (mh.length == screenHeight)
-			{
-				if (!(in.getYesNo(question, mf.format("misc.more.yeschars").toCharArray(), mf.format("misc.more.nochars").toCharArray())))
-				{
-					break; // We're done!
-				}
-				else
-				{
-					toprow += screenHeight;
-					mh = context.getSession().listMessagesInCurrentConference(toprow, screenHeight);
-					continue;
-				}
-			}
-			else
-			{
-				break; // All messages displayed, we're outta here.
-			}
 		}
-		while (true);
 	}
 	
 	public boolean acceptsParameters()

@@ -15,7 +15,7 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.ClientSettings;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.KOMPrinter;
+import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.utils.PrintUtils;
@@ -35,7 +35,7 @@ public class ChangeCharacterset extends AbstractCommand
 	{
 		
 		LineEditor in = context.getIn();
-		KOMPrinter out = context.getKOMPrinter();
+		KOMWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
 		String charSet = out.getCharset();
 		try
@@ -51,7 +51,7 @@ public class ChangeCharacterset extends AbstractCommand
 				list.add(name);
 				out.print(list.size());
 				out.print(". ");
-				PrintUtils.printLeftJustified(out.toPrintWriter(), name, 20);
+				PrintUtils.printLeftJustified(out, name, 20);
 				out.print(' ');
 				out.setCharset(name);
 				out.println(formatter.format("change.charset.samplestring"));
