@@ -7,6 +7,8 @@
 package nu.rydin.kom.frontend.text.commands;
 
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.MessageNotFoundException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -18,29 +20,41 @@ import nu.rydin.kom.structs.TextNumber;
  */
 public class NoComment extends AbstractCommand
 {
-	public NoComment(Context context, String fullName)
-	{
-		super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)});	
-	}
-	
-	public void execute(Context context, Object[] parameterArray) 
-	throws KOMException
-	{
-		// Parse parameters. No parameters means we're "not commenting" to the
-		// last text read.
-		//
-		TextNumber textNumber = (TextNumber) parameterArray[0];
-		long message;
-		if (textNumber == null) {
-		    message = context.getSession().getCurrentMessage();
-		} else {
-		    //Always get the global number.
-		    message = context.getSession().getGlobalMessageId(textNumber);
-		}
-			
-		// Store the "no comment"
-		//
-		context.getSession().storeNoComment(message);
-		context.getOut().println(context.getMessageFormatter().format("no.comment.saved"));
-	}
+    public NoComment(Context context, String fullName)
+    {
+        super(fullName, new CommandLineParameter[] { new TextNumberParameter(
+                false) });
+    }
+
+    public void execute(Context context, Object[] parameterArray)
+            throws KOMException
+    {
+        // Parse parameters. No parameters means we're "not commenting" to the
+        // last text read.
+        //
+        long message;
+        try
+        {
+            TextNumber textNumber = (TextNumber) parameterArray[0];
+            if (textNumber == null)
+            {
+                message = context.getSession().getCurrentMessage();
+            } 
+            else
+            {
+                //Always get the global number.
+                message = context.getSession().getGlobalMessageId(textNumber);
+            }
+        } 
+        catch (ObjectNotFoundException e)
+        {
+            throw new MessageNotFoundException();
+        }
+
+        // Store the "no comment"
+        //
+        context.getSession().storeNoComment(message);
+        context.getOut().println(
+                context.getMessageFormatter().format("no.comment.saved"));
+    }
 }

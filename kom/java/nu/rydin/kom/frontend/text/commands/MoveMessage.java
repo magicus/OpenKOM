@@ -48,41 +48,32 @@ public class MoveMessage extends AbstractCommand
 	    
 	    long destination = ((NameAssociation)parameterArray[0]).getId();
 		
-	    try
+        // Retrieve current original occurrence to try and get the local number
+        //
+        MessageOccurrence original = session
+                .getOriginalMessageOccurrence(messageid);
+        int localnum = -1;
+        if (original.getConference() == session.getCurrentConferenceId())
         {
-            // Retrieve current original occurrence to try and get the local number
-            //
-            MessageOccurrence original = session
-                    .getOriginalMessageOccurrence(messageid);
-            int localnum = -1;
-            if (original.getConference() == session.getCurrentConferenceId())
-            {
-                //We're moving a message whose original is in the current conference...
-                localnum = original.getLocalnum();
-            }
+            //We're moving a message whose original is in the current conference...
+            localnum = original.getLocalnum();
+        }
 
-            // MOVE ZIG!!
-            //
-            session.moveMessage(messageid, destination);
-            
-            if (localnum == -1)
-            {
-                //Print global confirmation
-        		out.println(fmt.format("move.global.confirmation", 
-        				new Object [] { new Long(messageid), session.getName(destination) } ));	
-            }
-            else
-            {
-                //Print local confirmation 
-        		out.println(fmt.format("move.local.confirmation", 
-        				new Object [] { new Long(localnum), session.getName(destination) } ));	
-            }
-        } 
-	    catch (ObjectNotFoundException e)
+        // MOVE ZIG!!
+        //
+        session.moveMessage(messageid, destination);
+        
+        if (localnum == -1)
         {
-            //Explicitly handle this exception here since we want a custom error message.
-	        //FIXME: Make a custom exception for this error and move error message to the exception error printer thing. 
-	        out.println(fmt.format("move.failure"));
+            //Print global confirmation
+    		out.println(fmt.format("move.global.confirmation", 
+    				new Object [] { new Long(messageid), session.getName(destination) } ));	
+        }
+        else
+        {
+            //Print local confirmation 
+    		out.println(fmt.format("move.local.confirmation", 
+    				new Object [] { new Long(localnum), session.getName(destination) } ));	
         }
 	}
 }

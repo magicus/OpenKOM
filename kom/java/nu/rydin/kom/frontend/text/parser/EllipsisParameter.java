@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.KOMRuntimeException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.utils.Logger;
@@ -44,8 +45,7 @@ public class EllipsisParameter extends CommandLineParameter
         {
             //Uh-oh, this will cause an infinite loop on parsing. Die violently.
             Logger.fatal(this, "Ellipses CANNOT contain optional parameters!");
-            //TODO: Throw KOM Exception. Needs refactoring so all parameter constructors can throw KOM Exceptions
-            throw new IllegalArgumentException("Ellipses CANNOT contain optional parameters!");
+            throw new KOMRuntimeException("Ellipses CANNOT contain optional parameters!");
         }        
     }
 
