@@ -37,7 +37,7 @@ public class ListPermissions extends AbstractCommand
 	    PrintWriter out = context.getOut();
 	    MessageFormatter formatter = context.getMessageFormatter();
 	    out.println(formatter.format("list.permissions.header", user.getName()));
-		FlagUtils.printFlags(context.getOut(), context.getMessageFormatter(), context.getRightsLabels(), 
+		FlagUtils.printFlags(context.getOut(), context.getMessageFormatter(), context.getFlagLabels("userprivs"), 
 		        new long[] { user.getRights() });	
 	}
 }

@@ -12,7 +12,9 @@ import java.util.*;
 
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.backend.ServerSessionFactory;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
+import nu.rydin.kom.constants.CommandSuggestions;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.SystemFiles;
 import nu.rydin.kom.constants.UserFlags;
@@ -27,6 +29,7 @@ import nu.rydin.kom.frontend.text.editor.simple.SimpleMessageEditor;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.modules.Modules;
 import nu.rydin.kom.structs.*;
 import nu.rydin.kom.utils.Logger;
 
@@ -50,8 +53,6 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private long m_userId;
 	private LinkedList m_displayMessageQueue = new LinkedList();
 	private UserInfo m_thisUserCache;
-	private String[] m_flagLabels;
-	private String[] m_privLabels;
 	private WordWrapperFactory m_wordWrapperFactory = new StandardWordWrapper.Factory();
 	private int m_windowHeight = -1;
 	private int m_windowWidth = -1;
@@ -236,12 +237,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		// Set up authentication method
 		//
 		m_useTicket = useTicket;
-		
-		// Set up flag tables
-		//
-		m_flagLabels = this.loadFlagTable("userflags");
-		m_privLabels = this.loadFlagTable("userprivs");
-		
+				
 		// Install commands and init parser
 		//
 		this.installCommands();
@@ -544,7 +540,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 
 	protected UserInfo login()
 	throws AuthenticationException, LoginNotAllowedException, UnexpectedException, IOException, 
-	InterruptedException, OperationInterruptedException, LoginProhibitedException
+	InterruptedException, OperationInterruptedException, LoginProhibitedException, NoSuchModuleException
 	{
 		// Collect information
 		//
@@ -575,7 +571,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		{
 			// Authenticate
 			//
-			ServerSessionFactoryImpl ssf = ServerSessionFactoryImpl.instance();
+			ServerSessionFactory ssf = (ServerSessionFactory) Modules.getModule("Backend");
 			try
 			{
 				m_session = m_useTicket? ssf.login(ticket) : ssf.login(userid, password);
@@ -796,16 +792,19 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	    short suggestion = m_state.getSuggestedAction(); 
 		switch(suggestion)
 		{
-			case ServerSession.NEXT_MAIL:
+			case CommandSuggestions.NEXT_MAIL:
 				return m_parser.getCommand(ReadNextMail.class);
-			case ServerSession.NEXT_REPLY:
+			case CommandSuggestions.NEXT_REPLY:
 				return m_parser.getCommand(ReadNextReply.class);
-			case ServerSession.NEXT_MESSAGE:
+			case CommandSuggestions.NEXT_MESSAGE:
 				return m_parser.getCommand(ReadNextMessage.class);
-			case ServerSession.NEXT_CONFERENCE:
+			case CommandSuggestions.NEXT_CONFERENCE:
 				return m_parser.getCommand(GotoNextConference.class);
-			case ServerSession.NO_ACTION:
+			case CommandSuggestions.NO_ACTION:
 				return m_parser.getCommand(ShowTime.class);
+			case CommandSuggestions.ERROR:
+			    m_out.println("TODO: Add message saying thing are screwed up");
+			    return m_parser.getCommand(ShowTime.class);
 			default:
 				Logger.warn(this, "Unknown command suggestion: " + suggestion);
 				return m_parser.getCommand(ShowTime.class);
@@ -1077,9 +1076,9 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	}
 
 	
-	public String[] getFlagLabels()
+	public String[] getFlagLabels(String flagTable)
 	{
-		return m_flagLabels;
+		return this.loadFlagTable(flagTable);
 	}
 	
 	public void checkName(String name)
@@ -1113,43 +1112,6 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		}
 	}
 
-	
-	// TODO: Ihse -- fulkod, I know. Vågade inte peta på de gamla funktionerna...
-	public String[] getExistingFlagLabels()
-	{
-	    int numFlags;
-	    for (numFlags = 0; numFlags < m_flagLabels.length; numFlags++)
-        {
-            if (m_flagLabels[numFlags] == null) {
-                break;
-            }
-        }
-	    
-	    String[] existingFlags = new String[numFlags];
-	    System.arraycopy(m_flagLabels, 0, existingFlags, 0, numFlags);
-		return existingFlags;
-	}
-	
-	public String[] getRightsLabels()
-	{
-	    return m_privLabels;
-	}
-	
-	// TODO: Ihse -- fulkod, I know. Vågade inte peta på de gamla funktionerna...
-	public String[] getExistingRightsLabels()
-	{
-	    int numFlags;
-	    for (numFlags = 0; numFlags < m_privLabels.length; numFlags++)
-        {
-            if (m_privLabels[numFlags] == null) {
-                break;
-            }
-        }
-	    
-	    String[] existingFlags = new String[numFlags];
-	    System.arraycopy(m_privLabels, 0, existingFlags, 0, numFlags);
-		return existingFlags;
-	}
 	
 	// Implementation of EventTarget
 	//

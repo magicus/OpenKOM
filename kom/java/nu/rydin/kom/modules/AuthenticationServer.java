@@ -14,6 +14,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 
+import nu.rydin.kom.backend.ServerSessionFactory;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.utils.Logger;
@@ -50,7 +51,7 @@ public class AuthenticationServer implements Module, Runnable
 	            //
 	            try
 	            {
-	                String ticket = ServerSessionFactoryImpl.instance().generateTicket(user, password);
+	                String ticket = ((ServerSessionFactory) Modules.getModule("Backend")).generateTicket(user, password);
 	                out.print("OK:");
 	                out.print(ticket);
 	                out.print("\r\n");

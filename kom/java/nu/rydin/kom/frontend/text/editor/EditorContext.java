@@ -71,16 +71,11 @@ public class EditorContext implements Context
 		return m_underlying.getCachedUserInfo();
 	}
 
-	public String[] getFlagLabels()
+	public String[] getFlagLabels(String flagTable)
 	{
-		return m_underlying.getFlagLabels();
+		return m_underlying.getFlagLabels(flagTable);
 	}
 	
-	public String[] getRightsLabels()
-	{
-		return m_underlying.getRightsLabels();
-	}
-
 	public LineEditor getIn()
 	{
 		return m_underlying.getIn();
@@ -244,16 +239,6 @@ public class EditorContext implements Context
     public void setReplyTo(long replyTo)
     {
         m_replyTo = replyTo;
-    }
-
-    public String[] getExistingFlagLabels()
-    {
-        return m_underlying.getExistingFlagLabels();
-    }
-
-    public String[] getExistingRightsLabels()
-    {
-        return m_underlying.getExistingRightsLabels();
     }
     
     public void checkName(String name)

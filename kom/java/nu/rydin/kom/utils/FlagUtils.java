@@ -31,4 +31,24 @@ public class FlagUtils
 			out.println(flagLabels[idx]); 
 		}
     }
+    
+    public static void printFlagsShort(PrintWriter out, MessageFormatter formatter, String[] flagLabels, long[] flags)
+    {
+		int top = flagLabels.length;
+		boolean printed = false;
+		for(int idx = 0; idx < top; ++idx)
+		{
+			if(flagLabels[idx] == null)
+				continue;
+			int flagWord = idx / 64;
+			int flagMask = 1 << (idx % 64);
+			if((flags[flagWord] & flagMask) == flagMask)
+			{
+			    if(printed)
+			        out.print(", ");
+			    out.print(flagLabels[idx]);
+			    printed = true;
+			}
+		}
+    }
 }

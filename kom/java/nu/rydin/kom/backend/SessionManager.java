@@ -100,14 +100,30 @@ public class SessionManager
 		}
 	}
 	
-	private Broadcaster m_broadcaster = new Broadcaster();
+	private Broadcaster m_broadcaster;
 	
 	private boolean m_allowLogin;
 	
 	public SessionManager()
 	{
-		m_broadcaster.start();
 		m_allowLogin = true;
+	}
+	
+	public void start()
+	{
+	    m_broadcaster = new Broadcaster();
+	    m_broadcaster.start();
+	}
+	
+	public void stop()
+	{
+	    m_broadcaster.interrupt();
+	}
+	
+	public void join()
+	throws InterruptedException
+	{
+	    m_broadcaster.join();
 	}
 	
 	public boolean canLogin()

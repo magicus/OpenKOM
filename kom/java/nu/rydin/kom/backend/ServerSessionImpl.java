@@ -18,6 +18,7 @@ import nu.rydin.kom.constants.*;
 import nu.rydin.kom.events.*;
 import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.structs.*;
+import nu.rydin.kom.utils.FilterUtils;
 import nu.rydin.kom.utils.Logger;
 import edu.oswego.cs.dl.util.concurrent.Mutex;
 
@@ -169,6 +170,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	 * Messages to mark as unread at logout
 	 */
 	private ReadLogItem m_pendingUnreads;
+	
+	/**
+	 * Filters by user id
+	 */
+	private final Map m_filterCache = new HashMap();
 		
 	public ServerSessionImpl(DataAccess da, long userId, SessionManager sessions)
 	throws UnexpectedException
@@ -193,6 +199,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Load membership infos into cache
 			//
 			this.reloadMemberships();
+			
+			// Load filters into cache
+			//
+			this.loadFilters();
 				
 			// Go to first conference with unread messages
 			//
@@ -306,91 +316,199 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public SessionState getSessionState()
-	throws UnexpectedException
 	{
 		try
 		{
+		    long conf = this.getCurrentConferenceId();
+		    long user = this.getLoggedInUserId();
 		    ConferenceManager cm = m_da.getConferenceManager();
+		    MessageManager mm = m_da.getMessageManager();
+		    boolean hasFilters = m_filterCache.size() > 0;
 		    
-		    // Do we have any unread mail?
+		    // While what we found matches a filter...
 		    //
-		    try
-		    {
+		    for(;;)
+		    {			    
+			    // Do we have any unread mail?
+			    //
 			    if((this.getLoggedInUser().getFlags1() & UserFlags.PRIORITIZE_MAIL) != 0)
 			    {
-			        int unreadMail = m_memberships.countUnread(this.getLoggedInUserId(), cm);
-			        if(unreadMail > 0)
-			            return new SessionState(m_lastSuggestedCommand = NEXT_MAIL, this.getLoggedInUserId(), 
-			                    unreadMail);
+			        try
+			        {
+				        int nextMail = m_memberships.getNextMessageInConference(user, cm);
+				        if(nextMail != -1)
+				        {
+				            if(hasFilters && this.applyFiltersForMessage(
+						            this.localToGlobal(this.getLoggedInUserId(), nextMail), 
+						            user, nextMail, FilterFlags.MAILS))
+				            	continue;
+				            return new SessionState(CommandSuggestions.NEXT_MAIL,
+				                    user, this.countUnread(user));
+				        }
+			        }
+			        catch(ObjectNotFoundException e)
+			        {
+			            // Problem reading next mail. Try conferences instead
+			            //
+			            Logger.error(this, "Error finding next mail", e);
+			        }
 			    }
-		    }
-		    catch(ObjectNotFoundException e)
-		    {
-		        // Not members in our own mailbox? This can't happen!
-		        //
-		        throw new UnexpectedException(this.getLoggedInUserId(), "No mailbox", e);
-		    }
 		    
-			// Count messages in current conference
-			//
-		    int unread = 0;
-			try
-			{				
-			    unread = m_memberships.countUnread(this.getCurrentConferenceId(), cm);
-			}
-			catch(ObjectNotFoundException e)
-			{
-			    // Can't find current conference, it must have been deleted.
-			    // Reload memberships and try to go to the next conference.
+			    // First, try a reply. Then, try any unread message in current conference
 			    //
-			    try
+			    short command = CommandSuggestions.NEXT_REPLY;
+			    long nextReply = this.peekReply();
+			    if(nextReply != -1)
 			    {
-			        this.reloadMemberships();
+			        try
+			        {
+				        SessionState answer = new SessionState(CommandSuggestions.NEXT_REPLY, conf, 
+			                    this.countUnread(conf)); 
+				        if(!hasFilters)
+				            return answer; 
+				      
+				        MessageOccurrence occ = this.getMostRelevantOccurrence(conf, nextReply);
+				        if(this.applyFiltersForMessage(nextReply, occ.getConference(), occ.getLocalnum(), FilterFlags.MESSAGES))
+				            continue;
+				        return answer;
+			        }
+			        catch(ObjectNotFoundException e)
+			        {
+			            // Problem getting next reply. Try messages
+			            //
+			            Logger.error(this, "Error finding next reply", e);
+			        }
 			    }
-			    catch(ObjectNotFoundException e2)
-			    {
-			        // TODO: Why would we get here?
-			        //
-			        throw new UnexpectedException(this.getLoggedInUserId(), e2);
-			    }
-			}
-
-		    
-			// Do we have any unread replies?
-			//
-			if(this.peekReply() != -1)
-				return new SessionState(m_lastSuggestedCommand = NEXT_REPLY,
-				        this.getCurrentConferenceId(), unread);
-			
-			if(unread > 0)
-			    return new SessionState(m_lastSuggestedCommand = NEXT_MESSAGE,
-			            this.getCurrentConferenceId(), unread);
-			
-			
-			// Get next conference with unread messages
-			//	
-			long confId = m_memberships.getNextConferenceWithUnreadMessages(m_currentConferenceId,
-					m_da.getConferenceManager());
+			    
+			    // No replies to read. Try a normal message
+			    //
+			    int nextMessage = -1;
+		        try
+		        {
+			        nextMessage = m_memberships.getNextMessageInConference(conf, cm);
+		        }
+				catch(ObjectNotFoundException e)
+				{
+				    // Can't find current conference, it must have been deleted.
+				    // Reload memberships and try to go to the next conference.
+				    //
+				    try
+				    {
+				        this.reloadMemberships();
+				    }
+				    catch(ObjectNotFoundException e2)
+				    {
+	                    Logger.error(this, "Strange state!", e);
+	                    return new SessionState(CommandSuggestions.ERROR, -1, 0);
 	
-			// Do we have any unread messages?
-			//
-			if(confId == -1)
-				return new SessionState(m_lastSuggestedCommand = NO_ACTION,
-				        this.getCurrentConferenceId(), unread);
-				
-			// Do we have messages in our current conference?
-			//
-			if(confId == m_currentConferenceId)
-				return new SessionState(m_lastSuggestedCommand = NEXT_MESSAGE,
-				        this.getCurrentConferenceId(), unread);
-				        
-			return new SessionState(m_lastSuggestedCommand = NEXT_CONFERENCE,
-			        this.getCurrentConferenceId(), unread);
+				    }
+				}
+			    
+			    // So? Did we get anything? Check if that message is filtered.
+			    //
+				try
+				{
+				    if(nextMessage != -1)
+				    {
+		                if(hasFilters && this.applyFiltersForMessage(
+				            this.localToGlobal(conf, nextMessage), 
+				            conf, nextMessage, FilterFlags.MESSAGES))
+		                    continue;
+			            return new SessionState(CommandSuggestions.NEXT_MESSAGE,
+			                    conf, this.countUnread(conf));
+				    }
+				}
+				catch(ObjectNotFoundException e)
+				{
+				    // Problems finding next message in this conference. Try
+				    // next conference
+				    //
+				    Logger.error(this, "Error when looking for next message", e);
+				}
+									
+				// Get next conference with unread messages
+				//	
+				long confId = m_memberships.getNextConferenceWithUnreadMessages(conf,
+						m_da.getConferenceManager());
+		
+				// Do we have any unread messages?
+				//
+				if(confId == -1)
+					return new SessionState(m_lastSuggestedCommand = CommandSuggestions.NO_ACTION,
+					        conf, 0);
+						
+					/*
+					 * TODO: What's the purpose of this? The current conference
+					 * should already have been checked!
+					
+					// Do we have messages in our current conference?
+					//
+					if(confId == m_currentConferenceId)
+						return new SessionState(m_lastSuggestedCommand = NEXT_MESSAGE,
+						        this.getCurrentConferenceId(), unread);
+						        */
+						        
+					return new SessionState(m_lastSuggestedCommand = CommandSuggestions.NEXT_CONFERENCE,
+					        this.getCurrentConferenceId(), 0);
+		    }
 		}
 		catch(SQLException e)
 		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
+            Logger.error(this, "Strange state!", e);
+            return new SessionState(CommandSuggestions.ERROR, -1, 0);
 		}
+		catch(UnexpectedException e)
+		{
+            Logger.error(this, "Strange state!", e);
+            return new SessionState(CommandSuggestions.ERROR, -1, 0);
+		}
+	}
+	
+	protected boolean applyFiltersForMessage(long message, long conference, int localnum, 
+	        long filter)
+	throws UnexpectedException
+	{
+	    try
+	    {
+		    MessageManager mm= m_da.getMessageManager();
+		    boolean skip = false;
+		    MessageHeader mh = null;
+		    try
+	        {
+	            mh = mm.loadMessageHeader(message);
+	            skip = this.userMatchesFilter(mh.getAuthor(), filter);
+	        }
+	        catch(ObjectNotFoundException e)
+	        {
+	            // Message was deleted. Skip!
+	            //
+	            skip = true;
+	        }
+	        
+	        // So... Should we skip this message?
+	        //
+	        if(!skip)
+	            return false;
+	        
+	        // Skip this message. Mark it as read.
+	        //
+	        try
+	        {
+	            m_memberships.markAsRead(conference, localnum);
+	        }
+	        catch(ObjectNotFoundException e)
+	        {
+	            // Not found when trying to mark it as read? I guess
+	            // it has disappeared then!
+	            //
+	            Logger.error(this, "Object not found when marking as read", e);
+	        }
+	        return true;
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException(this.getLoggedInUserId(), e);
+	    }
 	}
 	
 	public EventSource getEventSource()
@@ -834,6 +952,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			MessageOccurrence occ = mm.addMessage(this.getLoggedInUserId(),
 				this.getCensoredName(this.getLoggedInUserId()).getName(),
 				conference, -1, msg.getSubject(), msg.getBody());
+			
+			// Mark as read (unless we're a narcissist)
+			//
 			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
 			    this.markMessageAsRead(conference, occ.getLocalnum());
 			this.broadcastEvent(
@@ -1401,7 +1522,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				}
 				catch(ObjectNotFoundException e)
 				{
-					// Probably delete while we were listing
+					// Probably deleted while we were listing
 					//
 					answer[idx] = new NameAssociation(conf, 
 					        new Name("???", Visibilities.PUBLIC));
@@ -1721,7 +1842,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 					    UserInfo ui = um.loadUser(each);
 					    if(each == this.getLoggedInUserId())
 					        explicitToSelf = true;
-						if (m_sessions.hasSession(each) && ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES))
+					    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(each);
+						if (m_sessions.hasSession(each) && ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES)
+						        && !sess.userMatchesFilter(this.getLoggedInUserId(),
+					                    FilterFlags.CHAT))
 						{
 							s.add(new Long(each));
 						}
@@ -1736,14 +1860,17 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 						MembershipInfo[] mi = m_da.getMembershipManager().listMembershipsByConference(each);
 						for (int j = 0; j < mi.length; ++j)
 						{
-							long uid = mi[j].getUser();
-							if (m_sessions.hasSession(uid))
+						    long uid = mi[j].getUser();
+						    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(uid);
+							if (sess != null)
 							{
 							    UserInfo ui = um.loadUser(uid);
 							    
 							    // Does the receiver accept chat messages
 							    //
-							    if(ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES))
+							    if(ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES)
+							            && !sess.userMatchesFilter(this.getLoggedInUserId(),
+							                    FilterFlags.CHAT))
 							        s.add(new Long(uid));
 							    else
 							        refused.add(new NameAssociation(uid, 
@@ -1809,13 +1936,16 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	                {
 	                    // User. Check if logged in.
 	                    //
-	                    if(!m_sessions.hasSession(each))
+	                    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(each);
+	                    if(sess == null)
 	                        answer[idx] = ChatRecipientStatus.NOT_LOGGED_IN;
 	                    else
 	                    {
 	                        // Logged in. Do they receive chat messages?
 	                        //
 	                        answer[idx] = (um.loadUser(each).getFlags1() & UserFlags.ALLOW_CHAT_MESSAGES) != 0
+	                        	&& !sess.userMatchesFilter(this.getLoggedInUserId(),
+	                        	        FilterFlags.CHAT)
 	                        	? ChatRecipientStatus.OK_USER
 	                        	: ChatRecipientStatus.REFUSES_MESSAGES;
 	                    }
@@ -2601,6 +2731,63 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        throw new UnexpectedException (this.getLoggedInUserId(), e);
 	    }
     }
+    
+    public void createUserFilter(long jinge, long flags)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        try
+        {
+            long me = this.getLoggedInUserId();
+            RelationshipManager rm = m_da.getRelationshipManager();
+            Relationship[] r = rm.find(me, jinge, RelationshipKinds.FILTER);
+            if(r.length > 0)
+                rm.changeFlags(r[0].getId(), flags);
+            else
+                rm.addRelationship(me, jinge, RelationshipKinds.FILTER, flags);
+            
+            // Update cache
+            //
+            m_filterCache.put(new Long(jinge), new Long(flags));
+        }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }        
+    }
+    
+    public void dropUserFilter(long user)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        try
+        {
+            RelationshipManager rm = m_da.getRelationshipManager();
+            Relationship[] r = rm.find(this.getLoggedInUserId(), user, RelationshipKinds.FILTER);
+            for(int idx = 0; idx < r.length; ++idx)
+                rm.delete(r[idx].getId());
+            
+            // Update cache
+            //
+            m_filterCache.remove(new Long(user));
+        }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                
+    }
+    
+    public Relationship[] listFilters()
+    throws UnexpectedException
+    {
+        try
+        {
+            return m_da.getRelationshipManager().listByRefererAndKind(this.getLoggedInUserId(), 
+                    RelationshipKinds.FILTER);
+        }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                        
+    }
 
 	protected void markAsInvalid()
 	{
@@ -2793,7 +2980,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			for(int idx = 0; idx < top; ++idx)
 			{
 				MessageHeader each = replyHeaders[idx];
-				MessageOccurrence replyOcc = mm.getMostRelevantOccurrence(conf, each.getId()); 
+				MessageOccurrence replyOcc = mm.getMostRelevantOccurrence(conf, each.getId());
+				
+				// Don't show replies written by filtered users
+				//
+				if(this.userMatchesFilter(each.getAuthor(), FilterFlags.MESSAGES))
+				    continue;
 				
 				// Don't show personal replies
 				//
@@ -2913,7 +3105,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			if(m_replyStack == null)
 				return -1;
 				
-			// Fetch next reply global id adn translate into local occurrence
+			// Fetch next reply global id and translate into local occurrence
 			//
 			reply = m_replyStack.peek();
 			try
@@ -3085,7 +3277,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		// 
 	    if(debug)
 	        Logger.debug(this, "NewMessageEvent received. Conf=" + e.getConference());
-		if(m_lastSuggestedCommand == NEXT_MESSAGE || m_lastSuggestedCommand == NEXT_REPLY)
+		if(m_lastSuggestedCommand == CommandSuggestions.NEXT_MESSAGE 
+		        || m_lastSuggestedCommand == CommandSuggestions.NEXT_REPLY)
 		{
 		    if(debug)
 		        Logger.debug(this, "Event ignored since we already have an unread text in this conference");
@@ -3098,10 +3291,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		long conf = e.getConference();
 		try
 		{
-		    // Last suggestest command was NEXT_CONFERENCE and message 
+		    // Last suggested command was NEXT_CONFERENCE and message 
 		    // was not posted in current conference? No need to pass it on.
 		    //
-		    if(m_lastSuggestedCommand == NEXT_CONFERENCE && conf != this.getCurrentConferenceId())
+		    if(m_lastSuggestedCommand == CommandSuggestions.NEXT_CONFERENCE && conf != this.getCurrentConferenceId())
 		    {
 		        if(debug)
 		            Logger.debug(this, "Event ignored because we're already suggesting going to the next conference");
@@ -3424,59 +3617,80 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     protected GlobalMessageSearchResult[] censorMessages(GlobalMessageSearchResult[] messages)
     throws ObjectNotFoundException, UnexpectedException
     {
-        ArrayList list = new ArrayList(messages.length);
-        int top = messages.length;
-        for(int idx = 0; idx < top; ++idx)
-        {
-            GlobalMessageSearchResult each = messages[idx];
-            if(this.hasMessageReadPermissions(each.getGlobalId()))
-                list.add(each);
-        }
-        GlobalMessageSearchResult[] answer = new GlobalMessageSearchResult[list.size()];
-        list.toArray(answer);
-        return answer;
+        return (GlobalMessageSearchResult[]) FilterUtils.applyFilter(messages, 
+            new FilterUtils.Filter()
+            {
+	    		public boolean include(Object obj)
+	    		throws UnexpectedException
+	    		{
+	    		    try
+	    		    {
+	    		        GlobalMessageSearchResult gms = (GlobalMessageSearchResult) obj;
+	    		        return ServerSessionImpl.this.hasMessageReadPermissions(gms.getGlobalId())
+	    		        	&& !ServerSessionImpl.this.userMatchesFilter(
+	    		        	        gms.getAuthor().getId(), FilterFlags.MESSAGES);
+	    		    }
+	    		    catch(ObjectNotFoundException e)
+	    		    {
+	    		        // Not found? Certainly not to be included!
+	    		        //
+	    		        Logger.error(this, e);
+	    		        return false;
+	    		    }
+	            }
+            });
     }
     
     protected NameAssociation[] censorNames(NameAssociation[] names)
     throws ObjectNotFoundException, UnexpectedException
     {
-        // We're lazy: Assuume nothing gets wiped out and
-        // reallocate array only if we need to.
-        //
-        ArrayList list = null;
-        int top = names.length;
-        for (int idx = 0; idx < top; idx++)
-        {
-            NameAssociation association = names[idx];
-            if(!this.isVisible(association.getId()))
-            {
-                // Is this the first invisible name we see? 
-                // Allocate a list!
-                //
-                if(list == null)
+        return (NameAssociation[]) FilterUtils.applyFilter(names, 
+                new FilterUtils.Filter() 
                 {
-                    list = new ArrayList(top - 1);
-                    for(int idx2 = 0; idx2 < idx; ++idx2)
-                        list.add(names[idx2]);
-                }
-            }
-            else
+            		public boolean include(Object obj)
+            		throws UnexpectedException
+            		{
+            		    try
+            		    {
+            		        return ServerSessionImpl.this.isVisible(((NameAssociation) obj).getId());
+            		    }
+            		    catch(ObjectNotFoundException e)
+            		    {
+            		        // Not found? Certainly not visible!
+            		        //
+            		        Logger.error(this, e);
+            		        return false;
+            		    }            		    
+            		}
+                });
+    }
+    
+    protected void loadFilters()
+    throws UnexpectedException
+    {
+        try
+        {
+            Relationship[] rels = m_da.getRelationshipManager().listByRefererAndKind(
+                    this.getLoggedInUserId(), 
+                    RelationshipKinds.FILTER);
+            for (int idx = 0; idx < rels.length; idx++)
             {
-                if(list != null)
-                    list.add(association);
+                Relationship jinge = rels[idx];
+                m_filterCache.put(new Long(jinge.getReferee()), new Long(jinge.getFlags()));
             }
         }
-        
-        // So? Was the list untouched? Good in that case!
-        //
-        if(list == null)
-            return names;
-        
-        // Create array of the correct derived type.
-        // (Non object-jocks are not supposed to understand this)
-        //
-        names = (NameAssociation[]) Array.newInstance(names.getClass().getComponentType(), list.size());
-        list.toArray(names);
-        return names;
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }
     }
+    
+    protected boolean userMatchesFilter(long user, long neededFlags)
+    {
+        Long flagObj = (Long) m_filterCache.get(new Long(user));
+        if(flagObj == null)
+            return false;
+        long flags = flagObj.longValue();
+        return (flags & neededFlags) == neededFlags; 
+    }    
 }

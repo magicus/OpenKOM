@@ -110,12 +110,12 @@ public class ShowSystemInfo extends AbstractCommand
         }
         if(upHours > 0)
         {
-            sb.append(Long.toString(upHours));
+            sb.append(Long.toString(upHours % 24));
             sb.append(' ');
             sb.append(formatter.format("time.hours"));
             sb.append(", ");
         }
-        sb.append(Long.toString(upMins));
+        sb.append(Long.toString(upMins % 60));
         sb.append(' ');
         sb.append(formatter.format("time.minutes"));        
         PrintUtils.printLabelled(out, formatter.format("system.info.uptime"), WIDTH, sb.toString());

@@ -23,7 +23,7 @@ public class ClearFlag extends AbstractCommand
     public ClearFlag(Context context, String fullName)
     {
         super(fullName, new CommandLineParameter[]
-        { new FlagParameter(true, context.getExistingFlagLabels()) });
+        { new FlagParameter(true, context.getFlagLabels("userflags")) });
     }
 
     public void execute(Context context, Object[] parameterArray)
@@ -47,6 +47,6 @@ public class ClearFlag extends AbstractCommand
         //
         context.getOut().println(
                 context.getMessageFormatter().format("clear.flag.confirmation",
-                        context.getFlagLabels()[flagNumber]));
+                        context.getFlagLabels("userflags")[flagNumber]));
     }
 }

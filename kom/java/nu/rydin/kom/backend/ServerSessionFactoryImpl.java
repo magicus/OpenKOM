@@ -29,6 +29,7 @@ import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.LoginProhibitedException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.modules.Module;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Base64;
 import nu.rydin.kom.utils.Logger;
@@ -36,11 +37,11 @@ import nu.rydin.kom.utils.Logger;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class ServerSessionFactoryImpl 
+public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 {
-	private SessionManager m_sessionManager = new SessionManager();
+	private SessionManager m_sessionManager;
 
-	private static final ServerSessionFactoryImpl s_instance;
+	private static final ServerSessionFactory s_instance;
 	
 	static
 	{
@@ -80,12 +81,29 @@ public class ServerSessionFactoryImpl
 	    }
 	}
 	
-	public static ServerSessionFactoryImpl instance()
+/*	public static ServerSessionFactory instance()
 	{
 		return s_instance;
+	}*/
+	
+	public void start(Map properties)
+	{
+	    m_sessionManager = new SessionManager();
+	    m_sessionManager.start();
 	}
 	
-	protected ServerSessionFactoryImpl()
+	public void stop()
+	{
+	    m_sessionManager.stop();
+	}
+	
+	public void join()
+	throws InterruptedException
+	{
+	    m_sessionManager.join();
+	}
+	
+	public ServerSessionFactoryImpl()
 	throws UnexpectedException
 	{
 	    // Make sure there's at least a sysop in the database

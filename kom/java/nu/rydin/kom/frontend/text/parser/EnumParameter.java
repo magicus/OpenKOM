@@ -42,7 +42,8 @@ public abstract class EnumParameter extends CommandLineParameter
         m_alternatives = new ArrayList(alternatives.length);
         for (int i = 0; i < alternatives.length; i++)
         {
-            m_alternatives.add(alternatives[i]);
+            String each = alternatives[i];
+            m_alternatives.add(each == null ? "(null)" : each);
         }
     }
 

@@ -46,7 +46,7 @@ public class LineEditor implements NewlineListener
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
-	private static final char TAB				= 8;
+	private static final char TAB				= 9;
 	private static final char SPACE				= 32;
 	
 	private static final int TOKEN_UP			= 1;

@@ -7,9 +7,7 @@
 package nu.rydin.kom.boot;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,7 +18,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
+import nu.rydin.kom.exceptions.NoSuchModuleException;
 import nu.rydin.kom.modules.Module;
+import nu.rydin.kom.modules.Modules;
 import nu.rydin.kom.utils.Logger;
 
 /**
@@ -35,13 +35,9 @@ public class Bootstrap
 	    //	  We always run in UTC.
 	    //
 	    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-
-	    // Make sure the backend is running. TODO: Do this in a more elegant and remoteable way
-	    //
-	    ServerSessionFactoryImpl.instance();
 	}
 	
-	private Map m_modules;
+	// private Map m_modules;
 	
 	public static long getBootTime()
 	{
@@ -55,7 +51,6 @@ public class Bootstrap
 	    //
 	    ModuleDefinition[] definitions = this.loadModuleList();
 	    int top = definitions.length;
-	    m_modules = new HashMap(top);
 	    for(int idx = 0; idx < top; ++idx)
 	    {
 	        ModuleDefinition each = definitions[idx];
@@ -64,7 +59,7 @@ public class Bootstrap
 	        {
 		        Module module = each.newInstance();
 		        module.start(each.getParameters());
-		        m_modules.put(each.getName(), module);
+		        Modules.registerModule(each.getName(), module);
 	        }
 	        catch(ClassNotFoundException e)
 	        {
@@ -84,8 +79,17 @@ public class Bootstrap
 	 public void join()
 	 throws InterruptedException
 	 {
-	     for(Iterator itor = m_modules.values().iterator(); itor.hasNext();)
-	         ((Module) itor.next()).join();
+	     for(Iterator itor = Modules.listModuleNames().iterator(); itor.hasNext();)
+	     {
+	         try
+	         {
+	             Modules.getModule(itor.next().toString()).join();
+	         }
+	         catch(NoSuchModuleException e)
+	         {
+	             // Just skip
+	         }
+	     }
 	}
 	 
 	 public void run()

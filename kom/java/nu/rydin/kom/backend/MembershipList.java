@@ -150,8 +150,8 @@ public class MembershipList
 		MembershipInfo mi = this.get(confId);
 		ConferenceInfo ci = cm.loadConference(confId);
 		MessageRangeList mr = mi.getReadMessages();
-		int min = ci.getFirstMessage(); 
-		return mr == null ? min : mr.getFirstUnread(min, ci.getLastMessage());
+		int min = ci.getFirstMessage();
+		return mr == null ? (min != 0 ? min : -1) : mr.getFirstUnread(min, ci.getLastMessage());
 	}
 	
 	public boolean isUnread(long confId, int num)

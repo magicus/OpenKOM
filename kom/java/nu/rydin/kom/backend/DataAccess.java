@@ -15,6 +15,7 @@ import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageLogManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.backend.data.RelationshipManager;
 import nu.rydin.kom.backend.data.SettingsManager;
 import nu.rydin.kom.backend.data.UserLogManager;
 import nu.rydin.kom.backend.data.UserManager;
@@ -72,6 +73,11 @@ public class DataAccess
 	 */
 	private final FileManager m_fileManager;
 	
+	/**
+	 * Toolkit object handling relationships
+	 */
+	private final RelationshipManager m_relationshipManager;
+	
 	public DataAccess(Connection conn)
 	throws UnexpectedException
 	{
@@ -87,6 +93,7 @@ public class DataAccess
 			m_userLogManager	= new UserLogManager(conn);
 			m_fileManager		= new FileManager(conn);
 			m_settingManager	= new SettingsManager(conn);
+			m_relationshipManager = new RelationshipManager(conn);
 		}
 		catch(SQLException e)
 		{
@@ -137,6 +144,11 @@ public class DataAccess
 	public SettingsManager getSettingManager()
 	{
 	    return m_settingManager;
+	}
+	
+	public RelationshipManager getRelationshipManager()
+	{
+	    return m_relationshipManager;
 	}
 	
 	public void commit()

@@ -21,7 +21,7 @@ public class SetFlag extends AbstractCommand
     public SetFlag(Context context, String fullName)
     {
         super(fullName, new CommandLineParameter[]
-            { new FlagParameter(true, context.getExistingFlagLabels()) });
+            { new FlagParameter(true, context.getFlagLabels("userflags")) });
     }
 
     public void execute(Context context, Object[] parameterArray)
@@ -46,6 +46,6 @@ public class SetFlag extends AbstractCommand
         //
         context.getOut().println(
                 context.getMessageFormatter().format("set.flag.confirmation",
-                        context.getFlagLabels()[flagNumber]));
+                        context.getFlagLabels("userflags")[flagNumber]));
     }
 }

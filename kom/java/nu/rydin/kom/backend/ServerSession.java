@@ -20,31 +20,6 @@ import nu.rydin.kom.structs.*;
 public interface ServerSession 
 {
 	/**
-	 * Suggested action: No suggestion
-	 */
-	public static final short NO_ACTION 		= 0;
-
-	/**
-	 * Suggested action: Read next reply
-	 */
-	public static final short NEXT_REPLY 		= 1;
-
-	/**
-	 * Suggested action: Read next message
-	 */
-	public static final short NEXT_MESSAGE 		= 3;
-
-	/**
-	 * Suggested action: Go to next conference
-	 */
-	public static final short NEXT_CONFERENCE 	= 4;
-	
-	/**
-	 * Suggested action: Read next mail
-	 */
-	public static final short NEXT_MAIL			= 5;
-
-	/**
 	 * Changes the current conference.
 	 * 
 	 * @param id The id of the new conference
@@ -1447,4 +1422,32 @@ public interface ServerSession
      */
     public void changeSetting(String name, long value)
     throws AuthorizationException, UnexpectedException;
+    
+    /**
+     * Creates a user filter, causing us to ignore certain objects
+     * and events from a user.
+     * 
+     * @param jinge The user to ignore
+     * @param flags What to ignore
+     */
+    public void createUserFilter(long jinge, long flags)
+    throws ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Drops a user filter, i.e. stop ignoring objects and events 
+     * from a user.
+     * @param user The user
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public void dropUserFilter(long user)
+    throws ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Lists the user filters in effect for the logged in user.
+     * 
+     * @throws UnexpectedException
+     */
+    public Relationship[] listFilters()
+    throws UnexpectedException;
 }

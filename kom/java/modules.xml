@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <modules>
+	<module name="Backend" class="nu.rydin.kom.backend.ServerSessionFactoryImpl">
+	</module>
 	<module name="TelnetServer" class="nu.rydin.kom.modules.TelnetServer">
 		<parameter name="port" value="23"/>
 		<parameter name="authentication" value="password"/>
