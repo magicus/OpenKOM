@@ -14,7 +14,7 @@
 		<parameter name="port" value="2301"/>
 		<parameter name="ticketLifetime" value="20000"/>
 	</module>
-	<module name="SSHModule" class="nu.rydin.kom.modules.ssh.SSHModule">
+	<module name="SSHModule" class="nu.rydin.kom.modules.ssh.SSHServer">
 		<parameter name="serverhostkeyfile" value="server_host_key"/>
 		<parameter name="port" value="22"/>
 		<parameter name="maxauthretry" value="3"/>
