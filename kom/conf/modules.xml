@@ -41,6 +41,6 @@
 		<parameter name="serverhostkeyfile" value="server_host_key"/>
 		<parameter name="port" value="22"/>
 		<parameter name="maxauthretry" value="3"/>
-		<parameter name="maxconn" value="10"/>
+		<parameter name="maxconn" value="1000"/>
 	</module>
 </modules>
