@@ -44,14 +44,25 @@ public class CreateConference extends AbstractCommand
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
-		out.print(fmt.format("create.conference.fullname"));
-		out.flush();
-		String fullname = in.readLine();
+
+		// Have we already gotten a conference name?
+		String fullname;
 		
-		// Empty name? User interrupted
-		//
-		if(fullname.length() == 0)
-			return;
+		if (parameters.length > 0) {
+			// FIXME: Ihse -- this only gives us the name up to the first space (and in UPPER CASE)
+			// Awaiting Pontus "raw parameter" fix...
+			fullname = parameters[0];
+			out.println(fmt.format("create.conference.nameconfirmation", fullname));
+		} else {
+			out.print(fmt.format("create.conference.fullname"));
+			out.flush();
+			fullname = in.readLine();
+			
+			// Empty name? User interrupted
+			//
+			if(fullname.length() == 0)
+				return;
+		}
 		
 		// There must be a better way to do this..
 		//
@@ -183,4 +194,10 @@ public class CreateConference extends AbstractCommand
 
 	}
 
+	/* (non-Javadoc)
+	 * @see nu.rydin.kom.frontend.text.Command#acceptsParameters()
+	 */
+	public boolean acceptsParameters() {
+		return true;
+	}
 }
