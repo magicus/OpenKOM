@@ -51,7 +51,12 @@ public class UserPermissions
 	/**
 	 * Permission to log in
 	 */
-	public static final long LOGIN					= 0x0080L; // TODO: Add support for this!
+	public static final long LOGIN					= 0x0080L;
+	
+	/**
+	 * Permission to run admin commands
+	 */
+	public static final long ADMIN					= 0x0100L;
 	
 	/**
 	 * All permissions

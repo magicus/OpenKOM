@@ -32,6 +32,7 @@ public class UserFlags
 	public static long ANSI_ATTRIBUTES						= 0x00000040;
 	public static long SHOW_OBJECT_IDS						= 0x00000080;
 	public static long EMPTY_LINE_FINISHES_CHAT				= 0x00000100;
+	public static long ALWAYS_PRINT_FULL_DATE				= 0x00000200;
 
 	/**
 	 * Default value for flagword 1

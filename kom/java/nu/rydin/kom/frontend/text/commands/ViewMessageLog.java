@@ -49,7 +49,7 @@ public abstract class ViewMessageLog extends AbstractCommand
 		    // TODO: What is this???
 			if(num > 1000) // TODO: Read from configuration
 			{
-			    throw new GenericException(formatter.format("view.char.log.overflow"));
+			    throw new GenericException(formatter.format("view.chat.log.overflow"));
 			}
 		}
 

@@ -56,7 +56,8 @@ public class EditFile extends AbstractCommand
         {
             String content = session.readFile(parent, fileName);
             editor.fill(new NonWrappingWrapper(content));
-        } catch (ObjectNotFoundException e)
+        } 
+        catch (ObjectNotFoundException e)
         {
             // Not found
             //

@@ -2193,7 +2193,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    try
 	    {
 	        FileManager fm = m_da.getFileManager(); 
-	        if(!hasPermissionInConference(parent, ConferencePermissions.READ_PERMISSION)
+	        if(!((this.getLoggedInUser().getRights() & UserPermissions.ADMIN) != 0)
+	            	&& !hasPermissionInConference(parent, ConferencePermissions.READ_PERMISSION)
 	                && (fm.stat(parent, name).getProtection() & FileProtection.ALLOW_READ) == 0)
 	            throw new AuthorizationException();
 	        return fm.read(parent, name);
@@ -2210,7 +2211,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    try
 	    {
 	        FileManager fm = m_da.getFileManager();
-	        boolean hasParentRights = hasPermissionInConference(parent, ConferencePermissions.WRITE_PERMISSION); 
+	        boolean isSysop = (this.getLoggedInUser().getRights() & UserPermissions.ADMIN) != 0;
+	        boolean hasParentRights = isSysop || hasPermissionInConference(parent, ConferencePermissions.WRITE_PERMISSION); 
 	        try
 	        {
 	            FileStatus fs = fm.stat(parent, name);
@@ -2247,6 +2249,51 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        throw new UnexpectedException (this.getLoggedInUserId(), e);
 	    }                   
     }    
+    
+    public String readSystemFile(String name)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+    {
+	    try
+	    {
+	        return this.readFile(m_da.getUserManager().getSysopId(), name);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                   
+    }
+    
+    public void storeSystemFile(String name, String content)
+    throws AuthorizationException, UnexpectedException
+    {
+        try
+        {
+            long parent = m_da.getUserManager().getSysopId();
+            this.storeFile(parent, name, content);
+            m_da.getFileManager().chmod(parent, name, FileProtection.ALLOW_READ);
+        }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                        
+	    catch(ObjectNotFoundException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
+    }
+    
+    public void deleteSystemFile(String name)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+    {
+	    try
+	    {
+	        this.deleteFile(m_da.getUserManager().getSysopId(), name);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
+    }
 
 	protected void markAsInvalid()
 	{

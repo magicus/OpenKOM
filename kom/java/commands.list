@@ -74,5 +74,6 @@ nu.rydin.kom.frontend.text.commands.ChangeLoginScript
 nu.rydin.kom.frontend.text.commands.EditProfile
 nu.rydin.kom.frontend.text.commands.DeleteProfile
 nu.rydin.kom.frontend.text.commands.ListCommands
-nu.rydin.kom.frontend.text.commands.Help
 nu.rydin.kom.frontend.text.commands.ShowLicense
+nu.rydin.kom.frontend.text.commands.ChangeWelcomeMessage
+nu.rydin.kom.frontend.text.commands.Help

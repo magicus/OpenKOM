@@ -17,6 +17,7 @@ import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -97,10 +98,10 @@ public class CreateConference extends AbstractCommand
 											  1, error);
 						if (0 != choice)
 						{
-							doMagic = false;
+							throw new OperationInterruptedException();
 						}
 					}
-					catch (KOMException e)
+					catch (ObjectNotFoundException e)
 					{
 						// There was no previous magic conference of this kind. 
 					}

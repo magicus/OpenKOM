@@ -12,6 +12,7 @@ import java.util.*;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
+import nu.rydin.kom.constants.SystemFiles;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.*;
@@ -322,6 +323,30 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 				
 			userInfo = null; // Don't need it anymore... Let it be GC'd
 			
+			// Print motd (if any)
+			//
+			try
+			{
+			    String motd = m_session.readSystemFile(SystemFiles.WELCOME_MESSAGE);
+			    m_out.println();
+			    WordWrapper ww = this.getWordWrapper(motd);
+			    String line;
+			    while((line = ww.nextLine()) != null)
+			        m_out.println(line);
+			    m_out.println();
+			}
+			catch(ObjectNotFoundException e)
+			{
+			    // No motd. No big deal.
+			}
+			catch(AuthorizationException e)
+			{
+			    Logger.error(this, "Users don't have permission for motd");
+			}
+			catch(UnexpectedException e)
+			{
+			    Logger.error(this, e);
+			}
 			
 			// Run the login and profile script
 			//
@@ -741,12 +766,17 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
             return m_formatter.format("date.never");
         
         // Check number of days from today
-        // TODO: Get locale and timezone from user data!
         //
         Calendar then = Calendar.getInstance();
         then.setTime(date);
         then.setTimeZone(this.getCachedUserInfo().getTimeZone());
         String answer = m_formatter.format("timestamp.short", then.getTime());
+        
+        // Should we even try to be smart?
+        // 
+        if((this.getCachedUserInfo().getFlags1() & UserFlags.ALWAYS_PRINT_FULL_DATE) != 0)
+            return answer;
+        
         Calendar now = Calendar.getInstance(this.getCachedUserInfo().getTimeZone());
         now.setTimeInMillis(System.currentTimeMillis());
         

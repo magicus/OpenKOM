@@ -919,8 +919,10 @@ public class LineEditor implements NewlineListener
 						}
 					}
 					
-					// Store the character
+					// Store the character. But only if it's printable
 					//
+					if(ch < 32)
+					    continue;
 					buffer.insert(cursorpos++, ch);
 						
 					if((flags & FLAG_ECHO) != 0) 

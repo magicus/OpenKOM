@@ -373,6 +373,6 @@ public class TelnetInputStream extends InputStream
 	
 	protected static int complement2(int n)
 	{
-		return n < 0 ? 256 - n : n;
+		return n < 0 ? 256 + n : n;
 	}
 }

@@ -47,6 +47,7 @@ public class UserManager
 	private final PreparedStatement m_changePermissionsStmt;
 	private final PreparedStatement m_updateLastloginStmt;
 	private final PreparedStatement m_updateTimeZoneStmt;
+	private final PreparedStatement m_getSysopStmt;
 	
 	private final NameManager m_nameManager;
 	
@@ -85,6 +86,8 @@ public class UserManager
 			"UPDATE users SET lastlogin = ? WHERE id = ?");
 		m_updateTimeZoneStmt = conn.prepareStatement(
 		    "UPDATE users SET timezone = ? WHERE id = ?");
+		m_getSysopStmt = conn.prepareStatement(
+		    "SELECT id FROM users WHERE userid = 'sysop'");
 	}
 	
 	/**
@@ -115,6 +118,8 @@ public class UserManager
 		    m_updateLastloginStmt.close();
 		if(m_updateTimeZoneStmt != null)
 		    m_updateTimeZoneStmt.close();
+		if(m_getSysopStmt != null)
+		    m_getSysopStmt.close();
 	}
 	
 	/**
@@ -517,5 +522,27 @@ public class UserManager
 		if(m_updateTimeZoneStmt.executeUpdate() == 0)
 			throw new ObjectNotFoundException("user id=" + userId);
 		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
+	}
+	
+	/**
+	 * Returns the id of the "root" sysop.
+	 */
+	public long getSysopId()
+	throws SQLException, ObjectNotFoundException
+	{
+	    m_getSysopStmt.clearParameters();
+	    ResultSet rs = null;
+	    try
+	    {
+	        rs = m_getSysopStmt.executeQuery();
+	        if(!rs.next())
+	            throw new ObjectNotFoundException("Sysop not found!!!");
+	        return rs.getLong(1);
+	    }
+	    finally
+	    {
+	        if(rs != null)
+	            rs.close();
+	    }
 	}
 }

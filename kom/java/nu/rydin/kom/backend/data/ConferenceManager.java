@@ -259,7 +259,7 @@ public class ConferenceManager // extends NameManager
 	 * @return Conference ID.
 	 */
 	public long getMagicConference(short kind)
-	throws SQLException
+	throws SQLException, ObjectNotFoundException
 	{
 		ResultSet rs = null;
 		try
@@ -267,7 +267,8 @@ public class ConferenceManager // extends NameManager
 			m_getMagicConfStmt.clearParameters();
 			m_getMagicConfStmt.setShort(1, kind);
 			rs = m_getMagicConfStmt.executeQuery();
-			rs.first();
+			if(!rs.next())
+			    throw new ObjectNotFoundException("magic kind=" + kind);
 			return rs.getLong(1);
 		}
 		finally

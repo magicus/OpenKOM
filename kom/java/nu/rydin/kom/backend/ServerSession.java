@@ -1237,6 +1237,39 @@ public interface ServerSession
      */
     public void deleteFile(long parent, String name)
     throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Reads the contents of a named system file.
+     * 
+     * @param name The file name
+     * @throws AuthorizationException
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public String readSystemFile(String name)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Stores a system file.
+     * 
+     * @param name The file name
+     * @param content The content
+     * @throws AuthorizationException
+     * @throws UnexpectedException
+     */
+    public void storeSystemFile(String name, String content)
+    throws AuthorizationException, UnexpectedException;
+    
+    /**
+     * Deletes a system file.
+     * 
+     * @param name The file name
+     * @throws AuthorizationException
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public void deleteSystemFile(String name)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 
     /**
      * Returns the HeartbeatListener associated with this session.
