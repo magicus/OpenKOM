@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.utils.Logger;
@@ -82,6 +83,15 @@ public class TelnetServer implements Runnable
 		}
 	}
 	private int m_port;
+	
+	// Before anything, whatsoever, happens, we need to set the
+	// timezone of this JVM to UTC to make sure all dates and times
+	// are represented correctly everywhere.
+	//
+	static
+	{
+	    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+	}
 	
 	public void run()
 	{
