@@ -13,6 +13,7 @@ import nu.rydin.kom.InvalidChoiceException;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
@@ -39,7 +40,7 @@ public class UserParameter extends NamedObjectParameter
 	{
 		try
 		{
-			NameAssociation assoc = NamePicker.resolveName(match.getParsedObject().toString(), UserManager.USER_KIND, context);
+			NameAssociation assoc = NamePicker.resolveName(match.getParsedObject().toString(), NameManager.USER_KIND, context);
 			return assoc;
 		}
 		catch (ObjectNotFoundException e)

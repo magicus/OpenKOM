@@ -27,8 +27,6 @@ import nu.rydin.kom.structs.MessageRange;
  */
 public class ConferenceManager // extends NameManager
 {
-	public static final short CONFERENCE_KIND = 1;
-	
 	public static final short MAGIC_USERPRESENTATIONS = 0;
 	public static final short MAGIC_CONFPRESENTATIONS = 1;
 	public static final short MAGIC_NOTE = 2;
@@ -107,7 +105,7 @@ public class ConferenceManager // extends NameManager
 			
 		// First, add the name
 		//
-		long nameId = m_nameManager.addName(fullname, CONFERENCE_KIND, visibility);
+		long nameId = m_nameManager.addName(fullname, NameManager.CONFERENCE_KIND, visibility);
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		
 		// Now, add the conference
@@ -218,7 +216,7 @@ public class ConferenceManager // extends NameManager
 	public String[] getConferenceNamesByPattern(String pattern)
 	throws SQLException
 	{
-		return m_nameManager.getNamesByPatternAndKind(pattern, CONFERENCE_KIND);
+		return m_nameManager.getNamesByPatternAndKind(pattern, NameManager.CONFERENCE_KIND);
 	}
 	
 	/**
@@ -229,7 +227,7 @@ public class ConferenceManager // extends NameManager
 	public long[] getConferenceIdsByPattern(String pattern)
 	throws SQLException
 	{
-		return m_nameManager.getIdsByPatternAndKind(pattern, CONFERENCE_KIND);
+		return m_nameManager.getIdsByPatternAndKind(pattern, NameManager.CONFERENCE_KIND);
 	}
 	
 	/**

@@ -44,8 +44,6 @@ public class UserManager
 	
 	private final Connection m_conn;
 	
-	public static final short USER_KIND = 0;
-	
 	public UserManager(Connection conn, CacheManager cacheManager, NameManager nameManager)
 	throws SQLException
 	{
@@ -174,7 +172,7 @@ public class UserManager
 				throw new DuplicateNameException(fullname);
 			// First, add the name
 			//
-			long nameId = m_nameManager.addName(fullname, USER_KIND, NameManager.PUBLIC);
+			long nameId = m_nameManager.addName(fullname, NameManager.USER_KIND, NameManager.PUBLIC);
 			Timestamp now = new Timestamp(System.currentTimeMillis());
 
 			// Now, add the user
@@ -278,7 +276,7 @@ public class UserManager
 	public String[] getUserNamesByPattern(String pattern)
 	throws SQLException
 	{
-		return m_nameManager.getNamesByPatternAndKind(pattern, USER_KIND);
+		return m_nameManager.getNamesByPatternAndKind(pattern, NameManager.USER_KIND);
 	}
 	
 	/**
@@ -289,7 +287,7 @@ public class UserManager
 	public long[] getUserIdsByPattern(String pattern)
 	throws SQLException
 	{
-		return m_nameManager.getIdsByPatternAndKind(pattern, USER_KIND);
+		return m_nameManager.getIdsByPatternAndKind(pattern, NameManager.USER_KIND);
 	}
 	
 	public UserInfo loadUser(long id)

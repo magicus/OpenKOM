@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -37,7 +38,7 @@ public class ChangePassword extends AbstractCommand
 		if(parameters.length != 0)
 		{
 			session.checkRights(UserPermissions.USER_ADMIN);
-			user = NamePicker.resolveNameToId(parameters[0], UserManager.USER_KIND, context);
+			user = NamePicker.resolveNameToId(parameters[0], NameManager.USER_KIND, context);
 		}
 		else
 			user = context.getLoggedInUserId();

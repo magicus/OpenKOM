@@ -17,6 +17,7 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.backend.data.ConferenceManager;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.NameUtils;
 
@@ -37,7 +38,7 @@ public class DeleteConference extends AbstractCommand
 		{
 			throw new MissingArgumentException();
 		}
-		long conference=NamePicker.resolveNameToId(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context);
+		long conference=NamePicker.resolveNameToId(NameUtils.assembleName(parameters), NameManager.CONFERENCE_KIND, context);
 		ServerSession ss = context.getSession();
 		MessageFormatter mf = context.getMessageFormatter();
 		PrintWriter out = context.getOut();

@@ -14,6 +14,7 @@ import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.OperationInterruptedException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.ConferenceManager;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.i18n.MessageFormatter;
@@ -39,7 +40,7 @@ public class ConferenceParameter extends NamedObjectParameter
 	{
 		try
 		{
-			NameAssociation assoc = NamePicker.resolveName(match.getParsedObject().toString(), ConferenceManager.CONFERENCE_KIND, context);
+			NameAssociation assoc = NamePicker.resolveName(match.getParsedObject().toString(), NameManager.CONFERENCE_KIND, context);
 			return assoc;
 		}
 		catch (ObjectNotFoundException e)

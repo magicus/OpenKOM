@@ -14,6 +14,7 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.BadParameterException;
 import nu.rydin.kom.backend.data.ConferenceManager;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -38,7 +39,7 @@ public class MoveMessage extends AbstractCommand
 			throw new BadParameterException();
 		}
 		
-		long conference=NamePicker.resolveNameToId(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context);
+		long conference=NamePicker.resolveNameToId(NameUtils.assembleName(parameters), NameManager.CONFERENCE_KIND, context);
 		ServerSession ss = context.getSession();
 		int localNum = ss.globalToLocalInConference(ss.getCurrentConferenceId(), 
 													ss.getLastMessageHeader().getId()).getLocalnum();

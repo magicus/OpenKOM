@@ -1371,7 +1371,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 				}
 				else
 				{
-					if (UserManager.USER_KIND == m_da.getNameManager().getObjectKind(destinations[i]))
+					if (NameManager.USER_KIND == m_da.getNameManager().getObjectKind(destinations[i]))
 					{
 					    // Are we explicitly sending to ourselves`?
 					    //
@@ -1458,7 +1458,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	                
 	                // Conferences are always considered ok recipients
 	                //
-	                if(kind == ConferenceManager.CONFERENCE_KIND)
+	                if(kind == NameManager.CONFERENCE_KIND)
 	                    answer[idx] = ChatRecipientStatus.OK_CONFERENCE;
 	                else
 	                {
@@ -2484,7 +2484,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	throws ObjectNotFoundException, UnexpectedException
 	{
 		return this.getMagicConference(MessageManager.ATTR_PRESENTATION == kind ? 
-											UserManager.USER_KIND == this.getObjectKind(object) ? 
+											NameManager.USER_KIND == this.getObjectKind(object) ? 
 												ConferenceManager.MAGIC_USERPRESENTATIONS : 
 												ConferenceManager.MAGIC_CONFPRESENTATIONS :
 											ConferenceManager.MAGIC_NOTE);		

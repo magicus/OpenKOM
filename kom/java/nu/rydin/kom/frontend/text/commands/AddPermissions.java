@@ -13,6 +13,7 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.MissingArgumentException;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -46,7 +47,7 @@ public class AddPermissions extends AbstractCommand
 			
 		// Resolve user
 		//
-		long user = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), UserManager.USER_KIND, context);
+		long user = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), NameManager.USER_KIND, context);
 		
 		// Load current permissions (if any) 
 		//

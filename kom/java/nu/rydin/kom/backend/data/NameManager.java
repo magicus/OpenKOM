@@ -27,8 +27,12 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class NameManager
 {
+    // Different kinds of named objects
 	public static final short UNKNOWN_KIND = -1;
-	public static final short PUBLIC = 0;
+    public static final short USER_KIND = 0;
+    public static final short CONFERENCE_KIND = 1;
+
+    public static final short PUBLIC = 0;
 	public static final short PROTCTED = 1;
 	public static final short INVISIBLE = 2;
 	
@@ -495,7 +499,7 @@ public class NameManager
 			rs = m_getKindStmt.executeQuery();
 			if(!rs.next())
 				throw new ObjectNotFoundException("Object ID=" + objectId);
-			return rs.getInt(1) == 0 ? UserManager.USER_KIND : ConferenceManager.CONFERENCE_KIND;
+			return rs.getInt(1) == 0 ? NameManager.USER_KIND : NameManager.CONFERENCE_KIND;
 		}
 		catch (SQLException e)
 		{

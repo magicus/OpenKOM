@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -29,7 +30,7 @@ public class ListUsers extends AbstractCommand
 	throws KOMException, IOException
 	{
 		PrintWriter out = context.getOut();
-		NameAssociation[] names = context.getSession().getAssociationsForPatternAndKind("%", UserManager.USER_KIND);
+		NameAssociation[] names = context.getSession().getAssociationsForPatternAndKind("%", NameManager.USER_KIND);
 		int top = names.length;
 		for(int idx = 0; idx < top; ++idx)
 			out.println(context.formatObjectName(names[idx].getName(), names[idx].getId()));

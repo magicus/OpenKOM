@@ -14,6 +14,7 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UserException;
 import nu.rydin.kom.backend.data.ConferenceManager;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.i18n.MessageFormatter;
@@ -40,7 +41,7 @@ public class ReadRules extends AbstractCommand
 			}
 			else
 			{
-				context.getMessagePrinter().printMessage(context, context.getSession().getLastRulePostingInConference(NamePicker.resolveNameToId(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context)));
+				context.getMessagePrinter().printMessage(context, context.getSession().getLastRulePostingInConference(NamePicker.resolveNameToId(NameUtils.assembleName(parameters), NameManager.CONFERENCE_KIND, context)));
 			}
 		}
 		catch(ObjectNotFoundException e)
