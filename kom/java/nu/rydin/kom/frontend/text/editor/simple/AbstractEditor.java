@@ -18,7 +18,6 @@ import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
@@ -30,7 +29,7 @@ import nu.rydin.kom.utils.PrintUtils;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public abstract class AbstractEditor implements MessageEditor
+public abstract class AbstractEditor
 {	
 	private Parser m_parser;
 	private final String m_commandList;

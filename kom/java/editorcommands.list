@@ -11,4 +11,5 @@ nu.rydin.kom.frontend.text.editor.simple.Quit
 nu.rydin.kom.frontend.text.editor.simple.Delete
 nu.rydin.kom.frontend.text.editor.simple.Insert
 nu.rydin.kom.frontend.text.editor.simple.Change
+nu.rydin.kom.frontend.text.editor.simple.ChangeSubject
 nu.rydin.kom.frontend.text.editor.simple.Show

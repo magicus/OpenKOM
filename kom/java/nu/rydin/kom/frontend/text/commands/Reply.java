@@ -14,10 +14,13 @@ import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.TextNumber;
 import nu.rydin.kom.structs.UnstoredMessage;
 
@@ -60,11 +63,16 @@ public class Reply extends AbstractCommand
 			
 		// Get editor and execute it
 		//
-		UnstoredMessage msg = context.getMessageEditor().edit(replyToId);
+		MessageEditor editor = context.getMessageEditor();
+		ConferenceInfo confInfo = session.getCurrentConference();
+		if(confInfo.getReplyConf() != -1)
+		    confInfo = session.getConference(confInfo.getReplyConf());
+		editor.setRecipient(new NameAssociation(confInfo.getId(), confInfo.getName()));
+		UnstoredMessage msg = editor.edit(replyToId);
 		
 		// Store the message
 		//
-		MessageOccurrence occ = context.getSession().storeReplyInCurrentConference(msg, replyToId);
+		MessageOccurrence occ = session.storeReply(editor.getRecipient().getId(), msg, replyToId);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));
 	}

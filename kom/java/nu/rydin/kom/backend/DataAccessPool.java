@@ -9,6 +9,7 @@ package nu.rydin.kom.backend;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.LinkedList;
 
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -76,6 +77,8 @@ public class DataAccessPool
 			Class.forName(ServerSettings.getJDBCDriverClass()).newInstance();
 			conn = DriverManager.getConnection(ServerSettings.getJDBCConnectString());
 			conn.setAutoCommit(false);
+			Statement stmt = conn.createStatement();
+			stmt.execute("SET AUTOCOMMIT=0");
 			return new DataAccess(conn);			
 		}
 		catch(IllegalAccessException e)

@@ -36,7 +36,8 @@ public class SessionManager
 	
 	private class Broadcaster extends Thread
 	{
-		public Broadcaster() {
+		public Broadcaster() 
+		{
 			super("Broadcaster");
 		}
 		
@@ -76,7 +77,16 @@ public class SessionManager
 						//
 						if(!e.sendToSelf() && each.getLoggedInUserId() == e.getOriginatingUser())
 							continue;
-						e.dispatch((EventTarget) sessions[idx]);
+						ServerSessionImpl sess = (ServerSessionImpl) sessions[idx];
+						sess.acquireMutex();
+						try
+						{
+						    e.dispatch((EventTarget) sessions[idx]);
+						}
+						finally
+						{
+						    sess.releaseMutex();
+						}
 					}
 				}
 			}

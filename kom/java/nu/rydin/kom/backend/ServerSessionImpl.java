@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import edu.oswego.cs.dl.util.concurrent.Mutex;
+
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.FileManager;
 import nu.rydin.kom.backend.data.MembershipManager;
@@ -73,7 +75,7 @@ import nu.rydin.kom.structs.UserListItem;
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
-public class ServerSessionImpl implements ServerSession, EventTarget
+public class ServerSessionImpl implements ServerSession, EventTarget, EventSource
 {	
     private class HeartbeatListenerImpl implements HeartbeatListener
     {
@@ -155,6 +157,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	 * Usage statistics
 	 */
 	private final UserLogItem m_stats;
+
+	/**
+	 * Mutex controlling session access
+	 */
+	private final Mutex m_mutex = new Mutex();
 		
 	public ServerSessionImpl(DataAccess da, long userId, SessionManager sessions)
 	throws UnexpectedException
@@ -198,6 +205,17 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}	
+	}
+	
+	public void acquireMutex()
+	throws InterruptedException
+	{
+	    m_mutex.acquire();
+	}
+	
+	public void releaseMutex()
+	{
+	    m_mutex.release();
 	}
 	
 	public void setCurrentConferenceId(long id)
@@ -277,6 +295,30 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			if(this.peekReply() != -1)
 				return m_lastSuggestedCommand = NEXT_REPLY;
 			
+			// Do we have any unread messages in current conference?
+			//
+			try
+			{
+				if(m_memberships.countUnread(this.getCurrentConferenceId(), m_da.getConferenceManager()) > 0)
+				    return m_lastSuggestedCommand = NEXT_MESSAGE;
+			}
+			catch(ObjectNotFoundException e)
+			{
+			    // Can't find current conference, it must have been deleted.
+			    // Reload memberships and try to go to the next conference.
+			    //
+			    try
+			    {
+			        this.reloadMemberships();
+			    }
+			    catch(ObjectNotFoundException e2)
+			    {
+			        // TODO: Why would we get here?
+			        //
+			        throw new UnexpectedException(this.getLoggedInUserId(), e2);
+			    }
+			}
+			
 			// Get next conference with unread messages
 			//	
 			long confId = m_memberships.getNextConferenceWithUnreadMessages(m_currentConferenceId,
@@ -297,6 +339,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
+	}
+	
+	public EventSource getEventSource()
+	{
+	    return this;
 	}
 	
 	public Envelope readLastMessage()
@@ -486,7 +533,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	
 	public void gotoConference(long id)
 	throws UnexpectedException, ObjectNotFoundException, NotMemberException
-	{	
+	{
+	    // Going to the current conference?
+	    //
+	    if(id == this.getCurrentConferenceId())
+	        return;
 		try
 		{
 			// Are we members?
@@ -497,6 +548,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			// All set! Go there!
 			//
 			this.setCurrentConferenceId(id);
+			
+			// Clear reply stack
+			//
+			m_replyStack = null;
 		}
 		catch(SQLException e)
 		{
@@ -2531,6 +2586,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		long conf = e.getConference();
 		try
 		{
+		    // Last suggestest command was NEXT_CONFERENCE and message 
+		    // was not posted in current conference? No need to pass it on.
+		    //
+		    if(m_lastSuggestedCommand == NEXT_CONFERENCE && conf != this.getCurrentConferenceId())
+		        return;
+		    
+		    // Try to load the membership to see if we should care.
+		    //
 			m_memberships.get(conf);
 			this.postEvent(e);
 		}

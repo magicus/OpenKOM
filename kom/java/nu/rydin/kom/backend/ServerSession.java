@@ -610,17 +610,7 @@ public interface ServerSession
 	 */	
 	public MembershipListItem[] listNews()
 	throws UnexpectedException;
-	
-	/**
-	 * Pools for an event. 
-	 * 
-	 * @param timeoutMs Timeout, in milliseconds. If no event could be
-	 * delivered within this timeframe, <tt>null</tt> is returned.
-	 * @return
-	 */
-	public Event pollEvent(int timeoutMs)
-	throws InterruptedException;
-	
+		
 	/**
 	 * Returns an array of <tt>UserListItems</tt> with the user currently logged in.
 	 * @return
@@ -633,6 +623,12 @@ public interface ServerSession
 	 * @param userId User ID.
 	 */
 	public boolean hasSession (long userId);
+	
+	/**
+	 * Returns the <tt>EventSource</tt> i.e. an object returning event objects
+	 * when they are ready to be picked up.
+	 */
+	public EventSource getEventSource();
 		
 	/**
 	 * Sends a chat message to multiple recipients (users and conferences).

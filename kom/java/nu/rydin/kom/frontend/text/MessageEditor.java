@@ -18,4 +18,8 @@ public interface MessageEditor
 {
 	public UnstoredMessage edit(long replyTo)
 	throws KOMException, InterruptedException, IOException;
+	
+	public NameAssociation getRecipient();
+	
+	public void setRecipient(NameAssociation recipient);
 }

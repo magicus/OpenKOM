@@ -23,6 +23,7 @@ import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.MessageSearchResult;
+import nu.rydin.kom.utils.Logger;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -388,27 +389,47 @@ public class MessageManager
 	
 			// Create message occurrence record
 			//
-			m_addMessageOccurrenceStmt.clearParameters();
-			m_addMessageOccurrenceStmt.setLong(1, globalId);
-			m_addMessageOccurrenceStmt.setTimestamp(2, now);
-			m_addMessageOccurrenceStmt.setShort(3, kind);
-			m_addMessageOccurrenceStmt.setLong(4, user);
-			m_addMessageOccurrenceStmt.setString(5, userName);			
-			m_addMessageOccurrenceStmt.setLong(6, conference);
-			m_addMessageOccurrenceStmt.setInt(7, num);
-			m_addMessageOccurrenceStmt.executeUpdate();
-			
-			// This changes the number of messages in a convference. 
-			// 
-			CacheManager.instance().getConferenceCache().registerInvalidation(new Long(conference));
-			
+			for(;;)
+			{
+				m_addMessageOccurrenceStmt.clearParameters();
+				m_addMessageOccurrenceStmt.setLong(1, globalId);
+				m_addMessageOccurrenceStmt.setTimestamp(2, now);
+				m_addMessageOccurrenceStmt.setShort(3, kind);
+				m_addMessageOccurrenceStmt.setLong(4, user);
+				m_addMessageOccurrenceStmt.setString(5, userName);			
+				m_addMessageOccurrenceStmt.setLong(6, conference);
+				m_addMessageOccurrenceStmt.setInt(7, num);
+				try
+				{
+				    m_addMessageOccurrenceStmt.executeUpdate();
+				    break;
+				}
+				catch(SQLException e)
+				{
+				    // SELECT MAX(localnum) ... FOR UPDATE does not seem to
+				    // put a lock on the entire table (IMHO, it should).
+				    // Anyway... Check for index uniqueness violations.
+				    //
+				    if(e.getMessage().startsWith("Duplicate key"))
+				    {
+				        // Message number clash! Bump number and try again!
+				        //
+				        Logger.info(this, "Duplicate message number, trying again...");
+				        ++num;
+				        continue;
+				    }
+				    throw e;
+				}
+			}
+						
 			// Update conference records "last text" field
+			//
 			m_updateConferenceLasttext.clearParameters();
 			m_updateConferenceLasttext.setTimestamp(1, now);
 			m_updateConferenceLasttext.setLong(2,conference);
 			m_updateConferenceLasttext.executeUpdate();
 			
-			// This changes the number of messages in a convference. 
+			// This changes the number of messages in a conference. 
 			// 
 			CacheManager.instance().getConferenceCache().registerInvalidation(new Long(conference));
 			

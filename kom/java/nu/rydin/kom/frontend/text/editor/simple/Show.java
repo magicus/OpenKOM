@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.i18n.MessageFormatter;
@@ -32,15 +33,23 @@ public class Show extends AbstractCommand
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
 		EditorContext edContext = (EditorContext) context;
+		DisplayController dc = context.getDisplayController();
 		
 		// Print header
 		//
+		dc.messageHeader();
 		out.println(formatter.format("simple.editor.author", context.getCachedUserInfo().getName()));
+		
+		// Print recipient
+		//
+		out.println(formatter.format("simple.editor.receiver", edContext.formatObjectName(edContext.getRecipient())));
 				
 		// Print subject
 		//
 		out.print(formatter.format("simple.editor.subject"));
+		dc.messageSubject();
 		out.println(edContext.getSubject());
+		dc.messageBody();
 		
 		// Print body
 		//
@@ -57,4 +66,9 @@ public class Show extends AbstractCommand
 			out.println(line);
 		}
 	}
+		
+	public void printPostamble(PrintWriter out)
+	{
+		// Nothing 
+	}	
 }

@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
+
+import nu.rydin.kom.backend.EventSource;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
@@ -30,10 +32,11 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class LineEditor implements NewlineListener
 {
-	public static final int FLAG_STOP_ON_EVENT	= 0x01;
-	public static final int FLAG_ECHO			= 0x02;
-	public static final int FLAG_STOP_ON_BOL	= 0x04;
-	public static final int FLAG_STOP_ON_EOL	= 0x08;	
+	public static final int FLAG_STOP_ON_EVENT			= 0x01;
+	public static final int FLAG_ECHO					= 0x02;
+	public static final int FLAG_STOP_ON_BOL			= 0x04;
+	public static final int FLAG_STOP_ON_EOL			= 0x08;
+	public static final int FLAG_STOP_ONLY_WHEN_EMPTY	= 0x10;
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
@@ -259,9 +262,10 @@ public class LineEditor implements NewlineListener
 		{
 			try
 			{
+			    EventSource es = LineEditor.this.m_session.getEventSource();
 				for(;;)
 				{
-					Event e = LineEditor.this.m_session.pollEvent(POLL_INTERVAL);
+					Event e = es.pollEvent(POLL_INTERVAL);
 					if(e != null)
 						LineEditor.this.handleEvent(e);
 				}
@@ -393,7 +397,8 @@ public class LineEditor implements NewlineListener
 	{
 		try
 		{
-			return innerReadLine(null, null, 0, FLAG_STOP_ON_EVENT | FLAG_ECHO);
+			return innerReadLine(null, null, 0, FLAG_STOP_ON_EVENT | FLAG_ECHO 
+			        | FLAG_STOP_ONLY_WHEN_EMPTY);
 		}
 		catch(LineOverflowException e)
 		{
@@ -414,7 +419,8 @@ public class LineEditor implements NewlineListener
 	{
 		try
 		{
-			return innerReadLine(defaultString, null, 0, FLAG_STOP_ON_EVENT | FLAG_ECHO);
+			return innerReadLine(defaultString, null, 0, FLAG_STOP_ON_EVENT | FLAG_ECHO
+			        | FLAG_STOP_ONLY_WHEN_EMPTY);
 		}
 		catch(LineOverflowException e)
 		{
@@ -614,6 +620,7 @@ public class LineEditor implements NewlineListener
 			Event ev = this.getNextEvent();
 			
 			// Not a keystroke? Handle event
+			//
 			if(!(ev instanceof KeystrokeEvent))
 			{
 				// IOException while reading user input? Pass it on!
@@ -626,11 +633,9 @@ public class LineEditor implements NewlineListener
 				// Session shutdown? Get us out of here immediately!
 				//
 				if(ev instanceof SessionShutdownEvent)
-				{
 					throw new InterruptedException();
-				}
 
-				//Dispatch event
+				// Dispatch event
 				//
 				ev.dispatch(m_target);
 				if((flags & FLAG_STOP_ON_EVENT) != 0)
@@ -685,8 +690,28 @@ public class LineEditor implements NewlineListener
 		    char ch = 0;
 		    while(token == null)
 		    {
-		         ch = this.innerReadCharacter(flags);
-		         token = m_tokenizer.feedCharacter(ch);
+		        for(;;)
+		        {
+			        try
+			        {
+			            ch = this.innerReadCharacter(flags);
+			            break;
+			        }
+			        catch(EventDeliveredException e)
+			        {
+			            if((flags & FLAG_STOP_ONLY_WHEN_EMPTY) == 0)
+			                throw e;
+			            else
+			            {
+			                if(buffer.length() == 0)
+			                    throw e;
+			                
+			                // Otherwise, skip and hope it's queued
+			                //
+			            }
+			        }
+		        }
+		        token = m_tokenizer.feedCharacter(ch);
 		    }
 		    int kind = token.getKind();
 		    switch(kind)

@@ -22,6 +22,7 @@ import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
 
 /**
@@ -142,6 +143,11 @@ public interface Context extends TerminalSettingsProvider
 	 */
 	public String formatObjectName(String name, long id);
 	
+	/**
+	 * Formats an object name according to user settings
+	 */
+	public String formatObjectName(NameAssociation object);
+
 	/**
 	 * Formats a timestamp in a space efficient way.
 	 * 

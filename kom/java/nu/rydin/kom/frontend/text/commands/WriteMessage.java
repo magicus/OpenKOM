@@ -8,12 +8,16 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 
+import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.MessageEditor;
+import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -36,11 +40,15 @@ public class WriteMessage extends AbstractCommand
 			
 		// Get editor and execute it
 		//
-		UnstoredMessage msg = context.getMessageEditor().edit(-1);
+		ServerSession session = context.getSession();
+		MessageEditor editor = context.getMessageEditor();
+		ConferenceInfo recipient = session.getCurrentConference();
+		editor.setRecipient(new NameAssociation(recipient.getId(), recipient.getName()));
+		UnstoredMessage msg = editor.edit(-1);
 				
 		// Store text
 		//
-		MessageOccurrence occ = context.getSession().storeMessage(msg);
+		MessageOccurrence occ = session.storeMessage(msg);
 		context.getOut().println();
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));

@@ -35,9 +35,15 @@ public class TransactionalInvocationHandler implements InvocationHandler
 			throw new UnexpectedException(-1, "Invalid session!");
 		DataAccess da = DataAccessPool.instance().getDataAccess();
 		boolean committed = false;
-		m_session.setDataAccess(da);
 		try
 		{
+		    // Make sure we're the only ones fiddling with this session
+		    //
+		    m_session.acquireMutex();
+		    m_session.setDataAccess(da);
+		    
+		    // Invoke the method
+		    //
 			Object result = method.invoke(m_session, args);
 			m_session.setDataAccess(null);
 			
@@ -62,6 +68,7 @@ public class TransactionalInvocationHandler implements InvocationHandler
 				m_cacheManager.rollback();
 			}
 			DataAccessPool.instance().returnDataAccess(da);
+			m_session.releaseMutex();
 		} 
 	}
 }

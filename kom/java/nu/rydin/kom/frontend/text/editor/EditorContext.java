@@ -27,6 +27,7 @@ import nu.rydin.kom.frontend.text.TerminalSettings;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
 
 /**
@@ -39,6 +40,8 @@ public class EditorContext implements Context
 	private Buffer m_buffer;
 	
 	private String m_subject;
+	
+	private NameAssociation m_recipient;
 	
 	public EditorContext(Context underlying)
 	{
@@ -101,6 +104,16 @@ public class EditorContext implements Context
 	public void setSubject(String subject)
 	{
 		m_subject = subject;
+	}
+	
+	public NameAssociation getRecipient()
+	{
+	    return m_recipient;
+	}
+	
+	public void setRecipient(NameAssociation recipient)
+	{
+	    m_recipient = recipient;
 	}
 
 	public MessageEditor getMessageEditor()
@@ -174,6 +187,11 @@ public class EditorContext implements Context
 	public String formatObjectName(String name, long id)
 	{
 	    return m_underlying.formatObjectName(name, id);
+	}
+	
+	public String formatObjectName(NameAssociation object)
+	{
+	    return m_underlying.formatObjectName(object);
 	}
 	
 	public String smartFormatDate(Date date)

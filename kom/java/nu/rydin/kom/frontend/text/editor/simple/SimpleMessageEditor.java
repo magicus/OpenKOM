@@ -16,14 +16,16 @@ import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
+import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class SimpleMessageEditor extends AbstractEditor
+public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 {		
 	public SimpleMessageEditor(Context context)
 	throws IOException, UnexpectedException
@@ -56,7 +58,8 @@ public class SimpleMessageEditor extends AbstractEditor
 				
 			// Print receiver
 			//
-			out.println(formatter.format("simple.editor.receiver", "Tornado (I väntan på riktiga mötet)"));
+			
+			out.println(formatter.format("simple.editor.receiver", m_context.formatObjectName(m_context.getRecipient())));
 			
 			// Read subject
 			//
@@ -81,4 +84,14 @@ public class SimpleMessageEditor extends AbstractEditor
 			throw new KOMRuntimeException(formatter.format("error.reading.user.input"), e);		
 		}
 	}	
+	
+	public void setRecipient(NameAssociation recipient)
+	{
+	    m_context.setRecipient(recipient);
+	}
+	
+	public NameAssociation getRecipient()
+	{
+	    return m_context.getRecipient();
+	}
 }

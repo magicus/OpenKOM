@@ -60,6 +60,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.FileStatus;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Logger;
 
@@ -749,6 +750,13 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
         {
             throw new RuntimeException(e);
         }        
+    }
+    
+    public String formatObjectName(NameAssociation object)
+    {
+        return object == null
+        	? m_formatter.format("misc.nobody")
+        	: this.formatObjectName(object.getName(), object.getId());
     }
     
     public String smartFormatDate(Date date)

@@ -104,7 +104,7 @@ public class MembershipList
 		MessageRange total = new MessageRange(ci.getFirstMessage(), ci.getLastMessage());
 		MembershipInfo mi = (MembershipInfo) m_conferenceTable.get(new Long(conference));
 		
-		// Check that the list of unread messages is fully conteined 
+		// Check that the list of unread messages is fully contained 
 		// in the list of existing messages. If not, adjust!
 		//
 		MessageRangeList read = mi.getReadMessages();
@@ -166,7 +166,7 @@ public class MembershipList
 		{
 			if(m_order[idx].getConference() == startId)
 			{
-				offset = idx;
+				offset = idx + 1;
 				break;
 			}
 		}
