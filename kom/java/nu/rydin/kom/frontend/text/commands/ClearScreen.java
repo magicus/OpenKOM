@@ -32,4 +32,7 @@ public class ClearScreen extends AbstractCommand
         out.flush();
     }
 
+    public void printPostamble(PrintWriter out)
+    {
+    }
 }
