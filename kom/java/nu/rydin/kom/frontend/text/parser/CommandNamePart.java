@@ -17,10 +17,12 @@ import nu.rydin.kom.frontend.text.Context;
 public class CommandNamePart extends CommandLinePart
 {
 	private String m_cookedName;
+	private boolean m_isRequired;
 
-	public CommandNamePart(String cookedName)
+	public CommandNamePart(String cookedName, boolean isRequired)
 	{
 		m_cookedName = cookedName;
+		m_isRequired = isRequired;
 	}
 
 	public char getSeparator()
@@ -30,7 +32,7 @@ public class CommandNamePart extends CommandLinePart
 
 	public boolean isRequired()
 	{
-		return true;
+		return m_isRequired;
 	}
 
 	protected Match innerMatch(String matchingPart, String remainder)

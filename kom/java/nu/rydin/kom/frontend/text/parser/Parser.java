@@ -134,7 +134,8 @@ public class Parser
 		for (int i = 0; i < cookedParts.length; i++)
 		{
 			String cookedPart = cookedParts[i];
-			result[i] = new CommandNamePart(cookedPart);
+			//Only the first part is required, the rest are optional.
+			result[i] = new CommandNamePart(cookedPart, (i == 0));
 		}
 		return result;
 	}
@@ -308,32 +309,48 @@ public class Parser
     		
     		// If we still need more parameters, ask the user about them.
     		while (level < parts.length) {
-    			// Not on command line, ask the user about it.
-    			Match match = parts[level].fillInMissingObject(context);
-    			if (!match.isMatching()) {
-    				// The user entered an invalid parameter, abort
-    				PrintWriter out = context.getOut();
-    				MessageFormatter fmt = context.getMessageFormatter();
-    				
-    				out.println(fmt.format("parser.invalid.parameter"));
-    				out.flush();
-    				return;
-    			}
-    			
-    			// Resolve directly
-    			Object parameter = parts[level].resolveFoundObject(context, match);
-    			if (parameter == null) {
-    				// Error message have already been written. User aborted.
-    				return;
-    			}
-    			resolvedParameters.add(parameter);
+    		    Object parameter;
+    		    if (parts[level].isRequired())
+    		    {
+	    			// Not on command line and required, ask the user about it.
+	    			Match match = parts[level].fillInMissingObject(context);
+	    			if (!match.isMatching()) {
+	    				// The user entered an invalid parameter, abort
+	    				PrintWriter out = context.getOut();
+	    				MessageFormatter fmt = context.getMessageFormatter();
+	    				
+	    				out.println(fmt.format("parser.invalid.parameter"));
+	    				out.flush();
+	    				return;
+	    			}
+	    			
+	    			// Resolve directly
+	    			parameter = parts[level].resolveFoundObject(context, match);
+	    			if (parameter == null) {
+	    				// Error message have already been written. User aborted.
+	    				return;
+	    			}
+    		    }
+	    		else
+	    		{
+	    		    //Parameter was not required, just skip it and add null to the parameters
+	    		    parameter = null;
+	    		}
+	    		resolvedParameters.add(parameter);
     			level++;
     		}
     		
     		System.out.println("command: " + target.getCommand().getFullName());
     		for (Iterator iter = resolvedParameters.iterator(); iter.hasNext();) {
                 Object param = (Object) iter.next();
-                System.out.println("param: " + param.toString());
+                if (param == null)
+                {
+                    System.out.println("param: null");
+                }
+                else
+                {
+                    System.out.println("param: " + param.toString());
+                }
             }
     		// Now we can execute the command with the resolved parameters.
     		Object[] parameterArray = new Object[resolvedParameters.size()];

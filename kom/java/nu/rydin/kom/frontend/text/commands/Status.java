@@ -69,10 +69,11 @@ public class Status extends AbstractCommand
 	throws KOMException, IOException, InterruptedException
 	{	
 
-		// No parameters? That implies we're asking for our own status!
-		//
+		// Got null? That means user skipped optional parameter
+		// Default to showing status for current user.
+	    //
 	    long id;
-	    if (parameters.length == 0)
+	    if (parameters[0] == null)
 	    {
 	        id = context.getLoggedInUserId();
 	    }

@@ -32,27 +32,41 @@ public abstract class CommandLinePart
 	{
 		String matchingPart;
 		String remainder;
-	
+		Match result = null;
+		
 		// Trim leading whitespace
 		while (commandLine.length() > 0 && Character.isWhitespace(commandLine.charAt(0))) {
 			commandLine = commandLine.substring(1);
 		}
 		
 		if (commandLine.length() == 0) {
-			return new Match(false, null, null, null);
+			result = new Match(false, null, null, null);
+		}
+		else
+		{
+			int separatorPos = getSeparatorPos(commandLine); 
+	
+			if (separatorPos == -1) {
+				matchingPart = commandLine;
+				remainder = "";
+			} else {
+				matchingPart = commandLine.substring(0, separatorPos);
+				remainder = commandLine.substring(separatorPos, commandLine.length());
+			}
+			result = innerMatch(matchingPart, remainder);
+		}
+		if (!result.isMatching() && !isRequired())
+		{
+		    //If we couldn't get a match, but this parameter was not required, 
+		    //we should return a Match object that says it matched, but with
+		    //the original commandline intact as the remainder.
+		    return new Match(true, "", commandLine, null);
+		}
+		else
+		{
+		    return result;
 		}
 		
-		int separatorPos = getSeparatorPos(commandLine); 
-
-		if (separatorPos == -1) {
-			matchingPart = commandLine;
-			remainder = "";
-		} else {
-			matchingPart = commandLine.substring(0, separatorPos);
-			remainder = commandLine.substring(separatorPos, commandLine.length());
-		}
-		
-		return innerMatch(matchingPart, remainder);
 	}
 
     protected int getSeparatorPos(String commandLine) 

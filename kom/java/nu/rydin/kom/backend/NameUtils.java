@@ -26,7 +26,13 @@ public class NameUtils
 		return buffer.toString();
     }
 	/**
-	 * Removes non-significant parts of a name. E.g. 
+	 * Removes non-significant parts of a name. 
+	 * All within parenthesis is ignored.
+	 * No parenthesis stacking.
+	 * All parenthesis signs are ignored.
+	 * All whitespace is compressed to single space.
+	 * 
+	 * Example: 
 	 * "(The) KOM System (general discussions)" becomes "KOM SYSTEM".
 	 * "Foo ((((((((is a) ))) bar" becomes "FOO ))) BAR"
 	 * 
@@ -37,33 +43,41 @@ public class NameUtils
 	{
 		int top = name.length();
 		StringBuffer buffer = new StringBuffer(top);
-		boolean significant = true;
-		boolean skipSpace = true;
+		boolean lastInsertedWasSpace = true;
+		boolean inIgnoreMode = false;
 		for(int idx = 0; idx < top; ++idx)
 		{
 			char ch = name.charAt(idx);
-			if(significant)
+			if (inIgnoreMode)
 			{
-				if(ch == ' ')
-				{
-					if(skipSpace)
-						continue;
-					skipSpace = true;
-				}
-				else
-					skipSpace = false;
-				if(ch == '(')
-					significant = false;
-				else
-					buffer.append(Character.toUpperCase(ch));
+			    if (ch == ')')
+			    {
+			        inIgnoreMode = false;
+			    }
 			}
 			else
 			{
-				if(ch == ')')
-				{
-					significant = true;
-					skipSpace = true;
-				}
+			    if (ch == '(')
+			    {
+			        inIgnoreMode = true;
+			    }
+			    else if (ch == ')')
+			    {
+			        //Skip...
+			    }
+			    else if (ch == ' ')
+			    {
+			        if (!lastInsertedWasSpace)
+			        {
+			            buffer.append(' ');
+			            lastInsertedWasSpace = true;
+			        }
+			    }
+			    else
+			    {
+			        buffer.append(Character.toUpperCase(ch));
+			        lastInsertedWasSpace = false;
+			    }
 			}
 		}
 		return buffer.toString();
