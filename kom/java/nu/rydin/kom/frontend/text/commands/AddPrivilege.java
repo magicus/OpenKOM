@@ -21,11 +21,11 @@ import nu.rydin.kom.structs.NameAssociation;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class AddPermission extends AbstractCommand
+public class AddPrivilege extends AbstractCommand
 {
-    public AddPermission(Context context, String fullName)
+    public AddPrivilege(Context context, String fullName)
     {
-        super(fullName, new CommandLineParameter[] { new UserParameter("add.permission.user.question", true), 
+        super(fullName, new CommandLineParameter[] { new UserParameter("add.privilege.user.question", true), 
                 new RightParameter(true, context.getFlagLabels("userprivs")) });
     }
 
@@ -41,7 +41,7 @@ public class AddPermission extends AbstractCommand
         long user = nameAssoc.getId();
         int flagNumber = ((Integer) parameters[1]).intValue();	
 		context.getSession().changeUserPermissions(user, 1 << flagNumber, 0);
-		context.getOut().println(context.getMessageFormatter().format("add.permission.confirmation", 
+		context.getOut().println(context.getMessageFormatter().format("add.privilege.confirmation", 
 			new Object[] { context.getFlagLabels("userprivs")[flagNumber], nameAssoc.getName() } ));
 
 		// Clear cache

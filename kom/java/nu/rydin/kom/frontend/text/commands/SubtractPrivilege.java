@@ -17,11 +17,11 @@ import nu.rydin.kom.structs.NameAssociation;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class SubtractPermission extends AbstractCommand
+public class SubtractPrivilege extends AbstractCommand
 {
-    public SubtractPermission(Context context, String fullName)
+    public SubtractPrivilege(Context context, String fullName)
     {
-        super(fullName, new CommandLineParameter[] { new UserParameter("subtract.permission.user.question", true), 
+        super(fullName, new CommandLineParameter[] { new UserParameter("subtract.privilege.user.question", true), 
                 new RightParameter(true, context.getFlagLabels("userprivs")) });
     }
 
@@ -32,7 +32,7 @@ public class SubtractPermission extends AbstractCommand
         long user = nameAssoc.getId();
         int flagNumber = ((Integer) parameters[1]).intValue();	
 		context.getSession().changeUserPermissions(user, 0, 1 << flagNumber);
-		context.getOut().println(context.getMessageFormatter().format("subtract.permission.confirmation", 
+		context.getOut().println(context.getMessageFormatter().format("subtract.privilege.confirmation", 
 			new Object[] { context.getFlagLabels("userprivs")[flagNumber], nameAssoc.getName() } ));
 
 		// Clear cache

@@ -115,9 +115,9 @@
 	<category id="admin" i18n="command.category.admin" order="300">
 		<command class="nu.rydin.kom.frontend.text.commands.CreateUser"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.RenameObject"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.ListPermissions"/>
-		<command class="nu.rydin.kom.frontend.text.commands.AddPermission"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SubtractPermission"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ListPrivileges"/>
+		<command class="nu.rydin.kom.frontend.text.commands.AddPrivilege"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SubtractPrivilege"/>
 		<command class="nu.rydin.kom.frontend.text.commands.KillSession"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ProhibitLogin"/>
 		<command class="nu.rydin.kom.frontend.text.commands.EnterSingleUserMode"/>

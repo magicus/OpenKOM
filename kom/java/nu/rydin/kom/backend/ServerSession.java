@@ -78,6 +78,20 @@ public interface ServerSession
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 
 	/**
+	 * Checks if the current user has the permissions to modify the given
+	 * conference and throws an AuthorizationException if not.
+	 * This function takes user privileges into consideration, and not
+	 * only conference permissions.
+	 * 
+	 * @param conferenceId
+	 * @throws AuthorizationException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public void assertModifyConference(long conferenceId)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+	
+	/**
 	 * Returns name associations (of users or conferences) based on a pattern.
 	 * 
 	 * @param pattern The pattern

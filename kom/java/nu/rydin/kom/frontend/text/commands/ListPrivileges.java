@@ -21,9 +21,9 @@ import nu.rydin.kom.utils.FlagUtils;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class ListPermissions extends AbstractCommand
+public class ListPrivileges extends AbstractCommand
 {
-	public ListPermissions(Context context, String fullName)
+	public ListPrivileges(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new UserParameter(false) });
 	}
@@ -36,7 +36,7 @@ public class ListPermissions extends AbstractCommand
 	        : context.getCachedUserInfo();
 	    PrintWriter out = context.getOut();
 	    MessageFormatter formatter = context.getMessageFormatter();
-	    out.println(formatter.format("list.permissions.header", user.getName()));
+	    out.println(formatter.format("list.privileges.header", user.getName()));
 		FlagUtils.printFlags(context.getOut(), context.getMessageFormatter(), context.getFlagLabels("userprivs"), 
 		        new long[] { user.getRights() });	
 	}
