@@ -88,6 +88,9 @@ nu.rydin.kom.frontend.text.commands.ClearScreen
 nu.rydin.kom.frontend.text.commands.SendCondensedBroadcast
 nu.rydin.kom.frontend.text.commands.ChangeUserPresentationConference
 nu.rydin.kom.frontend.text.commands.ChangeConferencePresentationConference
-nu.rydin.kom.frontend.text.commands.Help
 nu.rydin.kom.frontend.text.commands.ChangeTerminalWidth
 nu.rydin.kom.frontend.text.commands.ChangeTerminalHeight
+nu.rydin.kom.frontend.text.commands.CreateAlias
+nu.rydin.kom.frontend.text.commands.RollbackReads
+nu.rydin.kom.frontend.text.commands.MarkAsUnread
+nu.rydin.kom.frontend.text.commands.Help

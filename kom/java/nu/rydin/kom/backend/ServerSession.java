@@ -615,6 +615,24 @@ public interface ServerSession
 	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
+	 * Queues up a message to be marked as unread at logout.
+	 * 
+	 * @param messageId The message id
+	 * @throws UnexpectedException
+	 */
+	public void markAsUnreadAtLogout(long messageId)
+	throws UnexpectedException;
+	
+	/**
+	 * Queues up a message to be marked as unread at logout.
+	 * 
+	 * @param localNum The local id
+	 * @throws UnexpectedException
+	 */
+	public void markAsUnreadAtLogoutInCurrentConference(int localnum)
+	throws UnexpectedException;
+	
+	/**
 	 * Changes the number of unread messages in the current conference. Destroys
 	 * any previous read-message-markers.
 	 * 
@@ -624,6 +642,18 @@ public interface ServerSession
 	 */	
 	public void changeUnread(int nUnread)
 	throws ObjectNotFoundException, UnexpectedException;
+
+	/**
+	 * Rolls back the <i>n</i> latest reads, marking the read messages
+	 * as unread. If n > the total number of messages read, all messages
+	 * read during the session are marked as unread.
+	 * 
+	 * @param n Number of messages to process
+	 * @return Number of messages actually processed
+	 * @throws UnexpectedException
+	 */
+	public int rollbackReads(int n)
+	throws UnexpectedException;
 
 	/**
 	 * List conferences containing unread messages

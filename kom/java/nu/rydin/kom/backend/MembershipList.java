@@ -90,6 +90,21 @@ public class MembershipList
 		m_dirty.add(mi);
 	}
 	
+	public void markAsUnread(long conference, int localnum)
+	throws ObjectNotFoundException
+	{
+		MembershipInfo mi = (MembershipInfo) m_conferenceTable.get(new Long(conference));
+		if(mi == null)
+		    return; // We're not members, so we don't care!
+
+		// Update ranges and mark as dirty
+		//
+		MessageRangeList l = mi.getReadMessages(); 
+		mi.setReadMessages(l == null ? null : l.subtract(localnum));
+		m_dirty.add(mi);
+	}
+	
+	
 	public boolean markAsReadEx(long conference, int localnum)
 	throws ObjectNotFoundException
 	{

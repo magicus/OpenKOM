@@ -14,7 +14,7 @@ import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
+import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
 
@@ -25,7 +25,7 @@ public class Copy extends AbstractCommand
 {
 	public Copy(Context context, String fullName)
 	{
-		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });	
+		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(true) });	
 	}
 	
 	public void execute(Context context, Object[] parameterArray) 

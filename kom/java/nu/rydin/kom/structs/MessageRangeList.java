@@ -117,25 +117,46 @@ public class MessageRangeList extends ListAtom implements Serializable
 		return m_range.getMax() < max ? m_range.getMax() + 1 : -1;
 	}
 	
+	public MessageRangeList subtract(int num)
+	{
+	    MessageRangeList r = this.getRangeAtom(num);
+	    
+	    // No range including the number? No need to
+	    // subtract it then!
+	    //
+	    if(r == null)
+	        return this;
+	    
+	    // Subtract
+	    //
+	    MessageRangeList l = r.getRange().subtract(num);
+	    if(l != null)
+	    {
+	        // Splice into list
+	        //
+	        ListAtom l1 = l.next();
+	        l.yank();
+	        l.succeed(r);
+	        if(l1 != l)
+	        {
+	            l1.yank();
+	            l1.succeed(l);
+	        }
+	    }
+	    
+	    // Yank old range
+	    //
+	    r.yank();
+
+	    // Did we just yank the root? Then "l" becomes
+	    // the new root!
+	    //
+	    return r == this ? l : this;
+	}
+		
 	public boolean includes(int num)
 	{
-		MessageRangeList each = this;
-		do
-		{
-			MessageRange r = each.getRange();
-			
-			// Any point in looking any further?
-			//
-			if(r.getMin() > num)
-				return false;
-			if(r.includes(num))
-				return true;
-			each = (MessageRangeList) each.next();
-		} while(each != this);
-		
-		// Nothing found
-		//
-		return false;
+	    return this.getRangeAtom(num) != null;
 	}
 	
 	public MessageRangeList intersect(MessageRange r)
@@ -162,4 +183,25 @@ public class MessageRangeList extends ListAtom implements Serializable
 	{
 		return r.getMin() <= this.getRange().getMin() && r.getMax() >= this.getRange().getMax();
 	}
+	
+	private MessageRangeList getRangeAtom(int num)
+	{
+		MessageRangeList each = this;
+		do
+		{
+			MessageRange r = each.getRange();
+			
+			// Any point in looking any further?
+			//
+			if(r.getMin() > num)
+				return null;
+			if(r.includes(num))
+				return each;
+			each = (MessageRangeList) each.next();
+		} while(each != this);
+		
+		// Nothing found
+		//
+		return null;
+	}	
 }

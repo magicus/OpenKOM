@@ -162,6 +162,19 @@ public class Parser
         m_commands = new Command[commands.size()];
         commands.toArray(m_commands);
     }
+    
+    public void addAlias(String alias, String actualCommand)
+    {
+        // Add alias by reallocating command array. This isn't 
+        // done that often, so we gladly pay the price for some
+        // shuffling of objects.
+        //
+        int top = m_commands.length;
+        Command[] newCommands = new Command[top + 1];
+        System.arraycopy(m_commands, 0, newCommands, 0, top);
+        newCommands[top] = new AliasWrapper(alias, actualCommand);
+        m_commands = newCommands;
+    }
 
     public ExecutableCommand parseCommandLine(Context context,
             String commandLine) throws IOException, InterruptedException,
@@ -290,12 +303,14 @@ public class Parser
         if (matchingCandidates.size() == 0)
         {
             throw new InvalidChoiceException();
-        } else if (matchingCandidates.size() == 1)
+        } 
+        else if (matchingCandidates.size() == 1)
         {
             // Yeah! We got it!
             Integer index = (Integer) originalNumbers.get(0);
             return index.intValue();
-        } else
+        } 
+        else
         {
             // Still ambiguous. Let the user chose again, recursively.
             int newIndex = askForResolution(context, matchingCandidates,
@@ -515,13 +530,15 @@ public class Parser
                     {
                         iter.remove();
                     }
-                } else
+                } 
+                else
                 {
                     String commandLineToMatch;
                     if (level == 0)
                     {
                         commandLineToMatch = commandLine;
-                    } else
+                    } 
+                    else
                     {
                         commandLineToMatch = potentialTarget.getLastMatch()
                                 .getRemainder();
@@ -530,7 +547,8 @@ public class Parser
                     if (!match.isMatching())
                     {
                         iter.remove();
-                    } else
+                    } 
+                    else
                     {
                         potentialTarget.addMatch(match);
                         if (match.getRemainder().length() > 0)
@@ -621,19 +639,24 @@ public class Parser
             // Copy to command array
             // 
             return new Parser(commandList);
-        } catch (ClassNotFoundException e)
+        } 
+        catch (ClassNotFoundException e)
         {
             throw new UnexpectedException(-1, e);
-        } catch (NoSuchMethodException e)
+        } 
+        catch (NoSuchMethodException e)
         {
             throw new UnexpectedException(-1, e);
-        } catch (InstantiationException e)
+        } 
+        catch (InstantiationException e)
         {
             throw new UnexpectedException(-1, e);
-        } catch (IllegalAccessException e)
+        } 
+        catch (IllegalAccessException e)
         {
             throw new UnexpectedException(-1, e);
-        } catch (InvocationTargetException e)
+        } 
+        catch (InvocationTargetException e)
         {
             throw new UnexpectedException(-1, e.getCause());
         }

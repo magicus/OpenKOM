@@ -83,7 +83,8 @@ public class BasicMessagePrinter implements MessagePrinter
 				// Complex case: Original text was in a different conference
 				//
 				out.println(formatter.format("BasicMessagePrinter.reply.to.different.conference", 
-					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()), 
+					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
+				        new Long(replyTo.getOccurrence().getGlobalId()),
 				        context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()), 
 				        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }));
 			}
@@ -171,18 +172,19 @@ public class BasicMessagePrinter implements MessagePrinter
 		for(int idx = 0; idx < top; ++idx)
 		{
 			Envelope.RelatedMessage each = replies[idx];	
+			MessageOccurrence occ = each.getOccurrence();
 			
 			// Reply in same conference? 
 			//
 			if(each.isLocal())
 			{
 				out.println(formatter.format("BasicMessagePrinter.reply.same.conference",
-					new Object[] { new Long(each.getOccurrence().getLocalnum()), each.getAuthorName() }));
+					new Object[] { new Long(occ.getLocalnum()), each.getAuthorName() }));
 			}
 			else
 			{
 				out.println(formatter.format("BasicMessagePrinter.reply.different.conference",
-					new Object[] { new Long(each.getOccurrence().getLocalnum()), 
+					new Object[] { new Long(occ.getLocalnum()), new Long(occ.getGlobalId()), 
 						each.getAuthorName(), each.getConferenceName() }));
 			}	
 		}

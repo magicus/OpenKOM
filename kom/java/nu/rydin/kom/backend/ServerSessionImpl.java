@@ -164,6 +164,16 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	 * The user currently logged in
 	 */
 	private long m_userId;
+	
+	/**
+	 * Backwards-linked list of read message
+	 */
+	private ReadLogItem m_readLog;
+	
+	/**
+	 * Messages to mark as unread at logout
+	 */
+	private ReadLogItem m_pendingUnreads;
 		
 	public ServerSessionImpl(DataAccess da, long userId, SessionManager sessions)
 	throws UnexpectedException
@@ -285,7 +295,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public long getLoginTime()
 	{
 		return m_loginTime;
-	}	
+	}
 	
 	public SessionState getSessionState()
 	throws UnexpectedException
@@ -706,6 +716,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			//
 			m_sessions.broadcastEvent(new UserAttendanceEvent(m_userId, 
 				this.getUser(m_userId).getName(), UserAttendanceEvent.LOGOUT)); 
+			
+			// Handle pending unreads
+			//
+			for(; m_pendingUnreads != null; m_pendingUnreads = m_pendingUnreads.getPrevious())
+			    m_memberships.markAsUnread(m_pendingUnreads.getConference(), m_pendingUnreads.getLocalNum());
 
 			// Make sure all message markers are saved
 			//
@@ -1412,6 +1427,31 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		ByteArrayOutputStream s = new ByteArrayOutputStream();
 		m_memberships.printDebugInfo(new PrintStream(s));
 		return s.toString();	
+	}
+	
+	public void markAsUnreadAtLogoutInCurrentConference(int localnum)
+	throws UnexpectedException
+	{
+	    m_pendingUnreads = new ReadLogItem(m_pendingUnreads, this.getCurrentConferenceId(), localnum);
+	}
+
+	public void markAsUnreadAtLogout(long messageId)
+	throws UnexpectedException
+	{
+	    try
+	    {
+		    MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(
+		            this.getCurrentConferenceId(), messageId);
+		    m_pendingUnreads = new ReadLogItem(m_pendingUnreads, occ.getConference(), occ.getLocalnum());
+	    }
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+		catch(ObjectNotFoundException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
 	}
 	
 	public void changeUnread(int nUnread)
@@ -2565,6 +2605,43 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
+	public int rollbackReads(int n)
+	throws UnexpectedException
+	{
+	    long conf = -1;
+	    int count = 0;
+	    for(; count < n && m_readLog != null; m_readLog = m_readLog.getPrevious())
+	    {
+	        conf = m_readLog.getConference();
+	        try
+	        {
+	            m_memberships.markAsUnread(conf, m_readLog.getLocalNum());
+	            ++count;
+	        }
+	        catch(ObjectNotFoundException e)
+	        {
+	            // The conference disappeared. Not much we can do!
+	        }
+	    }
+	    
+	    // Go to the conference of the last unread message
+	    //
+	    try
+	    {
+		    if(conf != -1)
+		        this.gotoConference(conf);
+	    }
+        catch(NotMemberException e)
+        {
+            // We have signed off from that conference. Not much to do
+        }
+        catch(ObjectNotFoundException e)
+        {
+            // The conference disappeared. Not much we can do!
+        }        
+	    return count;	    
+	}
+	
 	public void assertConferencePermission(long conferenceId, int mask)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
 	{
@@ -2667,6 +2744,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				MessageOccurrence each = occs[idx];
 				this.markMessageAsRead(each.getConference(), each.getLocalnum());
 			}
+			
+			// Put it in the read log. Notice that we log only one occurrence, as
+			// it would confuse users if implicitly read occurences were included.
+			//
+			this.appendToReadLog(occs[0]);
 			
 			// Create Envelope and return
 			//
@@ -2787,6 +2869,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	protected void setDataAccess(DataAccess da)
 	{
 		m_da = da;	
+	}
+	
+	protected void appendToReadLog(MessageOccurrence occ)
+	{
+	    m_readLog = new ReadLogItem(m_readLog, occ.getConference(), occ.getLocalnum());
 	}
 	
 	public void checkRights(long mask)
