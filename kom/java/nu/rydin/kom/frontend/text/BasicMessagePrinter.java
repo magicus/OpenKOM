@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.data.MessageManager;
+import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.ansi.ANSISequences;
@@ -35,6 +36,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		MessageFormatter formatter = context.getMessageFormatter();
 		Message message = envelope.getMessage();
 		MessageOccurrence primaryOcc = envelope.getPrimaryOccurrence();
+		MessageAttribute[] attributes = envelope.getAttributes();
 		
 		// Clear screen if requested by user
 		//
@@ -75,7 +77,8 @@ public class BasicMessagePrinter implements MessagePrinter
 		Envelope.RelatedMessage replyTo = envelope.getReplyTo();
 		if(replyTo != null)
 		{
-				 			
+			// Text is a comment
+		    //
 			if(replyTo.isLocal())
 			{
 				// Simple case: Original text was in same conference
@@ -94,7 +97,20 @@ public class BasicMessagePrinter implements MessagePrinter
 				        context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()), 
 				        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }));
 			}
-		}		
+		}
+		else
+		{
+		    // Even though this text looks like it's not a comment, it might be
+		    // a comment to a deleted text.
+			for(int idx = 0; idx < attributes.length; ++idx)
+			{
+			    MessageAttribute each = attributes[idx];
+			    if(each.getKind() == MessageManager.ATTR_ORIGINAL_DELETED)
+			    {
+			        out.println(formatter.format("BasicMessagePrinter.reply.to.deleted.text", context.formatObjectName(each.getUsername(), each.getUserId())));		        
+			    }
+			}
+		}
 		
 		// Print receiver list
 		//
@@ -106,31 +122,35 @@ public class BasicMessagePrinter implements MessagePrinter
 		for(int idx = 0; idx < top; ++idx)
 		{
 			MessageOccurrence occ = occs[idx];
-			out.println(formatter.format("BasicMessagePrinter.receiver", 
-			        context.formatObjectName(receivers[idx].getName(), receivers[idx].getId())));
-			switch(occ.getKind())
+			// Make sure we only print occurences in conferences we have read-permission in!
+			//
+			if (context.getSession().hasPermissionInConference(occ.getConference(), ConferencePermissions.READ_PERMISSION))
 			{
-				case MessageManager.ACTION_COPIED:
-					PrintUtils.printRepeated(out, ' ', space);
-					out.println(formatter.format("BasicMessagePrinter.copied", 
-						new Object[] { context.formatObjectName(occ.getUser()), 
-					        context.smartFormatDate(occ.getTimestamp()) }));
-					break;
-				case MessageManager.ACTION_MOVED:
-					MessageAttribute[] attributes = envelope.getAttributes();
-					for(int attrIdx = attributes.length-1; 0 <= attrIdx; --attrIdx)
-					{
-						MessageAttribute each = attributes[attrIdx];
-						if(each.getKind() == MessageManager.ATTR_MOVEDFROM)
+				out.println(formatter.format("BasicMessagePrinter.receiver", 
+				        context.formatObjectName(receivers[idx].getName(), receivers[idx].getId())));
+				switch(occ.getKind())
+				{
+					case MessageManager.ACTION_COPIED:
+						PrintUtils.printRepeated(out, ' ', space);
+						out.println(formatter.format("BasicMessagePrinter.copied", 
+							new Object[] { context.formatObjectName(occ.getUser()), 
+						        context.smartFormatDate(occ.getTimestamp()) }));
+						break;
+					case MessageManager.ACTION_MOVED:
+						for(int attrIdx = attributes.length-1; 0 <= attrIdx; --attrIdx)
 						{
-							movedFrom = new String(each.getValue());
-							break;
+							MessageAttribute each = attributes[attrIdx];
+							if(each.getKind() == MessageManager.ATTR_MOVEDFROM)
+							{
+								movedFrom = new String(each.getValue());
+								break;
+							}
 						}
-					}
-					PrintUtils.printRepeated(out, ' ', space);
-					out.println(formatter.format("BasicMessagePrinter.moved.long", 
-						new Object[] { movedFrom, context.formatObjectName(occ.getUser()), context.smartFormatDate(occ.getTimestamp()) }));
-					break;					
+						PrintUtils.printRepeated(out, ' ', space);
+						out.println(formatter.format("BasicMessagePrinter.moved.long", 
+							new Object[] { movedFrom, context.formatObjectName(occ.getUser()), context.smartFormatDate(occ.getTimestamp()) }));
+						break;					
+				}   
 			}
 		} 
 				
@@ -211,14 +231,12 @@ public class BasicMessagePrinter implements MessagePrinter
 		
 		// Print list of "no comments"
 		//
-		MessageAttribute[] attributes = envelope.getAttributes();
 		for(int idx = 0; idx < attributes.length; ++idx)
 		{
 		    MessageAttribute each = attributes[idx];
-		    
 		    if(each.getKind() == MessageManager.ATTR_NOCOMMENT)
 		    {
-		        out.println(formatter.format("BasicMessagePrinter.nocomment", context.formatObjectName(each.getNoCommentUsername(), each.getNoCommentUserid())));		        
+		        out.println(formatter.format("BasicMessagePrinter.nocomment", context.formatObjectName(each.getUsername(), each.getUserId())));		        
 		    }
 		}
 	}

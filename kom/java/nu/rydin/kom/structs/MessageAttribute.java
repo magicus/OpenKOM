@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 import nu.rydin.kom.backend.data.MessageManager;
-import nu.rydin.kom.utils.Logger;
 
 /**
  * @author Henrik Schröder
@@ -58,14 +57,14 @@ public class MessageAttribute implements Serializable
         return m_value;
     }
 	
-	public static String constructNoCommentPayload(UserInfo user)
+	public static String constructUsernamePayload(long userId, String userName)
 	{
-	    return user.getId() + ":" + user.getName(); 
+	    return userId + ":" + userName; 
 	}
 
-	public String getNoCommentUsername()
+	public String getUsername()
 	{
-	    if (m_kind == MessageManager.ATTR_NOCOMMENT)
+	    if (m_kind == MessageManager.ATTR_NOCOMMENT || m_kind == MessageManager.ATTR_ORIGINAL_DELETED)
 	    {
 	        return m_value.substring(m_value.indexOf(":") + 1);
 	    }
@@ -75,10 +74,10 @@ public class MessageAttribute implements Serializable
 	    }
 	}
 	
-	public long getNoCommentUserid()
+	public long getUserId()
 	{
 	    long result = -1;
-	    if (m_kind == MessageManager.ATTR_NOCOMMENT)
+	    if (m_kind == MessageManager.ATTR_NOCOMMENT || m_kind == MessageManager.ATTR_ORIGINAL_DELETED)
 	    {
 	        try
             {
