@@ -158,7 +158,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 					{
 						userInfo = this.login();
 						m_userId = userInfo.getId();
-						Thread.currentThread().setName("Session " + userInfo.getUserid());
+						Thread.currentThread().setName("Session (" + userInfo.getUserid() + ")");
 						break;
 					}
 					catch(AuthenticationException e)

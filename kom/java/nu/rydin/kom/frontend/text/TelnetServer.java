@@ -39,6 +39,7 @@ public class TelnetServer implements Runnable
 		
 		public SessionReaper(Socket socket, Thread clientThread, ClientSession session)
 		{
+			super("SessionReaper");
 			m_socket 		= socket;
 			m_clientThread 	= clientThread;
 			m_session		= session;
@@ -128,7 +129,7 @@ public class TelnetServer implements Runnable
 					// Also create a SessionReaper that will be woken up when the
 					// session dies to perform post-mortem cleanup.
 					//
-					Thread clientThread = new Thread(client, "Session [not logged in]");
+					Thread clientThread = new Thread(client, "Session (not logged in)");
 					Thread reaper = new SessionReaper(incoming, clientThread, client);
 					reaper.start();
 					clientThread.start();

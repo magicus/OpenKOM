@@ -36,6 +36,10 @@ public class SessionManager
 	
 	private class Broadcaster extends Thread
 	{
+		public Broadcaster() {
+			super("Broadcaster");
+		}
+		
 		public void run()
 		{
 			try

@@ -19,6 +19,7 @@ import nu.rydin.kom.LineUnderflowException;
 import nu.rydin.kom.OutputInterruptedException;
 import nu.rydin.kom.StopCharException;
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.backend.SessionManager;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
@@ -223,9 +224,34 @@ public class LineEditor implements NewlineListener
 		}
 	}
 	
-	private class EventPoller extends Thread
+	private abstract class LineEditorHelper extends Thread
+	{
+	    String m_threadName;
+	    
+	    public LineEditorHelper(String threadName) 
+	    {
+	        m_threadName = threadName;
+	        setThreadName("not logged in");
+	    }
+	    
+	    public void setThreadName(String userName) 
+	    {
+	        setName(m_threadName + " (" + userName + ")");
+	    }
+	    
+		public void setSession(ServerSession session)
+		{
+		    setThreadName(session.getLoggedInUser().getUserid());
+		}
+	}
+	
+	private class EventPoller extends LineEditorHelper
 	{
 		private final int POLL_INTERVAL = ClientSettings.getEventPollInterval();
+		
+		public EventPoller() {
+			super("EventPoller");
+		}
 		
 		public void run()
 		{
@@ -247,8 +273,12 @@ public class LineEditor implements NewlineListener
 		}
 	}
 	
-	private class KeystrokePoller extends Thread
+	private class KeystrokePoller extends LineEditorHelper
 	{
+		public KeystrokePoller() {
+			super("KeystrokePoller");
+		}
+		
 		public void run()
 		{
 			for(;;)
@@ -343,6 +373,8 @@ public class LineEditor implements NewlineListener
 		if(m_session != null)
 			throw new IllegalStateException("Already have a session!");
 		m_session = session;
+		m_keystrokePoller.setSession(session);
+		m_eventPoller.setSession(session);
 		m_eventPoller.start();
 		
 	}
