@@ -380,6 +380,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			try
 			{
 			    String motd = m_session.readSystemFile(SystemFiles.WELCOME_MESSAGE);
+			    this.getDisplayController().output();
 			    m_out.println();
 			    WordWrapper ww = this.getWordWrapper(motd);
 			    String line;
