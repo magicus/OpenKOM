@@ -13,7 +13,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 
+import nu.rydin.kom.AllRecipientsNotReachedException;
 import nu.rydin.kom.AlreadyMemberException;
 import nu.rydin.kom.AmbiguousNameException;
 import nu.rydin.kom.AuthorizationException;
@@ -31,6 +34,7 @@ import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
+import nu.rydin.kom.backend.data.ObjectManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.BroadcastMessageEvent;
@@ -1052,6 +1056,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
+	public boolean hasSession (long userId)
+	{
+		return m_sessions.hasSession(userId);
+	}
+	
 	public synchronized void postEvent(Event e)
 	{
 		m_eventQueue.addLast(e);
@@ -1076,6 +1085,78 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			throw new NotLoggedInException();
 		m_sessions.sendEvent(userId, new ChatMessageEvent(userId, this.getLoggedInUserId(), 
 			this.getLoggedInUser().getName(), message));
+	}
+	
+	private void sendChatMessageHelper(long userId, String message)
+	{
+		if (m_sessions.hasSession(userId))
+		{
+			m_sessions.sendEvent(userId, new ChatMessageEvent(userId, this.getLoggedInUserId(), 
+				this.getLoggedInUser().getName(), message));
+		}
+	}
+	
+	public void sendMulticastMessage (long destinations[], String message)	
+	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException
+	{
+		boolean hasError = false;
+		// Set to make sure we don't send the message to the same user more than once.
+		//
+		HashSet s = new HashSet();
+		for (int i = 0; i < destinations.length; ++i)
+		{
+			if (-1 == destinations[i])
+			{
+				break;
+			}
+			else
+			{
+				if (UserManager.USER_KIND == m_da.getObjectManager().getObjectKind(destinations[i]))
+				{
+					if (m_sessions.hasSession(destinations[i]))
+					{
+						s.add(new Long(destinations[i]));
+					}
+					else
+					{
+						hasError = true;
+					}
+				}
+				else // conference
+				{
+					try
+					{
+						MembershipInfo[] mi = m_da.getMembershipManager().listMembershipsByConference(destinations[i]);
+						for (int j = 0; j < mi.length; ++j)
+						{
+							long uid = mi[j].getUser();
+							if (m_sessions.hasSession(uid))
+							{
+								s.add(new Long(uid));
+							}
+						}
+					}
+					catch (SQLException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+		} // for
+		
+		// Now just send it
+		//
+		Iterator iter = s.iterator();
+		while (iter.hasNext())
+		{
+			sendChatMessageHelper(((Long)iter.next()).longValue(), message);
+		}
+		
+		// Finally..
+		s = null;
+		if (hasError)
+			throw new AllRecipientsNotReachedException();
+		
 	}
 	
 	public void broadcastChatMessage(String message)

@@ -8,6 +8,7 @@ package nu.rydin.kom.backend;
 
 import java.sql.SQLException;
 
+import nu.rydin.kom.AllRecipientsNotReachedException;
 import nu.rydin.kom.AlreadyMemberException;
 import nu.rydin.kom.AmbiguousNameException;
 import nu.rydin.kom.AuthorizationException;
@@ -510,6 +511,12 @@ public interface ServerSession
 	throws UnexpectedException;
 
 	/**
+	 * Returns true if the given user currently has an active session. 
+	 * @param userId User ID.
+	 */
+	public boolean hasSession (long userId);
+	
+	/**
 	 * Sends a chat message to a specified user.
 	 * 
 	 * @param userId The id of the receiving user
@@ -518,6 +525,14 @@ public interface ServerSession
 	 */	
 	public void sendChatMessage(long userId, String message)
 	throws NotLoggedInException;
+	
+	/**
+	 * Sends a chat message to multiple recipients (users and conferences).
+	 * @param destinations The intended message destinations
+	 * @param message The message
+	 */
+	public void sendMulticastMessage (long destinations[], String message)	
+	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException;
 	
 	/**
 	 * Broadcasts a chat message to all logged in users

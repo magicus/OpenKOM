@@ -130,6 +130,16 @@ public class SessionManager
 	}
 	
 	/**
+	 * Checks if the given user currently has an open session.
+	 * @param u The user ID.
+	 */
+	
+	public synchronized boolean hasSession(long u)
+	{
+		return m_sessions.containsKey(new Long(u));
+	}
+	
+	/**
 	 * Broadcasts an event to all currently active sessions
 	 * @param e The event
 	 */
