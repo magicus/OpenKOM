@@ -63,7 +63,19 @@ public class MessageFormatter
 	
 	public String format(String key, Object[] args)
 	{
-		return this.getFormat(key).format(args);
+	    try
+	    {
+	        return this.getFormat(key).format(args);
+	    }
+	    catch (IllegalArgumentException e)
+	    {
+	        // So, we couldn't format this for one reason or another. Possibly because
+	        // getFormat() didn't find the resource and instead returned the
+	        // error.resource.not.found format. Just show the pattern. This shouldn't
+	        // occur anyway.
+	        //
+	        return this.getFormat(key).toString();
+	    }
 	}
 	
 	public String getStringOrNull(String key)
