@@ -28,6 +28,7 @@ public class UserManager
 {	
 	private final PreparedStatement m_getIdByLoginStmt;
 	private final PreparedStatement m_authenticateStmt;
+	private final PreparedStatement m_authenticateOnIdStmt;
 	private final PreparedStatement m_addUserStmt;
 	private final PreparedStatement m_loadUserStmt;
 	private final PreparedStatement m_updateCharsetStmt;
@@ -52,6 +53,8 @@ public class UserManager
 			"SELECT id FROM users WHERE userid = ?");
 		m_authenticateStmt = conn.prepareStatement(
 			"SELECT u.id, u.pwddigest FROM users u, names n WHERE u.userid = ? AND n.id = u.id");
+		m_authenticateOnIdStmt = conn.prepareStatement(
+			"SELECT u.id, u.pwddigest FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_addUserStmt = conn.prepareStatement(
 			"INSERT INTO users(userid, pwddigest, address1, address2, " +
 			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights) " +
@@ -77,6 +80,8 @@ public class UserManager
 			m_authenticateStmt.close();
 		if(m_authenticateStmt != null)
 			m_authenticateStmt.close();
+		if(m_authenticateOnIdStmt != null)
+			m_authenticateOnIdStmt.close();
 		if(m_addUserStmt != null)
 			m_addUserStmt.close();
 		if(m_loadUserStmt != null)
@@ -102,14 +107,26 @@ public class UserManager
 	throws ObjectNotFoundException, AuthenticationException,
 		NoSuchAlgorithmException, SQLException
 	{
-		// Look up user
-		//
-		m_authenticateStmt.clearParameters();
-		m_authenticateStmt.setString(1, userid);
+		PreparedStatement ps = null;
+		try
+		{
+			long l = Long.parseLong(userid);
+			ps = m_authenticateOnIdStmt;
+			ps.clearParameters();
+			ps.setLong(1, l);
+		}
+		catch (NumberFormatException e)
+		{
+			// Not a numeric login.
+			ps = m_authenticateStmt;
+			ps.clearParameters();
+			ps.setString(1, userid);
+		}
+		
 		ResultSet rs = null;
 		try
 		{
-			rs = m_authenticateStmt.executeQuery();
+			rs = ps.executeQuery();
 			if(!rs.next())
 				throw new ObjectNotFoundException(userid);
 			long id = rs.getLong(1);
