@@ -30,6 +30,7 @@ public class ChangeUnread extends AbstractCommand
 	    Integer number = (Integer) parameterArray[0];
 		
 		context.getSession().changeUnread(number.intValue());
+		context.printCurrentConference();
 	}
 
 }

@@ -35,7 +35,7 @@ public class Change extends AbstractCommand
 	{
 	    Integer lineInteger = (Integer) parameterArray[0];
 	    
-		int line = lineInteger.intValue();
+		int line = lineInteger.intValue() - 1;
 		Buffer buffer = ((EditorContext) context).getBuffer();
 		try
 		{
