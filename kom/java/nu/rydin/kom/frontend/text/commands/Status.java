@@ -46,7 +46,7 @@ public class Status extends AbstractCommand
 		// 
 		long id = parameters.length == 0
 			? context.getLoggedInUserId()
-			: NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context);
+			: NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
 
 		// Call backend
 		//		

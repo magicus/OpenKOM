@@ -38,7 +38,7 @@ public class RenameObject extends AbstractCommand
 		if(parameters.length == 0)
 			throw new MissingArgumentException();
 
-		long id = NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context);
+		long id = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
 		
 		// Set up
 		//

@@ -37,7 +37,7 @@ public class ChangePassword extends AbstractCommand
 		if(parameters.length != 0)
 		{
 			session.checkRights(UserPermissions.USER_ADMIN);
-			user = NamePicker.resolveName(parameters[0], UserManager.USER_KIND, context);
+			user = NamePicker.resolveNameToId(parameters[0], UserManager.USER_KIND, context);
 		}
 		else
 			user = context.getLoggedInUserId();

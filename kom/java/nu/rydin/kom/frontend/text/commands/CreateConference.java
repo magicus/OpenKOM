@@ -163,7 +163,7 @@ public class CreateConference extends AbstractCommand
 				out.flush();
 				String line = in.readLine();
 				replyConf = line.length() != 0
-					? NamePicker.resolveName(line, ConferenceManager.CONFERENCE_KIND, context)
+					? NamePicker.resolveNameToId(line, ConferenceManager.CONFERENCE_KIND, context)
 					: -1; 
 				break;
 			}

@@ -38,7 +38,7 @@ public class ViewPresentation extends AbstractCommand
 		}
 		try
 		{
-			long objectId = NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context);
+			long objectId = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
 			short kind = MessageManager.ATTR_PRESENTATION; 
 			context.getMessagePrinter().printMessage(context, context.getSession().readMagicMessage(kind, objectId));
 		}

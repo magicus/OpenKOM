@@ -34,7 +34,7 @@ public class PresentObject extends AbstractCommand
 		{
 			throw new BadParameterException();
 		}
-		long objectId = NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context);
+		long objectId = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
 		short kind = context.getSession().getObjectKind(objectId);
 		UnstoredMessage msg = context.getMessageEditor().edit(context, -1);
 		MessageOccurrence occ = context.getSession().storeMagicMessage(msg, kind, objectId);

@@ -84,7 +84,7 @@ public class SendChatMessage extends AbstractCommand
 			String recipients = "";
 			for (int i = 0; i < uarray.length; ++i)
 			{
-			    long id = NamePicker.resolveName(uarray[i], NameManager.UNKNOWN_KIND, context);
+			    long id = NamePicker.resolveNameToId(uarray[i], NameManager.UNKNOWN_KIND, context);
 				destinations[i] = id;
 				recipients += ", " + session.getName(id);
 			}

@@ -37,7 +37,7 @@ public class DeleteConference extends AbstractCommand
 		{
 			throw new MissingArgumentException();
 		}
-		long conference=NamePicker.resolveName(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context);
+		long conference=NamePicker.resolveNameToId(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context);
 		ServerSession ss = context.getSession();
 		MessageFormatter mf = context.getMessageFormatter();
 		PrintWriter out = context.getOut();

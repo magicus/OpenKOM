@@ -46,7 +46,7 @@ public class AddPermissions extends AbstractCommand
 			
 		// Resolve user
 		//
-		long user = NamePicker.resolveName(NameUtils.assembleName(parameters), UserManager.USER_KIND, context);
+		long user = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), UserManager.USER_KIND, context);
 		
 		// Load current permissions (if any) 
 		//

@@ -35,7 +35,7 @@ public class SignOff extends AbstractCommand
 		if(parameters.length == 0)
 			throw new MissingArgumentException();
 		
-		long conference = NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context);
+		long conference = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
 		if (context.getLoggedInUserId() == conference)
 		{
 			throw new CantSignoffMailboxException();

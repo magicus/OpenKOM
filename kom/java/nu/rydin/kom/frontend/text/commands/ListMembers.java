@@ -32,7 +32,7 @@ public class ListMembers extends AbstractCommand
 	{
 		long confid = 	0 == parameters.length ?
 					  	context.getSession().getCurrentConference().getId() :
-					  	NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context);
+					  	NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
 		String[] mbrs = context.getSession().listMemberNamesByConference(confid);
 					  	
 		PrintWriter out = context.getOut();

@@ -34,7 +34,7 @@ public class ChangeSuffix extends AbstractCommand
 		throws KOMException, IOException, InterruptedException
 	{
 		long id = parameters.length != 0 
-			? NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context)
+			? NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context)
 			: -1;
 			
 		// Are we trying to change the suffix of another user? We need the

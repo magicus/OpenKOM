@@ -40,7 +40,7 @@ public class ReadRules extends AbstractCommand
 			}
 			else
 			{
-				context.getMessagePrinter().printMessage(context, context.getSession().getLastRulePostingInConference(NamePicker.resolveName(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context)));
+				context.getMessagePrinter().printMessage(context, context.getSession().getLastRulePostingInConference(NamePicker.resolveNameToId(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context)));
 			}
 		}
 		catch(ObjectNotFoundException e)

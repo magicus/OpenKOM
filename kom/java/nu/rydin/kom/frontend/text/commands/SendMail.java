@@ -34,7 +34,7 @@ public class SendMail extends AbstractCommand
 		//
 		if(parameters.length == 0)
 			throw new MissingArgumentException();
-		long user = NamePicker.resolveName(NameUtils.assembleName(parameters), (short) -1, context);
+		long user = NamePicker.resolveNameToId(NameUtils.assembleName(parameters), (short) -1, context);
 		
 		// Get editor and execute it
 		//

@@ -23,13 +23,14 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class NamePicker
 {
-	public static long resolveName(String name, short kind, Context ctx)
-	throws ObjectNotFoundException, AmbiguousNameException, UnexpectedException, IOException, 
+	private static NameAssociation innerResolveName(String name, short kind, Context ctx)
+	throws ObjectNotFoundException, UnexpectedException, IOException, 
 		InterruptedException, OperationInterruptedException, InvalidChoiceException
 	{
 		try
 		{
-			return Long.parseLong(name);
+			long id = Long.parseLong(name);
+			return new NameAssociation(id, null);
 		}
 		catch (NumberFormatException e)
 		{
@@ -56,17 +57,32 @@ public class NamePicker
 		if(assocs.length == 0)
 			throw new ObjectNotFoundException(name);
 		if(assocs.length == 1)
-			return assocs[0].getId();
+			return assocs[0];
 		
 		// Ambiguous! Go get possible names!
 		//
-		long id = pickName(assocs, ctx);
-		if(id == -1)
+		NameAssociation assoc = pickName(assocs, ctx);
+		if(assoc.getId() == -1)
 			throw new ObjectNotFoundException(name);
-		return id;
+		return assoc;
 	}
 	
-	public static long pickName(NameAssociation[] assocs, Context ctx)
+	public static long resolveNameToId(String name, short kind, Context context) throws ObjectNotFoundException, UnexpectedException, IOException, 
+	InterruptedException, OperationInterruptedException, InvalidChoiceException {
+		return innerResolveName(name, kind, context).getId();
+	}
+	
+	public static NameAssociation resolveName(String name, short kind, Context context) throws ObjectNotFoundException, UnexpectedException, IOException, 
+	InterruptedException, OperationInterruptedException, InvalidChoiceException {
+		NameAssociation assoc = innerResolveName(name, kind, context);
+		if (assoc.getName() == null) {
+			long id = assoc.getId();
+			return new NameAssociation(id, context.getSession().getName(id));
+		}
+		return assoc;
+	}
+	
+	public static NameAssociation pickName(NameAssociation[] assocs, Context ctx)
 	throws IOException, OperationInterruptedException, InterruptedException, InvalidChoiceException
 	{
 		MessageFormatter formatter = ctx.getMessageFormatter();
@@ -100,7 +116,7 @@ public class NamePicker
 		{
 			throw new InvalidChoiceException();
 		}
-		return assocs[idx - 1].getId();
+		return assocs[idx - 1];
 	}
 
 }

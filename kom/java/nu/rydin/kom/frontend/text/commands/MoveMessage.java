@@ -38,7 +38,7 @@ public class MoveMessage extends AbstractCommand
 			throw new BadParameterException();
 		}
 		
-		long conference=NamePicker.resolveName(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context);
+		long conference=NamePicker.resolveNameToId(NameUtils.assembleName(parameters), ConferenceManager.CONFERENCE_KIND, context);
 		ServerSession ss = context.getSession();
 		int localNum = ss.globalToLocalInConference(ss.getCurrentConferenceId(), 
 													ss.getLastMessageHeader().getId()).getLocalnum();
