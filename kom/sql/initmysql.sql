@@ -137,3 +137,27 @@ CREATE TABLE IF NOT EXISTS magicconferences
 	PRIMARY KEY(conference, kind),
 	FOREIGN KEY (conference) REFERENCES conferences(id) ON DELETE CASCADE
 ) TYPE=INNODB;
+
+CREATE TABLE IF NOT EXISTS messagelog
+(
+	id BIGINT NOT NULL AUTO_INCREMENT,
+	body TEXT NOT NULL,
+	created DATETIME NOT NULL,
+	author BIGINT,
+	author_name VARCHAR(80) NOT NULL,
+	PRIMARY KEY(id),
+	INDEX mlauthor(author),
+	FOREIGN KEY (author) REFERENCES users(id) ON DELETE SET NULL
+) TYPE=INNODB;
+
+CREATE TABLE IF NOT EXISTS messagelogpointers
+(
+	recipient BIGINT NOT NULL,
+	logid BIGINT NOT NULL,
+	kind SMALLINT NOT NULL,
+	sent BIT NOT NULL,
+	INDEX mlpuser_ix(recipient),
+	FOREIGN KEY (recipient) REFERENCES names(id) ON DELETE CASCADE,
+	INDEX logitem(logid),
+	FOREIGN KEY (logid) REFERENCES messagelog(id) ON DELETE CASCADE
+) TYPE=INNODB;

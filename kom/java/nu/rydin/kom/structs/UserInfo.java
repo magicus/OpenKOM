@@ -175,6 +175,7 @@ public class UserInfo extends NamedObject
 	{
 		return m_lastlogin;
 	}
+	
 	public void setAddress1(String string)
 	{
 		if(!string.equals(m_address1))
@@ -272,5 +273,10 @@ public class UserInfo extends NamedObject
 			m_changeMask |= URL;
 			m_url = string;
 		}
-	}	
+	}
+	
+	public boolean testFlags(int flagword, long mask)
+	{
+	    return (m_flags[flagword] & mask) == mask;
+	}
 }

@@ -15,11 +15,14 @@ public class BroadcastMessageEvent extends Event
 	
 	private final String m_message;
 	
-	public BroadcastMessageEvent(long user, String userName, String message)
+	private final long m_logId;
+	
+	public BroadcastMessageEvent(long user, String userName, String message, long logId)
 	{
 		super(user);
 		m_userName 	= userName;
 		m_message	= message;
+		m_logId		= logId;
 	}
 	
 	public void dispatch(EventTarget target)
@@ -35,5 +38,10 @@ public class BroadcastMessageEvent extends Event
 	public String getMessage()
 	{
 		return m_message;
+	}
+	
+	public long getLogId()
+	{
+	    return m_logId;
 	}
 }

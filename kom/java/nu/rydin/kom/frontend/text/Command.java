@@ -32,8 +32,10 @@ public interface Command
 	 */
 	public int match(String[] command);
 
-	public boolean acceptsParameters();	
+	public boolean acceptsParameters();
 	
+	public boolean expectsNumericParameter();
+
 	public String[] getParameters(String[] parts);
 	
 	/**

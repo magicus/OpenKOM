@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.utils.StringUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -51,7 +52,7 @@ public abstract class AbstractCommand implements Command
 		//
 		if(!this.acceptsParameters() && itsTop  > myTop)
 			return 0;
-			
+					
 		// Start matching
 		//
 		int top = Math.min(myTop, itsTop);
@@ -64,6 +65,15 @@ public abstract class AbstractCommand implements Command
 			if(!candidate.equals(myPart.substring(0, candidate.length())))
 				return 0;
 		}
+		
+		// If we accept parameters and we expect them to be numeric,
+		// then don't consider this a match for nun-numeric paramters.
+		//
+		if(this.acceptsParameters() && this.expectsNumericParameter() &&
+			!StringUtils.isMessageNumber(commandParts[myTop]))
+		    return 0;
+
+		
 		// If we got this far, we have a match! Whee!!
 		//
 		return top;
@@ -72,6 +82,11 @@ public abstract class AbstractCommand implements Command
 	public boolean acceptsParameters()
 	{
 		return false;
+	}
+	
+	public boolean expectsNumericParameter()
+	{
+	    return false;
 	}
 	
 	public String[] getParameters(String[] parts)

@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.MissingArgumentException;
-import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -19,8 +18,11 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
+import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleChatEditor;
 import nu.rydin.kom.frontend.text.editor.simple.AbstractEditor;
+import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -48,6 +50,7 @@ public class SendChatMessage extends AbstractCommand
 		PrintWriter out = context.getOut();
 		ServerSession session = context.getSession();
 		String me = session.getLoggedInUser().getName();
+		MessageFormatter formatter = context.getMessageFormatter();
 
 		//Parse parameters to get list of recipients.
 		//
@@ -77,16 +80,9 @@ public class SendChatMessage extends AbstractCommand
 			String recipients = "";
 			for (int i = 0; i < uarray.length; ++i)
 			{
-				try
-				{
-				    long id = NamePicker.resolveName(uarray[i], NameManager.UNKNOWN_KIND, context);
-					destinations[i] = id;
-					recipients += ", " + session.getNamedObject(id).getName();
-				}
-				catch (ObjectNotFoundException e)
-				{
-					destinations[i] = -1;
-				}
+			    long id = NamePicker.resolveName(uarray[i], NameManager.UNKNOWN_KIND, context);
+				destinations[i] = id;
+				recipients += ", " + session.getNamedObject(id).getName();
 			}
 			//TODO: If destinations is empty, maybe we should throw an exception here?
 			
@@ -100,13 +96,6 @@ public class SendChatMessage extends AbstractCommand
 		    out.println(context.getMessageFormatter().format("chat.saytouser", recipients));
 
 		}
-
-		// Print rest of prompt
-		//
-	    out.println("");
-		out.print(me);
-		out.println(": ");
-		dc.normal();
 		out.flush();
 		
 		
@@ -125,13 +114,34 @@ public class SendChatMessage extends AbstractCommand
 		// Send it
 		//
 		// Can't make it less ugly than this...
-		if("*".equals(parameters[0]))
+		//
+		NameAssociation[] refused = "*".equals(parameters[0])
+			? session.broadcastChatMessage(message)
+			: session.sendMulticastMessage(destinations, message);
+		
+		// Print refused destinations (if any)
+		//
+		int top = refused.length;
+		if(top > 0)
 		{
-			session.broadcastChatMessage(message);
-		}
-		else
-		{
-		    session.sendMulticastMessage(destinations, message);
+		    // Build message
+		    //
+		    StringBuffer sb = new StringBuffer(200);
+		    sb.append(formatter.format("chat.refused"));
+		    for(int idx = 0; idx < top; ++idx)
+		    {
+		        sb.append(refused[idx].getName());
+		        if(idx < top - 1)
+		            sb.append(", ");
+		    } 
+		    
+		    // Wordwrap it!
+		    //
+		    out.println();
+		    WordWrapper ww = context.getWordWrapper(sb.toString());
+		    String line = null;
+		    while((line = ww.nextLine()) != null)
+		        out.println(line);
 		}
 	}
 

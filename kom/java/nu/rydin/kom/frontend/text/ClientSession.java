@@ -420,6 +420,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			catch(ObjectNotFoundException e)
 			{
 				m_out.println(m_formatter.format("error.object.not.found", e.getMessage()));
+				m_out.println();
 			}
 			catch(UnexpectedException e)
 			{

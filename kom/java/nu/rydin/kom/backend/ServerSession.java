@@ -30,6 +30,7 @@ import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.LocalMessageHeader;
 import nu.rydin.kom.structs.MembershipInfo;
 import nu.rydin.kom.structs.MembershipListItem;
+import nu.rydin.kom.structs.MessageLogItem;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.NameAssociation;
@@ -606,30 +607,23 @@ public interface ServerSession
 	 * @param userId User ID.
 	 */
 	public boolean hasSession (long userId);
-	
-	/**
-	 * Sends a chat message to a specified user.
-	 * 
-	 * @param userId The id of the receiving user
-	 * @param message The message
-	 * @throws NotLoggedInException
-	 */	
-	public void sendChatMessage(long userId, String message)
-	throws NotLoggedInException;
-	
+		
 	/**
 	 * Sends a chat message to multiple recipients (users and conferences).
 	 * @param destinations The intended message destinations
 	 * @param message The message
+	 * @return An array of NameAssociations of users that refused the message
 	 */
-	public void sendMulticastMessage (long destinations[], String message)	
+	public NameAssociation[] sendMulticastMessage (long destinations[], String message)	
 	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException, UnexpectedException;
 	
 	/**
 	 * Broadcasts a chat message to all logged in users
 	 * @param message The message
+	 * @return An array of NameAssociations of users that refused the message
 	 */
-	public void broadcastChatMessage(String message);
+	public NameAssociation[] broadcastChatMessage(String message)
+	throws UnexpectedException;
 		
 	/**
 	 * Posts an event to the session-private event queue. Not intended to 
@@ -1045,4 +1039,13 @@ public interface ServerSession
 	public LocalMessageHeader[] listGlobalMessagesByUser(long userId, int offset, int length)
 	throws UnexpectedException;
 
+	/**
+	 * Returns an array of messages (chat or broadcast) from the message log
+	 * 
+	 * @param kind The message kind (char or broadcast)
+	 * @param limit Maximum number of messages to return
+	 * @throws UnexpectedException
+	 */
+	public MessageLogItem[] getMessagesFromLog(short kind, int limit)
+	throws UnexpectedException;
 }

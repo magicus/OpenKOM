@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.MembershipManager;
+import nu.rydin.kom.backend.data.MessageLogManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
@@ -48,6 +49,11 @@ public class DataAccess
 	 */	
 	private final MessageManager m_messageManager;
 	
+	/**
+	 * Toolkit object dealing with message logs
+	 */
+	private final MessageLogManager m_messageLogManager;
+	
 	public DataAccess(Connection conn)
 	throws UnexpectedException
 	{
@@ -59,6 +65,7 @@ public class DataAccess
 			m_conferenceManager = new ConferenceManager(conn, m_nameManager);
 			m_membershipManager = new MembershipManager(conn);
 			m_messageManager 	= new MessageManager(conn);
+			m_messageLogManager	= new MessageLogManager(conn);
 		}
 		catch(SQLException e)
 		{
@@ -89,6 +96,11 @@ public class DataAccess
 	public MessageManager getMessageManager()
 	{
 		return m_messageManager;
+	}
+	
+	public MessageLogManager getMessageLogManager()
+	{
+	    return m_messageLogManager;
 	}
 	
 	public void commit()

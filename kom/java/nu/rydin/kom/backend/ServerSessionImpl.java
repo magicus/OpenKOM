@@ -33,10 +33,12 @@ import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.MembershipManager;
+import nu.rydin.kom.backend.data.MessageLogManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.BroadcastMessageEvent;
@@ -1319,120 +1321,185 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			return null;
 		return (Event) m_eventQueue.removeFirst();
 	}
-	
-	
-	// TODO: This is not used?
-	//
-	public void sendChatMessage(long userId, String message)
-	throws NotLoggedInException
-	{
-		if(m_sessions.getSession(userId) == null)
-			throw new NotLoggedInException();
-
-		if(message.substring(0,1).equals("!")) {
-			m_sessions.sendEvent(userId, new ChatAnonymousMessageEvent(userId, 
-					message.substring(1,message.length())));
-		} else {
-			m_sessions.sendEvent(userId, new ChatMessageEvent(userId, this.getLoggedInUserId(), 
-					this.getLoggedInUser().getName(), message));
-		}
-	}
-	
+		
 	private void sendChatMessageHelper(long userId, String message)
 	{
 		if (m_sessions.hasSession(userId))
 		{
-			if(message.substring(0,1).equals("!")) {
+			if(message.substring(0,1).equals("!")) 
+			{
 				m_sessions.sendEvent(userId, new ChatAnonymousMessageEvent(userId, 
 						message.substring(1,message.length())));
-			} else {
+			} 
+			else 
+			{
 				m_sessions.sendEvent(userId, new ChatMessageEvent(userId, this.getLoggedInUserId(), 
 					this.getLoggedInUser().getName(), message));
 			}
 		}
 	}
 	
-	public void sendMulticastMessage (long destinations[], String message)	
+	public NameAssociation[] sendMulticastMessage (long destinations[], String message)	
 	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException, UnexpectedException
 	{
-		boolean hasError = false;
-		// Set to make sure we don't send the message to the same user more than once.
-		//
-		HashSet s = new HashSet();
-		for (int i = 0; i < destinations.length; ++i)
-		{
-			if (-1 == destinations[i])
+	    try
+	    {
+		    // Create a message log item. If we have multiple recipients, they all share
+		    // the same item.
+		    //
+	        UserManager um = m_da.getUserManager();
+		    MessageLogManager mlm = m_da.getMessageLogManager();
+		    long logId = mlm.storeMessage(this.getLoggedInUserId(), this.getLoggedInUser().getName(), message);
+		    
+		    // Create a link for the logged in user. Used for retrieving messages sent.
+		    //
+		    mlm.storeMessagePointer(logId, this.getLoggedInUserId(), true, MessageLogKinds.CHAT);
+		    
+		    ArrayList refused = new ArrayList(destinations.length);
+		    boolean explicitToSelf = false;
+		    
+			// Set to make sure we don't send the message to the same user more than once.
+			//
+			HashSet s = new HashSet();
+			for (int i = 0; i < destinations.length; ++i)
 			{
-				break;
-			}
-			else
-			{
-				if (UserManager.USER_KIND == m_da.getNameManager().getObjectKind(destinations[i]))
+			    long each = destinations[i];
+				if (-1 == each)
 				{
-					if (m_sessions.hasSession(destinations[i]))
-					{
-						s.add(new Long(destinations[i]));
-					}
-					else
-					{
-						hasError = true;
-					}
+					break;
 				}
-				else // conference
+				else
 				{
-					try
+					if (UserManager.USER_KIND == m_da.getNameManager().getObjectKind(destinations[i]))
 					{
-						MembershipInfo[] mi = m_da.getMembershipManager().listMembershipsByConference(destinations[i]);
+					    // Are we explicitly sending to ourselves`?
+					    //
+					    UserInfo ui = um.loadUser(each);
+					    if(each == this.getLoggedInUserId())
+					        explicitToSelf = true;
+						if (m_sessions.hasSession(each) && ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES))
+						{
+							s.add(new Long(each));
+						}
+						else
+						{
+							refused.add(new NameAssociation(each, ui.getName()));
+						}
+					}
+					else // conference
+					{
+						MembershipInfo[] mi = m_da.getMembershipManager().listMembershipsByConference(each);
 						for (int j = 0; j < mi.length; ++j)
 						{
 							long uid = mi[j].getUser();
 							if (m_sessions.hasSession(uid))
 							{
-								s.add(new Long(uid));
+							    UserInfo ui = um.loadUser(uid);
+							    
+							    // Does the receiver accept chat messages
+							    //
+							    if(ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES))
+							        s.add(new Long(uid));
+							    else
+							        refused.add(new NameAssociation(uid, ui.getName()));
 							}
 						}
 					}
-					catch (SQLException e)
-					{
-						throw new UnexpectedException (this.getLoggedInUserId(), e);
-					}
 				}
+			} // for
+			
+			// Remove sending user
+			// TODO: This should be a flag condition!
+			//
+			if (!explicitToSelf)
+			{
+				s.remove(new Long(this.getLoggedInUserId()));
 			}
-		} // for
-		
-		// Remove sending user
-		// TODO: This should be a flag condition!
-		//
-		
-		if (s.contains (new Long(this.getLoggedInUserId())))
+			
+			// Now just send it
+			//
+			Iterator iter = s.iterator();
+			while (iter.hasNext())
+			{
+			    long user = ((Long)iter.next()).longValue();
+				sendChatMessageHelper(user, message);
+				
+				// Create link from recipient to message
+				//
+				mlm.storeMessagePointer(logId, user, false, MessageLogKinds.CHAT);
+			}
+			
+			NameAssociation[] answer = new NameAssociation[refused.size()];
+			refused.toArray(answer);
+			return answer;
+	    }
+		catch (SQLException e)
 		{
-			s.remove(new Long(this.getLoggedInUserId()));
-		}
-		
-		// Now just send it
-		//
-		Iterator iter = s.iterator();
-		while (iter.hasNext())
-		{
-			sendChatMessageHelper(((Long)iter.next()).longValue(), message);
-		}
-		
-		// Finally..
-		s = null;
-		if (hasError)
-			throw new AllRecipientsNotReachedException();
-		
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}		
 	}
 	
-	public void broadcastChatMessage(String message)
+	public NameAssociation[] broadcastChatMessage(String message)
+	throws UnexpectedException
 	{
-		if(message.substring(0,1).equals("!")) {
-			m_sessions.broadcastEvent(new BroadcastAnonymousMessageEvent( 
-					message.substring(1,message.length())));
-		} else {
-			m_sessions.broadcastEvent(new BroadcastMessageEvent(this.getLoggedInUserId(), 
-				this.getLoggedInUser().getName(), message));
-		}
+	    try
+	    {
+		    // Create a message log item. If we have multiple recipients, they all share
+		    // the same item.
+		    //
+	        UserManager um = m_da.getUserManager();
+		    MessageLogManager mlm = m_da.getMessageLogManager();
+		    long logId = mlm.storeMessage(this.getLoggedInUserId(), this.getLoggedInUser().getName(), message);
+		    	
+			if(message.substring(0,1).equals("!")) 
+			{
+				m_sessions.broadcastEvent(new BroadcastAnonymousMessageEvent( 
+						message.substring(1,message.length()), logId));
+			} 
+			else 
+			{
+				m_sessions.broadcastEvent(new BroadcastMessageEvent(this.getLoggedInUserId(), 
+					this.getLoggedInUser().getName(), message, logId));
+			}
+			
+			// Log to chat log. This could be done in the event handlers, but
+			// that would give all kinds of concurrence and transactional problems,
+			// since they are executing asynchronously. 
+			// There is, of course, a slight chance that someone logs in out out
+			// while doing this and that the log won't be 100% correct, but that's
+			// a tradeoff we're willing to make at this point.
+			//
+			ServerSession[] sessions = m_sessions.listSessions();
+			int top = sessions.length;
+			ArrayList bounces = new ArrayList(top);
+			for(int idx = 0; idx < top; ++idx)
+			{
+			    long userId = sessions[idx].getLoggedInUserId();
+			    try
+			    {
+			        // Find out if recipients allows broadcasts
+			        //
+				    UserInfo user = um.loadUser(userId);
+				    if((user.getFlags1() & UserFlags.ALLOW_BROADCAST_MESSAGES) != 0)
+				        mlm.storeMessagePointer(logId, userId, false, MessageLogKinds.BROADCAST);
+				    else
+				        bounces.add(new NameAssociation(userId, user.getName()));   
+			    }
+			    catch(ObjectNotFoundException e)
+			    {
+			        // Sending to nonexisting user? Probably deleted while
+			        // we were iterating. Just skip!
+			        //
+			    }
+			}
+			NameAssociation[] answer = new NameAssociation[bounces.size()];
+			bounces.toArray(answer);
+			return answer;
+	    }
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}		
 	}
 	
 	public short getObjectKind(long object)
@@ -1805,6 +1872,20 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
 		}
 	}
+	
+	public MessageLogItem[] getMessagesFromLog(short kind, int limit)
+	throws UnexpectedException
+	{
+	    try
+	    {
+	        return m_da.getMessageLogManager().listMessages(this.getLoggedInUserId(), kind, limit);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
+	}
+
 
 	protected void markAsInvalid()
 	{
@@ -2116,37 +2197,32 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	
 	public void onEvent(ChatMessageEvent e)
 	{
-		// Just post it!
-		// 
-		this.postEvent(e);
+	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_CHAT_MESSAGES))
+	        this.postEvent(e);
 	}
 
 	public void onEvent(ChatAnonymousMessageEvent e)
 	{
-		// Just post it!
-		// 
-		this.postEvent(e);
+	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_CHAT_MESSAGES))
+	        this.postEvent(e);
 	}
 	
 	public void onEvent(BroadcastMessageEvent e)
 	{
-		// Just post it!
-		// 
-		this.postEvent(e);
+	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_BROADCAST_MESSAGES))
+	        this.postEvent(e);
 	}
 	
 	public void onEvent(BroadcastAnonymousMessageEvent e)
 	{
-		// Just post it!
-		// 
-		this.postEvent(e);
+	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_BROADCAST_MESSAGES))
+	        this.postEvent(e);
 	}
 
 	public void onEvent(UserAttendanceEvent e)
 	{
-		// Just post it!
-		// 
-		this.postEvent(e);
+	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.SHOW_ATTENDANCE_MESSAGES))
+	        this.postEvent(e);
 	}
 	
 	public void onEvent(ReloadUserProfileEvent e)
@@ -2189,10 +2265,39 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 		catch(ObjectNotFoundException ex)
 		{
-			// Not member. No need to notify client
+			// Not a member. No need to notify client
 			//
 			return;
 		}
+	}
+	
+	protected boolean testUserFlagInEventHandler(long user, int flagword, long mask)
+	{
+	    // Borrow a UserManager from the pool
+	    //
+	    DataAccessPool pool = DataAccessPool.instance();
+	    DataAccess da = null;
+	    try
+	    {
+	        da = pool.getDataAccess();
+	  
+	        // Load user
+	        //
+	        UserInfo ui = da.getUserManager().loadUser(user);
+	        return ui.testFlags(flagword, mask);
+	    }
+	    catch(Exception e)
+	    {
+	        // We're called from an event handler, so what can we do?
+	        //
+	        e.printStackTrace();
+	        return false;
+	    }
+	    finally
+	    {
+	        if(da != null)
+	            pool.returnDataAccess(da);
+	    }
 	}
 
 	public MessageHeader[] listMessagesInConference(long conference, int start, int length)

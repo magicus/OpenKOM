@@ -14,11 +14,11 @@ public class CacheManager
 {
 	private static CacheManager s_instance = new CacheManager();
 	 
-	private KOMCache m_userCache = new KOMCache(50); // TODO: Read from config
+	private KOMCache m_userCache = new KOMCache(1000); // TODO: Read from config
 	
-	private KOMCache m_conferenceCache = new KOMCache(50); // TODO: Read from config
+	private KOMCache m_conferenceCache = new KOMCache(2000); // TODO: Read from config
 	
-	private KOMCache m_messageCache = new KOMCache(50); // TODO: Read from config
+	private KOMCache m_messageCache = new KOMCache(100); // TODO: Read from config
 	
 	public static CacheManager instance()
 	{

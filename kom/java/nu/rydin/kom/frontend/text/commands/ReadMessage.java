@@ -80,4 +80,9 @@ public class ReadMessage extends AbstractCommand
 	{
 		return true;
 	}
+	
+	public boolean expectsNumericParameter()
+	{
+	    return true;
+	}
 }

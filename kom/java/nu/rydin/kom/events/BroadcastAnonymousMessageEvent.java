@@ -10,9 +10,12 @@ public class BroadcastAnonymousMessageEvent extends Event
 {
 	private final String m_message;
 	
-	public BroadcastAnonymousMessageEvent(String message)
+	private final long m_logId;
+	
+	public BroadcastAnonymousMessageEvent(String message, long logId)
 	{
 		m_message	= message;
+		m_logId		= logId;
 	}
 	
 	public void dispatch(EventTarget target)
@@ -23,5 +26,10 @@ public class BroadcastAnonymousMessageEvent extends Event
 	public String getMessage()
 	{
 		return m_message;
+	}
+	
+	public long getLogId()
+	{
+	    return m_logId;
 	}
 }
