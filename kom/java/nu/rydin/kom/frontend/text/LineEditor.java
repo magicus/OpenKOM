@@ -676,7 +676,7 @@ public class LineEditor implements NewlineListener
 							{
 								m_out.write(buffer.substring(cursorpos));
 								m_out.write(SPACE);
-								m_out.write(ANSISequences.moveCursorLeft(buffer.length() - cursorpos + 1));
+								PrintUtils.printRepeated(m_out, BS, buffer.length() - cursorpos + 1);
 							}
 						}	
 						break;
@@ -684,7 +684,7 @@ public class LineEditor implements NewlineListener
 						if(((flags & FLAG_ECHO) != 0) && cursorpos > 0)
 						{
 							//Advance cursor to beginning of line
-							m_out.write(ANSISequences.moveCursorLeft(cursorpos));
+							PrintUtils.printRepeated(m_out, BS, cursorpos);
 							cursorpos = 0;
 						}
 						break;
@@ -692,7 +692,7 @@ public class LineEditor implements NewlineListener
 						if(((flags & FLAG_ECHO) != 0) && cursorpos < buffer.length())
 						{
 							//Advance cursor to end of line
-							m_out.write(ANSISequences.moveCursorRight(buffer.length() - cursorpos));
+							m_out.write(buffer.substring(cursorpos));
 							cursorpos = buffer.length();
 						}
 						break;
@@ -737,7 +737,7 @@ public class LineEditor implements NewlineListener
 								buffer.delete(i, cursorpos);
 								
 								//Move back cursor to i.
-								m_out.write(ANSISequences.moveCursorLeft(cursorpos - i));
+								PrintUtils.printRepeated(m_out, BS, cursorpos - i);
 								
 								//Print rest of buffer from i.
 								m_out.write(buffer.substring(i));
@@ -746,7 +746,7 @@ public class LineEditor implements NewlineListener
 								PrintUtils.printRepeated(m_out, SPACE, cursorpos - i);
 								
 								//Move back cursor to i.
-								m_out.write(ANSISequences.moveCursorLeft(buffer.length() + (cursorpos - i) - i));
+								PrintUtils.printRepeated(m_out, BS, buffer.length() + (cursorpos - i) - i);
 								
 								//Set new cursorpos
 								cursorpos = i;
