@@ -442,6 +442,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			        executableCommand.execute(this);
     			    }
     			}
+    			else
+    			{
+    			    //TODO: Use ExecutableCommand instead.
+    			    defaultCommand.execute2(this, new Object[0]);
+    			}
     		}
     		catch(KOMException e)
     		{
