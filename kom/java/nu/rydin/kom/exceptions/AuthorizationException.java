@@ -18,6 +18,10 @@ public class AuthorizationException extends UserException
 	public AuthorizationException(String msg)
 	{
 		super(msg);
-	}	
-
+	}
+	
+    public AuthorizationException(Object[] msgArgs)
+    {
+        super(msgArgs);
+    }
 }

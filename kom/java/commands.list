@@ -53,7 +53,6 @@ nu.rydin.kom.frontend.text.commands.Logout
 nu.rydin.kom.frontend.text.commands.MarkAsUnread
 nu.rydin.kom.frontend.text.commands.MoveMessage
 nu.rydin.kom.frontend.text.commands.NoComment
-nu.rydin.kom.frontend.text.commands.PersonalReply
 nu.rydin.kom.frontend.text.commands.PresentObject
 nu.rydin.kom.frontend.text.commands.PrintDebug
 nu.rydin.kom.frontend.text.commands.Prioritize
@@ -66,7 +65,6 @@ nu.rydin.kom.frontend.text.commands.ReadNextReply
 nu.rydin.kom.frontend.text.commands.ReadOriginal
 nu.rydin.kom.frontend.text.commands.ReadRules
 nu.rydin.kom.frontend.text.commands.RenameObject
-nu.rydin.kom.frontend.text.commands.Reply
 nu.rydin.kom.frontend.text.commands.RollbackReads
 nu.rydin.kom.frontend.text.commands.RunScript
 nu.rydin.kom.frontend.text.commands.SearchLocalMessage
@@ -74,7 +72,6 @@ nu.rydin.kom.frontend.text.commands.SearchGlobalMessage
 nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage
 nu.rydin.kom.frontend.text.commands.SendChatMessage
 nu.rydin.kom.frontend.text.commands.SendCondensedBroadcast
-nu.rydin.kom.frontend.text.commands.SendMail
 nu.rydin.kom.frontend.text.commands.SetFlag
 nu.rydin.kom.frontend.text.commands.ShowFile
 nu.rydin.kom.frontend.text.commands.ShowLicense
@@ -93,6 +90,9 @@ nu.rydin.kom.frontend.text.commands.ViewChatLog
 nu.rydin.kom.frontend.text.commands.ViewPresentation
 nu.rydin.kom.frontend.text.commands.Who
 nu.rydin.kom.frontend.text.commands.WhoAmI
+nu.rydin.kom.frontend.text.commands.WriteMail
+nu.rydin.kom.frontend.text.commands.WriteMailReply
 nu.rydin.kom.frontend.text.commands.WriteMessage
+nu.rydin.kom.frontend.text.commands.WriteReply
 nu.rydin.kom.frontend.text.commands.WriteNote
 nu.rydin.kom.frontend.text.commands.WriteRules

@@ -292,16 +292,59 @@ public interface ServerSession
 	throws NoMoreNewsException, UnexpectedException;
 	
 	/**
-	 * Stores a message in the current conference
+	 * Stores a message in a conference
 	 * 
 	 * @param conf The conference to store the message in
 	 * @param msg The message
-	 * @return Newly create message occurrence
+	 * @return Newly created message occurrence
+	 * @throws ObjectNotFoundException
+	 * @throws AuthorizationException
 	 * @throws UnexpectedException
 	 */
 	public MessageOccurrence storeMessage(long conf, UnstoredMessage msg)
-	throws AuthorizationException, UnexpectedException;
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
+
+	/**
+	 * Stores a message as a personal mail to a user. May store a copy in the
+	 * senders mailbox if that flag is set. 
+	 * 
+	 * @param recipient The id of the receiving user
+	 * @param msg The message
+	 * @return  Newly created message occurrence
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */	
+	public MessageOccurrence storeMail(long recipient, UnstoredMessage msg)
+	throws ObjectNotFoundException, UnexpectedException;
+
+	/**
+	 * Stores a reply to a message in a conference
+	 * 
+	 * @param conference The conference to store the message in
+	 * @param msg The message
+	 * @param replyTo Global message id of the message replied to
+	 * @return Newly created message occurrence
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 * @throws AuthorizationException
+	 */
+	public MessageOccurrence storeReplyAsMessage(long conference, UnstoredMessage msg, long replyTo)
+	throws ObjectNotFoundException, UnexpectedException, AuthorizationException;
 	
+	/**
+	 * Stores a message as a personal mail to a user. May store a copy in the
+	 * senders mailbox if that flag is set.
+	 * 
+	 * @param recipient The id of the receiving user
+	 * @param msg The message
+	 * @param replyTo Global message id of the message replied to
+	 * @return Newly created message occurrence
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg, long replyTo)
+	throws ObjectNotFoundException, UnexpectedException;
+
 	/**
 	 * Stores a presentation of an object
 	 * 
@@ -325,68 +368,6 @@ public interface ServerSession
 	 */
 	public Envelope readTaggedMessage(short tag, long object)
 	throws UnexpectedException, ObjectNotFoundException;
-
-	/**
-	 * Stores a reply to a message
-	 * 
-	 * @param conference Target conference
-	 * @param msg The message
-	 * @param replyTo Global essage id of the message replied to
-	 * @return Newly create message occurrence
-	 * @throws UnexpectedException
-	 * @throws AuthorizationException
-	 */
-	public MessageOccurrence storeReply(long conference, UnstoredMessage msg, long replyTo)
-	throws UnexpectedException, AuthorizationException;
-
-	/**
-	 * Stores a reply to a message. The target conference is the current one.
-	 * 
-	 * @param msg The message
-	 * @param replyTo Global essage id of the message replied to
-	 * @return Newly create message occurrence
-	 * @throws UnexpectedException
-	 * @throws AuthorizationException
-	 */
-	public MessageOccurrence storeReplyInCurrentConference(UnstoredMessage msg, long replyTo)
-	throws AuthorizationException, UnexpectedException;
-	
-	/**
-	 * Stores a reply to a message refered to by its conference and local number
-	 * 
-	 * @param msg The message
-	 * @param replyToConfId The conference of the message replied to
-	 * @param replyToLocalnum The local message number of the message replied to
-	 * @return Newly create message occurrence
-	 * @throws ObjectNotFoundException
-	 * @throws UnexpectedException
-	 * @throws AuthorizationException
-	 */	
-	public MessageOccurrence storeReplyToLocal(UnstoredMessage msg, long replyToConfId, int replyToLocalnum)
-	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
-	
-	/**
-	 * Stores a reply to a message in the current conference
-	 * 
-	 * @param msg The message
-	 * @param replyToLocalnum The local message number in the current conference of
-	 * the message replied to.
-	 * @return Newly create message occurrence
-	 * @throws ObjectNotFoundException
-	 * @throws UnexpectedException
-	 */
-	public MessageOccurrence storeReplyToLocalInCurrentConference(UnstoredMessage msg, int replyToLocalnum)
-	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;	
-
-	/**
-	 * Stores a reply to the last message read
-	 * @param msg The message
-	 * @return Newly create message occurrence
-	 * @throws NoCurrentMessageException
-	 * @throws UnexpectedException
-	 */	
-	public MessageOccurrence storeReplyToCurrentMessage(UnstoredMessage msg)
-	throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
 
     /**
      * Stores a "no comment" to the given message
@@ -419,19 +400,6 @@ public interface ServerSession
 	 */	
 	public Envelope readOriginalMessage()
 	throws NoCurrentMessageException, NotAReplyException, ObjectNotFoundException, AuthorizationException, UnexpectedException;
-
-	/**
-	 * Stores a personal mail to a user. Also stores copy in the senders mailbox.
-	 * 
-	 * @param msg The message
-	 * @param user The receiving user
-	 * @param replyTo Global id of message to which this is a reply, or -1 if not a reply.
-	 * @return  Newly create message occurrence
-	 * @throws ObjectNotFoundException
-	 * @throws UnexpectedException
-	 */	
-	public MessageOccurrence storeMail(UnstoredMessage msg, long user, long replyTo)
-	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
 	 * Returns an occurrence of the specified message in the specified conference, or, 
@@ -508,6 +476,17 @@ public interface ServerSession
 	public MessageOccurrence getCurrentMessageOccurrence()
 	throws NoCurrentMessageException, UnexpectedException;		
 
+	/**
+	 * Returns the occurrence of the given message that is most relevant given
+	 * the conference.
+	 * @param conferenceId
+	 * @param messageId
+	 * @return
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public MessageOccurrence getMostRelevantOccurrence(long conferenceId, long messageId) 
+	throws ObjectNotFoundException, UnexpectedException;
 	
 	/**
 	 * Returns the original occurrence of a message, which is defined as:

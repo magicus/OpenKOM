@@ -75,12 +75,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             manager.broadcastEvent(m_event);
         }
     }
- 
-    
-	/**
-	 * Id of the user of this session
-	 */
-	
+ 	
 	/**
 	 * Current conference id, or -1 if it could not be determined
 	 */
@@ -217,6 +212,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}	
+	}
+
+	public void finalize()
+	{
+		try
+		{
+			if(!m_closed)
+				this.close();
+		}
+		catch(UnexpectedException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public void acquireMutex()
@@ -683,6 +691,194 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 
+	public MessageOccurrence storeMessage(long conf, UnstoredMessage msg)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+		return this.storeReplyAsMessage(conf, msg, -1L);
+	}
+
+    public MessageOccurrence storeMail(long recipient, UnstoredMessage msg)
+    throws ObjectNotFoundException, UnexpectedException	
+	{
+        return storeReplyAsMail(recipient, msg, -1L);
+	}
+
+    public MessageOccurrence storeReplyAsMessage(long conference,
+            UnstoredMessage msg, long replyTo) throws ObjectNotFoundException,
+            UnexpectedException, AuthorizationException
+	{
+		try
+		{
+		    MessageManager mm = m_da.getMessageManager();
+		    long me = this.getLoggedInUserId();
+		    UserInfo myinf = this.getLoggedInUser();
+
+			// Check that we have the permission to write here. If it's a reply, we should
+			// try check if we have the right to reply. It's ok to be able to reply without
+			// being able to write. Great for conferences where users are only allowed to
+			// reply to something posted by a moderator.
+			//
+			if(replyTo == -1)
+				this.assertConferencePermission(conference, ConferencePermissions.WRITE_PERMISSION);
+			else
+				this.assertConferencePermission(conference, ConferencePermissions.REPLY_PERMISSION);
+			
+			// Store message in conference
+			//
+			MessageOccurrence occ = mm.addMessage(me, this.getCensoredName(me).getName(),
+				conference, replyTo, msg.getSubject(), msg.getBody());
+			
+			// Mark message as read unless the user is a narcissist.
+			//
+			if((myinf.getFlags1() & UserFlags.NARCISSIST) == 0)
+			    this.markMessageAsRead(conference, occ.getLocalnum());
+			
+			// Notify the rest of the world that there is a new message!
+			//
+			this.broadcastEvent(
+				new NewMessageEvent(me, occ.getConference(), occ.getLocalnum(), 
+					occ.getGlobalId()));
+
+			m_stats.incNumPosted();
+			return occ;
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}	
+	
+    public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg,
+            long replyTo) throws ObjectNotFoundException, UnexpectedException
+    {
+		try
+		{
+		    MessageManager mm = m_da.getMessageManager();
+		    long me = this.getLoggedInUserId();
+		    UserInfo myinf = this.getLoggedInUser();
+		    
+			// Store message in recipient's mailbox
+			//
+			MessageOccurrence occ = mm.addMessage(me, 
+			    this.getCensoredName(me).getName(), 
+				recipient, replyTo, msg.getSubject(), msg.getBody()); 
+			
+			// Store a copy in sender's mailbox
+			//
+			if((myinf.getFlags1() & UserFlags.KEEP_COPIES_OF_MAIL) != 0)
+			{
+			    MessageOccurrence copy = mm.createMessageOccurrence(
+				occ.getGlobalId(), MessageManager.ACTION_COPIED, me, this.getName(me).getName(), me);
+
+			    // Mark copy as read unless the user is a narcissist.
+				//
+			    if((myinf.getFlags1() & UserFlags.NARCISSIST) == 0)
+				{
+				    this.markMessageAsRead(me, copy.getLocalnum());
+				}
+			}
+
+			// Notify recipient of the new message.
+			//
+			this.sendEvent(recipient, new NewMessageEvent(me, recipient, occ.getLocalnum(), occ.getGlobalId()));
+			
+			m_stats.incNumPosted(); // TODO: Count mail separately?
+			return occ;
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+    }
+   
+	public MessageOccurrence storePresentation(UnstoredMessage msg, long object)
+	throws UnexpectedException, AuthorizationException, ObjectNotFoundException
+	{
+		try
+		{
+		    // Permission checks: We have to be presenting ourselves, a conference
+		    // we're the administrator of or we have to hold the USER_ADMIN (in case
+		    // we're presenting a user) or CONFERENCE_ADMIN (in case of a conference)
+		    //
+			if (-1L == object) 
+			{
+				object = this.getLoggedInUserId();
+			}
+		    short kind = this.getObjectKind(object);
+		    if(!this.canManipulateObject(object))
+		        throw new AuthorizationException();
+			long conference = m_da.getSettingManager().getNumber(
+			        kind == NameManager.CONFERENCE_KIND ? SettingKeys.CONFERENCE_PRESENTATIONS
+			                : SettingKeys.USER_PRESENTATIONS);
+			MessageManager mm = m_da.getMessageManager();  
+			MessageOccurrence occ = mm.addMessage(this.getLoggedInUserId(),
+				this.getCensoredName(this.getLoggedInUserId()).getName(),
+				conference, -1, msg.getSubject(), msg.getBody());
+			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
+			    this.markMessageAsRead(conference, occ.getLocalnum());
+			this.broadcastEvent(
+				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
+					occ.getGlobalId()));
+			this.m_da.getMessageManager().addMessageAttribute(occ.getGlobalId(), MessageManager.ATTR_PRESENTATION, new Long(object).toString());
+			return occ;
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+
+	public Envelope readTaggedMessage(short tag, long object)
+	throws UnexpectedException, ObjectNotFoundException
+	{
+		try
+		{
+			if (-1 == object)
+			{
+				object = this.getLoggedInUserId();
+			}
+			return this.innerReadMessage(m_da.getMessageManager().getTaggedMessage(object, tag));
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+	
+	public void storeNoComment(long message)
+	throws UnexpectedException, AuthorizationException
+	{
+		try
+		{
+			// Determine conference of message
+			long targetConf = m_da.getMessageManager().getFirstOccurrence(message).getConference();
+
+			// Check that we have the permission to write there.
+			this.assertConferencePermission(targetConf, ConferencePermissions.WRITE_PERMISSION);
+
+			MessageManager mm = m_da.getMessageManager(); 
+
+			//Delete already existing "no comment"
+			MessageAttribute[] attributes = mm.getMessageAttributes(message);
+			for (int i = 0; i < attributes.length; i++)
+            {
+                if (attributes[i].getKind() == MessageManager.ATTR_NOCOMMENT && attributes[i].getNoCommentUserid() == this.getLoggedInUserId())
+                {
+                    mm.dropMessageAttribute(attributes[i].getId(), message);
+                }
+            }
+			
+			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructNoCommentPayload(this.getLoggedInUser()));
+		}
+		catch(ObjectNotFoundException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
 	
 	public void createUser(String userid, String password, String fullname, String address1,
 		String address2, String address3, String address4, String phoneno1, 
@@ -746,19 +942,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}				
 	}	
 	
-	public void finalize()
-	{
-		try
-		{
-			if(!m_closed)
-				this.close();
-		}
-		catch(UnexpectedException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
 	public int countUnread(long conference)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -806,12 +989,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
-	public MessageOccurrence storeMessage(long conf, UnstoredMessage msg)
-	throws AuthorizationException, UnexpectedException
-	{
-		return this.storeReply(conf, msg, -1L);
-	}
-	
 	public boolean canManipulateObject(long object)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -822,216 +999,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	            || (kind == NameManager.USER_KIND && ui.hasRights(UserPermissions.USER_ADMIN))
 	            || (kind == NameManager.CONFERENCE_KIND && ui.hasRights(UserPermissions.CONFERENCE_ADMIN));
 	}
-	
-	public MessageOccurrence storeReplyToCurrentMessage(UnstoredMessage msg)
-	throws NoCurrentMessageException, AuthorizationException, UnexpectedException
-	{
-		if(m_lastReadMessageId == -1)
-			throw new NoCurrentMessageException();
-		return this.storeReplyInCurrentConference(msg, m_lastReadMessageId);	
-	}
-
-	public MessageOccurrence storePresentation(UnstoredMessage msg, long object)
-	throws UnexpectedException, AuthorizationException, ObjectNotFoundException
-	{
-		try
-		{
-		    // Permission checks: We have to be presenting ourselves, a conference
-		    // we're the administrator of or we have to hold the USER_ADMIN (in case
-		    // we're presenting a user) or CONFERENCE_ADMIN (in case of a conference)
-		    //
-			if (-1L == object) 
-			{
-				object = this.getLoggedInUserId();
-			}
-		    short kind = this.getObjectKind(object);
-		    if(!this.canManipulateObject(object))
-		        throw new AuthorizationException();
-			long conference = m_da.getSettingManager().getNumber(
-			        kind == NameManager.CONFERENCE_KIND ? SettingKeys.CONFERENCE_PRESENTATIONS
-			                : SettingKeys.USER_PRESENTATIONS);
-			MessageManager mm = m_da.getMessageManager();  
-			MessageOccurrence occ = mm.addMessage(this.getLoggedInUserId(),
-				this.getCensoredName(this.getLoggedInUserId()).getName(),
-				conference, -1, msg.getSubject(), msg.getBody());
-			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
-			    this.markMessageAsRead(conference, occ.getLocalnum());
-			this.broadcastEvent(
-				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
-					occ.getGlobalId()));
-			this.m_da.getMessageManager().addMessageAttribute(occ.getGlobalId(), MessageManager.ATTR_PRESENTATION, new Long(object).toString());
-			return occ;
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
-
-	public Envelope readTaggedMessage(short tag, long object)
-	throws UnexpectedException, ObjectNotFoundException
-	{
-		try
-		{
-			if (-1 == object)
-			{
-				object = this.getLoggedInUserId();
-			}
-			return this.innerReadMessage(m_da.getMessageManager().getTaggedMessage(object, tag));
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
-	
-	public MessageOccurrence storeReplyInCurrentConference(UnstoredMessage msg, long replyTo)
-	throws UnexpectedException, AuthorizationException
-	{
-		try
-		{
-			// Determine target conference
-			//
-			long targetConf;
-			if(replyTo != -1)
-			{
-				MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(
-					this.getCurrentConferenceId(), replyTo);
-				ConferenceInfo ci = m_da.getConferenceManager().loadConference(occ.getConference());
-				
-				// Does the conference specify a separate reply conference?
-				//
-				targetConf = ci.getReplyConf();
-				if(targetConf == -1)
-					targetConf = this.getCurrentConferenceId();
-			}
-			else
-				targetConf = this.getCurrentConferenceId();
-			return this.storeReply(targetConf, msg, replyTo);
-		}
-		catch(ObjectNotFoundException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
-	
-	public MessageOccurrence storeReply(long conference, UnstoredMessage msg, long replyTo)
-	throws AuthorizationException, UnexpectedException
-	{
-		try
-		{
-			long user = this.getLoggedInUserId();
-			
-			// Check that we have the permission to write here. If it's a reply, we should
-			// try check if we have the right to reply. It's ok to be able to reply without
-			// being able to write. Great for conferences where users are only allowed to
-			// reply to something posted by a moderator.
-			//
-			if(replyTo == -1)
-				this.assertConferencePermission(conference, ConferencePermissions.WRITE_PERMISSION);
-			else
-				this.assertConferencePermission(conference, ConferencePermissions.REPLY_PERMISSION);
-			
-			// If this is a reply, we 
-			
-			MessageManager mm = m_da.getMessageManager();  
-			MessageOccurrence occ = mm.addMessage(user, this.getCensoredName(user).getName(),
-				conference, replyTo, msg.getSubject(), msg.getBody());
-			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
-			    this.markMessageAsRead(conference, occ.getLocalnum());
-			
-			// Are we replying to a mail? In that case, store the mail in the recipient's
-			// mailbox too!
-			//
-			if(replyTo != -1 && conference == this.getLoggedInUserId())
-			{
-				MessageHeader mh = mm.loadMessageHeader(replyTo);
-				mm.createMessageOccurrence(occ.getGlobalId(), MessageManager.ACTION_COPIED, 
-					this.getLoggedInUserId(), this.getName(this.getLoggedInUserId()).getName(), mh.getAuthor());		
-			}
-			
-			// Notify the rest of the world that there is a new message!
-			//
-			this.broadcastEvent(
-				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
-					occ.getGlobalId()));
-			m_stats.incNumPosted();
-			return occ;
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-		catch(ObjectNotFoundException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}	
-	}
-	
-	public void storeNoComment(long message)
-	throws UnexpectedException, AuthorizationException
-	{
-		try
-		{
-			// Determine conference of message
-			long targetConf = m_da.getMessageManager().getFirstOccurrence(message).getConference();
-
-			// Check that we have the permission to write there.
-			this.assertConferencePermission(targetConf, ConferencePermissions.WRITE_PERMISSION);
-
-			MessageManager mm = m_da.getMessageManager(); 
-
-			//Delete already existing "no comment"
-			MessageAttribute[] attributes = mm.getMessageAttributes(message);
-			for (int i = 0; i < attributes.length; i++)
-            {
-                if (attributes[i].getKind() == MessageManager.ATTR_NOCOMMENT && attributes[i].getNoCommentUserid() == this.getLoggedInUserId())
-                {
-                    mm.dropMessageAttribute(attributes[i].getId(), message);
-                }
-            }
-			
-			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructNoCommentPayload(this.getLoggedInUser()));
-		}
-		catch(ObjectNotFoundException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
-
-	
-	public MessageOccurrence storeReplyToLocal(UnstoredMessage msg, long replyToConfId, int replyToLocalnum)
-	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
-	{
-		try
-		{
-			long replyTo = m_da.getMessageManager().getGlobalMessageId(replyToConfId, replyToLocalnum);
-			return this.storeReplyInCurrentConference(msg, replyTo);
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-		catch(ObjectNotFoundException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}	
-	}
-	
-	public MessageOccurrence storeReplyToLocalInCurrentConference(UnstoredMessage msg, int replyToLocalnum)
-	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
-	{
-		return this.storeReplyToLocal(msg, this.getCurrentConferenceId(), replyToLocalnum);
-	}
-	
+		
 	public MessageOccurrence globalToLocalInConference(long conferenceId, long globalNum)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -1082,40 +1050,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             return localToGlobalInCurrentConference((int)textNumber.getNumber());
         }
     }
-	public MessageOccurrence storeMail(UnstoredMessage msg, long user, long replyTo)
-	throws ObjectNotFoundException, UnexpectedException
-	{
-		try
-		{
-			// Store message in recipient's mailbox
-			//
-			MessageManager mm = m_da.getMessageManager();
-			long me = this.getLoggedInUserId();
-			MessageOccurrence occ = mm.addMessage(me, 
-			    this.getCensoredName(me).getName(), 
-				user, replyTo, msg.getSubject(), msg.getBody()); 
-			
-			// Store a copy in sender's mailbox
-			//
-			MessageOccurrence copy = mm.createMessageOccurrence(
-				occ.getGlobalId(), MessageManager.ACTION_COPIED, me, this.getName(me).getName(), me);
-			
-			// Mark local copy as read
-			//
-			if((this.getLoggedInUser().getFlags1() & UserFlags.NARCISSIST) == 0)
-			    this.markMessageAsRead(me, copy.getLocalnum());
-			m_stats.incNumPosted(); // TODO: Count mail separately?
-			
-			// Send event to recipient
-			//
-			this.sendEvent(user, new NewMessageEvent(me, user, occ.getLocalnum(), occ.getGlobalId()));
-			return occ;
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
 	
 	public void copyMessage(long globalNum, long conferenceId)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
@@ -1272,6 +1206,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
+	}
+	
+	public MessageOccurrence getMostRelevantOccurrence(long conferenceId, long messageId) 
+	throws ObjectNotFoundException, UnexpectedException
+	{
+	    try
+        {
+            return m_da.getMessageManager().getMostRelevantOccurrence(conferenceId, messageId);
+        } 
+	    catch (SQLException e)
+        {
+	        throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }
 	}
 	
 	public MessageOccurrence getOriginalMessageOccurrence(long messageId)
@@ -2701,7 +2648,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
 	{
 		if(!this.hasPermissionInConference(conferenceId, mask))
-			throw new AuthorizationException();
+		{
+		    if (mask == ConferencePermissions.REPLY_PERMISSION)
+		    {
+		        throw new RepliesNotAllowedException(new Object[] { this.getCensoredName(conferenceId).getName() });
+		    }
+		    else if (mask == ConferencePermissions.WRITE_PERMISSION)
+		    {
+		        throw new OriginalsNotAllowedException(new Object[] { this.getCensoredName(conferenceId).getName() });
+		    }
+		    else
+		        throw new AuthorizationException();
+		}
+			
 	}
 		
 	protected void pushReplies(long conference, int localnum)
@@ -3257,7 +3216,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			MessageOccurrence mo = this.storeReplyInCurrentConference(msg, -1L);
+		    MessageOccurrence mo = this.storeMessage(m_currentConferenceId, msg);
 			m_da.getMessageManager().addMessageAttribute(mo.getGlobalId(), MessageManager.ATTR_RULEPOST, null);
 			return mo;
 		}

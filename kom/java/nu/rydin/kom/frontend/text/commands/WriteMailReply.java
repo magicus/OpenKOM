@@ -9,24 +9,24 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.constants.ConferencePermissions;
-import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.TextNumber;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class PersonalReply extends AbstractCommand
+public class WriteMailReply extends AbstractCommand
 {
-    public PersonalReply(Context context, String fullName)
+    public WriteMailReply(Context context, String fullName)
     {
         super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)});
     }
@@ -34,11 +34,6 @@ public class PersonalReply extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException, IOException, InterruptedException
 	{
-		// Check permissions
-		//
-		if(!context.getSession().hasPermissionInCurrentConference(ConferencePermissions.REPLY_PERMISSION))
-			throw new AuthorizationException();
-
 		// Parse parameters. No parameters means we're replying to the
 		// last text read.
 		//
@@ -53,15 +48,20 @@ public class PersonalReply extends AbstractCommand
 		{
 		    mh = session.getMessageHeader(session.getGlobalMessageId(textNumber));
 		}
-			
+
 		// Get editor and execute it
 		//
-		UnstoredMessage msg = context.getMessageEditor().edit(mh.getId());
+        MessageEditor editor = context.getMessageEditor();
+        editor.setRecipient(new NameAssociation(mh.getAuthor(), mh.getAuthorName()));
+        editor.setReplyTo(mh.getId());
+        UnstoredMessage msg = editor.edit(mh.getId());
 		
 		// Store the message
 		//
-		MessageOccurrence occ = session.storeMail(msg, mh.getAuthor(), mh.getId());
-		context.getOut().println(context.getMessageFormatter().format(
-			"write.message.saved", new Integer(occ.getLocalnum())));
+		MessageOccurrence occ = session.storeReplyAsMail(editor.getRecipient().getId(), msg, mh.getId());
+		
+        context.getOut().println(
+                context.getMessageFormatter().format("write.mail.saved", session.getUser(editor.getRecipient().getId()).getName()));
+
 	}
 }

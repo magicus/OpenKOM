@@ -21,37 +21,39 @@ import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
- * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin </a>
  */
 public class WriteMessage extends AbstractCommand
 {
-	public WriteMessage(Context context, String fullName)
-	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);	
-	}
-	
-	public void execute(Context context, Object[] parameterArray) 
-	throws KOMException, IOException, InterruptedException
-	{
-		// Check permissions
-		//
-		if(!context.getSession().hasPermissionInCurrentConference(ConferencePermissions.WRITE_PERMISSION))
-			throw new AuthorizationException();
-			
-		// Get editor and execute it
-		//
-		ServerSession session = context.getSession();
-		MessageEditor editor = context.getMessageEditor();
-		ConferenceInfo recipient = session.getCurrentConference();
-		editor.setRecipient(new NameAssociation(recipient.getId(), recipient.getName()));
-		UnstoredMessage msg = editor.edit(-1);
-				
-		// Store text
-		//
-		MessageOccurrence occ = session.storeMessage(
-		        editor.getRecipient().getId(), msg);
-		context.getOut().println();
-		context.getOut().println(context.getMessageFormatter().format(
-			"write.message.saved", new Integer(occ.getLocalnum())));
-	}
+    public WriteMessage(Context context, String fullName)
+    {
+        super(fullName, AbstractCommand.NO_PARAMETERS);
+    }
+
+    public void execute(Context context, Object[] parameterArray)
+            throws KOMException, IOException, InterruptedException
+    {
+        ServerSession session = context.getSession();
+        
+        // Check permissions so we can bail out earlier
+        //
+        session.assertConferencePermission(session.getCurrentConferenceId(), ConferencePermissions.WRITE_PERMISSION);
+
+        // Get editor and execute it
+        //
+        MessageEditor editor = context.getMessageEditor();
+        ConferenceInfo recipient = session.getCurrentConference();
+        editor.setRecipient(new NameAssociation(recipient.getId(), recipient
+                .getName()));
+        UnstoredMessage msg = editor.edit(-1);
+
+        // Store text
+        //
+        MessageOccurrence occ = session.storeMessage(editor.getRecipient()
+                .getId(), msg);
+        context.getOut().println();
+        context.getOut().println(
+                context.getMessageFormatter().format("write.message.saved",
+                        new Integer(occ.getLocalnum())));
+    }
 }
