@@ -819,7 +819,25 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	
 	public MessagePrinter getMessagePrinter()
 	{
-		return m_messagePrinter;
+	    boolean usecompact = false;
+        try
+        {
+            usecompact = this.isFlagSet(0, UserFlags.USE_COMPACT_MESSAGEPRINTER);
+        } 
+        catch (ObjectNotFoundException e)
+        {
+        } 
+        catch (UnexpectedException e)
+        {
+        }
+        if (usecompact)
+	    {
+	        return new CompactMessagePrinter();
+	    }
+	    else
+	    {
+	        return new BasicMessagePrinter();
+	    }
 	}
 	
 	public ServerSession getSession()

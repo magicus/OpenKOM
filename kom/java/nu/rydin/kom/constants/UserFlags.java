@@ -40,6 +40,7 @@ public class UserFlags
 	public static long PRIORITIZE_MAIL						= 0x00004000;
 	public static long BEEP_ON_NEW_MESSAGES					= 0x00008000;
 	public static long SHOW_NUM_UNREAD						= 0x00010000;
+	public static long USE_COMPACT_MESSAGEPRINTER			= 0x00020000;
 
 	/**
 	 * Default value for flagword 1
