@@ -7,17 +7,90 @@ package nu.rydin.kom.backend;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import nu.rydin.kom.backend.data.*;
-import nu.rydin.kom.constants.*;
-import nu.rydin.kom.events.*;
-import nu.rydin.kom.exceptions.*;
-import nu.rydin.kom.structs.*;
+import nu.rydin.kom.backend.data.ConferenceManager;
+import nu.rydin.kom.backend.data.FileManager;
+import nu.rydin.kom.backend.data.MembershipManager;
+import nu.rydin.kom.backend.data.MessageLogManager;
+import nu.rydin.kom.backend.data.MessageManager;
+import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.backend.data.RelationshipManager;
+import nu.rydin.kom.backend.data.UserManager;
+import nu.rydin.kom.constants.ChatRecipientStatus;
+import nu.rydin.kom.constants.CommandSuggestions;
+import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.FileProtection;
+import nu.rydin.kom.constants.FilterFlags;
+import nu.rydin.kom.constants.MessageLogKinds;
+import nu.rydin.kom.constants.RelationshipKinds;
+import nu.rydin.kom.constants.SettingKeys;
+import nu.rydin.kom.constants.UserFlags;
+import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.constants.Visibilities;
+import nu.rydin.kom.events.BroadcastAnonymousMessageEvent;
+import nu.rydin.kom.events.BroadcastMessageEvent;
+import nu.rydin.kom.events.ChatAnonymousMessageEvent;
+import nu.rydin.kom.events.ChatMessageEvent;
+import nu.rydin.kom.events.Event;
+import nu.rydin.kom.events.EventTarget;
+import nu.rydin.kom.events.MessageDeletedEvent;
+import nu.rydin.kom.events.NewMessageEvent;
+import nu.rydin.kom.events.ReloadUserProfileEvent;
+import nu.rydin.kom.events.UserAttendanceEvent;
+import nu.rydin.kom.exceptions.AllRecipientsNotReachedException;
+import nu.rydin.kom.exceptions.AlreadyMemberException;
+import nu.rydin.kom.exceptions.AmbiguousNameException;
+import nu.rydin.kom.exceptions.AuthenticationException;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.BadPasswordException;
+import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.NoCurrentMessageException;
+import nu.rydin.kom.exceptions.NoMoreMessagesException;
+import nu.rydin.kom.exceptions.NoMoreNewsException;
+import nu.rydin.kom.exceptions.NoRulesException;
+import nu.rydin.kom.exceptions.NotAReplyException;
+import nu.rydin.kom.exceptions.NotLoggedInException;
+import nu.rydin.kom.exceptions.NotMemberException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.OriginalsNotAllowedException;
+import nu.rydin.kom.exceptions.RepliesNotAllowedException;
+import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.structs.ConferenceInfo;
+import nu.rydin.kom.structs.ConferenceListItem;
+import nu.rydin.kom.structs.ConferencePermission;
+import nu.rydin.kom.structs.Envelope;
+import nu.rydin.kom.structs.FileStatus;
+import nu.rydin.kom.structs.GlobalMessageSearchResult;
+import nu.rydin.kom.structs.LocalMessageSearchResult;
+import nu.rydin.kom.structs.MembershipInfo;
+import nu.rydin.kom.structs.MembershipListItem;
+import nu.rydin.kom.structs.Message;
+import nu.rydin.kom.structs.MessageAttribute;
+import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.MessageLogItem;
+import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.Name;
+import nu.rydin.kom.structs.NameAssociation;
+import nu.rydin.kom.structs.NamedObject;
+import nu.rydin.kom.structs.ReadLogItem;
+import nu.rydin.kom.structs.Relationship;
+import nu.rydin.kom.structs.SessionState;
+import nu.rydin.kom.structs.SystemInformation;
+import nu.rydin.kom.structs.TextNumber;
+import nu.rydin.kom.structs.UnstoredMessage;
+import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.structs.UserListItem;
+import nu.rydin.kom.structs.UserLogItem;
 import nu.rydin.kom.utils.FilterUtils;
 import nu.rydin.kom.utils.Logger;
 import edu.oswego.cs.dl.util.concurrent.Mutex;
@@ -322,7 +395,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    long conf = this.getCurrentConferenceId();
 		    long user = this.getLoggedInUserId();
 		    ConferenceManager cm = m_da.getConferenceManager();
-		    MessageManager mm = m_da.getMessageManager();
 		    boolean hasFilters = m_filterCache.size() > 0;
 		    
 		    // While what we found matches a filter...
@@ -356,7 +428,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    
 			    // First, try a reply. Then, try any unread message in current conference
 			    //
-			    short command = CommandSuggestions.NEXT_REPLY;
 			    long nextReply = this.peekReply();
 			    if(nextReply != -1)
 			    {
@@ -1003,13 +1074,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			MessageAttribute[] attributes = mm.getMessageAttributes(message);
 			for (int i = 0; i < attributes.length; i++)
             {
-                if (attributes[i].getKind() == MessageManager.ATTR_NOCOMMENT && attributes[i].getNoCommentUserid() == this.getLoggedInUserId())
+                if (attributes[i].getKind() == MessageManager.ATTR_NOCOMMENT && attributes[i].getUserId() == this.getLoggedInUserId())
                 {
                     mm.dropMessageAttribute(attributes[i].getId(), message);
                 }
             }
 			
-			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructNoCommentPayload(this.getLoggedInUser()));
+			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructUsernamePayload(this.getLoggedInUser().getId(), this.getLoggedInUser().getName()));
 		}
 		catch(ObjectNotFoundException e)
 		{

@@ -84,6 +84,7 @@ public class MessageManager
 	public static final short ATTR_RULEPOST = 2;
 	public static final short ATTR_PRESENTATION = 3;
 	public static final short ATTR_NOTE = 4;
+	public static final short ATTR_ORIGINAL_DELETED = 5;
 	
 	public MessageManager(Connection conn)
 	throws SQLException
@@ -983,7 +984,24 @@ public class MessageManager
 			CacheManager.instance().getConferenceCache().registerInvalidation(
 				new Long(occs[idx].getConference()));
 				
-		// Delete
+		// Add "original deleted" attribute to replies
+		//
+		try
+        {
+		    MessageHeader[] replies = getReplies(globalNum);
+            MessageHeader original = loadMessageHeader(globalNum);
+			for (int i = 0; i < replies.length; i++)
+	        {
+	            addMessageAttribute(replies[i].getId(), ATTR_ORIGINAL_DELETED, MessageAttribute.constructUsernamePayload(original.getAuthor(), original.getAuthorName().getName()));
+	        }
+        } 
+		catch (ObjectNotFoundException e)
+        {
+		    // Well, uhh, if we got here it means we tried to delete a non-existing
+		    // message, which will fail naturally anyway. No worries, mate.
+        }
+		
+		// Delete the actual message.
 		//
 		this.m_dropMessageStmt.clearParameters();
 		this.m_dropMessageStmt.setLong(1, globalNum);
