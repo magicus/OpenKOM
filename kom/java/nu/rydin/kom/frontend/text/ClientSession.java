@@ -452,7 +452,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	}
 
 	protected UserInfo login()
-	throws AuthenticationException, LoginNotAllowedException, UnexpectedException, IOException, InterruptedException
+	throws AuthenticationException, LoginNotAllowedException, UnexpectedException, IOException, 
+	InterruptedException, OperationInterruptedException
 	{
 		// Collect information
 		//
@@ -590,7 +591,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			String cmdString = null;
     			try
     			{
-    				cmdString = m_in.readLineStopOnEvent();
+    				cmdString = m_in.readLine("", "", 0, LineEditor.FLAG_ECHO | LineEditor.FLAG_RECORD_HISTORY
+    				        | LineEditor.FLAG_STOP_ON_EVENT | LineEditor.FLAG_STOP_ONLY_WHEN_EMPTY);
     			}
     			catch(EventDeliveredException e)
     			{

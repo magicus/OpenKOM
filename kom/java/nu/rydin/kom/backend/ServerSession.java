@@ -206,6 +206,20 @@ public interface ServerSession
 	 */	
 	public long createConference(String fullname, int permissions, int nonmemberPermissions, short visibility, long replyConf)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException;
+	
+	/**
+	 * Returns a list of conferences, sorted by the date of the last text.
+	 * @throws UnexpectedException
+	 */
+	public ConferenceListItem[] listConferencesByDate()
+	throws UnexpectedException;
+
+	/**
+	 * Returns a list of conferences, sorted by their normalized name.
+	 * @throws UnexpectedException
+	 */
+	public ConferenceListItem[] listConferencesByName()
+	throws UnexpectedException;
 
 	/**
 	 * Creates a new user.

@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMRuntimeException;
-import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
@@ -75,11 +74,10 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 						
 			// Enter the main editor loop
 			//
-			if(!this.mainloop(false))
-			    throw new OperationInterruptedException();
+			this.mainloop(false);
 			return new UnstoredMessage(m_context.getSubject(), m_context.getBuffer().toString());
 		}
-		catch(IOException e)
+		catch(IOException e) 
 		{
 			throw new KOMRuntimeException(formatter.format("error.reading.user.input"), e);		
 		}

@@ -6,6 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.editor.simple;
 
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 
@@ -18,7 +19,8 @@ public class Quit extends AbstractCommand
 	}
 	
 	public void execute(Context context, Object[] paramArray)
+	throws OperationInterruptedException
 	{
-		// Not much to do here
+		throw new OperationInterruptedException();
 	}
 }

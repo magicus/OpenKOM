@@ -485,13 +485,8 @@ public class MembershipManager
 			m_addMembershipStmt.setBoolean(3, false); // Active flag
 			m_addMembershipStmt.setLong(4, 0);
 			m_addMembershipStmt.setLong(5, 0);
-			
-			// Set membership specific permissions and negation mask to
-			// zero, effectively granting the default rights.
-			// TODO: Is this correct?
-			//
-			m_addMembershipStmt.setInt(6, 0);
-			m_addMembershipStmt.setInt(7, 0);
+			m_addMembershipStmt.setInt(6, permissions);
+			m_addMembershipStmt.setInt(7, negations);
 			m_addMembershipStmt.executeUpdate();
 		}
 	}

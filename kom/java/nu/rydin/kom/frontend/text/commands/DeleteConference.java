@@ -53,7 +53,7 @@ public class DeleteConference extends AbstractCommand
 			                      new String[] { mf.format("misc.no"), 
 												 mf.format("misc.yes") },
 								  0,
-								  mf.format("nu.rydin.kom.InvalidChoiceException.format"));
+								  mf.format("nu.rydin.kom.exceptions.InvalidChoiceException.format"));
 		if (1 == choice)
 		{
 			ss.deleteConference(conference);

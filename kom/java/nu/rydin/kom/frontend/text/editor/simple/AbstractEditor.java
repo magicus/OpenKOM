@@ -13,6 +13,7 @@ import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.LineOverflowException;
 import nu.rydin.kom.exceptions.LineUnderflowException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.StopCharException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
@@ -55,8 +56,8 @@ public abstract class AbstractEditor
 	    m_context.getBuffer().fill(wrapper);
 	}
 	
-	protected boolean mainloop(boolean stopOnEmpty)
-	throws InterruptedException, UnexpectedException, IOException
+	protected void mainloop(boolean stopOnEmpty)
+	throws InterruptedException, OperationInterruptedException, UnexpectedException, IOException
 	{
 	    if(m_parser == null)
 	        m_parser = Parser.load(m_commandList, m_context);
@@ -85,7 +86,7 @@ public abstract class AbstractEditor
 			{
 				// TODO: Handle chat messages n'stuff.
 				//
-				 line = in.readLine(defaultLine, "\u0003\u001a\u0004\u000c", width,
+				 line = in.readLine(defaultLine, "\u0003\u001a\u0004", width,
 				 	LineEditor.FLAG_ECHO | LineEditor.FLAG_STOP_ON_BOL | LineEditor.FLAG_STOP_ON_EOL);
 				 	
 				 // Check if we got a command
@@ -114,9 +115,7 @@ public abstract class AbstractEditor
 					 		// and the save command. Check them first.
 					 		//
 					 		if(executableCommand.getCommand().getClass() == Save.class)
-					 			return true;
-					 		if(executableCommand.getCommand().getClass() == Quit.class)
-					 			return false;
+					 			return;
 				 			executableCommand.execute(m_context);
 				 		}
 				 		catch(KOMException e)
@@ -135,7 +134,7 @@ public abstract class AbstractEditor
 				 // Stop on empty line if requested
 				 //
 				 if(stopOnEmpty && line.length() == 0)
-				     return true;
+				     return;
 				 	
 				 // Add line to buffer
 				 //
@@ -186,9 +185,7 @@ public abstract class AbstractEditor
 						s = e.getLine();
 						if(s.length() > 0)
 							buffer.add(s);
-						return true;
-					case '\u0003': // Ctrl-C
-						return false;
+						return;
 					case '\u000c': // Ctrl-L
 					    try
 					    {

@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.KOMCache;
@@ -19,6 +20,7 @@ import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.ConferenceInfo;
+import nu.rydin.kom.structs.ConferenceListItem;
 import nu.rydin.kom.structs.MessageRange;
 import nu.rydin.kom.structs.Name;
 
@@ -41,6 +43,8 @@ public class ConferenceManager // extends NameManager
 	private final PreparedStatement m_setMagicConfStmt;
 	private final PreparedStatement m_isMagicConfStmt;
 	private final PreparedStatement m_isMailboxStmt;
+	private final PreparedStatement m_listByDateStmt;
+	private final PreparedStatement m_listByNameStmt;
 	
 	public ConferenceManager(Connection conn, NameManager nameManager)
 	throws SQLException
@@ -62,6 +66,16 @@ public class ConferenceManager // extends NameManager
 			 "select count(*) from magicconferences where conference = ?");
 		m_isMailboxStmt = conn.prepareStatement(
 		     "SELECT COUNT(*) FROM users WHERE id = ?");
+		m_listByDateStmt = conn.prepareStatement(
+		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext " +
+		     "FROM conferences c, names n " +
+		     "WHERE n.id = c.id AND n.kind = " + NameManager.CONFERENCE_KIND + ' '+
+		     "ORDER BY c.lasttext DESC");
+		m_listByNameStmt = conn.prepareStatement(
+		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext " +
+		     "FROM conferences c, names n " +
+		     "WHERE n.id = c.id AND n.kind = " + NameManager.CONFERENCE_KIND + ' '+
+		     "ORDER BY n.norm_name");
 	}
 	
 	public void close()
@@ -82,6 +96,10 @@ public class ConferenceManager // extends NameManager
 				m_isMagicConfStmt.close();
 			if(m_isMailboxStmt != null)
 			    m_isMailboxStmt.close();
+			if(m_listByDateStmt != null)
+			    m_listByDateStmt.close();
+			if(m_listByNameStmt != null)
+			    m_listByNameStmt.close();			
 		}
 		catch(SQLException e)
 		{
@@ -313,4 +331,67 @@ public class ConferenceManager // extends NameManager
 			}
 		}	    
 	}
+	
+	public ConferenceListItem[] listByDate()
+	throws SQLException
+	{
+	    ResultSet rs = null;
+	    try
+	    {
+	        ArrayList list = new ArrayList();
+	        m_listByDateStmt.clearParameters();
+	        rs = m_listByDateStmt.executeQuery();
+	        while(rs.next())
+	        {
+	            list.add(new ConferenceListItem(
+                    rs.getLong(1),new Name(
+                    rs.getString(2),
+                    rs.getShort(3)),
+                    rs.getTimestamp(4),
+                    rs.getTimestamp(5)));
+	        }
+	        ConferenceListItem[] answer = new ConferenceListItem[list.size()];
+	        list.toArray(answer);
+	        return answer;
+	    }
+		finally
+		{
+			if (null != rs)
+			{
+				rs.close();
+			}
+		}	    	    
+	}
+	
+	public ConferenceListItem[] listByName()
+	throws SQLException
+	{
+	    ResultSet rs = null;
+	    try
+	    {
+	        ArrayList list = new ArrayList();
+	        m_listByNameStmt.clearParameters();
+	        rs = m_listByNameStmt.executeQuery();
+	        while(rs.next())
+	        {
+	            list.add(new ConferenceListItem(
+                    rs.getLong(1),new Name(
+                    rs.getString(2),
+                    rs.getShort(3)),
+                    rs.getTimestamp(4),
+                    rs.getTimestamp(5)));
+	        }
+	        ConferenceListItem[] answer = new ConferenceListItem[list.size()];
+	        list.toArray(answer);
+	        return answer;
+	    }
+		finally
+		{
+			if (null != rs)
+			{
+				rs.close();
+			}
+		}	    	    
+	}
+	
 }

@@ -141,30 +141,34 @@ public class CreateConference extends AbstractCommand
 		if(choice == 0)
 			flags |= ConferencePermissions.REPLY_PERMISSION;
 		
-		// NONMEMBER PERMISSIONS
-		//
-		// Get permission to read
+		// Don't even ask if members don't have read permissions
 		//
 		int nonmemberFlags = 0;
-		choice = in.getChoice(fmt.format("create.conference.nonmember.allowread"), 
-			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
-		if(choice == 0)
-		    nonmemberFlags |= ConferencePermissions.READ_PERMISSION;
-
-		// Get permission to write
-		//
-		choice = in.getChoice(fmt.format("create.conference.nonmember.allowwrite"), 
-			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
-		if(choice == 0)
-		    nonmemberFlags |= ConferencePermissions.WRITE_PERMISSION;
-			
-		// Get permission to reply
-		//
-		choice = in.getChoice(fmt.format("create.conference.nonmember.allowreply"), 
-			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
-		if(choice == 0)
-		    nonmemberFlags |= ConferencePermissions.REPLY_PERMISSION;
-
+		if((flags & ConferencePermissions.READ_PERMISSION) != 0)
+		{
+			// NONMEMBER PERMISSIONS
+			//
+			// Get permission to read
+			//
+			choice = in.getChoice(fmt.format("create.conference.nonmember.allowread"), 
+				new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
+			if(choice == 0)
+			    nonmemberFlags |= ConferencePermissions.READ_PERMISSION;
+	
+			// Get permission to write
+			//
+			choice = in.getChoice(fmt.format("create.conference.nonmember.allowwrite"), 
+				new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
+			if(choice == 0)
+			    nonmemberFlags |= ConferencePermissions.WRITE_PERMISSION;
+				
+			// Get permission to reply
+			//
+			choice = in.getChoice(fmt.format("create.conference.nonmember.allowreply"), 
+				new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
+			if(choice == 0)
+			    nonmemberFlags |= ConferencePermissions.REPLY_PERMISSION;
+		}
 			
 		// Ask for reply conference
 		//

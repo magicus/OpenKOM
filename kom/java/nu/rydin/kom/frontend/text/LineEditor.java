@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import nu.rydin.kom.backend.EventSource;
@@ -21,6 +22,7 @@ import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.LineOverflowException;
 import nu.rydin.kom.exceptions.LineUnderflowException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.OutputInterruptedException;
 import nu.rydin.kom.exceptions.StopCharException;
 import nu.rydin.kom.i18n.MessageFormatter;
@@ -37,6 +39,8 @@ public class LineEditor implements NewlineListener
 	public static final int FLAG_STOP_ON_BOL			= 0x04;
 	public static final int FLAG_STOP_ON_EOL			= 0x08;
 	public static final int FLAG_STOP_ONLY_WHEN_EMPTY	= 0x10;
+	public static final int FLAG_RECORD_HISTORY			= 0x20;
+	public static final int FLAG_INHIBIT_ABORT			= 0x40;
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
@@ -62,6 +66,9 @@ public class LineEditor implements NewlineListener
 	private static final int TOKEN_EOL			= 8;
 	private static final int TOKEN_BS			= 9;
 	private static final int TOKEN_CR			= 10;
+	private static final int TOKEN_PREV			= 11;
+	private static final int TOKEN_NEXT			= 12;
+	private static final int TOKEN_ABORT		= 13;
 	private static final int TOKEN_SKIP			= 100;
 	
 	private static final KeystrokeTokenizerDefinition s_tokenizerDef;
@@ -86,7 +93,10 @@ public class LineEditor implements NewlineListener
 			                "\u001b[C", 		// <esc> [ C
 			                "\u0006", 			// Ctrl-F
 			                "\u001b[D", 		// <esc> [ D
-			                "\u0002" },			// Ctrl-B
+			                "\u0002", 			// Ctrl-B
+			                "\u0003", 			// Ctrl-C
+			                "\u0010",			// Ctrl-P
+			                "\u000e"},			// Ctrl-N
 			        new int[] {
 			                TOKEN_SKIP,			// Newline
 			                TOKEN_CR,			// CR
@@ -102,7 +112,10 @@ public class LineEditor implements NewlineListener
 			                TOKEN_RIGHT,		// <esc> [ C
 			                TOKEN_RIGHT, 		// Ctrl-F
 			                TOKEN_LEFT, 		// <esc> [ D
-			                TOKEN_LEFT });		// Ctrl-B
+			                TOKEN_LEFT,			// Ctrl-B
+			                TOKEN_ABORT,		// Ctrl-B
+		    				TOKEN_PREV,			// Ctrl-P
+		    				TOKEN_NEXT });		// Ctrl-N
 	    }
 	    catch(AmbiguousPatternException e)
 	    {
@@ -332,6 +345,11 @@ public class LineEditor implements NewlineListener
 	private final TerminalSettingsProvider m_tsProvider;
 	
 	private KeystrokeListener m_keystrokeListener;
+	
+	/**
+	 * Command history
+	 */
+	private ArrayList m_history = new ArrayList();
 		
 	public LineEditor(InputStream in, KOMWriter out, EventTarget target, TerminalSettingsProvider tsProvider, 
 	        ServerSession session, MessageFormatter formatter, String charset)
@@ -393,7 +411,7 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readLineStopOnEvent()
-	throws IOException, InterruptedException, EventDeliveredException
+	throws IOException, InterruptedException, OperationInterruptedException, EventDeliveredException
 	{
 		try
 		{
@@ -415,7 +433,7 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readLineStopOnEvent(String defaultString)
-	throws IOException, InterruptedException, EventDeliveredException
+	throws IOException, InterruptedException, OperationInterruptedException, EventDeliveredException
 	{
 		try
 		{
@@ -443,7 +461,7 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readPassword()
-	throws IOException, InterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException
 	{
 		try
 		{
@@ -471,13 +489,13 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readLine()
-	throws IOException, InterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException
 	{
 		return this.readLine(null);
 	}
 	
 	public String readLine(String defaultString)
-	throws IOException, InterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException
 	{
 		try
 		{
@@ -505,14 +523,15 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readLine(String defaultString, String stopChars, int length, int flags)
-	throws LineOverflowException, StopCharException, LineUnderflowException, IOException, InterruptedException, EventDeliveredException
+	throws LineOverflowException, StopCharException, LineUnderflowException, IOException, 
+	InterruptedException, OperationInterruptedException, EventDeliveredException
 	{
 		return innerReadLine(defaultString, stopChars, length, flags);
 	}
 
 	
 	public int getChoice(String prompt, String[] choices, int defaultChoice, String errorString)
-	throws IOException, InterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException
 	{		String defaultString = defaultChoice != -1 ? choices[defaultChoice] : null;
 		int top = choices.length;
 		for(;;)
@@ -671,8 +690,12 @@ public class LineEditor implements NewlineListener
 	
 	protected String innerReadLine(String defaultString, String stopChars, int maxLength, int flags)
 	throws EventDeliveredException, StopCharException, LineOverflowException, LineUnderflowException, 
-	IOException, InterruptedException
+	IOException, OperationInterruptedException, InterruptedException
 	{
+	    /**
+	     * Position in history buffer
+	     */
+	    int historyPos = m_history.size();
 		StringBuffer buffer = new StringBuffer(500);
 		int cursorpos = 0;
 		
@@ -728,11 +751,37 @@ public class LineEditor implements NewlineListener
 		    int kind = token.getKind();
 		    switch(kind)
 		    {
+		    	case TOKEN_ABORT:
+		    	    if((flags & FLAG_INHIBIT_ABORT) == 0)
+		    	        throw new OperationInterruptedException();
+		    	    break;
+		    	case TOKEN_PREV:
 		    	case TOKEN_UP:
-	    			m_out.write(BELL);
+		    	    if(historyPos > 0)
+		    	    {
+				    	this.deleteLine(buffer, cursorpos);
+						cursorpos = 0;						
+						String command = (String) m_history.get(--historyPos);
+		    	        buffer.append(command);
+		    	        m_out.print(command);
+		    	        cursorpos = command.length();
+		    	    }
+		    	    else
+		    	        m_out.write(BELL);
 		    		break;
+		    	case TOKEN_NEXT:
 		    	case TOKEN_DOWN:
-	    			m_out.write(BELL);
+		    	    if(historyPos < m_history.size() - 1)
+		    	    {
+				    	this.deleteLine(buffer, cursorpos);
+						cursorpos = 0;						
+						String command = (String) m_history.get(++historyPos);
+		    	        buffer.append(command);
+		    	        m_out.print(command);
+		    	        cursorpos = command.length();
+		    	    }
+		    	    else
+		    	        m_out.write(BELL);
 	    			break;
 	    		case TOKEN_RIGHT:
 	    		    if(cursorpos==buffer.length() || (flags & FLAG_ECHO) == 0)
@@ -806,24 +855,7 @@ public class LineEditor implements NewlineListener
 					break;
 				case TOKEN_DELETE_LINE:
 					{
-						int top = buffer.length();
-						
-						// Advance cursor to end of line
-						//
-						int n = top  - cursorpos;
-						while(n-- > 0)
-							m_out.write(SPACE);
-						
-						// Delete to beginning of line
-						//
-						n = top;
-						while(n-- > 0)
-						{
-							m_out.write(BS);
-							m_out.write(SPACE);
-							m_out.write(BS);
-						}
-						buffer.delete(0, buffer.length());
+				    	this.deleteLine(buffer, cursorpos);
 						cursorpos = 0;						
 						break;
 					}					
@@ -907,7 +939,39 @@ public class LineEditor implements NewlineListener
 		    }
 			m_out.flush();
 		}		
-		return buffer.toString();
+		// We got a string! Should we record it in command history?
+		//
+		String answer = buffer.toString();
+		
+		// Don't store if not asked to or if previous command
+		// was exactly the same.
+		//
+		if((flags & FLAG_RECORD_HISTORY) != 0 && buffer.length() > 0 && 
+		        (m_history.size() == 0 || !answer.equals(m_history.get(m_history.size() - 1))))
+		    m_history.add(answer);
+		return answer;
+	}
+	
+	private void deleteLine(StringBuffer buffer, int cursorpos)
+	{
+		int top = buffer.length();
+		
+		// Advance cursor to end of line
+		//
+		int n = top  - cursorpos;
+		while(n-- > 0)
+			m_out.write(SPACE);
+		
+		// Delete to beginning of line
+		//
+		n = top;
+		while(n-- > 0)
+		{
+			m_out.write(BS);
+			m_out.write(SPACE);
+			m_out.write(BS);
+		}
+		buffer.delete(0, buffer.length());				
 	}
 	
 	public void shutdown()

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.data.MessageManager;
+import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -30,6 +31,7 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class Status extends AbstractCommand
 {
+    private final int LABEL_LENGTH = 25;
     
 	public Status(Context context, String fullName)
 	{
@@ -69,35 +71,35 @@ public class Status extends AbstractCommand
 	{
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
-		PrintUtils.printLabelled(out, formatter.format("status.user.userid"), 30, info.getUserid());
-		PrintUtils.printLabelled(out, formatter.format("status.user.id"), 30, Long.toString(info.getId()));
-		PrintUtils.printLabelled(out, formatter.format("status.user.name"), 30, info.getName());
+		PrintUtils.printLabelled(out, formatter.format("status.user.userid"), LABEL_LENGTH, info.getUserid());
+		PrintUtils.printLabelled(out, formatter.format("status.user.id"), LABEL_LENGTH, Long.toString(info.getId()));
+		PrintUtils.printLabelled(out, formatter.format("status.user.name"), LABEL_LENGTH, info.getName());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.address1"), 
-			30, info.getAddress1());
+			LABEL_LENGTH, info.getAddress1());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.address2"), 
-			30, info.getAddress2());
+			LABEL_LENGTH, info.getAddress2());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.address3"), 
-			30, info.getAddress3());
+			LABEL_LENGTH, info.getAddress3());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.address4"), 
-			30, info.getAddress4());
+			LABEL_LENGTH, info.getAddress4());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.phone1"), 
-			30, info.getPhoneno1());
+			LABEL_LENGTH, info.getPhoneno1());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.phone2"), 
-			30, info.getPhoneno2());			
+			LABEL_LENGTH, info.getPhoneno2());			
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.email1"), 
-			30, info.getEmail1());
+			LABEL_LENGTH, info.getEmail1());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.email2"), 
-			30, info.getEmail2());
+			LABEL_LENGTH, info.getEmail2());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.url"), 
-			30, info.getUrl());
+			LABEL_LENGTH, info.getUrl());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.locale"), 
-				30, info.getLocale().toString());
+				LABEL_LENGTH, info.getLocale().toString());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.time.zone"), 
-				30, info.getTimeZone().getID());
+				LABEL_LENGTH, info.getTimeZone().getID());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.created"), 
-				30, context.smartFormatDate(info.getCreated()));
+				LABEL_LENGTH, context.smartFormatDate(info.getCreated()));
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.lastlogin"), 
-				30, context.smartFormatDate(info.getLastlogin()));
+				LABEL_LENGTH, context.smartFormatDate(info.getLastlogin()));
 		out.println();
 		
 		// Has the user left a note?
@@ -127,17 +129,26 @@ public class Status extends AbstractCommand
 	{
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
-		PrintUtils.printLabelled(out, formatter.format("status.conference.id"), 30, Long.toString(info.getId()));
-		PrintUtils.printLabelled(out, formatter.format("status.conference.name"), 30, info.getName());
-		PrintUtils.printLabelled(out, formatter.format("status.conference.admin"), 30, 
+		PrintUtils.printLabelled(out, formatter.format("status.conference.id"), LABEL_LENGTH, Long.toString(info.getId()));
+		PrintUtils.printLabelled(out, formatter.format("status.conference.name"), LABEL_LENGTH, info.getName());
+		// TODO: Handle protected conferences
+		//
+		PrintUtils.printLabelled(out, formatter.format("status.conference.type"), LABEL_LENGTH, 
+		        (info.getPermissions() & ConferencePermissions.READ_PERMISSION) != 0 ? formatter.format("conference.public")
+		                : formatter.format("conference.exclusive"));
+		PrintUtils.printLabelled(out, formatter.format("status.conference.admin"), LABEL_LENGTH, 
 			context.getSession().getName(info.getAdministrator()).getName());
-		PrintUtils.printLabelled(out, formatter.format("status.conference.messages"), 30, 
+		PrintUtils.printLabelled(out, formatter.format("status.conference.messages"), LABEL_LENGTH, 
 					Integer.toString(info.getFirstMessage()) + " - " + 
 					Integer.toString(info.getLastMessage()));			
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.created"), 
-				30, context.smartFormatDate(info.getCreated()));
+				LABEL_LENGTH, context.smartFormatDate(info.getCreated()));
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.lasttext"), 
-				30, context.smartFormatDate(info.getLasttext()));
+				LABEL_LENGTH, context.smartFormatDate(info.getLasttext()));
+		PrintUtils.printLabelled(out, formatter.format("status.conference.permissions"), LABEL_LENGTH,
+		        this.formatPermissions(info.getPermissions(), formatter));
+		PrintUtils.printLabelled(out, formatter.format("status.conference.nonmember.permissions"), LABEL_LENGTH,
+		        this.formatPermissions(info.getNonmemberPermissions(), formatter));
 		
 		// TODO: fulkod
 		ListMembers l = new ListMembers(context, "");
@@ -149,7 +160,26 @@ public class Status extends AbstractCommand
 		catch (Exception e)
 		{
 			//
-		}		
-			
+		}			
+	}
+	
+	private String formatPermissions(int permissions, MessageFormatter formatter)
+	{
+	    StringBuffer buffer = new StringBuffer(30);
+	    if((permissions & ConferencePermissions.READ_PERMISSION) != 0)
+	        buffer.append(formatter.format("permission.read"));
+	    if((permissions & ConferencePermissions.WRITE_PERMISSION) != 0)
+	    {	        
+	        if(buffer.length() > 0)
+	           buffer.append(", ");
+	        buffer.append(formatter.format("permission.write"));
+	    }
+	    if((permissions & ConferencePermissions.REPLY_PERMISSION) != 0)
+	    {	        
+	        if(buffer.length() > 0)
+	           buffer.append(", ");
+	        buffer.append(formatter.format("permission.reply"));
+	    }
+	    return buffer.length() > 0 ? buffer.toString() : formatter.format("misc.none.plural");
 	}
 }

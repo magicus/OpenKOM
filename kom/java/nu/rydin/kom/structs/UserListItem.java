@@ -13,13 +13,11 @@ import java.io.Serializable;
  */
 public class UserListItem implements Serializable
 {
-	public final long m_userId;
-	
-	public final Name m_userName;
+    public final NameAssociation m_user;
 	
 	public final short m_action;
 	
-	public final Name m_conferenceName;
+	public final NameAssociation m_conference;
 	
 	public final boolean m_inMailbox;
 	
@@ -27,13 +25,12 @@ public class UserListItem implements Serializable
 	
 	public final long m_lastHeartbeat;
 	
-	public UserListItem(long userId, Name userName, short action, Name conferenceName, boolean inMailbox,
+	public UserListItem(NameAssociation user, short action, NameAssociation conference, boolean inMailbox,
 	        long loginTime, long lastHeartbeat)
 	{
-		m_userId 			= userId;
-		m_userName 			= userName;
+		m_user 				= user;
 		m_action 			= action;
-		m_conferenceName 	= conferenceName;
+		m_conference 		= conference;
 		m_inMailbox			= inMailbox;
 		m_loginTime			= loginTime;
 		m_lastHeartbeat		= lastHeartbeat;
@@ -44,19 +41,14 @@ public class UserListItem implements Serializable
 		return m_action;
 	}
 
-	public Name getConferenceName()
+	public NameAssociation getConference()
 	{
-		return m_conferenceName;
+		return m_conference;
 	}
 
-	public long getUserId()
+	public NameAssociation getUser()
 	{
-		return m_userId;
-	}
-
-	public Name getUserName()
-	{
-		return m_userName;
+		return m_user;
 	}
 	
 	public boolean isInMailbox()

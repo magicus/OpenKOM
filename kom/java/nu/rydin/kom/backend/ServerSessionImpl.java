@@ -7,6 +7,7 @@ package nu.rydin.kom.backend;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -502,6 +503,44 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
+	public ConferenceListItem[] listConferencesByDate()
+	throws UnexpectedException
+	{
+	    try
+	    {
+	        return (ConferenceListItem[]) this.censorNames(m_da.getConferenceManager().listByDate());
+	    }
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+		catch(ObjectNotFoundException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}		
+	}
+
+	/**
+	 * Returns a list of conferences, sorted by their normalized name.
+	 * @throws UnexpectedException
+	 */
+	public ConferenceListItem[] listConferencesByName()
+	throws UnexpectedException
+	{
+	    try
+	    {
+	        return (ConferenceListItem[]) this.censorNames(m_da.getConferenceManager().listByName());
+	    }
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+		catch(ObjectNotFoundException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+		
 	public void gotoConference(long id)
 	throws UnexpectedException, ObjectNotFoundException, NotMemberException
 	{
@@ -1379,8 +1418,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			{
 				// Conference deleted. Display as "???"
 			}
-			answer[idx] = new UserListItem(user, new Name(userName, 
-			        Visibilities.PUBLIC), (short) 0, conferenceName, inMailbox, session.getLoginTime(),
+			answer[idx] = new UserListItem(new NameAssociation(user, new Name(userName, 
+			        Visibilities.PUBLIC)), (short) 0, new NameAssociation(confId, conferenceName), inMailbox, session.getLoginTime(),
 			        ((ServerSessionImpl) session).getLastHeartbeat()); 
 		}
 		return answer;
@@ -2906,11 +2945,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             }
         }
         
-        // So? Was the list untouched? Good n that case!
+        // So? Was the list untouched? Good in that case!
         //
         if(list == null)
             return names;
-        names = new NameAssociation[list.size()];
+        
+        // Create array of the correct derived type.
+        // (Non object-jocks are not supposed to understand this)
+        //
+        names = (NameAssociation[]) Array.newInstance(names.getClass().getComponentType(), list.size());
         list.toArray(names);
         return names;
     }

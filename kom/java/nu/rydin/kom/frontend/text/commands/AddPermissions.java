@@ -12,6 +12,7 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -62,7 +63,7 @@ public class AddPermissions extends AbstractCommand
 	}
 	
 	protected int askForPermission(Context context, String format, int permissions, int old)
-	throws IOException, InterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException
 	{
 		MessageFormatter formatter = context.getMessageFormatter();
 		String error = formatter.format("create.conference.invalid.choice");

@@ -46,13 +46,13 @@ public class Who extends AbstractCommand
 			UserListItem each = users[idx];
 			String confName = each.isInMailbox() 
 				? formatter.format("misc.mailboxtitle")
-				: each.getConferenceName().getName();
+				: context.formatObjectName(each.getConference());
 			long now = System.currentTimeMillis();
 			PrintUtils.printRightJustified(out, StringUtils.formatElapsedTime(now - each.getLoginTime()), 6);
 			long idle = now - each.getLastHeartbeat();
 			PrintUtils.printRightJustified(out, idle >= 60000 ? StringUtils.formatElapsedTime(now - each.getLastHeartbeat()) : "", 6);
 			out.print(' ');
-			out.println(formatter.format("who.format", new Object[] { each.getUserName(), confName }));
+			out.println(formatter.format("who.format", new Object[] { context.formatObjectName(each.getUser()), confName }));
 		}
     }
 }

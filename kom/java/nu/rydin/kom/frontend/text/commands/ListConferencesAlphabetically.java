@@ -1,6 +1,6 @@
 /*
- * Created on Oct 11, 2003
- *  
+ * Created on Sep 7, 2004
+ *
  * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
@@ -19,9 +19,10 @@ import nu.rydin.kom.utils.PrintUtils;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class ListConferences extends AbstractCommand
+public class ListConferencesAlphabetically extends AbstractCommand
 {
-	public ListConferences(Context context, String fullName)
+
+	public ListConferencesAlphabetically(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}
@@ -30,7 +31,7 @@ public class ListConferences extends AbstractCommand
 	throws KOMException
 	{
 		PrintWriter out = context.getOut();
-		ConferenceListItem[] names = context.getSession().listConferencesByDate();
+		ConferenceListItem[] names = context.getSession().listConferencesByName();
 		int top = names.length;
 		if(top == 0)
 		    return;
@@ -49,3 +50,4 @@ public class ListConferences extends AbstractCommand
 		}
 	}
 }
+

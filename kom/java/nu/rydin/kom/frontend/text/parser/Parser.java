@@ -17,7 +17,6 @@ import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
@@ -193,7 +192,7 @@ public class Parser
         int top = candidates.size();
         for(int idx = 0; idx < top; ++idx)
         {
-            String candidate = ((Name) candidates.get(idx)).getName();
+            String candidate = candidates.get(idx).toString();
             int printIndex = idx + 1;
             PrintUtils.printRightJustified(out, Integer.toString(printIndex), 2);
             out.print(". ");
