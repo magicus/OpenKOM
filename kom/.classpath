@@ -2,6 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="distr/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="distr/xml-apis.jar"/>
 	<classpathentry kind="lib" path="distr/concurrent.jar"/>
 	<classpathentry kind="lib" path="distr/mysql-connector-java-3.0.14-production-bin.jar"/>
 	<classpathentry kind="lib" path="distr/log4j-1.2.8.jar"/>

@@ -5,6 +5,8 @@
 		<pathelement location="${libPath}/kom.jar" /> 
 		<pathelement location="${distrPath}/mysql-connector-java-3.0.14-production-bin.jar"/>
 		<pathelement location="${distrPath}/log4j-1.2.8.jar"/>
+		<pathelement location="${distrPath}/xercesImpl.jar"/>
+		<pathelement location="${distrPath}/xml-apis.jar"/>
 	</path>
 	
 	<target name="clean">

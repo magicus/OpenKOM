@@ -72,4 +72,4 @@ nu.rydin.kom.frontend.text.commands.ChangeLoginScript
 nu.rydin.kom.frontend.text.commands.EditProfile
 nu.rydin.kom.frontend.text.commands.DeleteProfile
 nu.rydin.kom.frontend.text.commands.ListCommands
-nu.rydin.kom.frontend.text.commands.ShowHelp
+nu.rydin.kom.frontend.text.commands.Help
