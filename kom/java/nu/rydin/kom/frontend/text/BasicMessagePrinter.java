@@ -105,7 +105,7 @@ public class BasicMessagePrinter implements MessagePrinter
 				out.println(formatter.format("BasicMessagePrinter.reply.to.different.conference", 
 					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
 				        new Long(replyTo.getOccurrence().getGlobalId()),
-				        context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()), 
+				        context.formatConferenceName(replyTo.getConference(), replyTo.getConferenceName().getName()),
 				        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }));
 			}
 		}

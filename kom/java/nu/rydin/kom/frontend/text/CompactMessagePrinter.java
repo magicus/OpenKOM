@@ -101,7 +101,7 @@ public class CompactMessagePrinter implements MessagePrinter
 				//
 				out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
 					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
-				        context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()), 
+				        context.formatConferenceName(replyTo.getConference(), replyTo.getConferenceName().getName()),
 				        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }));
 			}
 		}
