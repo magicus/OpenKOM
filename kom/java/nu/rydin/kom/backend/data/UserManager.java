@@ -6,8 +6,10 @@
  */
 package nu.rydin.kom.backend.data;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +27,9 @@ import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.utils.Base64;
+import nu.rydin.kom.utils.MD5Crypt;
+import nu.rydin.kom.utils.UnixCrypt;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -148,15 +153,11 @@ public class UserManager
 			if(!rs.next())
 				throw new ObjectNotFoundException(userid);
 			long id = rs.getLong(1);
-			byte[] candidate = rs.getBytes(2);
-				
-			// Calculate digest of supplied password
-			// 
-			byte[] digest = this.passwordDigest(password);
-				
+			String candidate = rs.getString(2);
+								
 			// Compare to digest in database
 			//
-			if(!Arrays.equals(digest, candidate))
+			if(!this.compareDigest(password, candidate))
 				throw new AuthenticationException(userid);
 			return id;
 		}
@@ -194,7 +195,7 @@ public class UserManager
 			//
 			m_addUserStmt.clearParameters();
 			m_addUserStmt.setString(1, userid);
-			m_addUserStmt.setBytes(2, this.passwordDigest(password));
+			m_addUserStmt.setString(2, this.gerenatePasswordDigest(password));
 			m_addUserStmt.setString(3, address1);
 			m_addUserStmt.setString(4, address2);
 			m_addUserStmt.setString(5, address3);
@@ -391,7 +392,7 @@ public class UserManager
 	throws ObjectNotFoundException, NoSuchAlgorithmException, SQLException
 	{
 		m_changePasswordStmt.clearParameters();
-		m_changePasswordStmt.setBytes(1, this.passwordDigest(password));
+		m_changePasswordStmt.setString(1, this.gerenatePasswordDigest(password));
 		m_changePasswordStmt.setLong(2, userId);
 		if(m_changePasswordStmt.executeUpdate() == 0)
 			throw new ObjectNotFoundException("user id=" + userId);
@@ -435,20 +436,50 @@ public class UserManager
 		if(m_changePermissionsStmt.executeUpdate() == 0)
 			throw new ObjectNotFoundException("id=" + userId);
 		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
-	}	
-	
-	/**
-	 * Calculates an MD5 digest of a password
-	 * @param password
-	 * @return The MD5 digest
-	 * @throws NoSuchAlgorithmException
-	 */
-	protected byte[] passwordDigest(String password)
+	}
+		
+	protected String gerenatePasswordDigest(String password)
 	throws NoSuchAlgorithmException
 	{
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		md.update(password.getBytes());
-		return md.digest();		
+	    SecureRandom rnd = SecureRandom.getInstance("SHA1PRNG");
+	    byte[] salt = rnd.generateSeed(6);
+        String answer = MD5Crypt.crypt(password, 
+                "$1$" + Base64.encodeBytes(salt) + "$");
+        return answer;
+	}
+		
+	protected boolean compareDigest(String password, String candidate)
+	throws NoSuchAlgorithmException
+	{
+	    // Figure out what encoding we're dealing with
+	    //
+	    int l = candidate.length();
+	    switch(l)
+	    {
+	    	case 13:
+	    	{
+	    	    // Old-fashioned UNIX crypt
+	    	    //
+	    	    String salt = candidate.substring(0, 2);
+	    	    return UnixCrypt.crypt(salt, password).equals(candidate);
+	    	}
+	    	case 24:
+	    	{
+	    	    // Unsalted MD5!
+	    	    // TODO: Remove! Unsafe!!!
+	    	    //
+		    	MessageDigest md = MessageDigest.getInstance("MD5");
+		    	md.update(password.getBytes());
+		    	return Base64.encodeBytes(md.digest()).equals(candidate);
+	    		}
+	    	case 34:
+	    	    // MD5 with 6 byte salt
+	    	    //
+	    	    String salt = candidate.substring(3, 11);
+	    	    return MD5Crypt.crypt(password, salt).equals(candidate);
+	    	default:
+	    	    return false;
+	    }
 	}
 	/**
 	 * update last login date

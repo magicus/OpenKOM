@@ -86,9 +86,11 @@ public abstract class CommandLinePart
         return -1;
     }
 
-    public abstract Match fillInMissingObject(Context context) throws IOException, InterruptedException, OperationInterruptedException;
+    public abstract Match fillInMissingObject(Context context) 
+    throws IOException, InterruptedException, OperationInterruptedException;
 	
-	public Object resolveFoundObject(Context context, Match match) throws IOException, InterruptedException, KOMException
+	public Object resolveFoundObject(Context context, Match match) 
+	throws IOException, InterruptedException, KOMException
 	{
 		return match.getParsedObject();
 	}
@@ -97,6 +99,8 @@ public abstract class CommandLinePart
 	{
 		String name = NameUtils.normalizeName(matchingPart);
 		int top = name.length();
+		if(top == 0)
+		    return "";
 		return name.charAt(0)== '\'' && name.charAt(top - 1) == '\''
 		    ? name.substring(1, top - 1)
 		    : name;

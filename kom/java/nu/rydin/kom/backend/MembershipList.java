@@ -73,7 +73,9 @@ public class MembershipList
 	throws ObjectNotFoundException
 	{
 		MembershipInfo mi = (MembershipInfo) m_conferenceTable.get(new Long(conference));
-			
+		if(mi == null)
+		    return; // We're not members, so we don't care!
+
 		// Update ranges and mark as dirty
 		//
 		MessageRangeList l = mi.getReadMessages(); 

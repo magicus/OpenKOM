@@ -137,6 +137,31 @@ public class CreateConference extends AbstractCommand
 			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
 		if(choice == 0)
 			flags |= ConferencePermissions.REPLY_PERMISSION;
+		
+		// NONMEMBER PERMISSIONS
+		//
+		// Get permission to read
+		//
+		int nonmemberFlags = 0;
+		choice = in.getChoice(fmt.format("create.conference.nonmember.allowread"), 
+			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
+		if(choice == 0)
+		    nonmemberFlags |= ConferencePermissions.READ_PERMISSION;
+
+		// Get permission to write
+		//
+		choice = in.getChoice(fmt.format("create.conference.nonmember.allowwrite"), 
+			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
+		if(choice == 0)
+		    nonmemberFlags |= ConferencePermissions.WRITE_PERMISSION;
+			
+		// Get permission to reply
+		//
+		choice = in.getChoice(fmt.format("create.conference.nonmember.allowreply"), 
+			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
+		if(choice == 0)
+		    nonmemberFlags |= ConferencePermissions.REPLY_PERMISSION;
+
 			
 		// Ask for reply conference
 		//
@@ -166,11 +191,11 @@ public class CreateConference extends AbstractCommand
 		{
 			if (doMagic)
 			{
-				context.getSession().createMagicConference(fullname, flags, NameManager.PUBLIC, replyConf, magicType);
+				context.getSession().createMagicConference(fullname, flags, nonmemberFlags, NameManager.PUBLIC, replyConf, magicType);
 			}
 			else
 			{
-				context.getSession().createConference(fullname, flags, NameManager.PUBLIC, replyConf);
+				context.getSession().createConference(fullname, flags, nonmemberFlags, NameManager.PUBLIC, replyConf);
 			}
 		}
 		catch(DuplicateNameException e)

@@ -17,7 +17,6 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.NonWrappingWrapper;
 import nu.rydin.kom.frontend.text.editor.simple.FileEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>

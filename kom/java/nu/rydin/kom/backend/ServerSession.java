@@ -212,6 +212,7 @@ public interface ServerSession
 	 *  
 	 * @param fullname The full name of the conference
 	 * @param permissions Default permissions
+	 * @param nonmemberPermissions Default permissions for non-members
 	 * @param visibility Visibility level.
 	 * @param replyConf Conference to send replies to. -1 if same conference.
 	 * @return New conference ID.
@@ -219,7 +220,7 @@ public interface ServerSession
 	 * @throws AmbiguousNameException
 	 * @throws DuplicateNameException
 	 */	
-	public long createConference(String fullname, int permissions, short visibility, long replyConf)
+	public long createConference(String fullname, int permissions, int nonmemberPermissions, short visibility, long replyConf)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException;
 
 	/**
@@ -445,6 +446,26 @@ public interface ServerSession
 	 * @throws UnexpectedException
 	 */
 	public MessageOccurrence globalToLocal(long globalNum)
+	throws ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * Returns the global message id given a conference and a local number.
+	 * 
+	 * @param conference The conference
+	 * @param localNum The local number
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public long localToGlobal(long conference, int localNum)
+	throws ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * Returns the global message id given a local number in the current conference.
+	 * 
+	 * @param localNum
+	 * @return
+	 */
+	public long localToGlobalInCurrentConference(int localNum)
 	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
@@ -739,9 +760,10 @@ public interface ServerSession
 	 * 
 	 * @param conferenceId The conference id
 	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
 	 */
 	public int getPermissionsInConference(long conferenceId)
-	throws UnexpectedException;
+	throws UnexpectedException, ObjectNotFoundException;
 	
 	/**
 	 * Returns the permissions mask in effect for the specified user in the
@@ -750,18 +772,20 @@ public interface ServerSession
 	 * @param userId The user id 
 	 * @param conferenceId The conference id
 	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
 	 */
 	public int getUserPermissionsInConference(long userId, long conferenceId)
-	throws UnexpectedException;
+	throws UnexpectedException, ObjectNotFoundException;
 
 	/**
 	 * Returns the permissions mask in effect for the logged in user in the
 	 * current conference
 	 * 
 	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
 	 */	
 	public int getPermissionsInCurrentConference()
-	throws UnexpectedException;
+	throws UnexpectedException, ObjectNotFoundException;
 
 	/**
 	 * Checks if the currently logged on user has the permissions in the
@@ -1010,7 +1034,7 @@ public interface ServerSession
 	public void deleteConference (long conference)
 	throws UnexpectedException;
 	
-	public void createMagicConference (String fullname, int permissions, short visibility, long replyConf, short kind)
+	public void createMagicConference (String fullname, int permissions, int nonmemberPermissions, short visibility, long replyConf, short kind)
 	throws DuplicateNameException, UnexpectedException, AuthorizationException, AmbiguousNameException;
 
 	public long getMagicConference (short kind)

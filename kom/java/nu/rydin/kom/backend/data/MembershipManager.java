@@ -43,6 +43,7 @@ public class MembershipManager
 	private final PreparedStatement m_listPermissionsStmt;
 	private final PreparedStatement m_activateMembershipStmt;
 	private final PreparedStatement m_getDefaultPermissionsStmt;
+	private final PreparedStatement m_getNonmemberPermissionsStmt;
 	
 	private final Connection m_conn;
 	
@@ -80,6 +81,8 @@ public class MembershipManager
 			"UPDATE memberships SET active = 1 WHERE user = ? AND conference = ?");
 		m_getDefaultPermissionsStmt = conn.prepareStatement(
 			"SELECT permissions FROM conferences WHERE id = ?");
+		m_getNonmemberPermissionsStmt = conn.prepareStatement(
+		    "SELECT nonmember_permissions FROM conferences WHERE id = ?");
 	}	
 	
 	public void close()
@@ -109,6 +112,8 @@ public class MembershipManager
 			m_activateMembershipStmt.close();
 		if(m_getDefaultPermissionsStmt != null)
 			m_getDefaultPermissionsStmt.close();
+		if(m_getNonmemberPermissionsStmt != null)
+		    m_getNonmemberPermissionsStmt.close();
 	}
 	
 	public void finalize()
@@ -498,7 +503,7 @@ public class MembershipManager
 	 * @throws SQLException
 	 */ 	
 	public int getPermissions(long user, long conference)
-	throws SQLException
+	throws ObjectNotFoundException, SQLException
 	{
 		m_getPermissionsStmt.clearParameters();
 		m_getPermissionsStmt.setLong(1, user);
@@ -508,7 +513,18 @@ public class MembershipManager
 		{
 			rs = m_getPermissionsStmt.executeQuery();
 			if(!rs.next())
-				return 0; 
+			{
+			    // Not a member. Check for nonmember permissions
+			    //
+			    rs.close();
+			    rs = null;
+				m_getNonmemberPermissionsStmt.clearParameters();
+				m_getNonmemberPermissionsStmt.setLong(1, conference);
+				rs = m_getNonmemberPermissionsStmt.executeQuery();
+				if(!rs.next())
+				    throw new ObjectNotFoundException("conf id=" + conference);
+				return rs.getInt(1);
+			}
 			
 			// Get user permission, negation mask and conference permissions
 			//
@@ -539,7 +555,7 @@ public class MembershipManager
 	 * @throws SQLException
 	 */
 	public boolean hasPermission(long user, long conference, int mask)
-	throws SQLException
+	throws ObjectNotFoundException, SQLException
 	{
 		return (this.getPermissions(user, conference) & mask) == mask;
 	}

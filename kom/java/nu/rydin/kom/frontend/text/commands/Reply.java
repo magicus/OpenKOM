@@ -53,7 +53,9 @@ public class Reply extends AbstractCommand
 		}
 		else
 		{
-		    replyToId = replyTo.getNumber();
+		    // TODO: Handle global message number!!!
+		    //
+		    replyToId = session.localToGlobalInCurrentConference(replyTo.getNumber());
 		}
 			
 		// Get editor and execute it

@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS users
 (
 	id BIGINT NOT NULL,
 	userid VARCHAR(50),
-	pwddigest BINARY(50),
+	pwddigest VARCHAR(100),
 	address1 VARCHAR(50),
 	address2 VARCHAR(50),
 	address3 VARCHAR(50),

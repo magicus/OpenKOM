@@ -13,25 +13,28 @@ import java.sql.Timestamp;
  */
 public class ConferenceInfo extends NamedObject
 {
-	private long m_administrator;
-	private int m_permissions;
-	private long m_replyConf;
-	private int m_firstMessage;
-	private int m_lastMessage;
-	private Timestamp m_created;
-	private Timestamp m_lasttext;
+	private final long m_administrator;
+	private final int m_permissions;
+	private final int m_nonmemberPermissions;
+	private final long m_replyConf;
+	private final int m_firstMessage;
+	private final int m_lastMessage;
+	private final Timestamp m_created;
+	private final Timestamp m_lasttext;
 	
-	public ConferenceInfo(long id, String name, long administrator, int permissions, long replyConf,
+	public ConferenceInfo(long id, String name, long administrator, int permissions, 
+	        int nonmemberPermissions, long replyConf,
 			Timestamp created, Timestamp lasttext, int firstMessage, int lastMessage )
 	{
 		super(id, name);
-		m_administrator	= administrator;
-		m_permissions 	= permissions;
-		m_replyConf		= replyConf;
-		m_firstMessage 	= firstMessage;
-		m_lastMessage 	= lastMessage;
-		m_created		= created;
-		m_lasttext		= lasttext;
+		m_administrator			= administrator;
+		m_permissions 			= permissions;
+		m_nonmemberPermissions 	= nonmemberPermissions;
+		m_replyConf				= replyConf;
+		m_firstMessage 			= firstMessage;
+		m_lastMessage 			= lastMessage;
+		m_created				= created;
+		m_lasttext				= lasttext;
 	}
 	
 	public long getAdministrator()
@@ -52,6 +55,11 @@ public class ConferenceInfo extends NamedObject
 	public int getPermissions()
 	{
 		return m_permissions;
+	}
+	
+	public int getNonmemberPermissions()
+	{
+	    return m_nonmemberPermissions;
 	}
 
 	public int getLastMessage()

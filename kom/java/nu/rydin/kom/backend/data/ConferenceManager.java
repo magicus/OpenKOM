@@ -46,9 +46,9 @@ public class ConferenceManager // extends NameManager
 	{
 		m_nameManager = nameManager;
 		m_addConfStmt = conn.prepareStatement(
-			"INSERT INTO conferences(id, administrator, permissions, replyConf, created) VALUES(?, ?, ?, ?, ?)");
+			"INSERT INTO conferences(id, administrator, permissions, nonmember_permissions, replyConf, created) VALUES(?, ?, ?, ?, ?, ?)");
 		m_loadConfStmt = conn.prepareStatement(
-			"SELECT n.fullname, c.administrator, c.permissions, c.replyConf, c.created, c.lasttext " +
+			"SELECT n.fullname, c.administrator, c.permissions, c.nonmember_permissions, c.replyConf, c.created, c.lasttext " +
 			"FROM names n, conferences c " +
 			"WHERE c.id = ? AND n.id = c.id");
 		m_loadRangeStmt = conn.prepareStatement(	
@@ -97,7 +97,7 @@ public class ConferenceManager // extends NameManager
 	 * @throws SQLException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public long addConference(String fullname, long administrator, int permissions, short visibility, long replyConf)
+	public long addConference(String fullname, long administrator, int permissions, int nonmemberPermissions, short visibility, long replyConf)
 		throws DuplicateNameException, SQLException, AmbiguousNameException
 	{
 		if(m_nameManager.nameExists(fullname))
@@ -114,11 +114,12 @@ public class ConferenceManager // extends NameManager
 		m_addConfStmt.setLong(1, nameId);
 		m_addConfStmt.setLong(2, administrator);
 		m_addConfStmt.setInt(3, permissions);
+		m_addConfStmt.setInt(4, nonmemberPermissions);
 		if(replyConf == -1)
-			m_addConfStmt.setNull(4, Types.BIGINT);
+			m_addConfStmt.setNull(5, Types.BIGINT);
 		else
-			m_addConfStmt.setLong(4, replyConf);
-		m_addConfStmt.setTimestamp(5, now);
+			m_addConfStmt.setLong(5, replyConf);
+		m_addConfStmt.setTimestamp(6, now);
 		m_addConfStmt.executeUpdate();
 		return nameId;
 	}
@@ -140,8 +141,9 @@ public class ConferenceManager // extends NameManager
 		m_addConfStmt.setLong(1, user);
 		m_addConfStmt.setLong(2, user);
 		m_addConfStmt.setInt(3, permissions);
-		m_addConfStmt.setNull(4, Types.BIGINT);					
-		m_addConfStmt.setTimestamp(5, now);
+		m_addConfStmt.setInt(4, 0);
+		m_addConfStmt.setNull(5, Types.BIGINT);					
+		m_addConfStmt.setTimestamp(6, now);
 		m_addConfStmt.executeUpdate();
 	}
 	
@@ -171,9 +173,10 @@ public class ConferenceManager // extends NameManager
 				rs.getString(1),			// Name
 				rs.getLong(2),				// Admin
 				rs.getInt(3),				// Permissions
-				rs.getObject(4) != null ? rs.getLong(4) : -1, // Reply conference
-				rs.getTimestamp(5),
+				rs.getInt(4),				// Nonmember permissions
+				rs.getObject(5) != null ? rs.getLong(5) : -1, // Reply conference
 				rs.getTimestamp(6),
+				rs.getTimestamp(7),
 				r.getMin(),					// First text
 				r.getMax()					// Last text
 				);

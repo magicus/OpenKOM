@@ -448,14 +448,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}			
 		
-	public long createConference(String fullname, int permissions, short visibility, long replyConf)
+	public long createConference(String fullname, int permissions, int nonmemberPermissions, short visibility, long replyConf)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException
 	{
 		this.checkRights(UserPermissions.CREATE_CONFERENCE);
 		try
 		{
 			long userId = this.getLoggedInUserId();
-			long confId = m_da.getConferenceManager().addConference(fullname, userId, permissions, visibility, replyConf);
+			long confId = m_da.getConferenceManager().addConference(fullname, userId, permissions, nonmemberPermissions, visibility, replyConf);
 
 			// Add membership for administrator
 			//
@@ -868,6 +868,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
+	public long localToGlobalInCurrentConference(int localId)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+	    return localToGlobal(this.getCurrentConferenceId(), localId);
+	}
+
 	public MessageOccurrence storeMail(UnstoredMessage msg, long user, long replyTo)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -1031,7 +1037,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	{
 		return this.globalToLocalInConference(m_currentConferenceId, globalNum);
 	}
-	
+		
 	public long getCurrentMessage()
 	throws NoCurrentMessageException
 	{
@@ -1705,13 +1711,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	}
 	
 	public int getPermissionsInConference(long conferenceId)
-	throws UnexpectedException
+	throws ObjectNotFoundException, UnexpectedException
 	{
 		return this.getUserPermissionsInConference(this.getLoggedInUserId(), conferenceId);
 	}
 	
 	public int getUserPermissionsInConference(long userId, long conferenceId)
-	throws UnexpectedException
+	throws ObjectNotFoundException, UnexpectedException
 	{
 		try
 		{
@@ -1724,7 +1730,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	}		
 	
 	public int getPermissionsInCurrentConference()
-	throws UnexpectedException
+	throws ObjectNotFoundException, UnexpectedException
 	{
 		try
 		{
@@ -2317,7 +2323,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	 * the logged in user.
 	 */
 	protected void assertMessageReadPermissions(long globalId)
-	throws AuthorizationException, UnexpectedException
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
 	{
 	    if(!hasMessageReadPermissions(globalId))
 	        throw new AuthorizationException();
@@ -2328,7 +2334,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	 * the logged in user.
 	 */
 	protected boolean hasMessageReadPermissions(long globalId)
-	throws UnexpectedException
+	throws ObjectNotFoundException, UnexpectedException
 	{
 	    try
 	    {
@@ -2660,12 +2666,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 	}
 	
-	public void createMagicConference (String fullname, int permissions, short visibility, long replyConf, short kind)
+	public void createMagicConference (String fullname, int permissions, int nonmemberPermissions,  short visibility, long replyConf, short kind)
 	throws DuplicateNameException, UnexpectedException, AuthorizationException, AmbiguousNameException
 	{
 		try
 		{
-			m_da.getConferenceManager().setMagicConference(this.createConference(fullname, permissions, visibility, replyConf), kind);
+			m_da.getConferenceManager().setMagicConference(this.createConference(fullname, permissions, nonmemberPermissions, visibility, replyConf), kind);
 		}
 		catch (SQLException e)
 		{
