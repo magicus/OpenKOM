@@ -118,7 +118,7 @@ public abstract class AbstractCommand implements Command
 	public CommandLineParameter[] getSignature()
 	{
 		// TODO Auto-generated method stub
-		return null;
+		return new CommandLineParameter[0];
 	}
 	public void execute2(Context context, Object[] parameterArray)
 	{

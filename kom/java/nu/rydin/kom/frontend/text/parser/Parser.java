@@ -70,13 +70,24 @@ public class Parser
 		{
 			return (Match) m_matches.get(level);
 		}
+		
+		public Match getLastMatch()
+		{
+			return (Match)m_matches.get(m_matches.size() - 1);
+		}
+		
 		/**
 		 * @param level
 		 * @return
 		 */
 		public CommandLinePart getCommandLinePart(int level)
 		{
-			return ((CommandLinePart[]) (m_commandToPartsMap.get(m_command)))[level];
+			CommandLinePart[] parts = (CommandLinePart[]) (m_commandToPartsMap.get(m_command));
+			if (level > parts.length) {
+				return null;
+			} else {
+				return parts[level];
+			}
 		}
 	}
 	
@@ -84,24 +95,25 @@ public class Parser
 	 * @param commands
 	 * @param primaryCommands
 	 */
-	public Parser(Command[] commands, Map commandNames)
+	public Parser(List commands, List commandNames)
 	{
-		m_commands = commands;
+		m_commands = new Command[commands.size()];
+		commands.toArray(m_commands);
 		
 		// Initialize the command->parts map with a pair for each command
 		// and its corresponding array of command line parts (command name followed
 		// by its signature).
-		for (int i = 0; i < commands.length; i++)
+		for (int i = 0; i < m_commands.length; i++)
 		{
-			Command command = commands[i];
-			String name = (String)commandNames.get(command);
+			Command command = m_commands[i];
+			String name = (String)commandNames.get(i);
 			CommandNamePart[] nameParts = splitName(name);
 			CommandLineParameter[] parameterParts = command.getSignature();
 			
 			CommandLinePart[] commandLineParts = new CommandLinePart[nameParts.length + 
 																	 parameterParts.length];
-			System.arraycopy(commandLineParts, 0, nameParts, 0, nameParts.length);
-			System.arraycopy(commandLineParts, nameParts.length, parameterParts, 0, parameterParts.length);
+			System.arraycopy(nameParts, 0, commandLineParts, 0, nameParts.length);
+			System.arraycopy(parameterParts, 0, commandLineParts, nameParts.length, parameterParts.length);
 			m_commandToPartsMap.put(command, commandLineParts);
 		}
 	}
@@ -136,26 +148,48 @@ public class Parser
 			potentialTargets.add(new CommandToMatches(m_commands[i]));
 		}
 		
-		while (potentialTargets.size() > 1)
+		boolean remaindersExist = true;
+		while (remaindersExist && potentialTargets.size() > 1)
 		{
 			for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
 			{
+				remaindersExist = false;
 				CommandToMatches potentialTarget = (CommandToMatches)iter.next();
 				CommandLinePart part = potentialTarget.getCommandLinePart(level);
-				String commandLineToMatch;
-				if (level == 0) {
-					commandLineToMatch = commandLine;
+				if (part == null) {
+					if (potentialTarget.getLastMatch().getRemainder().length() > 0) {
+						iter.remove();
+					}
 				} else {
-					commandLineToMatch = potentialTarget.getMatch(level).getRemainder();
-				}
-				Match match = part.match(commandLine);
-				if (!match.isMatching()) {
-					potentialTargets.remove(potentialTarget);
-				} else {
-					potentialTarget.addMatch(match);
+					String commandLineToMatch;
+					if (level == 0) {
+						commandLineToMatch = commandLine;
+					} else {
+						commandLineToMatch = potentialTarget.getMatch(level).getRemainder();
+					}
+					Match match = part.match(commandLineToMatch);
+					if (!match.isMatching()) {
+						iter.remove();
+					} else {
+						potentialTarget.addMatch(match);
+						if (match.getRemainder().length() > 0)
+						{
+							remaindersExist = true;
+						}
+					}
 				}
 			}
 			level++;
+		}
+		
+		if (potentialTargets.size() > 1) {
+			// Ambiguous matching command found. Print error and abort.
+			PrintWriter out = context.getOut();
+			MessageFormatter fmt = context.getMessageFormatter();
+			
+			out.println(fmt.format("parser.ambiguous", commandLine));
+			out.flush();
+			return;
 		}
 		
 		// Now we either have one target candidate, or none.
@@ -254,7 +288,7 @@ public class Parser
 	{
 		try
 		{
-			Map primaryCommands = new HashMap();
+			List commandNames = new ArrayList();
 			List list = new ArrayList();
 			BufferedReader rdr = new BufferedReader(
 				new InputStreamReader(CommandParser.class.getResourceAsStream(filename)));
@@ -284,7 +318,7 @@ public class Parser
 				String name = formatter.format(clazz.getName() + ".name");
 				Command primaryCommand = (Command) ctor.newInstance(new Object[] { name });
 				commandList.add(primaryCommand);
-				primaryCommands.put(clazz, primaryCommand); 
+				commandNames.add(name);
 					
 				// Install aliases
 				//
@@ -299,15 +333,15 @@ public class Parser
 						
 					// We found an alias! Create command.
 					//
-					commandList.add(ctor.newInstance(new Object[] { alias }));
+					Command aliasCommand = (Command)ctor.newInstance(new Object[] { alias });
+					commandList.add(aliasCommand);
+					commandNames.add(alias);
 				}
 			}
-				
+
 			// Copy to command array
 			// 
-			Command[] commands = new Command[commandList.size()];
-			commandList.toArray(commands);
-			return new Parser(commands, primaryCommands);
+			return new Parser(commandList, commandNames);
 		}
 		catch(ClassNotFoundException e)
 		{
@@ -330,7 +364,26 @@ public class Parser
 			throw new UnexpectedException(-1, e.getCause());
 		}		
 	}
-	
 
-	
+	public Command[] getCommandList()
+	{
+		return m_commands;
+	}
+
+	/**
+	 * @param class1
+	 * @return
+	 */
+	public Command getCommand(Class class1)
+	{
+		//TODO: HOLY INEFFICIENT LOOKUP, BATMAN!
+		for (int i = 0; i < m_commands.length; i++)
+		{
+			if (class1.isInstance(m_commands[i]))
+			{
+				return m_commands[i];
+			}
+		}
+		return null;
+	}
 }

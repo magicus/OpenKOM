@@ -47,7 +47,9 @@ public class CommandNamePart extends CommandLinePart
 					.getRemainder(), recursiveMatch.getParsedObject());
 		}
 
-		if (cooked.equals(m_cookedName))
+		//If the entered string is the beginning of the complete command,
+		//we should still match to allow for shortening of commands.
+		if (m_cookedName.indexOf(cooked) == 0)
 		{
 			return new Match(true, matchingPart, remainder, null);
 		}
