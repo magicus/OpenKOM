@@ -162,6 +162,7 @@ public class TelnetServer implements Module, Runnable
 				// Wait for someone to connect
 				//
 				Socket incoming = m_socket.accept();
+				incoming.setKeepAlive(true);
 				Logger.info(this, "Incoming connection from " + incoming.getInetAddress().getHostAddress() +
 				        ". Buffer size=" + incoming.getReceiveBufferSize());
 				try
