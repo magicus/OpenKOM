@@ -46,15 +46,17 @@ public class SendChatMessage extends AbstractCommand
 		
 		//Retrieve array of id's of receivers.
 		Object[] nameAssociations = (Object[])parameterArray[0];
-		if (nameAssociations.length == 1 && nameAssociations[0] == ChatRececipientParameter.ALL_USERS) {
-		    new SendBroadcastChatMessage(context, "").execute(context, new Object[] { parameterArray[1] });
-		    return;
-		}
 		long[] destinations = new long[nameAssociations.length];
 		String recipients = "";
 		for (int i = 0; i < nameAssociations.length; i++)
         {
 		    long id = ((NameAssociation) nameAssociations[i]).getId();
+		    if (id == -1)
+		    {
+			    new SendBroadcastChatMessage(context, "").execute(context, new Object[] { parameterArray[1] });
+			    return;
+		    }
+		    
             destinations[i] = id;
             //Build string of recipients...
             recipients += ", " + session.getName(id);
