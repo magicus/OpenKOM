@@ -288,7 +288,9 @@ public class Help extends AbstractCommand
 	    CommandLineParameter[] clpa = command.getSignature();
 	    for (int i = 0; i < clpa.length; ++i)
 	    {
-	        out.print ((0 < i ? clpa[i].getSeparator() : ' ') + clpa[i].getUserDescription(context));
+	        // TODO: Sluta hota älgbeståndet här.
+	        //
+	        out.print ((0 < i ? new String(new char[] { clpa[i].getSeparator(), ' ' }) : " ") + clpa[i].getUserDescription(context));
 	    }
 	    out.println();	    
 	    out.println();

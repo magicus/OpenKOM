@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Hello, Polly! When adding new commands, use the following template to
+     document it:
+     
+     <command class="nu.rydin.kom.frontend.text.commands.">
+      <parameters>
+       <param order=""></param>
+      </parameters>
+      <description>
+       <block></block>
+      </description>
+      <exception>
+       <block></block>
+      </exception>
+      <seealso>
+       <element type="" value=""/>
+      </seealso>
+     </command>
+-->
+
 <commands locale="sv_SE"> <!-- locale identifier not currently used -->
  <command class="nu.rydin.kom.frontend.text.commands.Help">
   <parameters>
@@ -317,6 +336,7 @@
  <command class="nu.rydin.kom.frontend.text.commands.GotoNextConference">
   <description>
    <block>Kommandot flyttar dig till nästa möte med olästa texter. OpenKOM föreslår automatiskt att du ska gå till nästa möte, om du har olästa texter.</block>
+   <block>Om du inte ändrat dina alias kan du skriva '+' för att gå till nästa möte.</block>
   </description>
   <seealso>
    <element type="command" value="nu.rydin.kom.frontend.text.commands.GotoConference"/>
@@ -361,5 +381,496 @@
   <seealso>
    <element type="command" value="nu.rydin.kom.frontend.text.commands.ReadRules"/>
   </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ChangeUnread">
+  <parameters>
+   <param order="0">Antal texter du vill markera som olästa</param>
+  </parameters>
+  <description>
+   <block>Det här kommandot markerar ett antal texter i aktuellt möte som olästa.</block>
+   <block>Kommandot har främst två användningsområden: Antingen använder du det för att hoppa över inlägg efter en längre frånvaro ("endast 0") eller också använder du det för att se vad de senaste inläggen handlade om (även om "återse (det) kommenterade" kan vara ett lämpligare kommando här).</block>
+   <block>Om du anger ett större tal än antalet texter i mötet kommer alla texter att markeras som olästa.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ReadMessage"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.DisplayCurrentConference"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListNews">
+  <description>
+   <block>Kommandot visar de möten du har olästa texter i.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SendMail">
+  <parameters>
+   <param order="0">Mottagare av brevet.</param>
+  </parameters>
+  <description>
+   <block>Använd det här kommandot för att skicka ett brev till en användare.</block>
+   <block>När du skriver ett brev får du samma editor som när du skriver ett inlägg. Det innebär att du kan använda !? för att få hjälp. Se i övrigt kommandot för att skriva inlägg.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.WriteMessage"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.PersonalReply"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ReadOriginal">
+  <description>
+   <block>Kommandot visar texten som den text du just läste är en kommentar till.</block>
+   <block>Eftersom OpenKOM har funktioner för att följa kommentarskedjor anses det vara god sed att vara mycket sparsam med citat.</block>
+   <block>Om du inte ändrat dina alias kan du använda '-' istället för "å k".</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ReadMessage"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.Who">
+  <description>
+   <block>Det här kommandot visar vilka som är inloggade.</block>
+   <block>De fält som visas är:</block>
+   <block>- Inlog: Tidpunkt för inloggning.</block>
+   <block>- Idle: Den tid användaren varit inaktiv.</block>
+   <block>- Namn och aktivitet: Användarens namn och det möte i vilket han/hon befinner sig.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SendChatMessage">
+  <parameters>
+   <param order="0">Den eller de objekt du vill säga något till.</param>
+   <param order="1">Det meddelande du vill skicka.</param>
+  </parameters>
+  <description>
+   <block>Kommandot säger något till en eller flera användare. Du kan ange ett obegränsat antal mottagare.</block>
+   <block>Du kan välja både användare och möten som mottagare. Om du väljer att säga något till ett möte kommer ditt meddelande att distribueras till alla inloggade som är medlemmar i mötet.</block>
+   <block>Vill du säga något till alla inloggade kan du använda kommandot 'ropa' istället.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Who"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage">
+  <parameters>
+   <param order="0">Det meddelande du vill skicka till alla.</param>
+  </parameters>
+  <description>
+   <block>Kommandot skickar ett meddelande till alla inloggade användare.</block>
+   <block>Det skiljer sig inte nämnvärt från "säg", med undantag för att de som loggar in efter att du börjat skriva din rad men innan du skickar den också får meddelandet, vilket inte alltid är avsett.</block>
+   <block>Som standard kan du använda både 'ropa [meddelande]' och 'säg *: [meddelande]'.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SendChatMessage"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Who"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ChangeCharacterset">
+  <parameters>
+   <param order="0">Den teckenuppsättning du vill byta till.</param>
+  </parameters>
+  <description>
+   <block>Om texten OpenKOM skickar till dig ser underlig ut (om till exempel 'räksmörgås' inte ser ätbart ut) bör du byta teckenuppsättning. Det gör du med det här kommandot.</block>
+   <block>CP437 är en klassisk DOS- och Windowsteckenuppsättning. CP850 är den teckenuppsättning moderna Windowsversioner oftast använder.</block>
+   <block>Använder du en UNIX-plattform vill du förmodligen använda teckenuppsättningen ISO-8859-1.</block>
+   <block>Om du fortfarande har problem efter att ha valt rätt teckenuppsättning klarar din terminal kanske inte ANSI-färger. Använd kommandot "slå av ANSI" för att deaktivera dem.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFlags"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.AddPermissions">
+  <parameters>
+   <param order="0">Den användare du vill ge rättigheter i mötet</param>
+  </parameters>
+  <description>
+   <block>Kommandot ger en användare rättigheter i ett möte du skapat.</block>
+   <block>Om du skapar ett möte som får hög trafik kan du behöva hjälp med administrationen. Kommandot "ändra rättigheter" ger dig möjlighet att låta någon annan administrera ditt möte.</block>
+   <block>Du kan också använda kommandot för att ta ifrån någon en rättighet, exempelvis rätt att skriva inlägg, i ditt möte.</block>
+   <block>Kommandot ger dig möjlighet att ändra fem rättigheter:</block>
+   <block>- Rätt att läsa.</block>
+   <block>- Rätt att skriva.</block>
+   <block>- Rätt att kommentera.</block>
+   <block>- Rätt att radera andras inlägg.</block>
+   <block>- Rätt att administrera användare.</block>
+   <block>De tre första rättigheterna använder du typiskt för att hantera "vanliga användare" i ett möte du skapat. Rätten att radera andras inlägg bör du bara ge till de som hjälper dig med administrationen. Rätten att administrera användare ger den tilldelade användaren möjlighet att hantera medlemskap; att bjuda in eller utesluta medlemmar.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListMembers"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ReadNextReply">
+  <description>
+   <block>Kommandot läser nästa olästa text i trädet.</block>
+   <block>Om du befinner dig i ett kommentarsträd som innehåller olästa texter kommer OpenKOM att föreslå det här kommandot.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.Copy">
+  <parameters>
+   <param order="0">Det möte du vill kopiera texten till.</param>
+  </parameters>
+  <description>
+   <block>Kommandot kopierar den senast lästa texten till det möte du angivit.</block>
+   <block>Det finns i princip två anledningar att kopiera en text i OpenKOM; antingen kopierar du den för att andra bör läsa den eller också kopierar du den till ett åsiktsmöte. Det är till exempel populärt att kopiera alla sportrelaterade inlägg till "Vad gäller saken", "Dumheter" och "Korkade användare".</block>
+   <block>En text du kopierat kommer att räknas som läst även i mötet du kopierar den till.</block>
+  </description>
+  <exception>
+   <block>Du kan naturligtvis inte kopiera en text till ett möte du inte har skrivrättigheter i.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.MoveMessage"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.MoveMessage">
+  <parameters>
+   <param order="0">Det möte du vill flytta texten till.</param>
+  </parameters>
+  <description>
+   <block>Kommandot flyttar den senast lästa texten till det möte du angivit.</block>
+   <block>Du använder kommandot för att i efterhand flytta en text du skrivit till ett möte där den passar bättre.</block>
+   <block>Du kan även flytta en text du inte skrivit färdigt genom att använda editorkommandot !flytta.</block>
+  </description>
+  <exception>
+   <block>Du kan inte flytta en text till ett möte du inte har skrivrättigheter i.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Copy"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ChangeSuffix">
+  <parameters>
+   <param order="0">Den användare du vill byta suffix på.</param>
+   <param order="1">Det nya suffixet.</param>
+  </parameters>
+  <description>
+   <block>Suffixet är textstycket som står efter / i ditt användarnamn. Med det här kommandot kan du byta suffix.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop eller användaradministratör kan du byta suffix på andra än dig själv. Ange då användarnamn efter "ändra suffix".</block>
+  </exception>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.RenameObject">
+  <parameters>
+   <param order="0">Det objekt du vill byta namn på.</param>
+  </parameters>
+  <description>
+   <block>Med det här kommandot kan du byta namn på ett möte du skapat. Använd det om ditt mötesnamn krockar med ett ofta använt möte. Till exempel är det dumt att döpa ett bredbandsmöte till Bredband, eftersom det krockar med Brevlådan. Döp därför om det till "Tjockband och Helly-Hansen".</block>
+  </description>
+  <exception>
+   <block>Du kan inte byta namn på ett möte du inte äger.</block>
+   <block>Är du sysop eller användaradministratör kan du även byta namn på användare.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Status"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ChangePassword">
+  <parameters>
+   <param order="0">Den användare du vill byta lösenord på.</param>
+  </parameters>
+  <description>
+   <block>Med det här kommandot kan du byta ditt lösenord.</block>
+   <block>Av säkerhetsskäl får du först ange ditt nuvarande lösenord. Därefter får du ange ett nytt lösenord två gånger.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop eller användaradministratör kan du även byta lösenord på andra användare än dig själv. Ange då användarens namn eller ID efter "ändra lösenord".</block>
+  </exception>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListFlags">
+  <parameters>
+   <param order="0">Den användare du vill se flagglistan för.</param>
+  </parameters>
+  <description>
+   <block>Kommandot visar hur en användares flaggor är inställda. Om du inte anger ett användarnamn eller ID antar OpenKOM att du vill se dina egna flaggor.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SetFlag"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ClearFlag"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListPermissions">
+  <parameters>
+   <param order="0">Den användare du vill se rättigheter för.</param>
+  </parameters>
+  <description>
+   <block>Kommandot visar vilka globala rättigheter -- inte rättigheter i ett möte -- en användare har.</block>
+   <block>Om du inte anger ett användarnamn eller ID antar OpenKOM att du vill se dina egna rättigheter.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.AddPermission"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SubtractPermission"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SetFlag">
+  <parameters>
+   <param order="0">Den flagga du vill slå på.</param>
+  </parameters>
+  <description>
+   <block>Kommandot hissar den flagga du angivit. Om du inte anger en flagga kommer OpenKOM att ge dig en lista att välja ur.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFlags"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ClearFlag"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ClearFlag">
+  <parameters>
+   <param order="0">Den flagga du vill slå av.</param>
+  </parameters>
+  <description>
+   <block>Kommandot halar den flagga du angivit. Om du inte anger en flagga kommer OpenKOM att ge dig en lista att välja ur.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFlags"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SetFlag"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.Encouragement">
+  <description>
+   <block>Det här kommandot talar om för dig hur bra du är.</block>
+  </description>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListOwnMessages">
+  <description>
+   <block>Kommandot listar de texter du skrivit.</block>
+   <block>Använd "lista egna texter" för att göra en global sökning efter dina egna texter. Resultatet är en textlista som innehåller globalt ID, lokalt ID, mötesnamn och rubrik.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListTexts"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SearchMessage"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ViewChatLog">
+  <parameters>
+   <param order="0">Det antal rader du vill återse.</param>
+  </parameters>
+  <description>
+   <block>Kommandot visar dina sparade säg-rader. OpenKOM loggar automatiskt dina mottagna säg- och skrikrader.</block>
+   <block>Du ser både inkommande och utgående rader. Utgående rader börjar med &gt; [den användare du skickat till]. Inkommande rader börjar med &lt; [den användare du fått ett meddelande från].</block>
+   <block>Kommandot visar inte skrikrader. Använd kommandot "Återse skrikrader" för att se dem.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ViewBroadcastLog"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ViewBroadcastLog">
+  <parameters>
+   <param order="0">Det antal rader du vill återse.</param>
+  </parameters>
+  <description>
+   <block>Kommandot visar dina sparade skrikrader. OpenKOM loggar automatiskt dina mottagna säg- och skrikrader.</block>
+   <block>Kommandot visar inte sägrader. Använd kommandot "Återse sägrader" för att se dem.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ViewChatLog"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.WhoAmI">
+  <description>
+   <block>Kommandot talar om vem du är. Det är ett praktiskt kommando att använda lördag morgon.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.DisplayCurrentConference"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SearchMessage">
+  <parameters>
+   <param order="0">Sökbegrepp</param>
+  </parameters>
+  <description>
+   <block>Kommandot söker i texterna i aktuellt möte efter det sökbegrepp du angivit. En text anses matcha sökbegreppet om det förekommer i inläggstexten eller rubriken.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListTexts"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ChangeTimeZone">
+  <parameters>
+   <param order="0">Ny tidszon</param>
+  </parameters>
+  <description>
+   <block>Kommandot byter din tidszon.</block>
+   <block>Du använder det här kommandot om din uppfattning om vad klockan är inte stämmer överens med OpenKOMs.</block>
+   <block>Du kan ange en tidszon som text -- exempelvis "Europe Stockholm" -- eller välja en ur listan.</block>
+  </description>
+  <seealso>
+   <element type="text" value="nu.rydin.kom.frontend.text.commands.Status"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.AddPermission">
+  <parameters>
+   <param order="0">Den användare du vill ge en rättighet.</param>
+   <param order="1">Den rättighet du vill dela ut.</param>
+  </parameters>
+  <description>
+   <block>Kommandot ger en användare en global rättighet (inte en mötesrättighet).</block>
+   <block>Du måste vara sysop eller användaradministratör för att kunna ge någon globala rättigheter. Se manualen för en beskrivning av vad respektive rättighet gör..</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListPermissions"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.SubtractPermission"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.SubtractPermission">
+  <parameters>
+   <param order="0">Den användare du vill ta ifrån en rättighet.</param>
+   <param order="1">Den rättighet du vill dra tillbaka.</param>
+  </parameters>
+  <description>
+   <block>Kommandot tar ifrån en användare en global rättighet (inte en mötesrättighet).</block>
+   <block>Du måste vara sysop eller användaradministratör för att kunna hantera globala rättigheter. Se manualen för en beskrivning av vad respektive rättighet gör..</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListPermissions"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.AddPermission"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListUserLog">
+  <parameters>
+   <param order="0">Den användare du vill se inloggningslista för</param>
+  </parameters>
+  <description>
+   <block>Kommandot visar en eller flera användares inloggningslista, tillsammans med statistik över vad användaren gjort under sin inloggning.</block>
+   <block>Följande fält visas:</block>
+   <block>- Inloggad: Inloggningstidpunkt.</block>
+   <block>- Tid: Sessionens längd.</block>
+   <block>- Läs: Antal lästa texter under sessionen.</block>
+   <block>- Inl: Antal skrivna inlägg under sessionen.</block>
+   <block>- Säg: Antal skickade sägrader under sessionen.</block>
+   <block>- Rop: Antal skickade skrikrader under sessionen.</block>
+   <block>- Kop: Antal kopierade texter under sessionen.</block>
+   <block>- Namn: Användarnamn.</block>
+   <block>Om du inte anger ett användarnamn kommer OpenKOM att visa sessioner för alla användare.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.Status"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.EditFile">
+  <parameters>
+   <param order="0">Namn på den fil du vill redigera.</param>
+   <param order="1">Objektet som äger filen du vill redigera.</param>
+  </parameters>
+  <description>
+   <block>Kommandot redigerar en fil.</block>
+   <block>Du kommer att få samma editor som du använder för att skriva inlägg.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop eller användar-/mötesadministratör kan du redigera en fil som tillhör en annan användare eller ett möte du inte skapat själv.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ShowFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFiles"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.DeleteFile"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ShowFile">
+  <parameters>
+   <param order="0">Namn på den fil du vill redigera.</param>
+   <param order="1">Objektet som äger filen du vill redigera.</param>
+  </parameters>
+  <description>
+   <block>Kommandot visar innehållet i en fil.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop eller användar-/mötesadministratör kan du dumpa en fil som tillhör en annan användare eller ett möte du inte skapat själv.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.EditFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFiles"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.DeleteFile"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListFiles">
+  <parameters>
+   <param order="0">Objektet som äger filen du vill redigera.</param>
+  </parameters>
+  <description>
+   <block>Kommandot listar de filer du skapat.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop eller användar-/mötesadministratör kan du lista filer som tillhör en annan användare eller ett möte du inte skapat själv.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ShowFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.EditFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.DeleteFile"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.DeleteFile">
+  <parameters>
+   <param order="0">Namn på den fil du vill radera.</param>
+   <param order="1">Objektet som äger filen du vill radera.</param>
+  </parameters>
+  <description>
+   <block>Kommandot raderar en fil.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop eller användar-/mötesadministratör kan du radera en fil som tillhör en annan användare eller ett möte du inte skapat själv.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ShowFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFiles"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.EditFile"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.RunScript">
+  <parameters>
+   <param order="0">Namn på den fil du vill köra.</param>
+   <param order="1">Objektet som äger filen du vill köra.</param>
+  </parameters>
+  <description>
+   <block>Kommandot kör kommandona som finns i en scriptfil du skapat.</block>
+   <block>En scriptfil är en fil som innehåller en uppsättning kommandon. Du skapar en scriptfil genom att använda kommandot Redigera fil.</block>
+  </description>
+  <exception>
+   <block>Om du är sysop eller användar-/mötesadministratör kan du köra en fil som tillhör en annan användare eller ett möte du inte skapat själv.</block>
+  </exception>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ShowFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFiles"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.EditFile"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ChangeLoginScript">
+  <description>
+   <block>Det här kommandot redigerar dina uppstartskommandon.</block>
+   <block>Om filen ".login.cmd" finns kommer den att köras varje gång du loggar in. Med det här kommandot kan du skapa eller redigera den.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ShowFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFiles"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.EditProfile">
+  <parameters>
+   <param order="0">Profilnamn.</param>
+  </parameters>
+  <description>
+   <block>Använd det här kommandot för att skapa eller ändra en profil.</block>
+   <block>Den profil som väljs vid inloggning kommer att köras före dina uppstartskommandon.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ShowFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFiles"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.DeleteProfile"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.DeleteProfile">
+  <parameters>
+   <param order="0">Profilnamn.</param>
+  </parameters>
+  <description>
+   <block>Använd det här kommandot för att ta bort en profil.</block>
+  </description>
+  <seealso>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ShowFile"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.ListFiles"/>
+   <element type="command" value="nu.rydin.kom.frontend.text.commands.EditProfile"/>
+  </seealso>
+ </command>
+ <command class="nu.rydin.kom.frontend.text.commands.ListCommands">
+  <description>
+   <block>Kommandot listar de kommandon som finns tillgängliga i OpenKOM.</block>
+   <block>Om du inte ändrat dina alias kan du använda '?' istället för 'lista kommandon'.</block>
+  </description>
  </command>
 </commands>
