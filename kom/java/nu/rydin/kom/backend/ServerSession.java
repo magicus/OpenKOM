@@ -1030,7 +1030,7 @@ public interface ServerSession
 	 * @return
 	 * @throws UnexpectedException
 	 */
-	public LocalMessageHeader[] listGlobalMessagesByUser(long userId)
+	public LocalMessageHeader[] listGlobalMessagesByUser(long userId, int offset, int length)
 	throws UnexpectedException;
 
 }

@@ -2256,11 +2256,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}		
 	}
 
-    public LocalMessageHeader[] listGlobalMessagesByUser(long userId) throws UnexpectedException 
+    public LocalMessageHeader[] listGlobalMessagesByUser(long userId, int offset, int length) throws UnexpectedException 
 	{
 		try
 		{
-			return m_da.getMessageManager().getGlobalMessagesByUser(userId);
+			return m_da.getMessageManager().getGlobalMessagesByUser(userId, offset, length);
 		}
 		catch (SQLException e)
 		{

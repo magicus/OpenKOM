@@ -9,8 +9,6 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.KOMException;
-import nu.rydin.kom.backend.data.ConferenceManager;
-import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.KOMPrinter;
@@ -33,9 +31,30 @@ public class ListOwnMessages extends AbstractCommand
 	public void execute(Context context, String[] parameters)
 	throws KOMException, IOException, InterruptedException 
 	{
-		LocalMessageHeader[] lmh = context.getSession().listGlobalMessagesByUser(context.getLoggedInUserId());
+		int screenHeight = 25;	// TODO: Pull this from user term config.
+		int toprow = 0;			// Initial value: Start from top
+
 		KOMPrinter out = context.getKOMPrinter();
+		LineEditor in = context.getIn();
 		MessageFormatter mf = context.getMessageFormatter();
+		
+		// Retrieve the first batch, if it exists
+		// Note: Not having written any texts whatsoever is such a fucking 
+		// edge-case I won't bother with it, and those user are losers anyway.
+		// SCREW THEM!!!
+		LocalMessageHeader[] lmh = context.getSession().listGlobalMessagesByUser(context.getLoggedInUserId(), toprow, screenHeight);
+		
+		// Getting the more prompt
+		//
+		StringBuffer sb = new StringBuffer();
+		sb.append(mf.format("misc.more"));
+		sb.append(" (");
+		sb.append(mf.format("misc.y"));
+		sb.append("/");
+		sb.append(mf.format("misc.n"));
+		sb.append(") ");
+		String question = sb.toString();
+		sb = null;
 		
 		// Print headers and a blank line.
 		//
@@ -48,29 +67,54 @@ public class ListOwnMessages extends AbstractCommand
 		out.println();
 		out.flush();
 
-		//TODO: Add paging of data in a nice, general way.
-		for (int i = 0; i < lmh.length; ++i)
+		// Main rollercoaster
+		//
+		while (true)
 		{
-			//Naah, fuck the global message number
-			//PrintUtils.printRightJustified(out.toPrintWriter(), "(" + lmh[i].getId() + ")", 7);
-			PrintUtils.printRightJustified(out.toPrintWriter(), String.valueOf(lmh[i].getLocalnum()), 7);
-			out.print("  ");
-			// TODO (skrolle) Or should we use getSession().getName() instead? 
-			PrintUtils.printLeftJustified(out.toPrintWriter(), context.getSession().getConference(lmh[i].getConference()).getName(), 30);
-			out.print("  ");
-			PrintUtils.printLeftJustified(out.toPrintWriter(), lmh[i].getSubject(), 30);
-			out.println();
-			out.flush();
-		}
 		
-		LineEditor in = context.getIn();
-		if (in.getYesNo("Tut i luren? abc/def", "\r".toCharArray(), " ".toCharArray()))
-		{
-			out.println("TJOOHOO!");
-		}
-		else
-		{
-			out.println("NEEEEEEEEEEJ");
+			for (int i = 0; i < lmh.length; ++i)
+			{
+				//Naah, fuck the global message number
+				//PrintUtils.printRightJustified(out.toPrintWriter(), "(" + lmh[i].getId() + ")", 7);
+				PrintUtils.printRightJustified(out.toPrintWriter(), String.valueOf(lmh[i].getLocalnum()), 7);
+				out.print("  ");
+				//Personal mailfolder prints as username instead of "Brevlåda". WTF?
+				PrintUtils.printLeftJustified(out.toPrintWriter(), context.getSession().getName(lmh[i].getConference()), 30);
+				out.print("  ");
+				PrintUtils.printLeftJustified(out.toPrintWriter(), lmh[i].getSubject(), 30);
+				out.println();
+				out.flush();
+			}
+			
+			if (lmh.length == screenHeight)
+			{
+				//Pre-fetch next page to see if we should print more-prompt.
+				//Avoiding ful-kod! Sweet!
+				//
+				lmh = context.getSession().listGlobalMessagesByUser(context.getLoggedInUserId(), toprow+screenHeight, screenHeight);
+				if (lmh.length > 0)
+				{
+					//Yes, next page had more stuff in it. Go me!
+					//
+					if (!(in.getYesNo(question, mf.format("misc.more.yeschars").toCharArray(), mf.format("misc.more.nochars").toCharArray())))
+					{
+						break; // We're done!
+					}
+					else
+					{
+						toprow += screenHeight;
+						continue;
+					}
+				}
+				else
+				{
+					break; // All messages displayed, we're so fucking outta here.
+				}
+			}
+			else
+			{
+				break; // All messages displayed, we're outta here.
+			}
 		}
 	}
 }

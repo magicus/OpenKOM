@@ -177,7 +177,8 @@ public class MessageManager
 				"m.subject, mo.conference, mo.localnum " +
 				"FROM messageoccurrences mo JOIN messages m ON mo.message=m.id " +
 				"WHERE mo.user = ? AND mo.kind = ? " +
-				"ORDER BY m.created DESC");
+				"ORDER BY m.created DESC, m.id DESC " +
+				"LIMIT ? OFFSET ?");
 	}
 	
 	public void close()
@@ -962,12 +963,14 @@ public class MessageManager
 	}
 
 	//TODO (skrolle) Fix this shit, add subject.
-    public LocalMessageHeader[] getGlobalMessagesByUser(long userId) 
+    public LocalMessageHeader[] getGlobalMessagesByUser(long userId, int offset, int length) 
     throws SQLException
     {
             this.m_listMessagesByUserStmt.clearParameters();
             this.m_listMessagesByUserStmt.setLong(1, userId);
             this.m_listMessagesByUserStmt.setLong(2, ACTION_CREATED);
+            this.m_listMessagesByUserStmt.setLong(3, length);
+            this.m_listMessagesByUserStmt.setLong(4, offset);
             ResultSet rs = this.m_listMessagesByUserStmt.executeQuery();
             List l = new ArrayList();
             while (rs.next()) {
