@@ -16,6 +16,7 @@ import nu.rydin.kom.frontend.text.NamePicker;
 
 /**
  * @author Magnus Ihse (magnus@ihse.net)
+ * @author Henrik Schröder
  */
 public class NamedObjectParameter extends CommandLineParameter
 {
@@ -52,7 +53,6 @@ public class NamedObjectParameter extends CommandLineParameter
 
     protected boolean isValidName(String name)
     {
-        // TODO Auto-generated method stub
         return NameUtils.isValidName(name);
     }
 

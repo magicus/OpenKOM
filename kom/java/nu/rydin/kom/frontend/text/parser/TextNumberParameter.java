@@ -8,7 +8,6 @@ package nu.rydin.kom.frontend.text.parser;
 
 import nu.rydin.kom.structs.TextNumber;
 
-
 /**
  * @author Magnus Ihse (magnus@ihse.net)
  */
@@ -45,7 +44,6 @@ public class TextNumberParameter extends CommandLineParameter
 	}
 
     protected String getUserDescriptionKey() {
-        // TODO Auto-generated method stub
         return "parser.parameter.textnumber.description";
     }
 }
