@@ -10,7 +10,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import nu.rydin.kom.exceptions.UnexpectedException;
-import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author Pontus Rydin

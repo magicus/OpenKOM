@@ -10,7 +10,6 @@ import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
-import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.CantChangeMailboxPermissionsException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
