@@ -19,7 +19,7 @@ import nu.rydin.kom.structs.Envelope;
 
 public class ReadLastMessageAgain extends AbstractCommand 
 {
-	public ReadLastMessageAgain(String fullName) 
+	public ReadLastMessageAgain(Context context, String fullName) 
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

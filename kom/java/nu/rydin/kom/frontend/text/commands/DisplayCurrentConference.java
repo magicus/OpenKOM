@@ -15,7 +15,7 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class DisplayCurrentConference extends AbstractCommand
 {
-	public DisplayCurrentConference(String fullName)
+	public DisplayCurrentConference(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}

@@ -21,9 +21,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class SetFlag extends AbstractCommand
 {
-	public SetFlag(String fullName)
+	public SetFlag(Context context, String fullName)
 	{
-		super(fullName, new CommandLineParameter[] { new FlagParameter(true) } );
+		super(fullName, new CommandLineParameter[] { new FlagParameter(true, context.getFlagLabels()) } );
 	}
 
 	public void execute(Context context, Object[] parameterArray) throws KOMException

@@ -24,7 +24,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class AddPermissions extends AbstractCommand
 {
-	public AddPermissions(String fullName)
+	public AddPermissions(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new UserParameter(true) });
 	}

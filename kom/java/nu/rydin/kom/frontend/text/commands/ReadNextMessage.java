@@ -15,7 +15,7 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class ReadNextMessage extends AbstractCommand
 {
-	public ReadNextMessage(String fullName)
+	public ReadNextMessage(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

@@ -25,7 +25,7 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class Change extends AbstractCommand
 {
-	public Change(String fullName)
+	public Change(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) } );
 	}

@@ -16,9 +16,9 @@ import nu.rydin.kom.frontend.text.DisplayController;
  */
 public class ViewChatLog extends ViewMessageLog
 {
-    public ViewChatLog(String fullName)
+    public ViewChatLog(Context context, String fullName)
     {
-        super(fullName);
+        super(context, fullName);
     }
 
     public void execute(Context context, Object[] parameterArray)

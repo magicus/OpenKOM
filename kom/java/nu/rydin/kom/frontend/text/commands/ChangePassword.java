@@ -25,7 +25,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ChangePassword extends AbstractCommand
 {
-	public ChangePassword(String fullName)
+	public ChangePassword(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new UserParameter(false) });
 	}

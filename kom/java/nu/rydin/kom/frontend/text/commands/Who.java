@@ -20,7 +20,7 @@ import nu.rydin.kom.structs.UserListItem;
 public class Who extends AbstractCommand
 {
 
-	public Who(String fullName)
+	public Who(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}

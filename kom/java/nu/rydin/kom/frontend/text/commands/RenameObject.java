@@ -25,7 +25,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class RenameObject extends AbstractCommand
 {
-	public RenameObject(String fullName)
+	public RenameObject(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(true) });
 	}

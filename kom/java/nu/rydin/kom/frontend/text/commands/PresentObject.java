@@ -22,7 +22,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class PresentObject extends AbstractCommand 
 {
-	public PresentObject (String fullname)
+	public PresentObject (Context context, String fullname)
 	{
 		super(fullname, new CommandLineParameter[] { new NamedObjectParameter(true)});
 	}

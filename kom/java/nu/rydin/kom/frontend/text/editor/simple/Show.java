@@ -21,7 +21,7 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class Show extends AbstractCommand
 {
-	public Show(String fullName)
+	public Show(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

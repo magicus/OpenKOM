@@ -24,7 +24,7 @@ import nu.rydin.kom.utils.PrintUtils;
 public class SearchMessage extends AbstractCommand 
 {
     private static final int CHUNK_SIZE = 50;
-	public SearchMessage(String fullName) 
+	public SearchMessage(Context context, String fullName) 
 	{
 		super(fullName, new CommandLineParameter[] { new RawParameter("search.param.0.ask", true) });
 	}

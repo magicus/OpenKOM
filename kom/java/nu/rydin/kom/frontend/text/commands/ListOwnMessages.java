@@ -22,7 +22,7 @@ import nu.rydin.kom.utils.PrintUtils;
 public class ListOwnMessages extends AbstractCommand 
 {
     private static final int CHUNK_SIZE = 50;
-	public ListOwnMessages(String fullName) 
+	public ListOwnMessages(Context context, String fullName) 
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

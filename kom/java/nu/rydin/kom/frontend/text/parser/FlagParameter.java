@@ -1,8 +1,6 @@
 /*
  * Created on 2004-aug-19
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package nu.rydin.kom.frontend.text.parser;
 
@@ -13,59 +11,71 @@ import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.Context;
 
 /**
- * @author Magnus Ihse
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * @author Magnus Ihse 
  */
-public class FlagParameter extends CommandLineParameter {
+public class FlagParameter extends CommandLineParameter
+{
+    private final String[] m_flagLabels;
 
-    public FlagParameter(String missingObjectQuestionKey, boolean isRequired) {
+    public FlagParameter(String missingObjectQuestionKey, String[] flagLabels, boolean isRequired)
+    {
         super(missingObjectQuestionKey, isRequired);
+        m_flagLabels = flagLabels;
     }
 
-    public FlagParameter(boolean isRequired) {
+    public FlagParameter(boolean isRequired, String[] flagLabels)
+    {
         super("parser.parameter.flag.ask", isRequired);
+        m_flagLabels = flagLabels;
     }
 
-    protected String getUserDescriptionKey() {
+    protected String getUserDescriptionKey()
+    {
         return "parser.parameter.flag.description";
     }
 
-    protected Match innerMatch(String matchingPart, String remainder) {
-		String cooked = cookString(matchingPart);
-		
-		if (cooked.length() > 0) {
-			// well, this _could_ be a flag... check it later
-			return new Match(true, matchingPart, remainder, cooked);
-		} else {
-			return new Match(false, null, null, null);
-		}
+    protected Match innerMatch(String matchingPart, String remainder)
+    {
+        String cooked = cookString(matchingPart);
+
+        if (cooked.length() > 0)
+        {
+            // well, this _could_ be a flag... check it later
+            return new Match(true, matchingPart, remainder, cooked);
+        } 
+        else
+        {
+            return new Match(false, null, null, null);
+        }
     }
 
-    public Object resolveFoundObject(Context context, Match match) throws KOMException {
-		String[] flagLabels = context.getFlagLabels();
-		String flagName = match.getMatchedString();
-		int imatch = -1;
-		int top = flagLabels.length;
-		for(int idx = 0; idx < top; ++idx)
-		{
-			if(flagLabels[idx] != null && NameUtils.match(flagName, flagLabels[idx]))
-			{
-				// Ambigous?
-				//
-				if(imatch != -1) {
-				    // FIXME:Ihse: We should resolve the ambiguity instead!
-				    throw new AmbiguousNameException();
-				}
-				imatch = idx;
-			}
-		}
-		if(imatch == -1)
-		{
-		    throw new ObjectNotFoundException(context.getMessageFormatter().format("manipulate.flag.nonexistent", flagName));
-		}        
-        
-		return new Integer(imatch);
+    public Object resolveFoundObject(Context context, Match match)
+            throws KOMException
+    {
+        String flagName = match.getMatchedString();
+        int imatch = -1;
+        int top = m_flagLabels.length;
+        for (int idx = 0; idx < top; ++idx)
+        {
+            if (m_flagLabels[idx] != null
+                    && NameUtils.match(flagName, m_flagLabels[idx]))
+            {
+                // Ambigous?
+                //
+                if (imatch != -1)
+                {
+                    // FIXME:Ihse: We should resolve the ambiguity instead!
+                    throw new AmbiguousNameException();
+                }
+                imatch = idx;
+            }
+        }
+        if (imatch == -1)
+        {
+            throw new ObjectNotFoundException(context.getMessageFormatter()
+                    .format("manipulate.flag.nonexistent", flagName));
+        }
+
+        return new Integer(imatch);
     }
 }

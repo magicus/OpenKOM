@@ -12,7 +12,7 @@ import nu.rydin.kom.frontend.text.Context;
 
 public class Save extends AbstractCommand
 {
-	public Save(String fullName)
+	public Save(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.parser;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
@@ -34,7 +35,8 @@ public abstract class CommandLineParameter extends CommandLinePart
 		return ',';
 	}
 
-	public Match fillInMissingObject(Context context) throws IOException, InterruptedException
+	public Match fillInMissingObject(Context context) 
+	throws IOException, InterruptedException, OperationInterruptedException
 	{
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
@@ -43,21 +45,24 @@ public abstract class CommandLineParameter extends CommandLinePart
 		out.print(fmt.format(m_missingObjectQuestionKey));
 		out.flush();
 		String line = in.readLine();
+		if(line.length() == 0)
+		    throw new OperationInterruptedException();
 		Match newMatch = innerMatch(line, "");
 		return newMatch;
 	}
 
-    public boolean isRequired() {
+    public boolean isRequired() 
+    {
     	return m_isRequired;
     }
 
-    public String getUserDescription(Context context) {
+    public String getUserDescription(Context context) 
+    {
 		MessageFormatter fmt = context.getMessageFormatter();
-        if (isRequired()) {
+        if (isRequired()) 
             return "<" + fmt.format(getUserDescriptionKey()) + ">";
-        } else {
+        else
             return "[" + fmt.format(getUserDescriptionKey()) + "]";
-        }
     }
 
     protected abstract String getUserDescriptionKey();

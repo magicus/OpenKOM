@@ -22,9 +22,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class ClearFlag extends AbstractCommand
 {
-	public ClearFlag(String fullName)
+	public ClearFlag(Context context, String fullName)
 	{
-		super(fullName, new CommandLineParameter[] { new FlagParameter(true) } );
+		super(fullName, new CommandLineParameter[] { new FlagParameter(true, context.getFlagLabels()) } );
 	}
 
 	public void execute(Context context, Object[] parameterArray) throws KOMException, IOException, InterruptedException {

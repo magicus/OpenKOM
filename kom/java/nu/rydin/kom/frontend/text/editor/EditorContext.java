@@ -73,6 +73,11 @@ public class EditorContext implements Context
 	{
 		return m_underlying.getFlagLabels();
 	}
+	
+	public String[] getRightsLabels()
+	{
+		return m_underlying.getRightsLabels();
+	}
 
 	public LineEditor getIn()
 	{

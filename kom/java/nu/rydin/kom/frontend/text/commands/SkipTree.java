@@ -17,7 +17,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class SkipTree extends AbstractCommand 
 {
-	public SkipTree (String fullname)
+	public SkipTree (Context context, String fullname)
 	{
 		super(fullname, AbstractCommand.NO_PARAMETERS);
 	}

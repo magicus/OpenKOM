@@ -32,20 +32,23 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public abstract class AbstractEditor implements MessageEditor
 {	
-	private final Parser m_parser;
+	private Parser m_parser;
+	private final String m_commandList;
 	
 	public AbstractEditor(String commandList, MessageFormatter formatter)
 	throws IOException, UnexpectedException
 	{
-		m_parser = Parser.load(commandList, formatter);
+		m_commandList = commandList;
 	}
 	
 	public abstract UnstoredMessage edit(Context underlying, long replyTo)
 		throws KOMException, InterruptedException, IOException;
 	
 	protected boolean mainloop(EditorContext context, boolean stopOnEmpty)
-	throws InterruptedException, IOException
+	throws InterruptedException, UnexpectedException, IOException
 	{
+	    if(m_parser == null)
+	        m_parser = Parser.load(m_commandList, context);
 		// Set up some stuff
 		//
 		DisplayController dc = context.getDisplayController();

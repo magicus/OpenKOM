@@ -23,7 +23,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class SignOff extends AbstractCommand 
 {
-	public SignOff (String fullName)
+	public SignOff (Context context, String fullName)
 	{
 	    super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });
 	}

@@ -16,9 +16,9 @@ import nu.rydin.kom.frontend.text.DisplayController;
  */
 public class ViewBroadcastLog extends ViewMessageLog
 {
-    public ViewBroadcastLog(String fullName)
+    public ViewBroadcastLog(Context context, String fullName)
     {
-        super(fullName);
+        super(context, fullName);
     }
 
     public void execute(Context context, Object[] parameterArray)

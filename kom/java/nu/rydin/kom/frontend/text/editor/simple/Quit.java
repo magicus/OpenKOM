@@ -12,7 +12,7 @@ import nu.rydin.kom.frontend.text.Context;
 
 public class Quit extends AbstractCommand
 {
-	public Quit(String fullName)
+	public Quit(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

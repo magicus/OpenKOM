@@ -19,7 +19,7 @@ import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 
 public class ListCommands extends AbstractCommand
 {
-	public ListCommands(String fullName)
+	public ListCommands(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

@@ -38,6 +38,8 @@ import nu.rydin.kom.exceptions.BadParameterException;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMRuntimeException;
+import nu.rydin.kom.exceptions.KOMUserException;
+import nu.rydin.kom.exceptions.LoginNotAllowedException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -55,6 +57,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.utils.Logger;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -77,6 +80,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	private LinkedList m_displayMessageQueue = new LinkedList();
 	private UserInfo m_thisUserCache;
 	private String[] m_flagLabels;
+	private String[] m_privLabels;
 	private WordWrapperFactory m_wordWrapperFactory = new StandardWordWrapper.Factory();
 	private int m_windowHeight = -1;
 	private int m_windowWidth = -1;
@@ -179,6 +183,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		m_rawIn = in;
 		m_rawOut = out;
 		
+		// Set up flag tables
+		//
+		m_flagLabels = this.loadFlagTable("userflags");
+		m_privLabels = this.loadFlagTable("userprivs");
+		
 		// Install commands and init parser
 		//
 		this.installCommands();
@@ -196,11 +205,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			// There're NO WAY we don't support US-ASCII!
 			//
 			throw new UnexpectedException(-1, "US-ASCII not supported. Your JVM is broken!");
-		}
-		
-		// Set up flag table
-		//
-		this.loadFlagTable();
+		}		
 	}
 	 
 	public void run()
@@ -230,6 +235,10 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 						new PrintStream(m_rawOut).println(m_formatter.format("login.failure"));
 					}
 				}
+			}
+			catch(LoginNotAllowedException e)
+			{
+			    m_out.println(e.getMessage());
 			}
 			catch(InterruptedException e)
 			{
@@ -328,7 +337,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	}
 
 	protected UserInfo login()
-	throws AuthenticationException, AuthorizationException, UnexpectedException, IOException, InterruptedException
+	throws AuthenticationException, LoginNotAllowedException, UnexpectedException, IOException, InterruptedException
 	{
 		// Collect information
 		//
@@ -375,7 +384,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			//
 			UserInfo user = m_session.getLoggedInUser();
 			if(!user.hasRights(UserPermissions.LOGIN))
-				throw new AuthorizationException();
+				throw new LoginNotAllowedException();
 				
 			// Everything seems fine! We're in!
 			//
@@ -467,27 +476,30 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			    new ExecutableCommand(defaultCommand, new Object[0]).execute(this);
     			}
     		}
-    		catch(KOMException e)
-    		{
-    			m_out.println(e.getMessage(this));
-    			m_out.println();
-    		}
     		catch(KOMRuntimeException e)
     		{
     			m_out.println(e.formatMessage(this));
     			m_out.println();
+    			Logger.error(this, e);
     		}			
+    		catch(KOMUserException e)
+    		{
+    			m_out.println(e.getMessage(this));
+    			m_out.println();
+    		}
     		catch(InterruptedException e)
     		{
     			// Someone set up us the bomb! Let's get out of here!
-    			// Can happen if connection is lost.
+    			// Can happen if connection is lost, or if an admin 
+    		    // requested shutdown.
+    		    //
     			return;
     		}			
-    		catch(IOException e)
+    		catch(Exception e)
     		{
-    			//Getting an IOException means something went seriously wrong with
-    			//the connection, we can't do much but print it.
     			e.printStackTrace(m_out);
+    			m_out.println();
+    			Logger.error(this, e);
     		} 
     	}
     }
@@ -720,6 +732,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		return m_flagLabels;
 	}
 	
+	public String[] getRightsLabels()
+	{
+	    return m_privLabels;
+	}
+	
 	public MessageHeader resolveMessageSpecifier(String specifier)
 	throws MessageNotFoundException, AuthorizationException, UnexpectedException, BadParameterException
 	{
@@ -832,7 +849,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		
 		try
 		{
-			m_parser = Parser.load("/commands.list", m_formatter);
+			m_parser = Parser.load("/commands.list", this);
 		}
 		catch(IOException e)
 		{
@@ -840,9 +857,9 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		}
 	}
 	
-	public void loadFlagTable()
+	public String[] loadFlagTable(String prefix)
 	{
-		m_flagLabels = new String[UserFlags.NUM_FLAGS];
+		String[] flagLabels = new String[UserFlags.NUM_FLAGS];
 		for(int idx = 0; idx < UserFlags.NUM_FLAGS; ++idx)
 		{
 			// Calculate flag word and flag bit index
@@ -854,7 +871,8 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			// Build message key
 			//
 			StringBuffer buf = new StringBuffer();
-			buf.append("userflags.");
+			buf.append(prefix);
+			buf.append('.');
 			buf.append(flagWord);
 			buf.append('.');
 			int top = 8 - hex.length();
@@ -864,8 +882,9 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			
 			// Get flag label
 			//
-			m_flagLabels[idx] = m_formatter.getStringOrNull(buf.toString());			
+			flagLabels[idx] = m_formatter.getStringOrNull(buf.toString());			
 		}
+		return flagLabels;
 	}
 	
 	/**

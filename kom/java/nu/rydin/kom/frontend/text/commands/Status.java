@@ -31,7 +31,7 @@ import nu.rydin.kom.utils.PrintUtils;
 public class Status extends AbstractCommand
 {
     
-	public Status(String fullName)
+	public Status(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(false) });		
 	}
@@ -140,7 +140,7 @@ public class Status extends AbstractCommand
 				30, context.smartFormatDate(info.getLasttext()));
 		
 		// TODO: fulkod
-		ListMembers l = new ListMembers("");
+		ListMembers l = new ListMembers(context, "");
 		String [] args = {info.getName()};
 		try
 		{

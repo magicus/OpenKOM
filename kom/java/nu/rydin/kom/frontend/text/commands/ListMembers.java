@@ -22,7 +22,7 @@ import nu.rydin.kom.structs.NameAssociation;
 
 public class ListMembers extends AbstractCommand 
 {
-	public ListMembers(String fullName) 
+	public ListMembers(Context context, String fullName) 
 	{
 		super(fullName, new CommandLineParameter[] { new ConferenceParameter(false)});
 	}

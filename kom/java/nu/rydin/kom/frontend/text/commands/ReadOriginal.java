@@ -18,7 +18,7 @@ import nu.rydin.kom.structs.Envelope;
  */
 public class ReadOriginal extends AbstractCommand
 {
-	public ReadOriginal(String fullName)
+	public ReadOriginal(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

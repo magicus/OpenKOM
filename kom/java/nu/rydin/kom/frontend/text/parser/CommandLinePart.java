@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
 
 /**
@@ -52,7 +53,7 @@ public abstract class CommandLinePart
 				remainder = "";
 			} else {
 				matchingPart = commandLine.substring(0, separatorPos);
-				remainder = commandLine.substring(separatorPos, commandLine.length());
+				remainder = commandLine.substring(separatorPos + 1, commandLine.length());
 			}
 			result = innerMatch(matchingPart, remainder);
 		}
@@ -67,15 +68,25 @@ public abstract class CommandLinePart
 		{
 		    return result;
 		}
-		
 	}
 
     protected int getSeparatorPos(String commandLine) 
     {
-        return commandLine.indexOf(getSeparator());
+        int top = commandLine.length();
+        boolean quoted = false;
+        char separator = this.getSeparator();
+        for(int idx = 0; idx < top; ++idx)
+        {
+            char each = commandLine.charAt(idx);
+            if(each == '\'')
+           	    quoted = !quoted;
+            else if(each == separator && !quoted)
+       	        return idx;
+        }
+        return -1;
     }
 
-    public abstract Match fillInMissingObject(Context context) throws IOException, InterruptedException;
+    public abstract Match fillInMissingObject(Context context) throws IOException, InterruptedException, OperationInterruptedException;
 	
 	public Object resolveFoundObject(Context context, Match match) throws IOException, InterruptedException, KOMException
 	{
@@ -84,6 +95,10 @@ public abstract class CommandLinePart
 
 	public static String cookString(String matchingPart)
 	{
-		return NameUtils.normalizeName(matchingPart);
+		String name = NameUtils.normalizeName(matchingPart);
+		int top = name.length();
+		return name.charAt(0)== '\'' && name.charAt(top - 1) == '\''
+		    ? name.substring(1, top - 1)
+		    : name;
 	}
 }

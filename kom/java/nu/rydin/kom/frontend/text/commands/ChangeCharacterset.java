@@ -25,7 +25,7 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class ChangeCharacterset extends AbstractCommand
 {
-	public ChangeCharacterset(String fullName)
+	public ChangeCharacterset(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

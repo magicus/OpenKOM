@@ -39,6 +39,7 @@ public class UserManager
 	private final PreparedStatement m_updateCharsetStmt;
 	private final PreparedStatement m_changePasswordStmt;
 	private final PreparedStatement m_changeFlagsStmt;
+	private final PreparedStatement m_changePermissionsStmt;
 	private final PreparedStatement m_updateLastloginStmt;
 	private final PreparedStatement m_updateTimeZoneStmt;
 	
@@ -73,6 +74,8 @@ public class UserManager
 			"UPDATE users SET pwddigest = ? WHERE id = ?");
 		m_changeFlagsStmt = conn.prepareStatement(
 			"UPDATE users SET flags1 = ?, flags2 = ?, flags3 = ?, flags4 = ? WHERE id = ?");
+		m_changePermissionsStmt = conn.prepareStatement(
+			"UPDATE users SET rights = ? WHERE id = ?");		
 		m_updateLastloginStmt = conn.prepareStatement(
 			"UPDATE users SET lastlogin = ? WHERE id = ?");
 		m_updateTimeZoneStmt = conn.prepareStatement(
@@ -101,6 +104,8 @@ public class UserManager
 			m_changePasswordStmt.close();
 		if(m_changeFlagsStmt != null)
 			m_changeFlagsStmt.close();
+		if(m_changePermissionsStmt != null)
+			m_changePermissionsStmt.close();		
 		if(m_updateLastloginStmt != null)
 		    m_updateLastloginStmt.close();
 		if(m_updateTimeZoneStmt != null)
@@ -392,7 +397,14 @@ public class UserManager
 			throw new ObjectNotFoundException("user id=" + userId);
 		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
 	}
-	
+
+	/**
+	 * Changes user flags
+	 * @param userId The user id to change
+	 * @param flags The flag words
+	 * @throws ObjectNotFoundException
+	 * @throws SQLException
+	 */
 	public void changeFlags(long userId, long[] flags)
 	throws ObjectNotFoundException, SQLException
 	{
@@ -406,6 +418,24 @@ public class UserManager
 			throw new ObjectNotFoundException("id=" + userId);
 		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
 	}
+	
+	/**
+	 * Changes the user permissions
+	 * @param userId The user to change
+	 * @param permissions The permissions
+	 * @throws ObjectNotFoundException
+	 * @throws SQLException
+	 */
+	public void changePermissions(long userId, long permissions)
+	throws ObjectNotFoundException, SQLException
+	{
+		m_changePermissionsStmt.clearParameters();
+		m_changePermissionsStmt.setLong(1, permissions);
+		m_changePermissionsStmt.setLong(2, userId);
+		if(m_changePermissionsStmt.executeUpdate() == 0)
+			throw new ObjectNotFoundException("id=" + userId);
+		m_cacheManager.getUserCache().registerInvalidation(new Long(userId));
+	}	
 	
 	/**
 	 * Calculates an MD5 digest of a password

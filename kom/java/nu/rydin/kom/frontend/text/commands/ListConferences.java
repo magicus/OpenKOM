@@ -19,7 +19,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ListConferences extends AbstractCommand
 {
-	public ListConferences(String fullName)
+	public ListConferences(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

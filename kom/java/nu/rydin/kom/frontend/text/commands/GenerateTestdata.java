@@ -25,7 +25,7 @@ public class GenerateTestdata extends AbstractCommand
 	private static final String s_body1 = "Katter är solitära";
 	private static final String s_body2 = "Jag har ingen TV";
 	
-	public GenerateTestdata(String fullName)
+	public GenerateTestdata(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new IntegerParameter(false)});
 	}

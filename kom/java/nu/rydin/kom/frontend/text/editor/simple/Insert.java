@@ -16,7 +16,7 @@ import nu.rydin.kom.frontend.text.parser.LineNumberParameter;
 
 public class Insert extends AbstractCommand
 {
-	public Insert(String fullName)
+	public Insert(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) } );
 	}

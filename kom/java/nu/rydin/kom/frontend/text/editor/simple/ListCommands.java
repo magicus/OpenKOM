@@ -16,14 +16,14 @@ import nu.rydin.kom.frontend.text.parser.Parser;
 
 public class ListCommands extends nu.rydin.kom.frontend.text.commands.ListCommands
 {
-	public ListCommands(String fullName)
+	public ListCommands(Context context, String fullName)
 	{
-		super(fullName);
+		super(context, fullName);
 	}
 
-    protected Command[] getCommandList(Context context) throws KOMException, IOException {
-		Command[] cmds = Parser.load("/editorcommands.list", 
-				context.getMessageFormatter()).getCommandList();
+    protected Command[] getCommandList(Context context) throws KOMException, IOException 
+    {
+        Command[] cmds = Parser.load("/editorcommands.list", context).getCommandList();
 		return cmds;
     }
 }

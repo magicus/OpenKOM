@@ -14,7 +14,7 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class PrintDebug extends AbstractCommand
 {
-	public PrintDebug(String fullName)
+	public PrintDebug(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}

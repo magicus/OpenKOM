@@ -23,7 +23,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class CreateUser extends AbstractCommand
 {
-	public CreateUser(String fullName)
+	public CreateUser(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}

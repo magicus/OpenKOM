@@ -36,7 +36,7 @@ import nu.rydin.kom.structs.NameAssociation;
 public class SendChatMessage extends AbstractCommand
 {
 
-	public SendChatMessage(String fullName)
+	public SendChatMessage(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new RawParameter("chat.fulhack.raw.ask", true)});	
 	}

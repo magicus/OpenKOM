@@ -17,7 +17,7 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class Encouragement extends AbstractCommand
 {
-	public Encouragement(String fullName)
+	public Encouragement(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}

@@ -22,7 +22,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class SendMail extends AbstractCommand
 {
-	public SendMail(String fullName)
+	public SendMail(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new UserParameter(true) });	
 	}

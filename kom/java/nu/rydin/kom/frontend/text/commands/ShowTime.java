@@ -16,7 +16,7 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class ShowTime extends AbstractCommand
 {
-	public ShowTime(String fullName)
+	public ShowTime(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);	
 	}

@@ -49,6 +49,7 @@ nu.rydin.kom.frontend.text.commands.ChangeSuffix
 nu.rydin.kom.frontend.text.commands.RenameObject
 nu.rydin.kom.frontend.text.commands.ChangePassword
 nu.rydin.kom.frontend.text.commands.ListFlags
+nu.rydin.kom.frontend.text.commands.ListPermissions
 nu.rydin.kom.frontend.text.commands.SetFlag
 nu.rydin.kom.frontend.text.commands.ClearFlag
 nu.rydin.kom.frontend.text.commands.Encouragement
@@ -58,4 +59,6 @@ nu.rydin.kom.frontend.text.commands.ViewBroadcastLog
 nu.rydin.kom.frontend.text.commands.WhoAmI
 nu.rydin.kom.frontend.text.commands.SearchMessage
 nu.rydin.kom.frontend.text.commands.ChangeTimeZone
+nu.rydin.kom.frontend.text.commands.AddPermission
+nu.rydin.kom.frontend.text.commands.SubtractPermission
 nu.rydin.kom.frontend.text.commands.ListCommands

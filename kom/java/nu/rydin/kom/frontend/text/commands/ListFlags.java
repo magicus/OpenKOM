@@ -6,43 +6,30 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.PrintWriter;
-
-import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
+import nu.rydin.kom.structs.NameAssociation;
+import nu.rydin.kom.utils.FlagUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class ListFlags extends AbstractCommand
 {
-
-	public ListFlags(String fullName)
+	public ListFlags(Context context, String fullName)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(false) });
 	}
 
 	public void execute(Context context, Object[] parameterArray)
 	throws KOMException
 	{
-		MessageFormatter formatter = context.getMessageFormatter();
-		PrintWriter out = context.getOut();
-		String on = formatter.format("list.flags.on");
-		String off = formatter.format("list.flags.off"); 
-		long[] flags = context.getCachedUserInfo().getFlags();
-		String[] flagLabels = context.getFlagLabels();
-		for(int idx = 0; idx < UserFlags.NUM_FLAGS; ++idx)
-		{
-			if(flagLabels[idx] == null)
-				continue;
-			int flagWord = idx / 64;
-			int flagMask = 1 << (idx % 64);
-			out.print((flags[flagWord] & flagMask) == flagMask ? on : off);
-			out.print("  ");
-			out.println(flagLabels[idx]); 
-		}
+	    long[] flags = parameterArray[0] != null
+	    	? context.getSession().getUser(((NameAssociation) parameterArray[0]).getId()).getFlags()
+	        : context.getCachedUserInfo().getFlags();
+		FlagUtils.printFlags(context.getOut(), context.getMessageFormatter(), context.getFlagLabels(), flags);	
 	}
 }

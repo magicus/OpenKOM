@@ -21,7 +21,7 @@ import nu.rydin.kom.structs.TextNumber;
  */
 public class DeleteMessage extends AbstractCommand 
 {
-	public DeleteMessage(String fullName) 
+	public DeleteMessage(Context context, String fullName) 
 	{
 		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true)});
 	}

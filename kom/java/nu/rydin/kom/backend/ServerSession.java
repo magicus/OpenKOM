@@ -929,6 +929,15 @@ public interface ServerSession
 	 */
 	public void changeUserFlags(long[] set, long[] reset)
 	throws ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * Sets or resets user permissions of the logged in user
+	 * @param user The user to change
+	 * @param set The permissions to set
+	 * @param reset The permissions to reset
+	 */
+	public void changeUserPermissions(long user, long set, long reset)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;	
 
 	/**
 	 * Lists the messages in the given conference. Note that not all fields in the MessageHeader

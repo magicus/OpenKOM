@@ -26,7 +26,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class ChangeTimeZone extends AbstractCommand
 {
-    public ChangeTimeZone(String fullName)
+    public ChangeTimeZone(Context context, String fullName)
     {
         super(fullName, new CommandLineParameter[] { new RawParameter("change.timezone.prompt", true) });
     }

@@ -19,7 +19,7 @@ import nu.rydin.kom.structs.MembershipListItem;
  */
 public class ListNews extends AbstractCommand
 {
-	public ListNews(String fullName)
+	public ListNews(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

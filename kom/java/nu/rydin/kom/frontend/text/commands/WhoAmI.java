@@ -15,7 +15,7 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class WhoAmI extends AbstractCommand
 {
-    public WhoAmI(String fullName)
+    public WhoAmI(Context context, String fullName)
     {
         super(fullName, AbstractCommand.NO_PARAMETERS);
     }

@@ -20,7 +20,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class WriteNote extends AbstractCommand 
 {
-	public WriteNote(String fullname)
+	public WriteNote(Context context, String fullname)
 	{
 		super(fullname, AbstractCommand.NO_PARAMETERS);
 	}

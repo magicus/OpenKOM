@@ -22,7 +22,7 @@ import nu.rydin.kom.structs.TextNumber;
  */
 public class ReadMessage extends AbstractCommand
 {
-	public ReadMessage(String fullName)
+	public ReadMessage(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true)});	
 	}

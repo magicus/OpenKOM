@@ -21,7 +21,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class WriteRules extends AbstractCommand 
 {
-	public WriteRules (String fullname)
+	public WriteRules (Context context, String fullname)
 	{
 		super (fullname, AbstractCommand.NO_PARAMETERS);
 	}

@@ -15,7 +15,7 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class GotoNextConference extends AbstractCommand
 {
-	public GotoNextConference(String fullName)
+	public GotoNextConference(Context context, String fullName)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

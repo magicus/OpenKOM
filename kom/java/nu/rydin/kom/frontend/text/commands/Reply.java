@@ -26,7 +26,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class Reply extends AbstractCommand
 {
-	public Reply(String fullName)
+	public Reply(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new TextNumberParameter(false) });	
 	}

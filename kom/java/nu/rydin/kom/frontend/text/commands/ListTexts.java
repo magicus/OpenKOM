@@ -26,7 +26,7 @@ public class ListTexts extends AbstractCommand
 {
     private static final int CHUNK_SIZE = 50;
     
-	public ListTexts(String fullName) 
+	public ListTexts(Context context, String fullName) 
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS);
 	}

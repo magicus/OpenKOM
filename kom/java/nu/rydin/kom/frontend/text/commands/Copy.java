@@ -23,7 +23,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class Copy extends AbstractCommand
 {
-	public Copy(String fullName)
+	public Copy(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });	
 	}

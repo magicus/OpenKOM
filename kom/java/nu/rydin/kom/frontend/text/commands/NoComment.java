@@ -20,7 +20,7 @@ import nu.rydin.kom.structs.TextNumber;
  */
 public class NoComment extends AbstractCommand
 {
-	public NoComment(String fullName)
+	public NoComment(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)});	
 	}

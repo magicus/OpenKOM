@@ -27,7 +27,7 @@ import nu.rydin.kom.structs.NameAssociation;
 public class ChangeSuffix extends AbstractCommand
 {
 
-	public ChangeSuffix(String fullName)
+	public ChangeSuffix(Context context, String fullName)
 	{
 		super(fullName, new CommandLineParameter[] { new UserParameter(false), new RawParameter("change.suffix.param.1.ask", true)});
 	}

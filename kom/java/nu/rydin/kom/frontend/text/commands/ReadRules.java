@@ -22,7 +22,7 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ReadRules extends AbstractCommand 
 {
-	public ReadRules (String fullname)
+	public ReadRules (Context context, String fullname)
 	{
 		super(fullname, new CommandLineParameter[] { new ConferenceParameter(false) });
 	}

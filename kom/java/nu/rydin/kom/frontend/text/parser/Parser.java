@@ -348,11 +348,12 @@ public class Parser
     	}
     }
 
-	private static final Class[] s_commandCtorSignature = new Class[] { String.class };
+	private static final Class[] s_commandCtorSignature = new Class[] { Context.class, String.class };
 	
-	public static Parser load(String filename, MessageFormatter formatter)
+	public static Parser load(String filename, Context context)
 	throws IOException, UnexpectedException
 	{
+	    MessageFormatter formatter = context.getMessageFormatter();
 		try
 		{
 			List commandNames = new ArrayList();
@@ -383,7 +384,7 @@ public class Parser
 				// Install primary command
 				//
 				String name = formatter.format(clazz.getName() + ".name");
-				Command primaryCommand = (Command) ctor.newInstance(new Object[] { name });
+				Command primaryCommand = (Command) ctor.newInstance(new Object[] { context, name });
 				commandList.add(primaryCommand);
 				commandNames.add(name);
 					
@@ -400,7 +401,7 @@ public class Parser
 						
 					// We found an alias! Create command.
 					//
-					Command aliasCommand = (Command)ctor.newInstance(new Object[] { alias });
+					Command aliasCommand = (Command)ctor.newInstance(new Object[] { context, alias });
 					commandList.add(aliasCommand);
 					commandNames.add(alias);
 				}

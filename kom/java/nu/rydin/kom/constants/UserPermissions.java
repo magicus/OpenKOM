@@ -29,7 +29,7 @@ public class UserPermissions
 	public static final long CONFERENCE_ADMIN		= 0x0004L;
 	
 	/**
-	 * Obsolete. User this when defining a new bit
+	 * Obsolete. Use this when defining a new bit
 	 */
 	public static final long OBSOLETE1				= 0x0008L;
 	
@@ -51,7 +51,7 @@ public class UserPermissions
 	/**
 	 * Permission to log in
 	 */
-	public static final long LOGIN					= 0x0080L;
+	public static final long LOGIN					= 0x0080L; // TODO: Add support for this!
 	
 	/**
 	 * All permissions

@@ -1835,6 +1835,31 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}		
 	}
 	
+	public void changeUserPermissions(long user, long set, long reset)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+		try
+		{
+		    // Check permissions
+		    //
+		    this.checkRights(UserPermissions.USER_ADMIN);
+		    
+			// Load current permissions
+			//
+		    UserManager um = m_da.getUserManager();
+			UserInfo ui = um.loadUser(user);
+			long oldFlags = ui.getRights();
+			
+			// Store new permissions in database
+			//
+			um.changePermissions(user, (oldFlags | set) & ~reset);
+		}
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}		
+	}
+	
 	public int skipMessagesBySubject (String subject)
 	throws UnexpectedException, ObjectNotFoundException
 	{
