@@ -21,7 +21,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
 public abstract class CommandLineParameter extends CommandLinePart
 {
 
-	private String m_missingObjectQuestionKey;
+	protected String m_missingObjectQuestionKey;
     protected boolean m_isRequired;
 	
 	public CommandLineParameter(String missingObjectQuestionKey, boolean isRequired)

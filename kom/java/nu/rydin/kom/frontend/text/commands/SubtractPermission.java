@@ -25,7 +25,7 @@ public class SubtractPermission extends AbstractCommand
     public SubtractPermission(Context context, String fullName)
     {
         super(fullName, new CommandLineParameter[] { new UserParameter("subtract.permission.user.question", true), 
-                new RightParameter(true, context.getRightsLabels()) });
+                new RightParameter(true, context.getExistingRightsLabels()) });
     }
 
     public void execute(Context context, Object[] parameters)

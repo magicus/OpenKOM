@@ -26,7 +26,7 @@ public class AddPermission extends AbstractCommand
     public AddPermission(Context context, String fullName)
     {
         super(fullName, new CommandLineParameter[] { new UserParameter("add.permission.user.question", true), 
-                new RightParameter(true, context.getRightsLabels()) });
+                new RightParameter(true, context.getExistingRightsLabels()) });
     }
 
     public void execute(Context context, Object[] parameters)

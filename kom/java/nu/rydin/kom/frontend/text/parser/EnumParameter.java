@@ -7,11 +7,16 @@
 package nu.rydin.kom.frontend.text.parser;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.LineEditor;
+import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author Magnus Ihse 
@@ -55,4 +60,32 @@ public abstract class EnumParameter extends CommandLineParameter
         int selected = Parser.resolveString(context, match.getMatchedString(), m_alternatives, m_headingKey, m_promptKey);
         return new Integer(selected);
     }
+    
+	public Match fillInMissingObject(Context context) 
+	throws IOException, InterruptedException, OperationInterruptedException
+	{
+		PrintWriter out = context.getOut();
+		LineEditor in = context.getIn();
+		MessageFormatter fmt = context.getMessageFormatter();
+
+		while (true) {
+			out.print(fmt.format(m_missingObjectQuestionKey) + fmt.format("parser.parameter.enum.prompt.listall"));
+			out.flush();
+			String line = in.readLine();
+			if(line.length() == 0) {
+			    throw new OperationInterruptedException();
+			}
+			if(line.trim().equals("?")) {
+				for (Iterator iter = m_alternatives.iterator(); iter.hasNext();) {
+					String s = (String) iter.next();
+					out.println(s);
+				}
+				continue;
+			}
+			Match newMatch = innerMatch(line, "");
+			return newMatch;
+		}
+	}
+
+    
 }
