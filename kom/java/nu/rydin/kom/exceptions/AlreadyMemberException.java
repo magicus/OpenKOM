@@ -20,4 +20,9 @@ public class AlreadyMemberException extends UserException
 	{
 		super(name);
 	}
+	
+	public AlreadyMemberException(Object[] msgArgs) 
+	{
+	    super(msgArgs);
+	}
 }

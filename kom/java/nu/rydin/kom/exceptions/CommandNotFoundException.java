@@ -18,4 +18,9 @@ public class CommandNotFoundException extends UserException {
     public CommandNotFoundException(String msg) {
         super(msg);
     }
+    
+	public CommandNotFoundException(Object[] msgArgs) 
+	{
+	    super(msgArgs);
+	}
 }

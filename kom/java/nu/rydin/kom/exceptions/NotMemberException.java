@@ -11,12 +11,18 @@ package nu.rydin.kom.exceptions;
  */
 public class NotMemberException extends UserException
 {
-	public NotMemberException()
-		{
-			super();
-		}
-		public NotMemberException(String msg)
-		{
-			super(msg);
-		}	
+    public NotMemberException()
+    {
+        super();
+    }
+
+    public NotMemberException(String msg)
+    {
+        super(msg);
+    }
+
+    public NotMemberException(Object[] msgArgs)
+    {
+        super(msgArgs);
+    }
 }

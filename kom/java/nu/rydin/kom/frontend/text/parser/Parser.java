@@ -183,8 +183,7 @@ public class Parser
         // Now we either have one target candidate, or none.
         if (potentialTargets.size() == 0)
         {
-            throw new CommandNotFoundException(context.getMessageFormatter()
-                    .format("parser.unknown", commandLine));
+            throw new CommandNotFoundException(new Object[] { commandLine } );
         }
 
         // We have one match, but it is not neccessarily correct: we might have
@@ -346,17 +345,13 @@ public class Parser
                         // but the rest of the commandline does not match the
                         // rest of
                         // the command name parameters.
-                        throw new CommandNotFoundException(context
-                                .getMessageFormatter().format("parser.unknown",
-                                        "ADD ORIGINAL COMMANDLINE HERE"));
+                        throw new CommandNotFoundException(
+                                new Object[] { "ADD ORIGINAL COMMANDLINE HERE" });
                     } else
                     {
                         // User have entered an invalid parameter. This should
                         // be unlikely.
-                        throw new InvalidParametersException(context
-                                .getMessageFormatter().format(
-                                        "parser.invalid.match",
-                                        target.getCommand().getFullName()));
+                        throw new InvalidParametersException(new Object[] { target.getCommand().getFullName() });
                     }
                 }
                 target.addMatch(match);
@@ -364,10 +359,7 @@ public class Parser
                 level++;
             } else
             {
-                throw new TooManyParametersException(context
-                        .getMessageFormatter().format(
-                                "parser.superfluous.parameters",
-                                target.getCommand().getFullName()));
+                throw new TooManyParametersException(new Object[] { target.getCommand().getFullName() });
             }
         }
 
@@ -406,9 +398,7 @@ public class Parser
                     if (!match.isMatching())
                     {
                         // The user entered an invalid parameter, abort
-                        throw new InvalidParametersException(context
-                                .getMessageFormatter().format(
-                                        "parser.invalid.parameter"));
+                        throw new InvalidParametersException(new Object[] { target.getCommand().getFullName() });
                     }
 
                     // Resolve directly

@@ -562,7 +562,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Are we members?
 			//
 			if(!m_da.getMembershipManager().isMember(this.getLoggedInUserId(), id))
-				throw new NotMemberException(this.getCensoredName(id).getName());
+				throw new NotMemberException(new Object[] { this.getCensoredName(id).getName() });
 				
 			// All set! Go there!
 			//
@@ -1192,6 +1192,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			//
 			return this.getCensoredName(conferenceId).getName();
 		}
+		catch (AlreadyMemberException e)
+		{
+		    throw new AlreadyMemberException(new Object[] { this.getCensoredName(conferenceId).getName() });
+		}
 		catch(SQLException e)
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
@@ -1206,7 +1210,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			if (!m_da.getMembershipManager().isMember(userId, conferenceId))
 			{
-				throw new NotMemberException();
+				throw new NotMemberException(new Object[] { this.getCensoredName(conferenceId).getName() });
 			}
 			m_da.getMembershipManager().signoff(userId, conferenceId);
 			this.reloadMemberships();

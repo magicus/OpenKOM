@@ -708,11 +708,13 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
     		}
     		catch(OutputInterruptedException e)
     		{
+    		    m_out.println();
     			m_out.println(e.formatMessage(this));
     			m_out.println();
     		}    		    		
     		catch(UserException e)
     		{
+    		    m_out.println();
     			m_out.println(e.formatMessage(this));
     			m_out.println();
     		}

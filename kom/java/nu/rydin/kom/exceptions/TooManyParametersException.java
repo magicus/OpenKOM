@@ -9,13 +9,20 @@ package nu.rydin.kom.exceptions;
 /**
  * @author Magnus Ihse
  */
-public class TooManyParametersException extends UserException {
-
-    public TooManyParametersException() {
+public class TooManyParametersException extends UserException
+{
+    public TooManyParametersException()
+    {
         super();
     }
 
-    public TooManyParametersException(String msg) {
+    public TooManyParametersException(String msg)
+    {
         super(msg);
+    }
+
+    public TooManyParametersException(Object[] msgArgs)
+    {
+        super(msgArgs);
     }
 }

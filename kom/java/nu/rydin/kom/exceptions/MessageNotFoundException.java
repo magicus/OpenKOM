@@ -11,6 +11,7 @@ package nu.rydin.kom.exceptions;
  */
 public class MessageNotFoundException extends UserException
 {
+    //FIXME This class is never used!
     public MessageNotFoundException()
     {
         super();

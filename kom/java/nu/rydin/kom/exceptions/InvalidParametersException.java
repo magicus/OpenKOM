@@ -9,13 +9,20 @@ package nu.rydin.kom.exceptions;
 /**
  * @author Magnus Ihse
  */
-public class InvalidParametersException extends UserException {
-
-    public InvalidParametersException() {
+public class InvalidParametersException extends UserException
+{
+    public InvalidParametersException()
+    {
         super();
     }
 
-    public InvalidParametersException(String msg) {
+    public InvalidParametersException(String msg)
+    {
         super(msg);
+    }
+
+    public InvalidParametersException(Object[] msgArgs)
+    {
+        super(msgArgs);
     }
 }
