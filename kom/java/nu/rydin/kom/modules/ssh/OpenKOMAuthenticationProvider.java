@@ -74,7 +74,7 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
             String ticket = ((ServerSessionFactory) Modules.getModule("Backend")).generateTicket(
                     username, password);
             postTicket(ticket);
-            Logger.info(this, "Successfully logged in as: " + username);
+            Logger.info(this, "Successfully authenticated as: " + username);
             return true;
         } catch (AuthenticationException e)
         {

@@ -16,21 +16,31 @@ import nu.rydin.kom.exceptions.UnexpectedException;
  */
 public interface ServerSessionFactory
 {
-    public abstract void killSession(String user, String password)
+    public void killSession(String user, String password)
             throws AuthenticationException, UnexpectedException,
             InterruptedException;
 
-    public abstract ServerSession login(String ticket)
+	public void killSession(String ticket)
+			throws AuthenticationException, UnexpectedException, 
+			InterruptedException;
+    
+    public ServerSession login(String ticket)
             throws AuthenticationException, LoginProhibitedException,
             AlreadyLoggedInException, UnexpectedException;
 
-    public abstract ServerSession login(String user, String password)
+    public ServerSession login(String user, String password)
             throws AuthenticationException, LoginProhibitedException,
             AlreadyLoggedInException, UnexpectedException;
 
-    public abstract String generateTicket(String user, String password)
+    public String generateTicket(String user, String password)
             throws AuthenticationException, UnexpectedException;
 
-    public abstract long authenticate(String user, String password)
+	public void consumeTicket(String ticket)
+			throws AuthenticationException;
+    
+	public long authenticate(String ticket)
+			throws AuthenticationException;
+    
+    public long authenticate(String user, String password)
             throws AuthenticationException, UnexpectedException;
 }

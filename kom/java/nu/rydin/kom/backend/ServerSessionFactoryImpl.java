@@ -162,21 +162,24 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	    m_sessionManager.killSession(this.authenticate(user, password));
 	}
 	
+	public void killSession(String ticket)
+	throws AuthenticationException, UnexpectedException, InterruptedException
+	{
+	    m_sessionManager.killSession(this.authenticate(ticket));
+	}	
+	
 	public ServerSession login(String ticket)
 	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
 	{
-	    // Check that we have the ticket (and consume it if we do)
-	    //
-	    Long idObj = (Long) m_validTickets.remove(ticket);
-	    if(idObj == null)
-	        throw new AuthenticationException();
-	    
 	    // Log us in!
 	    //
 	    DataAccess da = DataAccessPool.instance().getDataAccess();
 	    try
 	    {
-	        return this.innerLogin(idObj.longValue(), da);
+	        long id = this.authenticate(ticket);
+	        ServerSession session = this.innerLogin(id, da);
+	        this.consumeTicket(ticket);
+	        return session;
 	    }
 	    finally
 	    {
@@ -279,7 +282,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	    long userId = this.authenticate(user, password);
 	    try
 	    {
-	        // Gerenate 128 bytes of random data and calculate MD5
+	        // Generate 128 bytes of random data and calculate MD5
 	        // digest. A ticket is typically valid for <30s, so
 	        // this feels fairly secure.
 	        //
@@ -300,6 +303,26 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	        throw new UnexpectedException(-1, e);
 	    }
 
+	}
+	
+	public void consumeTicket(String ticket) throws AuthenticationException
+    {
+        Long idObj = (Long) m_validTickets.remove(ticket);
+        if (idObj == null)
+        {
+            throw new AuthenticationException();
+        }
+    }
+	
+	public long authenticate(String ticket)
+	throws AuthenticationException
+	{
+	    Long idObj = (Long) m_validTickets.get(ticket);
+	    if(idObj == null)
+	    {
+	        throw new AuthenticationException();
+	    }
+	    return idObj.longValue();
 	}
 	
 	public long authenticate(String user, String password)

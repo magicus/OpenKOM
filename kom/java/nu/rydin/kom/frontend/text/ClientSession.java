@@ -636,7 +636,14 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 					
 				// Ask server to shut down the other session
 				//
-				ssf.killSession(userid, password);
+				if (m_useTicket)
+                {
+                    ssf.killSession(ticket);
+                } else
+                {
+                    ssf.killSession(userid, password);
+                }
+				Logger.info(this, "Successfully killed old session.");
 				
 				// Try to login again
 				//
