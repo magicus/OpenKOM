@@ -24,7 +24,8 @@ public class KOMException extends Exception
 		super(msg);
 	}
 	
-	public KOMException(Object[] msgArgs) {
+	public KOMException(Object[] msgArgs) 
+	{
 	    m_msgArgs = msgArgs;
 	}
 	
@@ -38,17 +39,12 @@ public class KOMException extends Exception
 		super(msg, t);
 	}
 	
-	public String getMessage(Context context)
+	public String formatMessage(Context context)
 	{
-	    if (getMessage() != null) {
-	        return getMessage();
-	    } else {
-	        if (m_msgArgs != null) {
-		        return context.getMessageFormatter().format(this.getArgsFormatKey(), m_msgArgs);
-	        } else {
-		        return context.getMessageFormatter().format(this.getFormatKey());
-	        }
-	    }
+        if (m_msgArgs != null) 
+	        return context.getMessageFormatter().format(this.getArgsFormatKey(), m_msgArgs);
+        else
+	        return context.getMessageFormatter().format(this.getFormatKey());
 	}
 	
 	protected String getFormatKey()

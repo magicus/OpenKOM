@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
-import nu.rydin.kom.backend.HeartbeatListener;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.constants.UserFlags;
@@ -43,6 +42,7 @@ import nu.rydin.kom.exceptions.KOMUserException;
 import nu.rydin.kom.exceptions.LoginNotAllowedException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.OutputInterruptedException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.commands.GotoNextConference;
 import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
@@ -470,11 +470,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     	{
     		// TODO: Default conference deleted. What do we do???
     		//
-    		m_out.println(e.getMessage(this));
+    		m_out.println(e.formatMessage(this));
     	}
     	catch(UnexpectedException e)
     	{
-    		m_out.println(e.getMessage(this));
+    		m_out.println(e.formatMessage(this));
     	}
     	m_out.println();
     	while (m_loggedIn)
@@ -531,6 +531,11 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			    new ExecutableCommand(defaultCommand, new Object[0]).execute(this);
     			}
     		}
+    		catch(OutputInterruptedException e)
+    		{
+    			m_out.println(e.formatMessage(this));
+    			m_out.println();
+    		}    		    		
     		catch(KOMRuntimeException e)
     		{
     			m_out.println(e.formatMessage(this));
@@ -539,7 +544,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     		}			
     		catch(KOMUserException e)
     		{
-    			m_out.println(e.getMessage(this));
+    			m_out.println(e.formatMessage(this));
     			m_out.println();
     		}
     		catch(InterruptedException e)
@@ -668,7 +673,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
         	answer = m_dateSymbols.getWeekdays()[now.get(Calendar.DAY_OF_WEEK)];
         else
             return answer;
-        return answer + ", " + m_formatter.format("time.medium", then.getTime());
+        return answer + ", " + m_formatter.format("time.short", then.getTime());
     }
     
     public DisplayController getDisplayController()

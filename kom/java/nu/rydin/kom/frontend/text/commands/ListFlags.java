@@ -10,7 +10,7 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
+import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.utils.FlagUtils;
 
@@ -21,7 +21,7 @@ public class ListFlags extends AbstractCommand
 {
 	public ListFlags(Context context, String fullName)
 	{
-		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(false) });
+		super(fullName, new CommandLineParameter[] { new UserParameter(false) });
 	}
 
 	public void execute(Context context, Object[] parameterArray)

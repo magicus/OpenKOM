@@ -73,7 +73,7 @@ public abstract class AbstractEditor implements MessageEditor
 			{
 				// TODO: Handle chat messages n'stuff.
 				//
-				 line = in.readLine(defaultLine, "\u0003\u001a", width,
+				 line = in.readLine(defaultLine, "\u0003\u001a\u0004", width,
 				 	LineEditor.FLAG_ECHO | LineEditor.FLAG_STOP_ON_BOL | LineEditor.FLAG_STOP_ON_EOL);
 				 	
 				 // Check if we got a command
@@ -111,7 +111,7 @@ public abstract class AbstractEditor implements MessageEditor
 				 		{
 				 			// TODO: Is this the way we should handle this?
 				 			//
-				 			out.println(e.getMessage(context));
+				 			out.println(e.formatMessage(context));
 				 		}
 				 		
 				 		// Don't include this in the buffer!
@@ -169,6 +169,7 @@ public abstract class AbstractEditor implements MessageEditor
 				int i = (int) e.getStopChar();
 				switch(e.getStopChar())
 				{
+					case '\u0004': // Ctrl-D
 					case '\u001a': // Ctrl-Z
 						s = e.getLine();
 						if(s.length() > 0)

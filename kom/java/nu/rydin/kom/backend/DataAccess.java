@@ -14,6 +14,7 @@ import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageLogManager;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.backend.data.UserLogManager;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.exceptions.UnexpectedException;
 
@@ -54,6 +55,11 @@ public class DataAccess
 	 */
 	private final MessageLogManager m_messageLogManager;
 	
+	/**
+	 * Toolkit object dealing with user logs
+	 */
+	private final UserLogManager m_userLogManager;	
+	
 	public DataAccess(Connection conn)
 	throws UnexpectedException
 	{
@@ -66,6 +72,7 @@ public class DataAccess
 			m_membershipManager = new MembershipManager(conn);
 			m_messageManager 	= new MessageManager(conn);
 			m_messageLogManager	= new MessageLogManager(conn);
+			m_userLogManager	= new UserLogManager(conn);
 		}
 		catch(SQLException e)
 		{
@@ -101,6 +108,11 @@ public class DataAccess
 	public MessageLogManager getMessageLogManager()
 	{
 	    return m_messageLogManager;
+	}
+	
+	public UserLogManager getUserLogManager()
+	{
+	    return m_userLogManager;
 	}
 	
 	public void commit()

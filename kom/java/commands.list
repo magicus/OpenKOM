@@ -62,4 +62,5 @@ nu.rydin.kom.frontend.text.commands.SearchMessage
 nu.rydin.kom.frontend.text.commands.ChangeTimeZone
 nu.rydin.kom.frontend.text.commands.AddPermission
 nu.rydin.kom.frontend.text.commands.SubtractPermission
+nu.rydin.kom.frontend.text.commands.ListUserLog
 nu.rydin.kom.frontend.text.commands.ListCommands

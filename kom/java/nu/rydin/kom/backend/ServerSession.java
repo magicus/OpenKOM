@@ -7,6 +7,7 @@
 package nu.rydin.kom.backend;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.exceptions.AllRecipientsNotReachedException;
@@ -39,6 +40,7 @@ import nu.rydin.kom.structs.NamedObject;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.structs.UserListItem;
+import nu.rydin.kom.structs.UserLogItem;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -1128,8 +1130,32 @@ public interface ServerSession
     throws UnexpectedException;
     
     /**
+     * Lists the user log for all users, sorted by date (descending)
+     * 
+     * @param start The start date
+     * @param end The end date
+     * @param offset List offset
+     * @param length List limit
+     * @throws UnexpectedException
+     */
+    public UserLogItem[] listUserLog(Timestamp start, Timestamp end, int offset, int length)
+    throws UnexpectedException;
+
+    /**
+     * Lists the user log for a specific user, sorted by date (descending)
+     * 
+     * @param user The id of the user
+     * @param start The start date
+     * @param end The end date
+     * @param offset List offset
+     * @param length List limit
+     * @throws UnexpectedException
+     */
+    public UserLogItem[] listUserLog(long user, Timestamp start, Timestamp end, int offset, int length)
+    throws UnexpectedException;
+
+    /**
      * Returns the HeartbeatListener associated with this session.
      */
     public HeartbeatListener getHeartbeatListener();
-
 }

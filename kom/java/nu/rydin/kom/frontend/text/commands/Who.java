@@ -13,6 +13,7 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UserListItem;
+import nu.rydin.kom.utils.HeaderPrinter;
 import nu.rydin.kom.utils.PrintUtils;
 import nu.rydin.kom.utils.StringUtils;
 
@@ -32,21 +33,13 @@ public class Who extends AbstractCommand
     {
 		MessageFormatter formatter = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
-		UserListItem[] users = context.getSession().listLoggedInUsers();
-		String loginLabel = formatter.format("who.login");
-		String idleLabel = formatter.format("who.idle");
-		String nameLabel = formatter.format("who.name");
-		PrintUtils.printRightJustified(out, loginLabel, 6);
-		PrintUtils.printRightJustified(out, idleLabel, 6);
-		out.print(' ');
-		out.println(nameLabel);
-		PrintUtils.printRepeated(out, ' ', 6 - loginLabel.length());		
-		PrintUtils.printRepeated(out, '-', loginLabel.length());
-		PrintUtils.printRepeated(out, ' ', 6 - idleLabel.length());
-		PrintUtils.printRepeated(out, '-', idleLabel.length());
-		out.print(' ');
-		PrintUtils.printRepeated(out, '-', nameLabel.length());
-		out.println();		
+		UserListItem[] users = context.getSession().listLoggedInUsers();		
+		HeaderPrinter hp = new HeaderPrinter();
+		hp.addHeader(formatter.format("who.login"), 6, true);
+		hp.addHeader(formatter.format("who.idle"), 6, true);
+		hp.addSpace(1);
+		hp.addHeader(formatter.format("who.name"), 20, false);
+		hp.printOn(out);
 		int top = users.length;
 		for(int idx = 0; idx < top; ++idx)
 		{

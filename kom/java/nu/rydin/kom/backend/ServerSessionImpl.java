@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -148,12 +149,22 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	 * Timestamp of last heartbeat
 	 */
 	private long m_lastHeartbeat = System.currentTimeMillis();
+	
+	/**
+	 * Usage statistics
+	 */
+	private final UserLogItem m_stats;
 		
 	public ServerSessionImpl(DataAccess da, long userId, SessionManager sessions)
 	throws UnexpectedException
 	{
 		try
 		{
+		    // Set up statistics collection
+		    //
+		    m_stats = new UserLogItem(userId);
+		    m_stats.setLoggedIn(new Timestamp(System.currentTimeMillis()));
+		    
 			// We'll need a DataAccess while doing this
 			//
 			m_da = da;
@@ -299,8 +310,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		try
 		{
 			long conf = this.getCurrentConferenceId(); 
-			return this.innerReadMessage(m_da.getMessageManager().getMostRelevantOccurrence(
+			Envelope env = this.innerReadMessage(m_da.getMessageManager().getMostRelevantOccurrence(
 				conf, messageId));
+			return env;
 		}
 		catch(SQLException e)
 		{
@@ -556,6 +568,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			// Make sure all message markers are saved
 			//
 			this.leaveConference();
+			
+			// Save statistics
+			//
+			m_stats.setLoggedOut(new Timestamp(System.currentTimeMillis()));
+			m_da.getUserLogManager().store(m_stats);
+			
+			// Unregister and kiss the world goodbye
+			//
 			m_sessions.unRegisterSession(this);
 			m_closed = true;			
 		}
@@ -758,6 +778,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			this.broadcastEvent(
 				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
 					occ.getGlobalId()));
+			m_stats.incNumPosted();
 			return occ;
 		}
 		catch(SQLException e)
@@ -866,6 +887,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			// Mark local copy as read
 			//
 			this.markMessageAsRead(me, copy.getLocalnum());
+			m_stats.incNumPosted(); // TODO: Count mail separately?
 			return occ;
 		}
 		catch(SQLException e)
@@ -895,6 +917,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			// Notify the rest of the world that there is a new message!
 			//
 			this.broadcastEvent(new NewMessageEvent(me, conferenceId, occ.getLocalnum(), globalNum));
+			m_stats.incNumCopies();
 		}
 		catch(SQLException e)
 		{
@@ -1357,6 +1380,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 					this.getLoggedInUser().getName(), message));
 			}
 		}
+		m_stats.incNumChats();
 	}
 	
 	public NameAssociation[] sendMulticastMessage (long destinations[], String message)	
@@ -1563,6 +1587,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			}
 			NameAssociation[] answer = new NameAssociation[bounces.size()];
 			bounces.toArray(answer);
+			m_stats.incNumBroadcasts();
 			return answer;
 	    }
 		catch (SQLException e)
@@ -2001,6 +2026,34 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	{
 	    return new HeartbeatListenerImpl();
 	}
+	
+    public UserLogItem[] listUserLog(Timestamp start, Timestamp end, int offset, int length)
+    throws UnexpectedException
+    {
+	    try
+	    {
+	        return m_da.getUserLogManager().getByDate(start, end, offset, length);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }        
+    }
+
+    public UserLogItem[] listUserLog(long user, Timestamp start, Timestamp end, int offset, int length)
+    throws UnexpectedException
+    {
+	    try
+	    {
+	        return m_da.getUserLogManager().getByUser(user, start, end, offset, length);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }        
+    }
+
+
 
 	protected void markAsInvalid()
 	{
@@ -2163,6 +2216,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			
 			// Create Envelope and return
 			//
+			m_stats.incNumRead();
 			return new Envelope(message, primaryOcc, replyTo, receivers, occ, attr, replies);
 		}
 		catch(SQLException e)

@@ -171,3 +171,18 @@ CREATE TABLE IF NOT EXISTS messagelogpointers
 	INDEX logitem(logid),
 	FOREIGN KEY (logid) REFERENCES messagelog(id) ON DELETE CASCADE
 ) TYPE=INNODB;
+
+CREATE TABLE IF NOT EXISTS userlog
+(
+	user BIGINT NOT NULL,
+	logged_in DATETIME NOT NULL,
+	logged_out DATETIME NOT NULL,
+	num_posted INT NOT NULL,
+	num_read INT NOT NULL,
+	num_chat_messages INT NOT NULL,
+	num_broadcasts INT NOT NULL,
+	num_copies INT NOT NULL,
+	INDEX userlog_user(user),
+	FOREIGN KEY (user) REFERENCES users(id) ON DELETE CASCADE,
+	INDEX userlog_date(logged_in)
+) TYPE=INNODB;
