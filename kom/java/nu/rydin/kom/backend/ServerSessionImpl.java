@@ -2256,7 +2256,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}		
 	}
 
-    public MessageOccurrence[] listGlobalMessagesByUser(long userId) throws UnexpectedException 
+    public LocalMessageHeader[] listGlobalMessagesByUser(long userId) throws UnexpectedException 
 	{
 		try
 		{

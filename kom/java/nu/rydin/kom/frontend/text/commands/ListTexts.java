@@ -62,9 +62,11 @@ public class ListTexts extends AbstractCommand
 		
 		// Print headers and a blank line.
 		//
-		PrintUtils.printRightJustified(out, mf.format("list.heading.text") + "  ", 7);
-		PrintUtils.printLeftJustified(out, mf.format("list.heading.writtenby") + "  ", 30);
-		PrintUtils.printLeftJustified(out, mf.format("list.heading.subject") + "  ", 30);
+		PrintUtils.printRightJustified(out, mf.format("list.heading.text"), 7);
+		out.print("  ");
+		PrintUtils.printLeftJustified(out, mf.format("list.heading.writtenby"), 30);
+		out.print("  ");
+		PrintUtils.printLeftJustified(out, mf.format("list.heading.subject"), 30);
 		out.println();
 		out.println();
 		out.flush();

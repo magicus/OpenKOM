@@ -27,6 +27,7 @@ import nu.rydin.kom.events.Event;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferencePermission;
 import nu.rydin.kom.structs.Envelope;
+import nu.rydin.kom.structs.LocalMessageHeader;
 import nu.rydin.kom.structs.MembershipInfo;
 import nu.rydin.kom.structs.MembershipListItem;
 import nu.rydin.kom.structs.MessageOccurrence;
@@ -1029,7 +1030,7 @@ public interface ServerSession
 	 * @return
 	 * @throws UnexpectedException
 	 */
-	public MessageOccurrence[] listGlobalMessagesByUser(long userId)
+	public LocalMessageHeader[] listGlobalMessagesByUser(long userId)
 	throws UnexpectedException;
 
 }
