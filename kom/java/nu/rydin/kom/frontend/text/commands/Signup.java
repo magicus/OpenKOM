@@ -6,7 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
@@ -28,7 +27,7 @@ public class Signup extends AbstractCommand
 	}
 	
 	public void execute2(Context context, Object[] parameterArray) 
-	throws KOMException, IOException, InterruptedException
+	throws KOMException
 	{
 		long conference = ((NameAssociation)parameterArray[0]).getId();
 

@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -25,7 +23,7 @@ public class SkipSubject extends AbstractCommand
 	}
 	
  	public void execute2(Context context, Object[] parameterArray)
-	throws KOMException, IOException, InterruptedException 
+	throws KOMException
 	{
  		ServerSession ss = context.getSession();
  		int n = ss.skipMessagesBySubject(ss.getLastMessageHeader().getSubject());

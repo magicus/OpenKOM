@@ -6,7 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
@@ -27,7 +26,8 @@ public class Who extends AbstractCommand
 	}
 	
     public void execute2(Context context, Object[] parameterArray)
-            throws KOMException, IOException, InterruptedException {
+            throws KOMException
+    {
 		MessageFormatter formatter = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
 		UserListItem[] users = context.getSession().listLoggedInUsers();

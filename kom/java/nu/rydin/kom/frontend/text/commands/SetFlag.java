@@ -6,7 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
@@ -27,7 +26,8 @@ public class SetFlag extends AbstractCommand
 		super(fullName, new CommandLineParameter[] { new FlagParameter(true) } );
 	}
 
-	public void execute2(Context context, Object[] parameterArray) throws KOMException, IOException, InterruptedException {
+	public void execute2(Context context, Object[] parameterArray) throws KOMException
+	{
         Integer flagNumberInteger = (Integer) parameterArray[0];
         int flagNumber = flagNumberInteger.intValue();
         

@@ -45,24 +45,24 @@ public class Reply extends AbstractCommand
 		MessageFormatter formatter = context.getMessageFormatter();
 		ServerSession session = context.getSession();
 
-		long newMessageId = -1;
-		TextNumber replyTo;
-		if (parameterArray[0] == null)
+		long replyToId = -1;
+		TextNumber replyTo = (TextNumber) parameterArray[0];
+		if (replyTo == null)
 		{
-		    replyTo = session.getCurrentMessage();
+		    replyToId = session.getCurrentMessage();
 		}
 		else
 		{
-		    replyTo = (TextNumber)parameterArray[0];
+		    replyToId = replyTo.getNumber();
 		}
 			
 		// Get editor and execute it
 		//
-		UnstoredMessage msg = context.getMessageEditor().edit(context, replyTo);
+		UnstoredMessage msg = context.getMessageEditor().edit(context, replyToId);
 		
 		// Store the message
 		//
-		MessageOccurrence occ = context.getSession().storeReplyInCurrentConference(msg, replyTo);
+		MessageOccurrence occ = context.getSession().storeReplyInCurrentConference(msg, replyToId);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));
 	}

@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.frontend.text.Context;
@@ -24,7 +22,7 @@ public class ViewBroadcastLog extends ViewMessageLog
     }
 
     public void execute2(Context context, Object[] parameterArray)
-    throws KOMException, IOException, InterruptedException	
+    throws KOMException
     {	
     	DisplayController dc = context.getDisplayController();
     	dc.broadcastMessageBody();

@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -23,7 +21,7 @@ public class ReadNextReply extends AbstractCommand
 	}
 	
 	public void execute2(Context context, Object[] parameterArray) 
-	throws KOMException, IOException
+	throws KOMException
 	{
 		context.getMessagePrinter().printMessage(context, context.getSession().readNextReply());
 	}

@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.UserException;
@@ -30,7 +28,7 @@ public class ViewPresentation extends AbstractCommand
 	}
 
 	public void execute2(Context context, Object[] parameterArray)
-	throws KOMException, IOException, InterruptedException 
+	throws KOMException
 	{
 		try
 		{

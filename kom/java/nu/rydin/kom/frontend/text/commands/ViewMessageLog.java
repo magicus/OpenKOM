@@ -35,7 +35,7 @@ public abstract class ViewMessageLog extends AbstractCommand
             throws KOMException, IOException, InterruptedException;
     
     public void innerExecute(Context context, Object[] parameterArray, short kind)
-    throws KOMException, IOException, InterruptedException
+    throws KOMException
     {
         
         PrintWriter out = context.getOut();

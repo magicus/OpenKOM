@@ -6,7 +6,6 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.KOMException;
@@ -18,7 +17,10 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.*;
+import nu.rydin.kom.structs.ConferenceInfo;
+import nu.rydin.kom.structs.NameAssociation;
+import nu.rydin.kom.structs.NamedObject;
+import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
@@ -34,7 +36,7 @@ public class Status extends AbstractCommand
 	}
 
 	public void execute2(Context context, Object[] parameters) 
-	throws KOMException, IOException, InterruptedException
+	throws KOMException
 	{	
 
 		// Got null? That means user skipped optional parameter
@@ -133,10 +135,10 @@ public class Status extends AbstractCommand
 		
 		// TODO: fulkod
 		ListMembers l = new ListMembers("");
-		String [] args = {info.getName()};
+		Object [] args = { new NameAssociation(info.getId(), null) };
 		try
 		{
-			l.execute(context, args);
+			l.execute2(context, args);
 		}
 		catch (Exception e)
 		{

@@ -23,8 +23,10 @@ import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
-import nu.rydin.kom.frontend.text.editor.simple.SimpleChatEditor;
 import nu.rydin.kom.frontend.text.editor.simple.AbstractEditor;
+import nu.rydin.kom.frontend.text.editor.simple.SimpleChatEditor;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
 
@@ -36,12 +38,15 @@ public class SendChatMessage extends AbstractCommand
 
 	public SendChatMessage(String fullName)
 	{
-		super(fullName);	
+		super(fullName, new CommandLineParameter[] { new RawParameter("chat.fulhack.raw.ask", true)});	
 	}
 
-	public void execute(Context context, String[] parameters)
+	public void execute2(Context context, Object[] parameterArray)
 		throws KOMException, IOException, InterruptedException
 	{
+	    String parameter = (String) parameterArray[0];
+	    parameter = parameter.trim();
+	    String[] parameters = parameter.split(" ");
 		// Handle parameters
 		//
 		if(parameters.length == 0)
@@ -180,10 +185,5 @@ public class SendChatMessage extends AbstractCommand
 		    while((line = ww.nextLine()) != null)
 		        out.println(line);
 		}
-	}
-
-	public boolean acceptsParameters()
-	{
-		return true;
 	}
 }
