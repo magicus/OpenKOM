@@ -9,3 +9,4 @@ echo COMMIT\; >> $myfile
 echo SET AUTOCOMMIT=1\; >> $myfile
 echo DELETE FROM messagesearch\; >> $myfile
 echo INSERT INTO messagesearch SELECT id, subject, body FROM messages\; >> $myfile
+echo \; >> $myfile
