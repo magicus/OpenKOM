@@ -6,10 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.editor.simple;
 
-import java.io.IOException;
-
 import nu.rydin.kom.BadParameterException;
-import nu.rydin.kom.KOMException;
 import nu.rydin.kom.MissingArgumentException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
