@@ -2046,7 +2046,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Do we have the permission to disregard conference permissions?
 			//
 			if(this.getLoggedInUser().hasRights(UserPermissions.DISREGARD_CONF_PERM))
-				return true;				
+			    // We can only disregard everything but ADMIN_PERMISSION.
+			    //
+			    if((mask & ConferencePermissions.ADMIN_PERMISSION) != mask)
+			        return true;				
 			return m_da.getMembershipManager().hasPermission(this.getLoggedInUserId(), conferenceId, mask);
 		}
 		catch(SQLException e)
