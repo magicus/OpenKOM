@@ -14,8 +14,15 @@ public class ObjectNotFoundException extends UserException
 	{
 		super();
 	}
+	
+	// TODO: Why is this done here?
 	public ObjectNotFoundException(String msg)
 	{
 		super(new Object[] { msg });
 	}
+	
+    public ObjectNotFoundException(Object[] msgArgs)
+    {
+        super(msgArgs);
+    }
 }

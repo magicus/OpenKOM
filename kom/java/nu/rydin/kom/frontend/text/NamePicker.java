@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.frontend.text.parser.Parser;
@@ -58,7 +59,12 @@ public class NamePicker
         }
         if (assocs.length == 0)
         {
-            throw new ObjectNotFoundException(name);
+            if (kind == NameManager.CONFERENCE_KIND)
+                throw new ConferenceNotFoundException(name);
+            else if (kind == NameManager.USER_KIND)
+                throw new UserNotFoundException(name);
+            else
+                throw new ObjectNotFoundException(name);
         }
         if (assocs.length == 1)
         {
