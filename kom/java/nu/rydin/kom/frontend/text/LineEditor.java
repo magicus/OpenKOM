@@ -800,9 +800,11 @@ public class LineEditor implements NewlineListener
 	    		case TOKEN_LEFT:
 					if(cursorpos == 0 || (flags & FLAG_ECHO) == 0)
 					{
-//							If at end of buffer or no echo, ignore arrow and beep.
-						if((flags & FLAG_STOP_ON_BOL) != 0) {
-							throw new LineUnderflowException();
+					    //If at end of buffer or no echo, ignore arrow and beep.
+						if((flags & FLAG_STOP_ON_BOL) != 0) 
+						{
+						    //FIXME Disabled this, breaks lots of stuff. :-)
+							//throw new LineUnderflowException();
 						}
 						m_out.write(BELL);
 					}
