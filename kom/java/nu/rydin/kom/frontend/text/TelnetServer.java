@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.util.StringTokenizer;
 
 import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.utils.Logger;
 
 /**
  * A simple telnet server. Listens to a port, and kicks of
@@ -155,6 +156,7 @@ public class TelnetServer implements Runnable
 	
 	public static void main(String[] args)
 	{
+		Logger.info(new TelnetServer(), "1123FULRUNK1");
 		new TelnetServer().run();
 	}
 	
