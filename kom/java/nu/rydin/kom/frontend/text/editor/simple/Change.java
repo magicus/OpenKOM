@@ -13,6 +13,7 @@ import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
@@ -42,8 +43,12 @@ public class Change extends AbstractCommand
 			String oldLine = buffer.get(line).toString();
 			boolean hasNl = oldLine.endsWith("\n");
 			PrintWriter out = context.getOut();
+			DisplayController dc = context.getDisplayController();
+			
+			dc.editorLineNumber();
 			PrintUtils.printRightJustified(out, Integer.toString(line + 1), 4);
 			out.print(':');
+			dc.input();
 			out.flush();
 			String newLine = context.getIn().readLine(oldLine, null, context.getTerminalSettings().getWidth() - 6, 
 				LineEditor.FLAG_ECHO);
