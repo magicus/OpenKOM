@@ -12,6 +12,8 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.MessageNotFoundException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.MessageEditor;
@@ -47,14 +49,31 @@ public class WriteReply extends AbstractCommand
         if (replyTo == null)
         {
             replyToId = session.getCurrentMessage();
-        } else
+        } 
+        else
         {
-            replyToId = session.getGlobalMessageId(replyTo);
+            try
+            {
+                replyToId = session.getGlobalMessageId(replyTo);
+            }
+            catch (ObjectNotFoundException e) 
+            {
+                throw new MessageNotFoundException();
+            }
         }
 
         // Second, we need to figure out which conference the original message was in.
         //
-        MessageOccurrence originalMessage = session.getMostRelevantOccurrence(session.getCurrentConferenceId(), replyToId);
+        MessageOccurrence originalMessage;
+        try
+        {
+            originalMessage = session.getMostRelevantOccurrence(session.getCurrentConferenceId(), replyToId);
+        }
+        catch (ObjectNotFoundException e) 
+        {
+            throw new MessageNotFoundException();
+        }
+        
         ConferenceInfo originalConference = session.getConference(originalMessage.getConference());
         
         // Now, if the conference is the current user's mailbox, it means we should
