@@ -96,7 +96,7 @@ public class MessageManager
 		m_addMessageStmt = conn.prepareStatement(
 			"INSERT INTO messages(created, author, author_name, reply_to, subject, body) " +			"VALUES(?, ?, ?, ?, ?, ?)");
 		m_addMessageSearchStmt = conn.prepareStatement(
-			"INSERT INTO messagesearch(id, subject, body) " +
+			"REPLACE INTO messagesearch(id, subject, body) " +
 			"VALUES(?, ?, ?)");
 		m_addMessageOccurrenceStmt = conn.prepareStatement(
 			"INSERT INTO messageoccurrences(message, action_ts, kind, user, user_name, conference, localnum) " +
