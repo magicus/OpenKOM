@@ -921,6 +921,17 @@ public interface ServerSession
 	throws UnexpectedException, ObjectNotFoundException;
 	
 	/**
+	 * Skips all messages in the tree rooted at the node given.
+	 * 
+	 * @param node Root of tree to skip.
+	 * @return Number of texts skipped.
+	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
+	 */	
+	public int skipTree (long node)
+	throws UnexpectedException, ObjectNotFoundException;
+	
+	/**
 	 * This method drops a conference, including all message occurrences (and, sometimes, messages)
 	 * stored in it. Refer to the dropMessageOccurrence source for a discussion on when the message,
 	 * as opposed to the occurrence, is dropped.

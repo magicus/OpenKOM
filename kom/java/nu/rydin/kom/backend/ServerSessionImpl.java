@@ -1654,6 +1654,84 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			throw new UnexpectedException (loggedInUser, e);
 		}
 	}
+	
+	public int skipTree(long root)
+	throws UnexpectedException, ObjectNotFoundException
+	{
+		try
+		{
+			MessageManager mm = m_da.getMessageManager();
+			ArrayList al = new ArrayList();
+			
+			// Set up our start position (root node in al[0], beginning and end index at zero.
+			//			
+			int idxBeg = 0;
+			int idxEnd = 0;
+			int addCount = 0;
+			al.add(new Long(root));
+			while(true) // until we say otherwise :-)
+			{
+				// Iterate over the last set of new nodes we got from getReplies (or init).
+				//
+				for (int i = idxBeg; i <= idxEnd; ++i)
+				{
+					// Retrieve all children of that particular node.
+					//
+					MessageHeader[] mh = mm.getReplies(((Long)al.get(i)).longValue()); // LISP
+					if (0 == mh.length)
+					{
+						continue;
+					}
+					// Add them to the array list, we'll be iterating over them next time around.
+					//
+					for (int j = 0; j < mh.length; ++j)
+					{
+						al.add(new Long(mh[j].getId()));
+					}
+					addCount += mh.length;
+				}
+				// So, now we've gone through all nodes retrieved in the previous pass. Time to
+				// update the indexes or break out of the loop.
+				//
+				if (0 == addCount)
+				{
+					// Nothing was added this time around. This means we've penetrated the full
+					// depth of the tree and can go on to greater achievements.
+					//
+					break;
+				}
+				// Update the indices. The new idxBeg is, of course, the node after the previous
+				// idxEnd, just as the new idxEnd is addCount-1 steps after the new idxBeg
+				// (since idxBeg marks the first new node, so it's included in the interval).
+				//
+				idxBeg = idxEnd + 1;
+				idxEnd = idxBeg + addCount - 1;
+				addCount = 0;
+			}
+			
+			// So, we now have a list of all messages in the tree branching out from the current
+			// node. Now all we have to do is find all occurrences and mark them as read.
+			//
+			int sillyCounter = 0;
+			Iterator it = al.listIterator();
+			while (it.hasNext())
+			{
+				MessageOccurrence[] mos = mm.getVisibleOccurrences(this.getLoggedInUserId(),
+																   ((Long)it.next()).longValue());
+				for (int j = 0; j < mos.length; ++j)
+				{
+					MessageOccurrence mo = mos[j];
+					sillyCounter += this.markMessageAsReadEx(mo.getConference(), mo.getLocalnum()) ? 1 : 0;
+				}
+			}
+			
+			return sillyCounter;
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
 
 	protected void markAsInvalid()
 	{
