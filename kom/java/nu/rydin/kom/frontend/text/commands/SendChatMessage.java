@@ -61,6 +61,7 @@ public class SendChatMessage extends AbstractCommand
 		//Retrieve message.
 		String message = (String)parameterArray[1];
 		
+		//FIXME These checks should *probably* be moved into the ChatRecipientParameter.
 		// Check that all users are logged in and can receive messages
 		//
 		StringWriter sw = new StringWriter();

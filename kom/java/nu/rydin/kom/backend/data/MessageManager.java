@@ -112,9 +112,7 @@ public class MessageManager
 		m_getOccurrenceInConferenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name, conference, localnum FROM messageoccurrences " +
 			"WHERE conference = ? AND message = ?");
-			
-		// TODO: Probably slow...
-		//
+
 		m_getFirstOccurrenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name, conference, localnum FROM messageoccurrences " +
 			"WHERE message = ? ORDER BY action_ts LIMIT 1");

@@ -12,41 +12,24 @@ package nu.rydin.kom.exceptions;
 public class InternalException extends SystemException
 {
 
-    /**
-     * 
-     */
     public InternalException()
     {
         super();
-        // TODO Auto-generated constructor stub
     }
 
-    /**
-     * @param msg
-     */
     public InternalException(String msg)
     {
         super(msg);
-        // TODO Auto-generated constructor stub
     }
 
-    /**
-     * @param t
-     */
     public InternalException(Throwable t)
     {
         super(t);
-        // TODO Auto-generated constructor stub
     }
 
-    /**
-     * @param msg
-     * @param t
-     */
     public InternalException(String msg, Throwable t)
     {
         super(msg, t);
-        // TODO Auto-generated constructor stub
     }
 
 }

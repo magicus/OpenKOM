@@ -25,7 +25,6 @@ public class MessageFomatter
 
     public static String getString(String key)
     {
-        // TODO Auto-generated method stub
         try
         {
             return RESOURCE_BUNDLE.getString(key);

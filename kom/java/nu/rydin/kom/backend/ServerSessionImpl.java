@@ -1035,7 +1035,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			//
 			long me = this.getLoggedInUserId();
 			
-			//TODO (skrolle) Why not use assertConferencePermission?
 			MembershipManager mbr = m_da.getMembershipManager();
 			if(!mbr.hasPermission(me, conferenceId, ConferencePermissions.WRITE_PERMISSION))
 				throw new AuthorizationException();

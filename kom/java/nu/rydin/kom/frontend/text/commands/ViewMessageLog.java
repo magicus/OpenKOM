@@ -47,13 +47,14 @@ public abstract class ViewMessageLog extends AbstractCommand
 		else
 		{
 		    num = ((Integer)parameterArray[0]).intValue();
-		    // TODO: What is this???
-			if(num > 1000) // TODO: Read from configuration
+		    // FIXME review limit should not be hardcoded. (Should it even exist?)
+			if(num > 1000)
 			{
 			    throw new GenericException(formatter.format("view.chat.log.overflow"));
 			}
 		}
 
+		//FIXME Fetch data in chunks.
 		// Fetch data
 		//
 		MessageLogItem[] messages = this.fetch(context.getSession(), num);
@@ -99,11 +100,6 @@ public abstract class ViewMessageLog extends AbstractCommand
 		    while((line = ww.nextLine()) != null)
 		        out.println(line);
 		}
-    }
-    
-    public boolean acceptsParameters()
-    {
-        return true;
     }
     
     protected abstract MessageLogItem[] fetch(ServerSession session, int num)
