@@ -1,5 +1,6 @@
 USE kom;
 
+DROP TABLE IF EXISTS messageattributes;
 DROP TABLE IF EXISTS messageoccurrences;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS memberships;
