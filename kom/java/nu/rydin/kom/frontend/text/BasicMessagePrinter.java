@@ -112,6 +112,7 @@ public class BasicMessagePrinter implements MessagePrinter
 						if(each.getKind() == MessageManager.ATTR_MOVEDFROM)
 						{
 							movedFrom = new String(each.getValue());
+							break;
 						}
 					}
 					PrintUtils.printRepeated(out, ' ', space);
