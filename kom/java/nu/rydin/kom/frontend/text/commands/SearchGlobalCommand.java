@@ -41,7 +41,6 @@ public abstract class SearchGlobalCommand extends SearchCommand
 		PrintUtils.printRightJustified(out, 
 		        String.valueOf(gmsr.getLocalId()), LOCALID_COL_WIDTH);
 		out.print(" ");
-		//FIXME Skrolle Must print conference name, not authorname. :-)
 		PrintUtils.printLeftJustified(out, 
 		        context.formatObjectName(gmsr.getConference()), CONFERENCE_COL_WIDTH);
 		out.print(" ");
