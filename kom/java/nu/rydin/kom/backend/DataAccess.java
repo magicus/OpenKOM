@@ -116,4 +116,22 @@ public class DataAccess
 			throw new UnexpectedException(-1, "Exception while rolling back transaction", e);
 		}
 	}	
+	
+	public boolean isValid()
+	{
+		try
+		{
+			// Create and execute a dummy statement just to make 
+			// sure the connection is still alive
+			//
+			m_conn.createStatement().execute("select 0");
+			return true;
+		}
+		catch(SQLException e)
+		{
+			// Something is wrtong with this connection!
+			//
+			return false;
+		}
+	}
 }

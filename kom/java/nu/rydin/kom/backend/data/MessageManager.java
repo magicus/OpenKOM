@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nu.rydin.kom.ObjectNotFoundException;
+import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.SQLUtils;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;
@@ -373,11 +374,19 @@ public class MessageManager
 			m_addMessageOccurrenceStmt.setInt(7, num);
 			m_addMessageOccurrenceStmt.executeUpdate();
 			
+			// This changes the number of messages in a convference. 
+			// 
+			CacheManager.instance().getConferenceCache().registerInvalidation(new Long(conference));
+			
 			// Update conference records "last text" field
 			m_updateConferenceLasttext.clearParameters();
 			m_updateConferenceLasttext.setTimestamp(1, now);
 			m_updateConferenceLasttext.setLong(2,conference);
 			m_updateConferenceLasttext.executeUpdate();
+			
+			// This changes the number of messages in a convference. 
+			// 
+			CacheManager.instance().getConferenceCache().registerInvalidation(new Long(conference));
 			
 			return new MessageOccurrence(globalId, now, kind, user, userName, conference, num);
    		}
@@ -834,9 +843,19 @@ public class MessageManager
 	public void dropMessage(long globalNum)
 	throws SQLException
 	{
+		// Invalidate cache for all occurrences
+		//
+		MessageOccurrence[] occs = this.getOccurrences(globalNum);
+		int top = occs.length;
+		for(int idx = 0; idx < top; ++idx)
+			CacheManager.instance().getConferenceCache().registerInvalidation(
+				new Long(occs[idx].getConference()));
+				
+		// Delete
+		//
 		this.m_dropMessageStmt.clearParameters();
 		this.m_dropMessageStmt.setLong(1, globalNum);
-		this.m_dropMessageStmt.execute();		
+		this.m_dropMessageStmt.execute();
 	}
 	
 	public MessageHeader[] getMessageOccurrencesInConference (long conference, int start, int limit)
@@ -866,6 +885,7 @@ public class MessageManager
 	public void deleteConference (long conference)
 	throws SQLException
 	{
+		CacheManager.instance().getConferenceCache().registerInvalidation(new Long(conference));
 		this.m_getLocalIdsInConfStmt.clearParameters();
 		this.m_getLocalIdsInConfStmt.setLong(1, conference);
 		ResultSet rs = this.m_getLocalIdsInConfStmt.executeQuery();

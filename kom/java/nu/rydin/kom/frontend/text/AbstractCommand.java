@@ -71,4 +71,22 @@ public abstract class AbstractCommand implements Command
 	{
 		return false;
 	}
+	
+	public String[] getParameters(String[] parts)
+	{	
+		int top = this.getNameParts().length;
+		int numParts = parts.length;
+		String[] args = null;
+		if(numParts <= top)
+			args = new String[0];
+		else
+		{
+			int numArgs = numParts - top;
+			args = new String[numArgs];
+			System.arraycopy(parts, top, args, 0, numArgs);
+		}		
+		return args;
+	}
+
+	
 }

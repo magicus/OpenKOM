@@ -12,6 +12,7 @@ import nu.rydin.kom.KOMException;
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.frontend.text.ansi.ANSISequences;
+import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.Message;
@@ -131,7 +132,11 @@ public class BasicMessagePrinter implements MessagePrinter
 		
 		// Print body
 		//
-		out.println(message.getBody());
+		WordWrapper ww = context.getWordWrapper(message.getBody());
+		String line;
+		while((line = ww.nextLine()) != null)
+			out.println(line);
+		out.println();
 		
 		// Print text footer if requested
 		//
@@ -143,8 +148,6 @@ public class BasicMessagePrinter implements MessagePrinter
 		//
 		Envelope.RelatedMessage[] replies = envelope.getReplies();
 		top = replies.length;
-		if(!context.isFlagSet(0, UserFlags.SHOW_TEXT_FOOTER) && top > 0)
-			out.println();
 		for(int idx = 0; idx < top; ++idx)
 		{
 			Envelope.RelatedMessage each = replies[idx];	

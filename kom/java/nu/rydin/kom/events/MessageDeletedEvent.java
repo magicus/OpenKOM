@@ -9,21 +9,21 @@ package nu.rydin.kom.events;
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
-public class ReevaluateDefaultEvent extends Event 
+public class MessageDeletedEvent extends Event 
 {
 	private long m_confId = -1;
 	
-	public ReevaluateDefaultEvent() 
+	public MessageDeletedEvent() 
 	{
 		super();
 	}
 
-	public ReevaluateDefaultEvent(long user) 
+	public MessageDeletedEvent(long user) 
 	{
 		super(user);
 	}
 	
-	public ReevaluateDefaultEvent(long user, long conf)
+	public MessageDeletedEvent(long user, long conf)
 	{
 		super(user);
 		m_confId = conf;

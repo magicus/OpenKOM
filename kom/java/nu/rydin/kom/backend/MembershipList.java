@@ -39,9 +39,9 @@ public class MembershipList
 	private MembershipInfo[] m_order;
 	
 	/**
-	 * Memberships where the 
+	 * Memberships where the list of read messages has to be saved
 	 */
-	private Set m_dirty = new HashSet();
+	private Set m_dirty = new HashSet(); 
 	
 	/**
 	 * Creates a <tt>MembershipList</tt> based on an array or <tt>MembershipInfo</rr>
@@ -95,7 +95,7 @@ public class MembershipList
 		}
 	}
 	
-	public int countUnread(long conference, ConferenceManager cm)
+	public synchronized int countUnread(long conference, ConferenceManager cm)
 	throws ObjectNotFoundException, SQLException
 	{
 		ConferenceInfo ci = cm.loadConference(conference);
@@ -116,7 +116,8 @@ public class MembershipList
 			mi.setReadMessages(read);
 			m_dirty.add(mi);
 		}
-		return total.countOverlapping(read);
+		int answer = total.countOverlapping(read);
+		return answer;
 	}
 	
 	public int getNextMessageInConference(long confId, ConferenceManager cm)

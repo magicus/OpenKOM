@@ -27,9 +27,9 @@ public class CacheManager
 	
 	public void commit()
 	{
-		m_userCache.performDeferredInvalidations();
-		m_conferenceCache.performDeferredInvalidations();
-		m_messageCache.performDeferredInvalidations();
+		m_userCache.performDeferredOperations();
+		m_conferenceCache.performDeferredOperations();
+		m_messageCache.performDeferredOperations();
 	}
 	
 	public void rollback()

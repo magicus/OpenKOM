@@ -6,21 +6,13 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import nu.rydin.kom.AlreadyLoggedInException;
 import nu.rydin.kom.AuthenticationException;
@@ -35,21 +27,25 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
-import nu.rydin.kom.events.BroadcastMessageEvent;
-import nu.rydin.kom.events.ChatMessageEvent;
 import nu.rydin.kom.events.BroadcastAnonymousMessageEvent;
+import nu.rydin.kom.events.BroadcastMessageEvent;
 import nu.rydin.kom.events.ChatAnonymousMessageEvent;
+import nu.rydin.kom.events.ChatMessageEvent;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
+import nu.rydin.kom.events.MessageDeletedEvent;
 import nu.rydin.kom.events.NewMessageEvent;
 import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
-import nu.rydin.kom.events.ReevaluateDefaultEvent;
 import nu.rydin.kom.frontend.text.commands.GotoNextConference;
 import nu.rydin.kom.frontend.text.commands.Logout;
 import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextReply;
 import nu.rydin.kom.frontend.text.commands.ShowTime;
+import nu.rydin.kom.frontend.text.editor.SimpleEditor;
+import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
+import nu.rydin.kom.frontend.text.editor.WordWrapper;
+import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.UserInfo;
@@ -63,8 +59,6 @@ public class ClientSession implements Runnable, Context, EventTarget
 	private static final int MAX_LOGIN_RETRIES = 3;
 	private static final String DEFAULT_CHARSET = "US-ASCII";
 	
-	private static final Class[] s_commandCtorSignature = new Class[] { String.class };
-	
 	private LineEditor m_in;
 	private KOMPrinter m_out;
 	private final InputStream m_rawIn;
@@ -75,15 +69,15 @@ public class ClientSession implements Runnable, Context, EventTarget
 	private LinkedList m_displayMessageQueue = new LinkedList();
 	private UserInfo m_thisUserCache;
 	private String[] m_flagLabels;
+	private WordWrapperFactory m_wordWrapperFactory = new StandardWordWrapper.Factory();
 
 	
 	// This could be read from some kind of user config if the
 	// user wants an alternate message printer. 
 	//
 	private final MessagePrinter m_messagePrinter = new BasicMessagePrinter();
-	
-	private Command[] m_commandList;
-	private final Map m_primaryCommands = new HashMap(); 
+
+	private CommandParser m_parser;	
 		
 	private static class ListCommands extends AbstractCommand
 	{
@@ -95,14 +89,12 @@ public class ClientSession implements Runnable, Context, EventTarget
 		public void execute(Context context, String[] args)
 		{
 			PrintWriter out = context.getOut();
-			Command[] cmds = ((ClientSession) context).m_commandList;
+			Command[] cmds = ((ClientSession) context).m_parser.getCommandList();
 			int top = cmds.length;
 			for(int idx = 0; idx < top; ++idx)
 				out.println(cmds[idx].getFullName());
 		}
 	}
-		
-	private CommandParser m_parser; 
 	
 	public ClientSession(InputStream in, OutputStream out)
 	throws UnexpectedException
@@ -115,7 +107,6 @@ public class ClientSession implements Runnable, Context, EventTarget
 		// Install commands and init parser
 		//
 		this.installCommands();
-		m_parser = new CommandParser(m_commandList);
 		
 		// More I/O
 		//
@@ -378,18 +369,8 @@ public class ClientSession implements Runnable, Context, EventTarget
 						// Time to execute the command, but first, isolate the 
 						// parameters.
 						//
-						int top = command.getNameParts().length;
-						int numParts = parts.length;
-						String[] args = null;
-						if(numParts <= top)
-							args = new String[0];
-						else
-						{
-							int numArgs = numParts - top;
-							args = new String[numArgs];
-							System.arraycopy(parts, top, args, 0, numArgs);
-						}		
-					
+						String[] args = command.getParameters(parts);
+
 						// Go ahead and execute it!
 						//
 						command.execute(this, args);
@@ -445,16 +426,16 @@ public class ClientSession implements Runnable, Context, EventTarget
 		switch(m_session.suggestNextAction())
 		{
 			case ServerSession.NEXT_REPLY:
-				return (Command) m_primaryCommands.get(ReadNextReply.class);
+				return m_parser.getCommand(ReadNextReply.class);
 			case ServerSession.NEXT_MESSAGE:
-				return (Command) m_primaryCommands.get(ReadNextMessage.class);
+				return m_parser.getCommand(ReadNextMessage.class);
 			case ServerSession.NEXT_CONFERENCE:
-				return (Command) m_primaryCommands.get(GotoNextConference.class);
+				return m_parser.getCommand(GotoNextConference.class);
 			case ServerSession.NO_ACTION:
-				return (Command) m_primaryCommands.get(ShowTime.class);
+				return m_parser.getCommand(ShowTime.class);
 			default:
 				// TODO: Print warning
-				return (Command) m_primaryCommands.get(ShowTime.class);
+				return m_parser.getCommand(ShowTime.class);
 		}
 	}
 	
@@ -513,10 +494,25 @@ public class ClientSession implements Runnable, Context, EventTarget
 	}
 			
 	public MessageEditor getMessageEditor()
+	throws UnexpectedException
 	{
 		// TODO: Determine editor class by reading user config
 		//
-		return new BraindeadMessageEditor();
+		try
+		{
+			return new SimpleEditor(m_formatter);
+		}
+		catch(IOException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+	
+	public TerminalSettings getTerminalSettings()
+	{
+		// TODO: Get from telnet session etc.
+		//
+		return new TerminalSettings(24, 80, "ANSI");
 	}
 	
 	public void printDebugInfo()
@@ -548,6 +544,16 @@ public class ClientSession implements Runnable, Context, EventTarget
 		return (this.getCachedUserInfo().getFlags()[flagWord] & mask) == mask; 
 	}
 	
+	public WordWrapper getWordWrapper(String content)
+	{
+		return m_wordWrapperFactory.create(content, this.getTerminalSettings().getWidth());
+	}
+	
+	public WordWrapper getWordWrapper(String content, int width)
+	{
+		return m_wordWrapperFactory.create(content, width);
+	}
+		
 	public String[] getFlagLabels()
 	{
 		return m_flagLabels;
@@ -629,7 +635,7 @@ public class ClientSession implements Runnable, Context, EventTarget
 		//
 	}
 	
-	public void onEvent(ReevaluateDefaultEvent event)
+	public void onEvent(MessageDeletedEvent event)
 	{
 		//
 	}
@@ -637,85 +643,15 @@ public class ClientSession implements Runnable, Context, EventTarget
 	protected void installCommands()
 	throws UnexpectedException
 	{
+		
 		try
 		{
-			List list = new ArrayList();
-			BufferedReader rdr = new BufferedReader(
-				new InputStreamReader(this.getClass().getResourceAsStream("/commands.list")));
-			
-			// Read command list
-			//
-			String line;
-			while((line = rdr.readLine()) != null)
-			{
-				line = line.trim();
-				if(!line.startsWith("#"))
-					list.add(line);
-			}
-			rdr.close();
-			
-			// Instantiate commands
-			//
-			int top = list.size();
-			List commandList = new ArrayList();
-			for(int idx = 0; idx < top; ++idx)
-			{
-				Class clazz = Class.forName((String) list.get(idx));
-				Constructor ctor = clazz.getConstructor(s_commandCtorSignature); 
-				
-				// Install primary command
-				//
-				String name = m_formatter.format(clazz.getName() + ".name");
-				Command primaryCommand = (Command) ctor.newInstance(new Object[] { name });
-				commandList.add(primaryCommand);
-				m_primaryCommands.put(clazz, primaryCommand); 
-				
-				// Install aliases
-				//
-				int aliasIdx = 1;
-				for(;; ++aliasIdx)
-				{
-					// Try alias key
-					//
-					String alias = m_formatter.getStringOrNull(clazz.getName() + ".name." + aliasIdx);
-					if(alias == null)
-						break; // No more aliases
-					
-					// We found an alias! Create command.
-					//
-					commandList.add(ctor.newInstance(new Object[] { alias }));
-				}
-			}
-			
-			// Copy to command array
-			// 
-			m_commandList = new Command[commandList.size()];
-			commandList.toArray(m_commandList);
+			m_parser = CommandParser.load("/commands.list", m_formatter);
 		}
 		catch(IOException e)
 		{
 			throw new UnexpectedException(-1, e);
 		}
-		catch(ClassNotFoundException e)
-		{
-			throw new UnexpectedException(-1, e);
-		}
-		catch(NoSuchMethodException e)
-		{
-			throw new UnexpectedException(-1, e);
-		}
-		catch(InstantiationException e)
-		{
-			throw new UnexpectedException(-1, e);
-		}
-		catch(IllegalAccessException e)
-		{
-			throw new UnexpectedException(-1, e);
-		}
-		catch(InvocationTargetException e)
-		{
-			throw new UnexpectedException(-1, e.getCause());
-		}		
 	}
 	
 	public void loadFlagTable()

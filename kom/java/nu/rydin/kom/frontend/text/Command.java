@@ -32,4 +32,7 @@ public interface Command
 	public int match(String[] command);
 
 	public boolean acceptsParameters();	
+	
+	public String[] getParameters(String[] parts);
+
 }

@@ -14,6 +14,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 
 import nu.rydin.kom.EventDeliveredException;
+import nu.rydin.kom.LineOverflowException;
+import nu.rydin.kom.LineUnderflowException;
+import nu.rydin.kom.StopCharException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
@@ -24,11 +27,16 @@ import nu.rydin.kom.events.SessionShutdownEvent;
  */
 public class LineEditor
 {
-	private static final char BELL 		= 7;
-	private static final char BS		= 8;
-	private static final char CTRL_U	= 21;
-	private static final char CTRL_W	= 23;
-	private static final char DEL		= 127;
+	public static final int FLAG_STOP_ON_EVENT	= 0x01;
+	public static final int FLAG_ECHO			= 0x02;
+	public static final int FLAG_STOP_ON_BOL	= 0x04;
+	public static final int FLAG_STOP_ON_EOL	= 0x08;	
+	
+	private static final char BELL 				= 7;
+	private static final char BS				= 8;
+	private static final char CTRL_U			= 21;
+	private static final char CTRL_W			= 23;
+	private static final char DEL				= 127;
 	
 	private final ReaderProxy m_in;
 	
@@ -233,13 +241,43 @@ public class LineEditor
 	public String readLineStopOnEvent()
 	throws IOException, InterruptedException, EventDeliveredException
 	{
-		return innerReadLine(null, true, true);
+		try
+		{
+			return innerReadLine(null, null, 0, FLAG_STOP_ON_EVENT | FLAG_ECHO);
+		}
+		catch(LineOverflowException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}
+		catch(LineUnderflowException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}		
+		catch(StopCharException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}				
 	}
 	
 	public String readLineStopOnEvent(String defaultString)
 	throws IOException, InterruptedException, EventDeliveredException
 	{
-		return innerReadLine(defaultString, true, true);
+		try
+		{
+			return innerReadLine(defaultString, null, 0, FLAG_STOP_ON_EVENT | FLAG_ECHO);
+		}
+		catch(LineOverflowException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}
+		catch(LineUnderflowException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}
+		catch(StopCharException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}				
 	}	
 	
 	public void setCharset(String charset)
@@ -253,7 +291,7 @@ public class LineEditor
 	{
 		try
 		{
-			return innerReadLine(null, false, false);
+			return innerReadLine(null, null, 0, 0);
 		}
 		catch(EventDeliveredException e)
 		{
@@ -262,6 +300,18 @@ public class LineEditor
 			//
 			throw new RuntimeException("This should not happen!", e);
 		}
+		catch(LineOverflowException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}
+		catch(LineUnderflowException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}
+		catch(StopCharException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}						
 	}
 	
 	public String readLine()
@@ -275,7 +325,7 @@ public class LineEditor
 	{
 		try
 		{
-			return innerReadLine(defaultString, true, false);
+			return innerReadLine(defaultString, null, 0, FLAG_ECHO);
 		}
 		catch(EventDeliveredException e)
 		{
@@ -284,7 +334,26 @@ public class LineEditor
 			//
 			throw new RuntimeException("This should not happen!", e);
 		}
+		catch(LineOverflowException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}
+		catch(LineUnderflowException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}
+		catch(StopCharException e)
+		{
+			throw new RuntimeException("This should not happen!", e);
+		}				
 	}
+	
+	public String readLine(String defaultString, String stopChars, int length, int flags)
+	throws LineOverflowException, StopCharException, LineUnderflowException, IOException, InterruptedException, EventDeliveredException
+	{
+		return innerReadLine(defaultString, stopChars, length, flags);
+	}
+
 	
 	public int getChoice(String prompt, String[] choices, int defaultChoice, String errorString)
 	throws IOException, InterruptedException
@@ -314,8 +383,9 @@ public class LineEditor
 
 	}
 	
-	protected String innerReadLine(String defaultString, boolean echo, boolean stopOnEvent)
-	throws EventDeliveredException, IOException, InterruptedException
+	protected String innerReadLine(String defaultString, String stopChars, int maxLength, int flags)
+	throws EventDeliveredException, StopCharException, LineOverflowException, LineUnderflowException, 
+	IOException, InterruptedException
 	{
 		StringBuffer buffer = new StringBuffer(500);
 		int idx = 0;
@@ -324,6 +394,10 @@ public class LineEditor
 		//
 		if(defaultString != null)
 		{
+			// Strip newlines
+			//
+			if(defaultString.endsWith("\n"))
+				defaultString = defaultString.substring(0, defaultString.length() - 1);
 			buffer.append(defaultString);
 			m_out.print(defaultString);
 			m_out.flush();
@@ -353,7 +427,7 @@ public class LineEditor
 				if(e instanceof SessionShutdownEvent)
 					throw new InterruptedException();
 				e.dispatch(m_target);
-				if(stopOnEvent && buffer.length() == 0)
+				if(((flags & FLAG_STOP_ON_EVENT) != 0) && buffer.length() == 0)
 					throw new EventDeliveredException(e);
 				
 				// Done with this event!
@@ -369,7 +443,11 @@ public class LineEditor
 				case DEL:
 				case BS:
 					if(idx == 0)
+					{
+						if((flags & FLAG_STOP_ON_BOL) != 0)
+							throw new LineUnderflowException();
 						m_out.write(BELL);
+					}
 					else
 					{
 						buffer.deleteCharAt(--idx);
@@ -417,8 +495,33 @@ public class LineEditor
 					//
 					break;
 				default:
+					// A stopchar?
+					//
+					if(stopChars != null && stopChars.indexOf(ch) != -1)
+						throw new StopCharException(buffer.toString(), ch);
+
 					buffer.insert(idx++, ch);
-					if(echo)
+										
+					// Are we exceeding max length?
+					//
+					if(maxLength != 0 && buffer.length() > maxLength)
+					{
+						// Break on overflow?
+						//
+						if((flags & FLAG_STOP_ON_EOL) != 0)
+							throw new LineOverflowException(buffer.toString());
+						else
+						{
+							// Don't break. Just make noise and ignore keystroke
+							//
+							m_out.write(BELL);
+							m_out.flush();
+							break; 
+						}
+					}
+					
+						
+					if((flags & FLAG_ECHO) != 0)
 						m_out.write(ch);
 					else
 						m_out.write('*');

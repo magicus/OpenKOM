@@ -30,11 +30,17 @@ public class DataAccessPool
 	public DataAccess getDataAccess()
 	throws UnexpectedException
 	{
+		DataAccess da = null;
 		synchronized(this)
 		{
 			if(!m_pool.isEmpty())
-				return (DataAccess) m_pool.removeFirst();
+				da = (DataAccess) m_pool.removeFirst();
 		}
+		
+		// Did we get anything? Is it working?
+		//
+		if(da != null && da.isValid())
+			return da;
 		
 		Connection conn = null;
 		try

@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import nu.rydin.kom.ObjectNotFoundException;
 import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UserInfo;
 
@@ -49,7 +50,8 @@ public interface Context
 	/** 
 	 * Returns the <tt>MessageEditor</tt> configured for this session 
 	 */
-	public MessageEditor getMessageEditor();
+	public MessageEditor getMessageEditor()
+	throws UnexpectedException;
 
 	/**
 	 * Prints debug info
@@ -102,4 +104,22 @@ public interface Context
 	 * Returns localized names of user flags.
 	 */
 	public String[] getFlagLabels();
+
+	/**
+	 * Returns the WordWrapper to use when formatting messages
+	 * @param content The text to wrap
+	 */
+	public WordWrapper getWordWrapper(String content);
+	
+	/**
+	 * Returns the WordWrapper to use when formatting messages
+	 * @param content The text to wrap
+	 * @param length Maximum line length
+	 */
+	public WordWrapper getWordWrapper(String content, int length);
+	
+	/**
+	 * Returns terminal information
+	 */
+	public TerminalSettings getTerminalSettings();
 }

@@ -30,5 +30,5 @@ public interface EventTarget
 	
 	public void onEvent(ReloadUserProfileEvent event);
 	
-	public void onEvent(ReevaluateDefaultEvent event);
+	public void onEvent(MessageDeletedEvent event);
 }

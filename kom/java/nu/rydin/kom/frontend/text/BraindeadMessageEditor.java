@@ -46,7 +46,7 @@ public class BraindeadMessageEditor implements MessageEditor
 			for(;;)
 			{
 				String line = in.readLine();
-				if(line.length() == 0)
+				if(line.equals("."))
 					break;
 				sb.append(line);
 				sb.append('\n');

@@ -6,13 +6,20 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import nu.rydin.kom.OperationInterruptedException;
+import nu.rydin.kom.UnexpectedException;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.i18n.MessageFormatter;
 
@@ -27,6 +34,10 @@ public class CommandParser
 	 * The commands we support
 	 */
 	private final Command[] m_commandList;
+
+	private Map m_primaryCommands = new HashMap();
+	
+	private static final Class[] s_commandCtorSignature = new Class[] { String.class };	
 	
 	/**
 	 * Constructs a new command parser
@@ -36,6 +47,94 @@ public class CommandParser
 	public CommandParser(Command[] commandList)
 	{
 		m_commandList = commandList;
+	}
+	
+	public static CommandParser load(String filename, MessageFormatter formatter)
+	throws IOException, UnexpectedException
+	{
+		try
+		{
+			Map primaryCommands = new HashMap();
+			List list = new ArrayList();
+			BufferedReader rdr = new BufferedReader(
+				new InputStreamReader(CommandParser.class.getResourceAsStream(filename)));
+				
+			// Read command list
+			//
+			String line;
+			while((line = rdr.readLine()) != null)
+			{
+				line = line.trim();
+				if(!line.startsWith("#"))
+					list.add(line);
+			}
+			rdr.close();
+				
+			// Instantiate commands
+			//
+			int top = list.size();
+			List commandList = new ArrayList();
+			for(int idx = 0; idx < top; ++idx)
+			{
+				Class clazz = Class.forName((String) list.get(idx));
+				Constructor ctor = clazz.getConstructor(s_commandCtorSignature); 
+					
+				// Install primary command
+				//
+				String name = formatter.format(clazz.getName() + ".name");
+				Command primaryCommand = (Command) ctor.newInstance(new Object[] { name });
+				commandList.add(primaryCommand);
+				primaryCommands.put(clazz, primaryCommand); 
+					
+				// Install aliases
+				//
+				int aliasIdx = 1;
+				for(;; ++aliasIdx)
+				{
+					// Try alias key
+					//
+					String alias = formatter.getStringOrNull(clazz.getName() + ".name." + aliasIdx);
+					if(alias == null)
+						break; // No more aliases
+						
+					// We found an alias! Create command.
+					//
+					commandList.add(ctor.newInstance(new Object[] { alias }));
+				}
+			}
+				
+			// Copy to command array
+			// 
+			Command[] commands = new Command[commandList.size()];
+			commandList.toArray(commands);
+			return new CommandParser(commands, primaryCommands);
+		}
+		catch(ClassNotFoundException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(NoSuchMethodException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(InstantiationException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(IllegalAccessException e)
+		{
+			throw new UnexpectedException(-1, e);
+		}
+		catch(InvocationTargetException e)
+		{
+			throw new UnexpectedException(-1, e.getCause());
+		}		
+	}
+	
+	public CommandParser(Command[] commands, Map primaryCommands)
+	{
+		m_commandList		= commands;
+		m_primaryCommands 	= primaryCommands;
 	}
 	
 	/**
@@ -52,8 +151,6 @@ public class CommandParser
 	public Command parse(Context context, String command, String[] parts)
 	throws IOException, InterruptedException, OperationInterruptedException
 	{	
-		// TODO: Fulkod!
-		//
 		LineEditor in = context.getIn();
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
@@ -154,6 +251,14 @@ public class CommandParser
 			}
 		}	
 	}
-
-
+	
+	public Command[] getCommandList()
+	{
+		return m_commandList;
+	}
+	
+	public Command getCommand(Class wantedClass)
+	{
+		return (Command) m_primaryCommands.get(wantedClass);
+	}
 }

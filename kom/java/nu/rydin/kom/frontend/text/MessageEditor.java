@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.IOException;
+
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.structs.*;
 
@@ -15,5 +17,5 @@ import nu.rydin.kom.structs.*;
 public interface MessageEditor
 {
 	public UnstoredMessage edit(Context context, long replyTo)
-	throws KOMException, InterruptedException;
+	throws KOMException, InterruptedException, IOException;
 }

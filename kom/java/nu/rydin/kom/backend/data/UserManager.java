@@ -62,7 +62,7 @@ public class UserManager
 			"address3, address4, phoneno1, phoneno2, email1, email2, url, charset, id, " +			"flags1, flags2, flags3, flags4, rights, created) " +
 			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?)");
 		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, u.address1, u.address2, u.address3, u.address4, " +
-			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.created, u.lastlogin " +
+			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_updateCharsetStmt = conn.prepareStatement(
 			"UPDATE users SET charset = ? WHERE id = ?");

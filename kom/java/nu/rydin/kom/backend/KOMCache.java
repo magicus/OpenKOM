@@ -6,8 +6,10 @@
  */
 package nu.rydin.kom.backend;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import com.frameworx.util.MRUCache;
@@ -18,6 +20,8 @@ import com.frameworx.util.MRUCache;
 public class KOMCache extends MRUCache
 {
 	private Set m_deferredInvalidations = new HashSet();
+	
+	private Map m_dirtyData = new HashMap();
 	
 	public KOMCache(int maxSize)
 	{
@@ -31,11 +35,22 @@ public class KOMCache extends MRUCache
 	
 	public synchronized void registerInvalidation(Object key)
 	{
+		m_dirtyData.remove(key);
 		m_deferredInvalidations.add(key);
 	}
 	
-	public synchronized void performDeferredInvalidations()
+	public synchronized void deferredPut(Object key, Object value)
 	{
+		m_dirtyData.put(key, value);
+	}
+	
+	public synchronized void performDeferredOperations()
+	{
+		for(Iterator itor = m_dirtyData.entrySet().iterator(); itor.hasNext();)
+		{
+			Map.Entry each = (Map.Entry) itor.next();
+			this.put(each.getKey(), each.getValue());
+		}		
 		for(Iterator itor = m_deferredInvalidations.iterator(); itor.hasNext();)
 			this.remove(itor.next());
 	}

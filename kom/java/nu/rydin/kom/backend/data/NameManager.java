@@ -16,6 +16,7 @@ import java.util.List;
 import nu.rydin.kom.AmbiguousNameException;
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.ObjectNotFoundException;
+import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.SQLUtils;
 import nu.rydin.kom.structs.NameAssociation;
@@ -467,6 +468,13 @@ public class NameManager
 		m_renameObjectStmt.setLong(3, id);
 		if(m_renameObjectStmt.executeUpdate() == 0)
 			throw new ObjectNotFoundException("id=" + id);
+		
+		// Update caches
+		//
+		Long key = new Long(id);
+		CacheManager cmgr = CacheManager.instance();
+		cmgr.getUserCache().registerInvalidation(key);
+		cmgr.getConferenceCache().registerInvalidation(key);
 	}
 	
 	
@@ -514,5 +522,12 @@ public class NameManager
 		this.m_dropNamedObjectStmt.clearParameters();
 		this.m_dropNamedObjectStmt.setLong(1, objectId);
 		this.m_dropNamedObjectStmt.execute();
+		
+		// Update caches
+		//
+		Long key = new Long(objectId);
+		CacheManager cmgr = CacheManager.instance();
+		cmgr.getUserCache().registerInvalidation(key);
+		cmgr.getConferenceCache().registerInvalidation(key);		
 	}
 }

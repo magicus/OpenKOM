@@ -16,6 +16,8 @@ import java.sql.Types;
 import nu.rydin.kom.AmbiguousNameException;
 import nu.rydin.kom.DuplicateNameException;
 import nu.rydin.kom.ObjectNotFoundException;
+import nu.rydin.kom.backend.CacheManager;
+import nu.rydin.kom.backend.KOMCache;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageRange;
 
@@ -144,6 +146,11 @@ public class ConferenceManager // extends NameManager
 	public ConferenceInfo loadConference(long id)
 	throws ObjectNotFoundException, SQLException
 	{
+		KOMCache cache = CacheManager.instance().getConferenceCache();
+		Long key = new Long(id);
+		ConferenceInfo cached = (ConferenceInfo) cache.get(key);
+		if(cached != null)
+			return cached;
 		m_loadConfStmt.clearParameters();
 		m_loadConfStmt.setLong(1, id);
 		ResultSet rs = null;
@@ -156,7 +163,7 @@ public class ConferenceManager // extends NameManager
 			// Load the message range
 			//
 			MessageRange r = this.getMessageRange(id);
-			return new ConferenceInfo(
+			ConferenceInfo answer = new ConferenceInfo(
 				id,							// Id
 				rs.getString(1),			// Name
 				rs.getLong(2),				// Admin
@@ -167,6 +174,8 @@ public class ConferenceManager // extends NameManager
 				r.getMin(),					// First text
 				r.getMax()					// Last text
 				);
+			cache.deferredPut(key, answer);
+			return answer;
 		}
 		finally
 		{

@@ -48,7 +48,7 @@ import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
 import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
-import nu.rydin.kom.events.ReevaluateDefaultEvent;
+import nu.rydin.kom.events.MessageDeletedEvent;
 import nu.rydin.kom.structs.*;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferencePermission;
@@ -886,7 +886,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		try
 		{
 			m_da.getMessageManager().dropMessageOccurrence(localNum, conference);
-			this.broadcastEvent(new ReevaluateDefaultEvent(this.getLoggedInUserId(), conference));
+			this.broadcastEvent(new MessageDeletedEvent(this.getLoggedInUserId(), conference));
 		}
 		catch (SQLException e)
 		{
@@ -948,7 +948,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			// Hello, world!
 			//			
 			this.broadcastEvent(new NewMessageEvent(me, destConfId, occ.getLocalnum(), occ.getGlobalId()));
-			this.broadcastEvent(new ReevaluateDefaultEvent(me, this.getCurrentConferenceId()));
+			this.broadcastEvent(new MessageDeletedEvent(me, this.getCurrentConferenceId()));
 		}
 		catch (SQLException e)
 		{
@@ -2087,7 +2087,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		this.postEvent(e);
 	}
 	
-	public void onEvent(ReevaluateDefaultEvent e)
+	public void onEvent(MessageDeletedEvent e)
 	{
 		long conf = e.getConference();
 		try
