@@ -35,7 +35,8 @@ public class ListOwnMessages extends AbstractCommand
 		MessageFormatter mf = context.getMessageFormatter();
 
 		// TODO: Get out of here if there are no messages
-		//
+		// TODO: Use the nice headerprinter thingie
+		// TODO: Fix column widths.
 				
 		// Print headers and a blank line.
 		//
@@ -62,7 +63,7 @@ public class ListOwnMessages extends AbstractCommand
 				out.print("  ");
 				PrintUtils.printRightJustified(out, String.valueOf(lmh[i].getLocalnum()), 7);
 				out.print("  ");
-				//Personal mailfolder prints as username instead of "Brevlåda". WTF?
+				//TODO: Personal mailfolder prints as username instead of "Brevlåda". WTF?
 				PrintUtils.printLeftJustified(out, 
 				        context.formatObjectName(context.getSession().getName(lmh[i].getConference()), lmh[i].getConference()), 30);
 				out.print("  ");
