@@ -24,7 +24,7 @@ public class ClearFlag extends AbstractCommand
 {
 	public ClearFlag(Context context, String fullName)
 	{
-		super(fullName, new CommandLineParameter[] { new FlagParameter(true, context.getFlagLabels()) } );
+		super(fullName, new CommandLineParameter[] { new FlagParameter(true, context.getExistingFlagLabels()) } );
 	}
 
 	public void execute(Context context, Object[] parameterArray) throws KOMException, IOException, InterruptedException {

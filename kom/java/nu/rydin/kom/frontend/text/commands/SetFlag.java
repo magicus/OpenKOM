@@ -23,7 +23,7 @@ public class SetFlag extends AbstractCommand
 {
 	public SetFlag(Context context, String fullName)
 	{
-		super(fullName, new CommandLineParameter[] { new FlagParameter(true, context.getFlagLabels()) } );
+		super(fullName, new CommandLineParameter[] { new FlagParameter(true, context.getExistingFlagLabels()) } );
 	}
 
 	public void execute(Context context, Object[] parameterArray) throws KOMException

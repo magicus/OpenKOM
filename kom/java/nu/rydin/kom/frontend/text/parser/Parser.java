@@ -11,6 +11,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
@@ -177,7 +178,7 @@ public class Parser
 	    return resolveMatchingCommand(context, commandLine).getCommand();
 	}
 
-    private List resolveAmbiguousCommand(Context context, List potentialTargets) throws IOException, InterruptedException, KOMException
+    private static int resolveAmbiguousString(Context context, List candidates, String headingKey, String promptKey) throws IOException, InterruptedException, KOMException
     {
         LineEditor in = context.getIn();
         PrintWriter out = context.getOut();
@@ -185,18 +186,18 @@ public class Parser
         
         // Ask user to chose
         //
-        out.println(fmt.format("parser.ambiguous"));
-        int top = potentialTargets.size();
+        out.println(fmt.format(headingKey));
+        int top = candidates.size();
         for(int idx = 0; idx < top; ++idx)
         {
-            CommandToMatches potentialTarget1 = (CommandToMatches) potentialTargets.get(idx);
-        	out.print(idx + 1);
-        	out.print(". ");
-        	out.println(potentialTarget1.getCommand().getFullName()); 
+            String candidate = (String) candidates.get(idx);
+            int printIndex = idx + 1;
+            // Ugly but sortof-working padding, sorry :-) /Ihse 
+        	out.println((printIndex < 10 ? " " : "") + printIndex + ". " + candidate); 
         }
-        out.print(fmt.format("parser.chose"));
+        out.print(fmt.format(promptKey));
         out.flush();
-        String input = in.readLine();
+        String input = in.readLine().trim();
         
         // Empty string given? Abort!
         //
@@ -204,20 +205,67 @@ public class Parser
         	throw new OperationInterruptedException();
         }
         	
-        int idx = 0;
         try
         {
-        	idx = Integer.parseInt(input);
+            // Is it a number the user entered?
+            int selection = Integer.parseInt(input);
+            if(selection < 1 || selection > top)
+            {
+                throw new InvalidChoiceException();
+            }
+            return selection-1;
         }
         catch(NumberFormatException e)
         {
-            throw new InvalidChoiceException();
+            return resolveString(context, input, candidates, headingKey, promptKey);
         }
-        if(idx < 1 || idx > top)
+    }
+	
+    public static int resolveString(Context context, String input, List candidates, String headingKey, String promptKey) throws InvalidChoiceException, IOException, InterruptedException, KOMException
+    {
+        // Nope. Assume it is a name to be matched against the list.
+        String cookedInput = NameUtils.normalizeName(input);
+        List originalNumbers = new LinkedList();
+        List matchingCandidates = new LinkedList();
+        int i = 0;
+        for (Iterator iter = candidates.iterator(); iter.hasNext();)
         {
-            throw new InvalidChoiceException();
+            String candidate = (String) iter.next();
+            String cookedCandidate = NameUtils.normalizeName(candidate);
+            if (NameUtils.match(cookedInput, cookedCandidate)) {
+                originalNumbers.add(new Integer(i));
+                matchingCandidates.add(candidate);
+            }
+            i++;
         }
-        CommandToMatches potentialTarget = (CommandToMatches) potentialTargets.get(idx - 1);
+        if (matchingCandidates.size() == 0) {
+            throw new InvalidChoiceException();
+        } else if (matchingCandidates.size() == 1) {
+            // Yeah! We got it!
+            Integer index = (Integer) originalNumbers.get(0);
+            return index.intValue();
+        } else {
+            // Still ambiguous. Let the user chose again, recursively.
+            int newIndex = resolveAmbiguousString(context, matchingCandidates, headingKey, promptKey);
+            // This is the index in our (shorter) list of remaining candidates, but we need to
+            // return the index of the original list. Good thing we saved that number! :-)
+            Integer oldIndex = (Integer) originalNumbers.get(newIndex);
+            return oldIndex.intValue();
+        }
+    }
+
+    private List resolveAmbiguousCommand(Context context, List potentialTargets) throws IOException, InterruptedException, KOMException
+    {
+        List commandNames = new ArrayList();
+        for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
+        {
+            CommandToMatches potentialTarget = (CommandToMatches) iter.next();
+            commandNames.add(potentialTarget.getCommand().getFullName());
+        }
+        
+        int selection = resolveAmbiguousString(context, commandNames, "parser.ambiguous", "parser.chose");
+
+        CommandToMatches potentialTarget = (CommandToMatches) potentialTargets.get(selection);
 
         // Just save the chosen one in our list for later processing
         potentialTargets = new LinkedList();

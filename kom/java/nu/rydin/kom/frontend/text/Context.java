@@ -107,12 +107,15 @@ public interface Context extends TerminalSettingsProvider
 	 * Returns localized names of user flags.
 	 */
 	public String[] getFlagLabels();
+
+	public String[] getExistingFlagLabels();
 	
 	/**
 	 * Returns localized names of user rights.
 	 */
 	public String[] getRightsLabels();
 	
+	public String[] getExistingRightsLabels();
 
 	/**
 	 * Returns the WordWrapper to use when formatting messages

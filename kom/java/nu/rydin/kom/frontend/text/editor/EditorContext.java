@@ -211,4 +211,14 @@ public class EditorContext implements Context
         return m_underlying.getParser();
     }
 
+    public String[] getExistingFlagLabels()
+    {
+        return m_underlying.getExistingFlagLabels();
+    }
+
+    public String[] getExistingRightsLabels()
+    {
+        return m_underlying.getExistingRightsLabels();
+    }
+
 }

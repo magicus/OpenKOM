@@ -915,9 +915,41 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		return m_flagLabels;
 	}
 	
+	// TODO: Ihse -- fulkod, I know. Vågade inte peta på de gamla funktionerna...
+	public String[] getExistingFlagLabels()
+	{
+	    int numFlags;
+	    for (numFlags = 0; numFlags < m_flagLabels.length; numFlags++)
+        {
+            if (m_flagLabels[numFlags] == null) {
+                break;
+            }
+        }
+	    
+	    String[] existingFlags = new String[numFlags];
+	    System.arraycopy(m_flagLabels, 0, existingFlags, 0, numFlags);
+		return existingFlags;
+	}
+	
 	public String[] getRightsLabels()
 	{
 	    return m_privLabels;
+	}
+	
+	// TODO: Ihse -- fulkod, I know. Vågade inte peta på de gamla funktionerna...
+	public String[] getExistingRightsLabels()
+	{
+	    int numFlags;
+	    for (numFlags = 0; numFlags < m_privLabels.length; numFlags++)
+        {
+            if (m_privLabels[numFlags] == null) {
+                break;
+            }
+        }
+	    
+	    String[] existingFlags = new String[numFlags];
+	    System.arraycopy(m_privLabels, 0, existingFlags, 0, numFlags);
+		return existingFlags;
 	}
 	
 	public MessageHeader resolveMessageSpecifier(String specifier)

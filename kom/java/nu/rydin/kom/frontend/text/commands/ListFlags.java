@@ -30,6 +30,6 @@ public class ListFlags extends AbstractCommand
 	    long[] flags = parameterArray[0] != null
 	    	? context.getSession().getUser(((NameAssociation) parameterArray[0]).getId()).getFlags()
 	        : context.getCachedUserInfo().getFlags();
-		FlagUtils.printFlags(context.getOut(), context.getMessageFormatter(), context.getFlagLabels(), flags);	
+		FlagUtils.printFlags(context.getOut(), context.getMessageFormatter(), context.getExistingFlagLabels(), flags);	
 	}
 }
