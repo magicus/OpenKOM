@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import nu.rydin.kom.backend.ServerSessionFactoryImpl;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.utils.Logger;
 
@@ -84,17 +85,15 @@ public class TelnetServer implements Runnable
 	}
 	private int m_port;
 	
-	// Before anything, whatsoever, happens, we need to set the
-	// timezone of this JVM to UTC to make sure all dates and times
-	// are represented correctly everywhere.
-	//
 	static
 	{
+	    //	  We always run in UTC.
+	    //
 	    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 	}
 	
 	public void run()
-	{
+	{   
 		// Before we do anything, make sure we're even able to start
 		//
 		if(!this.sanityChecks())
@@ -166,6 +165,9 @@ public class TelnetServer implements Runnable
 	
 	public static void main(String[] args)
 	{
+	    // Make sure the backend is running. TODO: Do this in a more elegant and remoteable way
+	    //
+	    ServerSessionFactoryImpl.instance();
 		new TelnetServer().run();
 	}
 	
