@@ -835,14 +835,22 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
         {
 	        StringBuffer sb = new StringBuffer(name.length() + 10);
 	        if(name.length() == 0)
-	            name = m_formatter.format("misc.protected.conference");
-	        sb.append(name);
-	        if((this.getCachedUserInfo().getFlags1() & UserFlags.SHOW_OBJECT_IDS) != 0)
 	        {
-	            sb.append(' ');
-	            sb.append('<');
-	            sb.append(id);
-	            sb.append('>');
+	            //Protected conference, only show hidden name.
+	            name = m_formatter.format("misc.protected.conference");
+	            sb.append(name);
+	        }
+	        else
+	        {
+	            //Normal conference. Show name and maybe object id.
+	            sb.append(name);
+		        if((this.getCachedUserInfo().getFlags1() & UserFlags.SHOW_OBJECT_IDS) != 0)
+		        {
+		            sb.append(' ');
+		            sb.append('<');
+		            sb.append(id);
+		            sb.append('>');
+		        }
 	        }
 	        return sb.toString();
         }
