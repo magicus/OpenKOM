@@ -43,6 +43,7 @@ public abstract class CommandLineParameter extends CommandLinePart
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
 
+		out.println();
 		out.print(fmt.format(m_missingObjectQuestionKey));
 		out.flush();
 		String line = in.readLine();
