@@ -6,26 +6,12 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import nu.rydin.kom.exceptions.CommandNotFoundException;
-import nu.rydin.kom.exceptions.InvalidChoiceException;
-import nu.rydin.kom.exceptions.InvalidParametersException;
-import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.OperationInterruptedException;
-import nu.rydin.kom.exceptions.TooManyParametersException;
-import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.frontend.text.Command;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -40,7 +26,7 @@ public class Parser
 	private Command[] m_commands;
 	
 	/** Map[Command->CommandLinePart[]] */
-	private Map m_commandToPartsMap = new HashMap();
+//	private Map m_commandToPartsMap = new HashMap();
 
 	public static class ExecutableCommand 
 	{
@@ -121,13 +107,15 @@ public class Parser
 		 */
 		public CommandLinePart getCommandLinePart(int level)
 		{
-			CommandLinePart[] parts = (CommandLinePart[]) (m_commandToPartsMap.get(m_command));
+		    CommandLinePart[] parts = getCommand().getFullSignature();
+			//CommandLinePart[] parts = (CommandLinePart[]) (m_commandToPartsMap.get(m_command));
 			if (level >= parts.length) {
 				return null;
 			} else {
 				return parts[level];
 			}
 		}
+		
         public String toString() {
             return "CommandToMatches:[command=" + m_command + ", matches=" + m_matches + "]";
         }
@@ -137,34 +125,17 @@ public class Parser
 	 * @param commands
 	 * @param primaryCommands
 	 */
-	public Parser(List commands, List commandNames)
+	private Parser(List commands)
 	{
 		m_commands = new Command[commands.size()];
 		commands.toArray(m_commands);
-		
-		// Initialize the command->parts map with a pair for each command
-		// and its corresponding array of command line parts (command name followed
-		// by its signature).
-		for (int i = 0; i < m_commands.length; i++)
-		{
-			Command command = m_commands[i];
-			String name = (String)commandNames.get(i);
-			CommandNamePart[] nameParts = splitName(name);
-			CommandLineParameter[] parameterParts = command.getSignature();
-			
-			CommandLinePart[] commandLineParts = new CommandLinePart[nameParts.length + 
-																	 parameterParts.length];
-			System.arraycopy(nameParts, 0, commandLineParts, 0, nameParts.length);
-			System.arraycopy(parameterParts, 0, commandLineParts, nameParts.length, parameterParts.length);
-			m_commandToPartsMap.put(command, commandLineParts);
-		}
 	}
 
 	/**
 	 * @param name
 	 * @return
 	 */
-	private CommandNamePart[] splitName(String name)
+/*	private CommandNamePart[] splitName(String name)
 	{
 		String cooked = CommandLinePart.cookString(name);
 		String[] cookedParts = cooked.split(" ");
@@ -176,7 +147,7 @@ public class Parser
 		}
 		return result;
 	}
-	
+*/	
 	private CommandToMatches resolveAmbiguousCommand(Context context, List potentialTargets) throws IOException, InterruptedException, KOMException {
 		LineEditor in = context.getIn();
 		PrintWriter out = context.getOut();
@@ -269,6 +240,19 @@ public class Parser
     		level++;
     	}
     	
+    	// Check if there is one and only one potential command that the user 
+    	// wrote all parts of. If so, choose it.
+    	//FIXME HOLA BANDOOLA BAND!
+/*    	if (potentialTargets.size() > 1) {
+    	    List foo = new ArrayList();
+    	    for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
+            {
+                CommandToMatches each = (CommandToMatches) iter.next();
+                List matches = each.getMatches(); 
+            }
+    	
+    	}
+  */  	
     	if (potentialTargets.size() > 1) {
     		// Ambiguous matching command found. Try to resolve it.
     	    CommandToMatches potentialTarget = resolveAmbiguousCommand(context, potentialTargets);
@@ -287,7 +271,8 @@ public class Parser
     		// ask user about missing parameters.
     		
     		CommandToMatches target = (CommandToMatches) potentialTargets.get(0); 
-    		CommandLinePart[] parts = (CommandLinePart[]) m_commandToPartsMap.get(target.getCommand());
+    		CommandLinePart[] parts = target.getCommand().getFullSignature();
+    		//CommandLinePart[] parts = (CommandLinePart[]) m_commandToPartsMap.get(target.getCommand());
     		Match lastMatch = target.getMatch(level - 1);
     		
     		// First, do we have more left on the command line to parse?
@@ -361,13 +346,21 @@ public class Parser
 
 	private static final Class[] s_commandCtorSignature = new Class[] { Context.class, String.class };
 	
+	/**
+	 * 
+	 * @param filename
+	 * @param context
+	 * @return
+	 * @throws IOException
+	 * @throws UnexpectedException
+	 */
 	public static Parser load(String filename, Context context)
 	throws IOException, UnexpectedException
 	{
 	    MessageFormatter formatter = context.getMessageFormatter();
 		try
 		{
-			List commandNames = new ArrayList();
+			//List commandNames = new ArrayList();
 			List list = new ArrayList();
 			BufferedReader rdr = new BufferedReader(
 				new InputStreamReader(Parser.class.getResourceAsStream(filename)));
@@ -397,7 +390,7 @@ public class Parser
 				String name = formatter.format(clazz.getName() + ".name");
 				Command primaryCommand = (Command) ctor.newInstance(new Object[] { context, name });
 				commandList.add(primaryCommand);
-				commandNames.add(name);
+				//commandNames.add(name);
 					
 				// Install aliases
 				//
@@ -414,13 +407,13 @@ public class Parser
 					//
 					Command aliasCommand = (Command)ctor.newInstance(new Object[] { context, alias });
 					commandList.add(aliasCommand);
-					commandNames.add(alias);
+					//commandNames.add(alias);
 				}
 			}
 
 			// Copy to command array
 			// 
-			return new Parser(commandList, commandNames);
+			return new Parser(commandList);
 		}
 		catch(ClassNotFoundException e)
 		{

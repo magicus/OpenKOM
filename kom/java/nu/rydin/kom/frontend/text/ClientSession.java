@@ -588,10 +588,12 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     	{
     		// TODO: Default conference deleted. What do we do???
     		//
+    	    Logger.error(this, e);
     		m_out.println(e.formatMessage(this));
     	}
     	catch(UnexpectedException e)
     	{
+    	    Logger.error(this, e);
     		m_out.println(e.formatMessage(this));
     	}
     	m_out.println();

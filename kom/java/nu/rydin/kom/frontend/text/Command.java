@@ -11,6 +11,8 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.CommandLinePart;
+import nu.rydin.kom.frontend.text.parser.CommandNamePart;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -40,5 +42,9 @@ public interface Command
 	 * @return
 	 */
 	public CommandLineParameter[] getSignature();
+	
+	public CommandNamePart[] getNameSignature();
+	
+	public CommandLinePart[] getFullSignature();
 
 }
