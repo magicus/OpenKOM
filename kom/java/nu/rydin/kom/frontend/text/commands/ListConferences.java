@@ -1,7 +1,7 @@
 /*
  * Created on Oct 11, 2003
  *  
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text.commands;
@@ -32,6 +32,6 @@ public class ListConferences extends AbstractCommand
 		NameAssociation[] names = context.getSession().getAssociationsForPatternAndKind("%", ConferenceManager.CONFERENCE_KIND);
 		int top = names.length;
 		for(int idx = 0; idx < top; ++idx)
-			out.println(names[idx].getName());
+		    out.println(context.formatObjectName(names[idx].getName(), names[idx].getId()));
 	}
 }

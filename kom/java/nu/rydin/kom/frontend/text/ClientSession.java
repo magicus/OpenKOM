@@ -40,6 +40,7 @@ import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
 import nu.rydin.kom.frontend.text.commands.GotoNextConference;
 import nu.rydin.kom.frontend.text.commands.Logout;
+import nu.rydin.kom.frontend.text.commands.ReadMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextReply;
 import nu.rydin.kom.frontend.text.commands.ShowTime;
@@ -50,6 +51,7 @@ import nu.rydin.kom.frontend.text.editor.simple.SimpleEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.utils.StringUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -366,28 +368,37 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 				}
 				
 				if(cmdString.length() > 0)
-				{
-					// Command given. Parse it!
-					//
-					String[] parts = NameUtils.splitName(cmdString);
-					Command command = m_parser.parse(this, cmdString, parts);
-					if(command != null) 
-					{
-						// Time to execute the command, but first, isolate the 
-						// parameters.
+				{				    
+				    // Can we parse it as a number? 
+				    //
+				    if(StringUtils.isMessageNumber(cmdString))
+				    {
+				        this.executeCommand(m_parser.getCommand(ReadMessage.class), new String[] { cmdString });
+				    }
+				    else
+				    {
+						// Not a number. Command given. Parse it!
 						//
-						String[] args = command.getParameters(parts);
-
-						// Go ahead and execute it!
-						//
-						this.executeCommand(command, args);
-					}
+						String[] parts = NameUtils.splitNameKeepParenteses(cmdString);
+						Command command = m_parser.parse(this, cmdString, parts);
+						if(command != null) 
+						{
+							// Time to execute the command, but first, isolate the 
+							// parameters.
+							//
+							String[] args = command.getParameters(parts);
+	
+							// Go ahead and execute it!
+							//
+							this.executeCommand(command, args);
+						}
 						
-					// Special case: Seeing a Logout command here
-					// means we should end the loop
-					//
-					if(command instanceof Logout)
-						break;
+						// Special case: Seeing a Logout command here
+						// means we should end the loop
+						//
+						if(command instanceof Logout)
+							break;
+				    }
 				}
 				else
 					this.executeCommand(defaultCommand, new String[0]);
@@ -476,6 +487,30 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 	{
 		return m_session;
 	}
+	
+    public String formatObjectName(String name, long id)
+    {
+        try
+        {
+	        StringBuffer sb = new StringBuffer(name.length() + 10);
+	        sb.append(name);
+	        if((this.getCachedUserInfo().getFlags1() & UserFlags.SHOW_OBJECT_IDS) != 0)
+	        {
+	            sb.append('<');
+	            sb.append(id);
+	            sb.append('>');
+	        }
+	        return sb.toString();
+        }
+        catch(ObjectNotFoundException e)
+        {
+            throw new RuntimeException(e);
+        }
+        catch(UnexpectedException e)
+        {
+            throw new RuntimeException(e);
+        }        
+    }
 			
 	public void printCurrentConference()
 	throws ObjectNotFoundException, UnexpectedException

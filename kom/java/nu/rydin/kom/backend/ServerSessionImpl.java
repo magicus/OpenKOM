@@ -306,7 +306,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	}
 	
 	public Envelope readOriginalMessage()
-	throws NoCurrentMessageException, NotAReplyException, ObjectNotFoundException, UnexpectedException
+	throws NoCurrentMessageException, NotAReplyException, ObjectNotFoundException, AuthorizationException, UnexpectedException
 	{
 		try
 		{
@@ -320,6 +320,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			long replyTo = mh.getReplyTo();
 			if(replyTo == -1)
 				throw new NotAReplyException();
+			
+			// Do we have the right to see it?
+			//
+			this.assertMessageReadPermissions(replyTo);
 				
 			// We now know the message number. Go ahead and load it
 			//
@@ -331,6 +335,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}
 		
 	}
+	
+	public Envelope readGlobalMessage(long globalId)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+	    // Check that we have the right to read this message
+	    //
+	    this.assertMessageReadPermissions(globalId);
+
+	    // Read it
+	    // 
+	    return this.innerReadMessage(globalId);
+	}
+	
 		
 	public Envelope readLocalMessage(int localnum)
 	throws ObjectNotFoundException, UnexpectedException
@@ -1897,17 +1914,18 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 				// This is a reply. Fill in info.
 				//
 				MessageOccurrence occ = mm.getMostRelevantOccurrence(conf, replyToId);
-				replyTo = new Envelope.RelatedMessage(occ, mm.loadMessageHeader(replyToId).getAuthorName(), 
-					nm.getNameById(occ.getConference()), occ.getConference() == conf);
+				MessageHeader replyToMh = mm.loadMessageHeader(replyToId);
+				replyTo = new Envelope.RelatedMessage(occ, replyToMh.getAuthor(), replyToMh.getAuthorName(), 
+					occ.getConference(), nm.getNameById(occ.getConference()), occ.getConference() == conf);
 			} 
 				
 			// Create receiver list
 			//
 			MessageOccurrence[] occ = message.getOccurrences();
 			int top = occ.length;
-			String[] receivers = new String[top]; 
+			NameAssociation[] receivers = new NameAssociation[top]; 
 			for(int idx = 0; idx < top; ++idx)
-				receivers[idx] = nm.getNameById(occ[idx].getConference());  
+				receivers[idx] = new NameAssociation(occ[idx].getConference(), nm.getNameById(occ[idx].getConference()));  
 			
 			// Create attributes list
 			//
@@ -1922,8 +1940,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			{
 				MessageHeader each = replyHeaders[idx];
 				MessageOccurrence replyOcc = mm.getMostRelevantOccurrence(conf, each.getId()); 
-				replies[idx] = new Envelope.RelatedMessage(replyOcc, each.getAuthorName(),
-					nm.getNameById(replyOcc.getConference()), replyOcc.getConference() == conf);  
+				replies[idx] = new Envelope.RelatedMessage(replyOcc, each.getAuthor(), each.getAuthorName(),
+				        replyOcc.getConference(), nm.getNameById(replyOcc.getConference()), replyOcc.getConference() == conf);  
 			}
 			
 			// Done assembling envelope. Now, mark the message as read in all
@@ -1946,16 +1964,66 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
-	}	
+	}
+	
+	/**
+	 * Checks that at least one occurrence of the message is readable to
+	 * the logged in user.
+	 */
+	protected void assertMessageReadPermissions(long globalId)
+	throws AuthorizationException, UnexpectedException
+	{
+	    if(!hasMessageReadPermissions(globalId))
+	        throw new AuthorizationException();
+	}
+
+	/**
+	 * Checks that at least one occurrence of the message is readable to
+	 * the logged in user.
+	 */
+	protected boolean hasMessageReadPermissions(long globalId)
+	throws UnexpectedException
+	{
+	    try
+	    {
+	        // Get all occurrences
+	        //
+	        MessageManager mm = m_da.getMessageManager();
+	        MembershipManager mbrMgr = m_da.getMembershipManager();
+	        MessageOccurrence[] occs = mm.getOccurrences(globalId);
+	        long me = this.getLoggedInUserId();
+	        
+	        // Check whether we have read access in at least one of them
+	        //
+	        int top = occs.length;
+	        for(int idx = 0; idx < top; ++idx)
+	        {
+	            // Get out of here as soon as we have read access in a conference
+	            // where this text occurrs.
+	            //
+                if(mbrMgr.hasPermission(me, occs[idx].getConference(), ConferencePermissions.READ_PERMISSION))
+                    return true;
+	        }
+	        
+	        // We didn't find an occurrence in a conference we have access to?
+	        // We're not allowed to see it, then!
+	        //
+	        return false;
+	    }
+		catch(SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
 	
 	protected long popReply()
-	throws ObjectNotFoundException, SQLException
+	throws ObjectNotFoundException, UnexpectedException, SQLException
 	{
 		return this.peekReply() != -1 ? m_replyStack.pop() : -1;
 	}
 	
 	protected long peekReply()
-	throws SQLException
+	throws SQLException, UnexpectedException
 	{
 		long reply = -1;
 
@@ -1967,7 +2035,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 
 		// Loop until we have an unread reply
 		//
-		for(;;)
+		for(;; m_replyStack.pop())
 		{
 
 			// Frame exhausted? Try next!
@@ -1984,6 +2052,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			{
 				MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(m_currentConferenceId, reply);
 				
+				// Check that we have permission to see this one
+				//
+				if(!this.hasMessageReadPermissions(reply))
+				    continue;
+				
 				// If it's unread, we're done
 				//
 				if(m_memberships.isUnread(occ.getConference(), occ.getLocalnum()))
@@ -1992,11 +2065,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 			catch(ObjectNotFoundException e)
 			{
 				// Not found. Probably deleted, so just skip it!
-			}
-				
-			// Already read, so pop it from the frame and try again
-			//
-			m_replyStack.pop();
+			}				
 		}
 		return reply;
 	}

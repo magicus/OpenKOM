@@ -1,7 +1,7 @@
 /*
  * Created on Jun 5, 2004
  *
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text.commands;
@@ -75,7 +75,8 @@ public class RenameObject extends AbstractCommand
 		
 		// Print confirmation
 		//
-		out.println(formatter.format("rename.confirmation", new Object [] { oldName, newName }));
+		out.println(formatter.format("rename.confirmation", new Object [] { 
+		        context.formatObjectName(oldName, id), context.formatObjectName(newName, id) }));
 	}
 	
 	public boolean acceptsParameters()

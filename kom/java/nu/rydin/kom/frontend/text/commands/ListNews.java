@@ -1,7 +1,7 @@
 /*
  * Created on Nov 9, 2003
  *
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text.commands;
@@ -37,7 +37,8 @@ public class ListNews extends AbstractCommand
 		{
 			MembershipListItem each = list[idx];
 			out.println(formatter.format("list.news.item", new Object[] 
-				{ new Integer(each.getUnread()), each.getConference().getName() }));
+				{ new Integer(each.getUnread()), 
+			        context.formatObjectName(each.getConference().getName(), each.getConference().getId()) }));
 			total += each.getUnread();
 		}
 		if(total > 0)

@@ -154,4 +154,9 @@ public class EditorContext implements Context
 	{
 		return m_underlying.getTerminalSettings();
 	}
+	
+	public String formatObjectName(String name, long id)
+	{
+	    return m_underlying.formatObjectName(name, id);
+	}
 }

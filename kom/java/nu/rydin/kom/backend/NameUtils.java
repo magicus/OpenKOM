@@ -13,6 +13,18 @@ import java.util.StringTokenizer;
  */
 public class NameUtils
 {
+    public static String normalizeNameKeepParanteses(String name)
+    {
+		int top = name.length();
+		StringBuffer buffer = new StringBuffer(top);
+		for(StringTokenizer st = new StringTokenizer(name, " "); st.hasMoreTokens();)
+		{
+		    buffer.append(st.nextToken().toUpperCase());
+		    if(st.hasMoreTokens())
+		        buffer.append(' ');
+		}
+		return buffer.toString();
+    }
 	/**
 	 * Removes non-significant parts of a name. E.g. 
 	 * "(The) KOM System (general discussions)" becomes "KOM SYSTEM".
@@ -64,6 +76,16 @@ public class NameUtils
 		String[] answer = new String[top];
 		for(int idx = 0; idx < top; ++idx)
 			answer[idx] = st.nextToken();
+		return answer;
+	}
+	
+	public static String[] splitNameKeepParenteses(String name)
+	{
+		StringTokenizer st = new StringTokenizer(name);
+		int top = st.countTokens();
+		String[] answer = new String[top];
+		for(int idx = 0; idx < top; ++idx)
+			answer[idx] = st.nextToken().toUpperCase();
 		return answer;
 	}
 	

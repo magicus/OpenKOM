@@ -132,7 +132,7 @@ public class MessageManager
 			 "delete from messages " + 
 			 "where id = ?");
 		m_listOccurrencesInConferenceStmt = conn.prepareStatement(
-			 "select mo.localnum, mo.action_ts, m.author_name, m.subject " +
+			 "select mo.localnum, mo.action_ts, m.author, m.author_name, m.subject " +
 			 "from messages m join messageoccurrences mo " +
 			 "on m.id=mo.message " +
 			 "where mo.conference = ? " +
@@ -883,10 +883,10 @@ public class MessageManager
 			l.add (new MessageHeader(
 					rs.getInt(1),
 					rs.getTimestamp(2),
+					rs.getLong(3),
+					rs.getString(4),
 					-1,
-					rs.getString(3),
-					-1,
-					rs.getString(4)));
+					rs.getString(5)));
 		}
 		MessageHeader[] mh = new MessageHeader[l.size()]; 
 		l.toArray(mh);

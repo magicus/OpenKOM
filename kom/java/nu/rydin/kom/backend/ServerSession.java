@@ -382,6 +382,18 @@ public interface ServerSession
     public void storeNoCommentToCurrentMessage()
     throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
     
+    /**
+     * Reads a message identified by a global message id.
+     * 
+     * @param globalId The global message id
+     * 
+     * @throws ObjectNotFoundException
+     * @throws AuthorizationException
+     * @throws UnexpectedException
+     */
+	public Envelope readGlobalMessage(long globalId)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
+    
 	/**
 	 * Reads the "original message" of the current message, i.e. the message
 	 * to which it is a reply
@@ -392,7 +404,7 @@ public interface ServerSession
 	 * @throws UnexpectedException
 	 */	
 	public Envelope readOriginalMessage()
-	throws NoCurrentMessageException, NotAReplyException, ObjectNotFoundException, UnexpectedException;
+	throws NoCurrentMessageException, NotAReplyException, ObjectNotFoundException, AuthorizationException, UnexpectedException;
 
 	/**
 	 * Stores a personal mail to a user. Also stores copy in the senders mailbox.

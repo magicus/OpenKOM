@@ -65,7 +65,8 @@ public class ListOwnMessages extends AbstractCommand
 				PrintUtils.printRightJustified(out, String.valueOf(lmh[i].getLocalnum()), 7);
 				out.print("  ");
 				//Personal mailfolder prints as username instead of "Brevlåda". WTF?
-				PrintUtils.printLeftJustified(out, context.getSession().getName(lmh[i].getConference()), 30);
+				PrintUtils.printLeftJustified(out, 
+				        context.formatObjectName(context.getSession().getName(lmh[i].getConference()), lmh[i].getConference()), 30);
 				out.print("  ");
 				PrintUtils.printLeftJustified(out, lmh[i].getSubject(), 30);
 				out.println();

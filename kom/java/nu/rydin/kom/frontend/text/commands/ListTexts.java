@@ -61,7 +61,7 @@ public class ListTexts extends AbstractCommand
 			{
 				PrintUtils.printRightJustified(out, String.valueOf(mh[i].getId()), 7);
 				out.print("  "); /* Inject spaces to separate localnum from author*/
-				PrintUtils.printLeftJustified(out, mh[i].getAuthorName(), 30);
+				PrintUtils.printLeftJustified(out, context.formatObjectName(mh[i].getAuthorName(), mh[i].getAuthor()), 30);
 				out.print("  ");
 				PrintUtils.printLeftJustified(out, mh[i].getSubject(), 30);
 				out.println();

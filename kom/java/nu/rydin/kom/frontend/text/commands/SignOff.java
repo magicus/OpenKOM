@@ -49,7 +49,7 @@ public class SignOff extends AbstractCommand
 		//
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();
-		out.println(fmt.format("signoff.confirmation", name));		
+		out.println(fmt.format("signoff.confirmation", context.formatObjectName(name, conference)));		
 	}
 
 	public boolean acceptsParameters()

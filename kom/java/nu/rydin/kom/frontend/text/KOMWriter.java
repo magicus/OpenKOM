@@ -211,16 +211,11 @@ public class KOMWriter extends PrintWriter
 	{
 		m_writer.write(c);
 		
-		// Flush after each character to avoid some
-		// packet accumulating strategies practiced 
-		// by some TCP/IP-drivers.
-		//
-		m_writer.flush();
-		
 		// Notify newline listener if we're writing a newline
 		//
 		if(c == '\n')
 		{
+		    m_writer.flush();
 		    synchronized(m_newlineListeners)
 		    {
 		        for(Iterator itor = m_newlineListeners.iterator(); itor.hasNext();)

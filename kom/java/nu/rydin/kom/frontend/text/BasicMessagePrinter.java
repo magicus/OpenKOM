@@ -18,6 +18,7 @@ import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
@@ -44,19 +45,17 @@ public class BasicMessagePrinter implements MessagePrinter
 		out.print(formatter.format("BasicMessagePrinter.textnumber"));
 		if(primaryOcc != null)
 			out.print(primaryOcc.getLocalnum());
-		else
-		{
-			// Couldn't find a local number. Use global!
-			//
-			out.print('(');
-			out.print(message.getId());
-			out.print(')');
-		}
+
+		// Print global numbber
+		//
+		out.print(" (");
+		out.print(message.getId());
+		out.print(')');
 		
 		// Print name of author
 		//
 		out.print("; ");
-		out.print(message.getAuthorName());
+		out.print(context.formatObjectName(message.getAuthorName(), message.getAuthor()));
 				
 		// Print creation date
 		//
@@ -75,15 +74,16 @@ public class BasicMessagePrinter implements MessagePrinter
 				//
 				out.println(formatter.format("BasicMessagePrinter.reply.to.same.conference", 
 					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()), 
-						replyTo.getAuthorName() } ));		
+						context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) } ));		
 			}
 			else
 			{
 				// Complex case: Original text was in a different conference
 				//
 				out.println(formatter.format("BasicMessagePrinter.reply.to.different.conference", 
-					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()), replyTo.getConferenceName(), 
-						 replyTo.getAuthorName()}));
+					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()), 
+				        context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()), 
+				        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }));
 			}
 		}		
 		
@@ -91,19 +91,21 @@ public class BasicMessagePrinter implements MessagePrinter
 		//
 		int space = formatter.format("BasicMessagePrinter.receiver", "").length();
 		MessageOccurrence[] occs = envelope.getOccurrences();
-		String[] receivers = envelope.getReceivers();
+		NameAssociation[] receivers = envelope.getReceivers();
 		String movedFrom = null;
 		int top = receivers.length;
 		for(int idx = 0; idx < top; ++idx)
 		{
 			MessageOccurrence occ = occs[idx];
-			out.println(formatter.format("BasicMessagePrinter.receiver", receivers[idx]));
+			out.println(formatter.format("BasicMessagePrinter.receiver", 
+			        context.formatObjectName(receivers[idx].getName(), receivers[idx].getId())));
 			switch(occ.getKind())
 			{
 				case MessageManager.ACTION_COPIED:
 					PrintUtils.printRepeated(out, ' ', space);
 					out.println(formatter.format("BasicMessagePrinter.copied", 
-						new Object[] { occ.getUserName(), occ.getTimestamp().toString() }));
+						new Object[] { context.formatObjectName(occ.getUserName(), occ.getUser()), 
+					        occ.getTimestamp().toString() }));
 					break;
 				case MessageManager.ACTION_MOVED:
 					MessageAttribute[] attributes = envelope.getAttributes();
@@ -118,7 +120,8 @@ public class BasicMessagePrinter implements MessagePrinter
 					}
 					PrintUtils.printRepeated(out, ' ', space);
 					out.println(formatter.format("BasicMessagePrinter.moved.long", 
-						new Object[] { movedFrom, occ.getUserName(), occ.getTimestamp().toString() }));
+						new Object[] { movedFrom, context.formatObjectName(occ.getUserName(), 
+						        occ.getUser()), occ.getTimestamp().toString() }));
 					break;					
 			}
 		} 
@@ -142,7 +145,8 @@ public class BasicMessagePrinter implements MessagePrinter
 		//
 		if(context.isFlagSet(0, UserFlags.SHOW_TEXT_FOOTER))
 			out.println(formatter.format("BasicMessagePrinter.footer", 
-				new Object[] { new Long(primaryOcc.getLocalnum()), message.getAuthorName() }));
+				new Object[] { new Long(primaryOcc.getLocalnum()), 
+			        context.formatObjectName(message.getAuthorName(), message.getAuthor()) }));
 		
 		// Print list of replies
 		//

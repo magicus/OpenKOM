@@ -42,7 +42,7 @@ public class Signup extends AbstractCommand
 		//
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();
-		out.println(fmt.format("signup.confirmation", name));
+		out.println(fmt.format("signup.confirmation", context.formatObjectName(name, conference)));
 	}
 	
 	public boolean acceptsParameters()

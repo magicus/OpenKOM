@@ -120,7 +120,7 @@ public class SimpleEditor implements MessageEditor
 				 		// It's a command! How great! Go parse it!
 				 		//
 				 		line = line.substring(1);
-				 		String[] parts = NameUtils.splitName(line);
+				 		String[] parts = NameUtils.splitNameKeepParenteses(line);
 						Command command = null;
 				 		try
 				 		{

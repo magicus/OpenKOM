@@ -17,23 +17,40 @@ public class Envelope implements Serializable
 	{
 		private final MessageOccurrence m_occurrence;
 		
+		private final long m_author;
+		
 		private final String m_authorName;
+		
+		private final long m_conference;
 		
 		private final String m_conferenceName; 
 		
 		private final boolean m_local;
 		
-		public RelatedMessage(MessageOccurrence occurrence, String authorName, String conferenceName, boolean local)
+		public RelatedMessage(MessageOccurrence occurrence, long author, String authorName, long conference, 
+		        String conferenceName, boolean local)
 		{
 			m_occurrence 	= occurrence;
+			m_author		= author;
 			m_authorName 	= authorName;
+			m_conference	= conference;
 			m_conferenceName= conferenceName;
 			m_local 		= local;
+		}
+		
+		public long getAuthor()
+		{
+		    return m_author;
 		}
 
 		public String getAuthorName() 
 		{
 			return m_authorName;
+		}
+		
+		public long getConference()
+		{
+		    return m_conference;
 		}
 		
 		public String getConferenceName()
@@ -58,7 +75,7 @@ public class Envelope implements Serializable
 	
 	private final RelatedMessage m_replyTo;
 	
-	private final String[] m_receivers;
+	private final NameAssociation[] m_receivers;
 	
 	private final RelatedMessage[] m_replies;
 	
@@ -67,7 +84,7 @@ public class Envelope implements Serializable
 	private final MessageAttribute[] m_attributes;
 	
 	public Envelope(Message message, MessageOccurrence primaryOccurrence, RelatedMessage replyTo, 
-		String[] receivers, MessageOccurrence[] occurrences, MessageAttribute[] attributes, RelatedMessage[] replies)
+		NameAssociation[] receivers, MessageOccurrence[] occurrences, MessageAttribute[] attributes, RelatedMessage[] replies)
 	{
 		m_message 			= message;
 		m_primaryOccurrence = primaryOccurrence;
@@ -88,7 +105,7 @@ public class Envelope implements Serializable
 		return m_primaryOccurrence;
 	}
 
-	public String[] getReceivers()
+	public NameAssociation[] getReceivers()
 	{
 		return m_receivers;
 	}

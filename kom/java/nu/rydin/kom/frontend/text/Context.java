@@ -114,4 +114,11 @@ public interface Context extends TerminalSettingsProvider
 	 * Returns terminal information
 	 */
 	public TerminalSettings getTerminalSettings();
+	
+	/**
+	 * Formats an object name according to user settings
+	 * @param name Object name
+	 * @param id Object id
+	 */
+	public String formatObjectName(String name, long id);
 }
