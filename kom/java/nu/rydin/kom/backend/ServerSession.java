@@ -897,4 +897,15 @@ public interface ServerSession
 	 */
 	public MessageHeader[] listMessagesInCurrentConference(int start, int length)
 	throws UnexpectedException;
+	
+	/**
+	 * This method drops a conference, including all message occurrences (and, sometimes, messages)
+	 * stored in it. Refer to the dropMessageOccurrence source for a discussion on when the message,
+	 * as opposed to the occurrence, is dropped.
+	 * 
+	 * @param conference Conference Id.
+	 * @throws UnexpectedException
+	 */
+	public void deleteConference (long conference)
+	throws UnexpectedException;
 }

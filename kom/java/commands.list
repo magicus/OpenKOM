@@ -6,6 +6,7 @@ nu.rydin.kom.frontend.text.commands.ShowTime
 nu.rydin.kom.frontend.text.commands.Logout
 nu.rydin.kom.frontend.text.commands.CreateUser
 nu.rydin.kom.frontend.text.commands.CreateConference
+nu.rydin.kom.frontend.text.commands.DeleteConference
 nu.rydin.kom.frontend.text.commands.ListUsers
 nu.rydin.kom.frontend.text.commands.ListConferences
 nu.rydin.kom.frontend.text.commands.ListMembers

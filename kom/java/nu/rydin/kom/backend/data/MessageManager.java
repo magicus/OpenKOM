@@ -49,6 +49,8 @@ public class MessageManager
 	private final PreparedStatement m_countMessageOccurrencesStmt;
 	private final PreparedStatement m_dropMessageStmt;
 	private final PreparedStatement m_listOccurrencesInConferenceStmt;
+	private final PreparedStatement m_getLocalIdsInConfStmt;
+	private final PreparedStatement m_dropConferenceStmt;
 	
 	private final Connection m_conn; 
 	
@@ -123,6 +125,12 @@ public class MessageManager
 			 "where mo.conference = ? " +
 			 "order by localnum desc limit ? offset ?;");
 
+		// To speed things up, a special version to just retrieve the local ID.
+		//
+		m_getLocalIdsInConfStmt = conn.prepareStatement(
+			 "select localnum from messageoccurrences where conference = ?");
+		m_dropConferenceStmt = conn.prepareStatement(
+			 "delete from conferences where id = ?");
 	}
 	
 	public void close()
@@ -164,6 +172,10 @@ public class MessageManager
 			m_dropMessageStmt.close();
 		if(m_listOccurrencesInConferenceStmt != null)
 			m_listOccurrencesInConferenceStmt.close();
+		if(m_getLocalIdsInConfStmt != null)
+			m_getLocalIdsInConfStmt.close();
+		if(m_dropConferenceStmt != null)
+			m_dropConferenceStmt.close();		
 	}
 	
 	public void finalize()
@@ -800,5 +812,25 @@ public class MessageManager
 		MessageHeader[] mh = new MessageHeader[l.size()]; 
 		l.toArray(mh);
 		return mh;
+	}
+	
+	public void deleteConference (long conference)
+	throws SQLException
+	{
+		this.m_getLocalIdsInConfStmt.clearParameters();
+		this.m_getLocalIdsInConfStmt.setLong(1, conference);
+		ResultSet rs = this.m_getLocalIdsInConfStmt.executeQuery();
+		while (rs.next())
+		{
+			try
+			{
+				this.dropMessageOccurrence(rs.getInt(1), conference);
+			}
+			catch (ObjectNotFoundException f)
+			{
+				// Ignore. This exception is probably due to someone deleting the message before
+				// we got to it.
+			}
+		}
 	}
 }

@@ -1914,4 +1914,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	{
 		return listMessagesInConference (this.getCurrentConferenceId(), start, length);
 	}
+	
+	public void deleteConference (long conference)
+	throws UnexpectedException
+	{
+		try
+		{
+			m_da.getMessageManager().deleteConference(conference);
+			m_da.getNameManager().dropNamedObject(conference);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+	
 }

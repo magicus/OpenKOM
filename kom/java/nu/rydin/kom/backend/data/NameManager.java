@@ -42,6 +42,7 @@ public class NameManager
 	private final PreparedStatement m_getAssociationsByPatternAndKindStmt;
 	private final PreparedStatement m_renameObjectStmt;
 	private final PreparedStatement m_getKindStmt;
+	private final PreparedStatement m_dropNamedObjectStmt;
 	
 	public NameManager(Connection conn)
 	throws SQLException
@@ -74,6 +75,8 @@ public class NameManager
 			"UPDATE names SET fullname = ?, norm_name = ? WHERE id = ?");
 		m_getKindStmt = conn.prepareStatement(
 			"select kind from names where id=?");
+		m_dropNamedObjectStmt = conn.prepareStatement(
+			"delete from names where id = ?");
 	}
 	
 	public void finalize()
@@ -114,6 +117,8 @@ public class NameManager
 			m_renameObjectStmt.close();
 		if (m_getKindStmt != null)
 			m_getKindStmt.close();
+		if (m_dropNamedObjectStmt != null)
+			m_dropNamedObjectStmt.close();
 	}
 	
 	/**
@@ -493,5 +498,12 @@ public class NameManager
 			}
 		}
 	}
+	
+	public void dropNamedObject (long objectId)
+	throws SQLException
+	{
+		this.m_dropNamedObjectStmt.clearParameters();
+		this.m_dropNamedObjectStmt.setLong(1, objectId);
+		this.m_dropNamedObjectStmt.execute();
+	}
 }
-
