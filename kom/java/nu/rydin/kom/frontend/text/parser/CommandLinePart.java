@@ -102,7 +102,7 @@ public abstract class CommandLinePart
 		int top = name.length();
 		if(top == 0)
 		    return "";
-		return name.charAt(0)== '\'' && name.charAt(top - 1) == '\''
+		return top > 1 && name.charAt(0)== '\'' && name.charAt(top - 1) == '\''
 		    ? name.substring(1, top - 1)
 		    : name;
 	}
