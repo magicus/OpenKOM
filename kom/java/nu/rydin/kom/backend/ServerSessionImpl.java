@@ -1343,6 +1343,53 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+
+	public MembershipListItem[] listNewsFor(long userId)
+	throws UnexpectedException
+	{
+	    try
+	    {
+	        ConferenceManager cm = m_da.getConferenceManager();
+	        NameManager nm = m_da.getNameManager();
+	        MembershipManager mm = m_da.getMembershipManager();
+	        MembershipInfo[] m = mm.listMembershipsByUser(userId);
+	        MembershipList ml = new MembershipList(m);
+	        int top = m.length;
+	        List list = new ArrayList (top);
+	        for (int i = 0; i < top; ++i)
+	        {
+	            try
+	            {
+	                MembershipInfo item = m[i];
+	                long confId = item.getConference();
+	                if(!this.isVisible(confId))
+	                {
+	                    continue;
+	                }
+	                int n = ml.countUnread(confId, cm);
+	                if (0 < n)
+	                {
+	                    list.add(new MembershipListItem(new NameAssociation(confId, this.getCensoredName(confId)), n));
+	                }
+	            }
+	            catch (ObjectNotFoundException e)
+	            {
+	                // Ignore
+	            }
+	        }
+			MembershipListItem[] answer = new MembershipListItem[list.size()];
+			list.toArray(answer);
+			return answer;
+	    }
+	    catch (SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
+	    catch (ObjectNotFoundException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
+	}
 	
 	public MembershipListItem[] listNews()
 	throws UnexpectedException
@@ -3077,20 +3124,26 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
     
-    protected boolean isVisible(long conferenceId)
+    protected boolean isVisibleFor(long conferenceId, long userId)
     throws ObjectNotFoundException, UnexpectedException
     {
     	try
 		{
     		return m_memberships.getOrNull(conferenceId) != null 
     			|| m_da.getNameManager().getNameById(conferenceId).getVisibility() == Visibilities.PUBLIC
-    			|| m_da.getMembershipManager().hasPermission(this.getLoggedInUserId(), conferenceId, 
+    			|| m_da.getMembershipManager().hasPermission(userId, conferenceId, 
     			        ConferencePermissions.READ_PERMISSION);
 		}
     	catch (SQLException e)
 		{
     		throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
+    }
+    
+    protected boolean isVisible(long conferenceId)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        return isVisibleFor (conferenceId, this.getLoggedInUserId());
     }
     
     protected Name getCensoredName(long id)

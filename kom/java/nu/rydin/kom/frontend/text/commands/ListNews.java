@@ -11,25 +11,37 @@ import java.io.PrintWriter;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.MembershipListItem;
+import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class ListNews extends AbstractCommand
 {
 	public ListNews(Context context, String fullName)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, new CommandLineParameter[] {new UserParameter ("", false)});
 	}
 
 	public void execute(Context context, Object[] parameterArray)
-		throws KOMException
+	throws KOMException
 	{
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
-		MembershipListItem[] list = context.getSession().listNews();
+		MembershipListItem[] list;
+		if (null == parameterArray[0])
+		{
+		    list = context.getSession().listNews();
+		}
+		else
+		{
+		    list = context.getSession().listNewsFor(((NameAssociation)parameterArray[0]).getId());
+		}
 		int total = 0;
 		int top = list.length;
 		for(int idx = 0; idx < top; ++idx)

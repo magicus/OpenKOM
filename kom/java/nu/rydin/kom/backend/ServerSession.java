@@ -618,6 +618,15 @@ public interface ServerSession
 	throws UnexpectedException;
 		
 	/**
+	 * List unread texts for the given user.
+	 * 
+	 * @param userId User ID.
+	 * @throws UnexpectedException
+	 */
+	
+	public MembershipListItem[] listNewsFor(long userId)
+	throws UnexpectedException;
+	/**
 	 * Returns an array of <tt>UserListItems</tt> with the user currently logged in.
 	 * @return
 	 */
