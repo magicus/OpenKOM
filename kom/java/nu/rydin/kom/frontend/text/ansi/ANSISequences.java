@@ -1,7 +1,7 @@
 /*
  * Created on Jun 6, 2004
  *
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text.ansi;

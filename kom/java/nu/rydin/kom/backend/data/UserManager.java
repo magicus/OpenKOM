@@ -1,31 +1,20 @@
 /*
  * Created on Oct 5, 2003
  *
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.backend.data;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Arrays;
+import java.sql.*;
 
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.KOMCache;
 import nu.rydin.kom.constants.ConferencePermissions;
-import nu.rydin.kom.exceptions.AlreadyMemberException;
-import nu.rydin.kom.exceptions.AmbiguousNameException;
-import nu.rydin.kom.exceptions.AuthenticationException;
-import nu.rydin.kom.exceptions.AuthorizationException;
-import nu.rydin.kom.exceptions.DuplicateNameException;
-import nu.rydin.kom.exceptions.ObjectNotFoundException;
+import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Base64;
 import nu.rydin.kom.utils.MD5Crypt;

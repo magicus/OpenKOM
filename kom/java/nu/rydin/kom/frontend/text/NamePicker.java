@@ -1,20 +1,18 @@
 /*
  * Created on Nov 17, 2003
  *
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.exceptions.*;
 import nu.rydin.kom.frontend.text.parser.Parser;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**

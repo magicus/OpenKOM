@@ -1,7 +1,7 @@
 /*
  * Created on Oct 27, 2003
  *  
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  */
 package nu.rydin.kom.backend;
 

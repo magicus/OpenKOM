@@ -8,13 +8,9 @@ package nu.rydin.kom.frontend.text.parser;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import nu.rydin.kom.backend.NameUtils;
-import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.Context;
 
 /**
