@@ -104,7 +104,7 @@ public class NamePicker
             candidates.add(assocs[i].getName());
         
         assocs[0].getName();
-        int selection = Parser.askForResolution(ctx, candidates, "name.chose", true, "name.ambiguous", false);
+        int selection = Parser.askForResolution(ctx, candidates, "name.choose", true, "name.ambiguous", false);
         return assocs[selection];
     }
 
