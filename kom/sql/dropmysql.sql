@@ -11,3 +11,4 @@ DROP TABLE IF EXISTS messagelogpointers;
 DROP TABLE IF EXISTS messagelog;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS names;
+DROP TABLE IF EXISTS userlog;
