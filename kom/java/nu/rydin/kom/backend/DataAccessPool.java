@@ -18,9 +18,29 @@ import nu.rydin.kom.exceptions.UnexpectedException;
  */
 public class DataAccessPool 
 {
-	private static DataAccessPool s_instance = new DataAccessPool();
+	private static DataAccessPool s_instance;
+	
+	static
+	{
+	    try
+	    {
+	        s_instance = new DataAccessPool();
+	    }
+	    catch(UnexpectedException e)
+	    {
+	        throw new ExceptionInInitializerError(e);
+	    }
+	}
 	
 	private LinkedList m_pool = new LinkedList(); 
+	
+	public DataAccessPool()
+	throws UnexpectedException
+	{
+	    int top = ServerSettings.getNumDataAccess();
+	    for(int idx = 0; idx < top; ++idx)
+	        m_pool.add(this.createDataAccess());
+	}
 	
 	public static DataAccessPool instance()
 	{
@@ -42,6 +62,14 @@ public class DataAccessPool
 		if(da != null && da.isValid())
 			return da;
 		
+		// Otwherwise, create one!
+		//
+		return this.createDataAccess();
+	}
+		
+	private DataAccess createDataAccess()
+	throws UnexpectedException
+	{
 		Connection conn = null;
 		try
 		{

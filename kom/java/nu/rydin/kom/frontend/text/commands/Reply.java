@@ -58,7 +58,7 @@ public class Reply extends AbstractCommand
 			
 		// Get editor and execute it
 		//
-		UnstoredMessage msg = context.getMessageEditor().edit(context, replyToId);
+		UnstoredMessage msg = context.getMessageEditor().edit(replyToId);
 		
 		// Store the message
 		//

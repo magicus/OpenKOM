@@ -34,29 +34,42 @@ public abstract class AbstractEditor implements MessageEditor
 {	
 	private Parser m_parser;
 	private final String m_commandList;
+	protected final EditorContext m_context; 
 	
-	public AbstractEditor(String commandList, MessageFormatter formatter)
+	public AbstractEditor(String commandList, Context context)
 	throws IOException, UnexpectedException
 	{
 		m_commandList = commandList;
+		m_context 	  = new EditorContext(context);
 	}
 	
-	public abstract UnstoredMessage edit(Context underlying, long replyTo)
-		throws KOMException, InterruptedException, IOException;
+	public abstract UnstoredMessage edit(long replyTo)
+	throws KOMException, InterruptedException, IOException;
 	
-	protected boolean mainloop(EditorContext context, boolean stopOnEmpty)
+	public void fill(String content)
+	{
+	    m_context.getBuffer().fill(m_context.getWordWrapper(content));
+	}
+	
+	public void fill(WordWrapper wrapper)
+	{
+	    m_context.getBuffer().fill(wrapper);
+	}
+	
+	protected boolean mainloop(boolean stopOnEmpty)
 	throws InterruptedException, UnexpectedException, IOException
 	{
 	    if(m_parser == null)
-	        m_parser = Parser.load(m_commandList, context);
+	        m_parser = Parser.load(m_commandList, m_context);
+	    
 		// Set up some stuff
 		//
-		DisplayController dc = context.getDisplayController();
-		PrintWriter out = context.getOut();
-		LineEditor in = context.getIn();
-		MessageFormatter formatter = context.getMessageFormatter();
-		Buffer buffer = context.getBuffer();
-		int width = context.getTerminalSettings().getWidth() - 5;
+		DisplayController dc = m_context.getDisplayController();
+		PrintWriter out = m_context.getOut();
+		LineEditor in = m_context.getIn();
+		MessageFormatter formatter = m_context.getMessageFormatter();
+		Buffer buffer = m_context.getBuffer();
+		int width = m_context.getTerminalSettings().getWidth() - 5;
 		
 		// Mainloop
 		//
@@ -93,7 +106,7 @@ public abstract class AbstractEditor implements MessageEditor
 					 		//
 					 		line = line.substring(1);
 					 		Parser.ExecutableCommand executableCommand = null;
-					 		executableCommand = m_parser.parse(context, line);
+					 		executableCommand = m_parser.parse(m_context, line);
 					 		
 					 		if(executableCommand == null)
 					 			continue;
@@ -105,13 +118,13 @@ public abstract class AbstractEditor implements MessageEditor
 					 			return true;
 					 		if(executableCommand.getCommand().getClass() == Quit.class)
 					 			return false;
-				 			executableCommand.execute(context);
+				 			executableCommand.execute(m_context);
 				 		}
 				 		catch(KOMException e)
 				 		{
 				 			// TODO: Is this the way we should handle this?
 				 			//
-				 			out.println(e.formatMessage(context));
+				 			out.println(e.formatMessage(m_context));
 				 		}
 				 		
 				 		// Don't include this in the buffer!
@@ -140,7 +153,7 @@ public abstract class AbstractEditor implements MessageEditor
 				// Overflow! We have to wrap the line
 				//
 				String original = e.getLine();
-				WordWrapper wrapper = context.getWordWrapper(original, width - 1);
+				WordWrapper wrapper = m_context.getWordWrapper(original, width - 1);
 				line = wrapper.nextLine();
 				buffer.add(line);
 				defaultLine = wrapper.nextLine();

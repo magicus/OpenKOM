@@ -63,4 +63,8 @@ nu.rydin.kom.frontend.text.commands.ChangeTimeZone
 nu.rydin.kom.frontend.text.commands.AddPermission
 nu.rydin.kom.frontend.text.commands.SubtractPermission
 nu.rydin.kom.frontend.text.commands.ListUserLog
+nu.rydin.kom.frontend.text.commands.EditFile
+nu.rydin.kom.frontend.text.commands.ShowFile
+nu.rydin.kom.frontend.text.commands.DeleteFile
+nu.rydin.kom.frontend.text.commands.ListFiles
 nu.rydin.kom.frontend.text.commands.ListCommands

@@ -37,6 +37,9 @@ public class MoveMessage extends AbstractCommand
 		ServerSession ss = context.getSession();
 		int localNum = ss.globalToLocalInConference(ss.getCurrentConferenceId(), 
 													ss.getLastMessageHeader().getId()).getLocalnum();
+		
+		// MOVE ZIG!!
+		//
 		context.getSession().moveMessage(localNum, conference);
 
 		PrintWriter out = context.getOut();

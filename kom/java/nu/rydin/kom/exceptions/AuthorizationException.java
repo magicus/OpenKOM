@@ -9,7 +9,7 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class AuthorizationException extends KOMUserException
+public class AuthorizationException extends UserException
 {
 	public AuthorizationException()
 	{

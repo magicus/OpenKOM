@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.exceptions.GenericException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
@@ -18,19 +19,25 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class BraindeadMessageEditor implements MessageEditor
 {
-	public UnstoredMessage edit(Context context, long replyTo)
+    private final Context m_context;
+    
+    public BraindeadMessageEditor(Context context)
+    {
+        m_context = context;
+    }
+	public UnstoredMessage edit(long replyTo)
 		throws KOMException, InterruptedException
 	{
-		PrintWriter out = context.getOut();
-		LineEditor in = context.getIn();
-		MessageFormatter formatter = context.getMessageFormatter();	
+		PrintWriter out = m_context.getOut();
+		LineEditor in = m_context.getIn();
+		MessageFormatter formatter = m_context.getMessageFormatter();	
 		String oldSubject=null;
 		try
 		{
 			// if this is a reply, retrieve subject from original message
 			//
 			if(replyTo > 0) {
-				oldSubject = context.getSession().innerReadMessage(replyTo).getMessage().getSubject();
+				oldSubject = m_context.getSession().innerReadMessage(replyTo).getMessage().getSubject();
 			}
 				
 			// Read subject
@@ -55,7 +62,7 @@ public class BraindeadMessageEditor implements MessageEditor
 		}
 		catch(IOException e)
 		{
-			throw new KOMException(formatter.format("error.reading.user.input"), e);		
+			throw new GenericException(formatter.format("error.reading.user.input"));		
 		}
 	}
 }

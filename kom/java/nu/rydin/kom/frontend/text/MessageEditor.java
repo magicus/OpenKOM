@@ -16,6 +16,6 @@ import nu.rydin.kom.structs.*;
  */
 public interface MessageEditor
 {
-	public UnstoredMessage edit(Context context, long replyTo)
+	public UnstoredMessage edit(long replyTo)
 	throws KOMException, InterruptedException, IOException;
 }

@@ -22,9 +22,14 @@ public class Buffer
 	
 	public Buffer(WordWrapper wrapper)
 	{
+	    this.fill(wrapper);
+	}
+	
+	public void fill(WordWrapper wrapper)
+	{
 		String line;
 		while((line = wrapper.nextLine()) != null)
-			m_lines.add(new StringBuffer(line));
+			m_lines.add(new StringBuffer(line));	    
 	}
 	
 	public String toString()
@@ -32,10 +37,15 @@ public class Buffer
 		StringBuffer buffer = new StringBuffer();
 		for(Iterator itor = m_lines.iterator(); itor.hasNext();)
 		{
-			StringBuffer line = (StringBuffer) itor.next(); 
-			buffer.append(line);
-			if(!Character.isWhitespace(line.charAt(line.length() - 1)))
-				buffer.append(' ');
+			StringBuffer line = (StringBuffer) itor.next();
+			if(line.length() > 0)
+			{
+				buffer.append(line);
+				if(!Character.isWhitespace(line.charAt(line.length() - 1)))
+					buffer.append(' ');
+			}
+			else
+			    buffer.append('\n');
 		}
 		return buffer.toString();
 	}

@@ -9,19 +9,19 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class KOMUserException extends KOMException
+public abstract class UserException extends KOMException
 {
-    public KOMUserException()
+    public UserException()
     {
         super();
     }
     
-	public KOMUserException(String message)
+	public UserException(String message)
 	{
 		super(message);		
 	}
 
-    public KOMUserException(Object[] msgArgs)
+    public UserException(Object[] msgArgs)
     {
         super(msgArgs);
     }

@@ -12,25 +12,25 @@ package nu.rydin.kom.exceptions;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class KOMSystemException extends KOMException
+public class SystemException extends KOMException
 {
 
-    public KOMSystemException()
+    public SystemException()
     {
         super();
     }
 
-    public KOMSystemException(String msg)
+    public SystemException(String msg)
     {
         super(msg);
     }
 
-    public KOMSystemException(Throwable t)
+    public SystemException(Throwable t)
     {
         super(t);
     }
 
-    public KOMSystemException(String msg, Throwable t)
+    public SystemException(String msg, Throwable t)
     {
         super(msg, t);
     }

@@ -2,7 +2,6 @@
  * Created on Oct 27, 2003
  *  
  * Distributed under the GPL licens.
- * See http://www.gnu.org for details
  */
 package nu.rydin.kom.backend;
 
@@ -18,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import nu.rydin.kom.backend.data.ConferenceManager;
+import nu.rydin.kom.backend.data.FileManager;
 import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageLogManager;
 import nu.rydin.kom.backend.data.MessageManager;
@@ -25,6 +25,7 @@ import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.UserManager;
 import nu.rydin.kom.constants.ChatRecipientStatus;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.FileProtection;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
@@ -2052,8 +2053,94 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 	        throw new UnexpectedException (this.getLoggedInUserId(), e);
 	    }        
     }
-
-
+    
+    public FileStatus statFile(long parent, String name)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+	    try
+	    {
+	        return m_da.getFileManager().stat(parent, name);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                
+    }
+    
+    public FileStatus[] listFiles(long parent, String pattern)
+    throws UnexpectedException
+    {
+	    try
+	    {
+	        return m_da.getFileManager().list(parent, pattern);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                
+        
+    }
+    
+    public String readFile(long parent, String name)
+    throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+    {
+	    try
+	    {
+	        FileManager fm = m_da.getFileManager(); 
+	        if(!hasPermissionInConference(parent, ConferencePermissions.READ_PERMISSION)
+	                && (fm.stat(parent, name).getProtection() & FileProtection.ALLOW_READ) == 0)
+	            throw new AuthorizationException();
+	        return fm.read(parent, name);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                        
+    }
+    
+    public void storeFile(long parent, String name, String content)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+    {
+	    try
+	    {
+	        FileManager fm = m_da.getFileManager();
+	        boolean hasParentRights = hasPermissionInConference(parent, ConferencePermissions.WRITE_PERMISSION); 
+	        try
+	        {
+	            FileStatus fs = fm.stat(parent, name);
+	            if(!hasParentRights && (fs.getProtection() & FileProtection.ALLOW_WRITE) == 0)
+	            	throw new AuthorizationException();
+	        }
+	        catch(ObjectNotFoundException e)
+	        {
+	            // New file. Just check parent permission
+	            //
+	            if(!hasParentRights)
+	                throw new AuthorizationException();
+	        }
+	        m_da.getFileManager().store(parent, name, content);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                
+        
+    }
+    
+    public void deleteFile(long parent, String name)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+    {
+	    try
+	    {
+	        FileManager fm = m_da.getFileManager();
+	        this.assertConferencePermission(parent, ConferencePermissions.WRITE_PERMISSION);
+	        m_da.getFileManager().delete(parent, name);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }                   
+    }    
 
 	protected void markAsInvalid()
 	{

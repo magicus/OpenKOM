@@ -6,8 +6,9 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import nu.rydin.kom.exceptions.GenericException;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.KOMUserException;
+import nu.rydin.kom.exceptions.UserException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -25,7 +26,7 @@ public class ReadLastMessageAgain extends AbstractCommand
 	}
 
 	public void execute(Context context, Object[] parameterArray)
-	throws KOMException, KOMUserException 
+	throws KOMException, UserException 
 	{
 		try
 		{
@@ -34,7 +35,7 @@ public class ReadLastMessageAgain extends AbstractCommand
 		}
 		catch(ObjectNotFoundException e)
 		{
-			throw new KOMUserException(context.getMessageFormatter().format("read.message.not.found"));
+			throw new GenericException(context.getMessageFormatter().format("read.message.not.found"));
 		}
 	}
 }

@@ -186,3 +186,16 @@ CREATE TABLE IF NOT EXISTS userlog
 	FOREIGN KEY (user) REFERENCES users(id) ON DELETE CASCADE,
 	INDEX userlog_date(logged_in)
 ) TYPE=INNODB;
+
+CREATE TABLE IF NOT EXISTS files
+(
+	parent BIGINT NOT NULL,
+	name VARCHAR(100) NOT NULL,
+	created DATETIME NOT NULL,
+	updated DATETIME NOT NULL,
+	content TEXT NOT NULL,
+	protection INT NOT NULL,
+	PRIMARY KEY(parent, name),
+	INDEX file_parentix(parent), 
+	FOREIGN KEY (parent) REFERENCES names(id) ON DELETE CASCADE
+) TYPE=INNODB;

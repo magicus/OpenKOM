@@ -11,7 +11,7 @@ package nu.rydin.kom.exceptions;
  * @author Jepson
  */
 
-public class BadParameterException extends KOMUserException 
+public class BadParameterException extends UserException 
 {
 	public BadParameterException() 
 	{

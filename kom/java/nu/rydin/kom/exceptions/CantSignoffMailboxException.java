@@ -10,7 +10,7 @@ package nu.rydin.kom.exceptions;
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 
-public class CantSignoffMailboxException extends KOMSystemException 
+public class CantSignoffMailboxException extends SystemException 
 {
 	public CantSignoffMailboxException() 
 	{

@@ -1,7 +1,7 @@
 /*
  * Created on Jun 17, 2004
  *
- * Distributed under the GPL licens.
+ * Distributed under the GPL license.
  * See http://www.gnu.org for details
  */
 package nu.rydin.kom.frontend.text.editor;
@@ -41,17 +41,15 @@ public class StandardWordWrapper implements WordWrapper
 	{
 		m_tokenizer = new StringTokenizer(content, "\n", true);
 		
-		//Negative widths make no sense, set to 1 in that case.
+		// Negative widths make no sense, set to 1 in that case.
+		//
 		if (width > 0)
-		{
 			m_width 	= width;
-		} 
 		else 
-		{
 			m_width = 1;
-		}
 		
-		//Offset larger than width makes no sense, set to width - 1 in that case.
+		// Offset larger than width makes no sense, set to width - 1 in that case.
+		//
 		m_offset	= offset;
 		if (offset >= m_width)
 		{
@@ -94,15 +92,11 @@ public class StandardWordWrapper implements WordWrapper
 		if(m_paragraph == null)
 		{
 			if(!m_tokenizer.hasMoreTokens())
-			{
 				return null;
-			}
 			m_paragraph = m_tokenizer.nextToken();
 			int top = m_paragraph.length();
 			if(m_paragraph.endsWith("\n"))
-			{
 				--top;
-			}
 			m_paragraph = m_paragraph.substring(0, top);
 			m_start = 0;
 		}
@@ -116,7 +110,7 @@ public class StandardWordWrapper implements WordWrapper
 			{
 				String answer = m_paragraph.substring(m_start);
 				m_paragraph = null;
-				m_offset = 0; //The line fit with offset - we're done with it.
+				m_offset = 0; // The line fit with offset - we're done with it.
 				return answer; 
 			}
 		}

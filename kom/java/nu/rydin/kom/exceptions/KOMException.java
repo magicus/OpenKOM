@@ -10,7 +10,7 @@ import nu.rydin.kom.frontend.text.Context;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class KOMException extends Exception
+public abstract class KOMException extends Exception
 {
     private Object[] m_msgArgs;
     

@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.constants.MessageLogKinds;
+import nu.rydin.kom.exceptions.GenericException;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.KOMUserException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
@@ -46,9 +46,10 @@ public abstract class ViewMessageLog extends AbstractCommand
 		else
 		{
 		    num = ((Integer)parameterArray[0]).intValue();
+		    // TODO: What is this???
 			if(num > 1000) // TODO: Read from configuration
 			{
-			    throw new KOMUserException(formatter.format("view.char.log.overflow"));
+			    throw new GenericException(formatter.format("view.char.log.overflow"));
 			}
 		}
 

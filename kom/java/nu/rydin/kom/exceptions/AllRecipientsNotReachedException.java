@@ -9,7 +9,7 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
-public class AllRecipientsNotReachedException extends KOMSystemException 
+public class AllRecipientsNotReachedException extends SystemException 
 {
 	public AllRecipientsNotReachedException()
 	{

@@ -13,8 +13,6 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.editor.EditorContext;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -22,19 +20,18 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class SimpleChatEditor extends AbstractEditor 
 {
-    public SimpleChatEditor(MessageFormatter formatter)
+    public SimpleChatEditor(Context context)
             throws IOException, UnexpectedException 
     {
-        super("/chateditorcommands.list", formatter);
+        super("/chateditorcommands.list", context);
     }
 
-    public UnstoredMessage edit(Context underlying, long replyTo)
+    public UnstoredMessage edit(long replyTo)
             throws KOMException, InterruptedException, IOException 
     {
-        EditorContext context = new EditorContext(underlying);
-		if(!this.mainloop(context, 
-		        (context.getCachedUserInfo().getFlags1() & UserFlags.EMPTY_LINE_FINISHES_CHAT) != 0))
+		if(!this.mainloop(
+		        (m_context.getCachedUserInfo().getFlags1() & UserFlags.EMPTY_LINE_FINISHES_CHAT) != 0))
 		    throw new OperationInterruptedException();
-		return new UnstoredMessage("", context.getBuffer().toString());
+		return new UnstoredMessage("", m_context.getBuffer().toString());
     }
 }

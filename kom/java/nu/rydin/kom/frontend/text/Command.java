@@ -17,7 +17,7 @@ import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
  */
 public interface Command
 {
-	public void execute(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameters)
 	throws KOMException, IOException, InterruptedException;
 	
 	public String getFullName();

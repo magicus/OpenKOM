@@ -28,6 +28,7 @@ import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferencePermission;
 import nu.rydin.kom.structs.Envelope;
+import nu.rydin.kom.structs.FileStatus;
 import nu.rydin.kom.structs.LocalMessageHeader;
 import nu.rydin.kom.structs.MembershipInfo;
 import nu.rydin.kom.structs.MembershipListItem;
@@ -1153,6 +1154,62 @@ public interface ServerSession
      */
     public UserLogItem[] listUserLog(long user, Timestamp start, Timestamp end, int offset, int length)
     throws UnexpectedException;
+    
+    /**
+     * Checks the status of a file
+     * 
+     * @param parent The id of the parent object
+     * @param name The name of the file
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public FileStatus statFile(long parent, String name)
+    throws ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Lists files under a specified parent matching a pattern.
+     * 
+     * @param parent The id of the parent object
+     * @param pattern The pattern to search for
+     * @throws UnexpectedException
+     */
+    public FileStatus[] listFiles(long parent, String pattern)
+    throws UnexpectedException;
+    
+    /**
+     * Returns the contents of a file
+     * 
+     * @param parent The id of the parent object
+     * @param name The name of the file
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public String readFile(long parent, String name)
+    throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
+    
+    /**
+     * Stores content in a file. If a file with the specified name
+     * did not exist, a new file is created.
+     * 
+     * @param parent The id of the parent object
+     * @param name The file name
+     * @param content The content
+     * @throws UnexpectedException
+     */
+    public void storeFile(long parent, String name, String content)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Deletes a file.
+     * 
+     * @param parent The id of the parent object 
+     * @param name The file name
+     * @throws AuthorizationException
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public void deleteFile(long parent, String name)
+    throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 
     /**
      * Returns the HeartbeatListener associated with this session.

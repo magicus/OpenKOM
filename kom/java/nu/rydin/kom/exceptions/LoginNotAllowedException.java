@@ -9,7 +9,7 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class LoginNotAllowedException extends KOMSystemException
+public class LoginNotAllowedException extends SystemException
 {
     public LoginNotAllowedException()
     {

@@ -54,7 +54,7 @@ public class PersonalReply extends AbstractCommand
 			
 		// Get editor and execute it
 		//
-		UnstoredMessage msg = context.getMessageEditor().edit(context, mh.getId());
+		UnstoredMessage msg = context.getMessageEditor().edit(mh.getId());
 		
 		// Store the message
 		//

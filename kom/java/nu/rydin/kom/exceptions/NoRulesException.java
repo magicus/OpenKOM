@@ -9,7 +9,7 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
-public class NoRulesException extends KOMUserException 
+public class NoRulesException extends UserException 
 {
 	public NoRulesException()
 	{

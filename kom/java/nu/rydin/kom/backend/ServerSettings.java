@@ -49,4 +49,9 @@ public class ServerSettings
 		return s_settings.getLong("server.session.shutdown.delay");
 	}
 	
+	public static int getNumDataAccess()
+	{
+	    return s_settings.getInt("server.initial.data.access");
+	}
+	
 }

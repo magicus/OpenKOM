@@ -9,7 +9,7 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class NoMoreNewsException extends KOMUserException
+public class NoMoreNewsException extends UserException
 {
 	public NoMoreNewsException()
 	{

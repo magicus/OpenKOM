@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import nu.rydin.kom.backend.data.ConferenceManager;
+import nu.rydin.kom.backend.data.FileManager;
 import nu.rydin.kom.backend.data.MembershipManager;
 import nu.rydin.kom.backend.data.MessageLogManager;
 import nu.rydin.kom.backend.data.MessageManager;
@@ -60,6 +61,11 @@ public class DataAccess
 	 */
 	private final UserLogManager m_userLogManager;	
 	
+	/**
+	 * Toolkit object dealing with files
+	 */
+	private final FileManager m_fileManager;
+	
 	public DataAccess(Connection conn)
 	throws UnexpectedException
 	{
@@ -73,6 +79,7 @@ public class DataAccess
 			m_messageManager 	= new MessageManager(conn);
 			m_messageLogManager	= new MessageLogManager(conn);
 			m_userLogManager	= new UserLogManager(conn);
+			m_fileManager		= new FileManager(conn);
 		}
 		catch(SQLException e)
 		{
@@ -113,6 +120,11 @@ public class DataAccess
 	public UserLogManager getUserLogManager()
 	{
 	    return m_userLogManager;
+	}
+	
+	public FileManager getFileManager()
+	{
+	    return m_fileManager;
 	}
 	
 	public void commit()

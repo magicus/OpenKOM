@@ -34,7 +34,7 @@ public class PresentObject extends AbstractCommand
 	    
 		long objectId = nameAssociation.getId();
 		short kind = context.getSession().getObjectKind(objectId);
-		UnstoredMessage msg = context.getMessageEditor().edit(context, -1);
+		UnstoredMessage msg = context.getMessageEditor().edit(-1);
 		MessageOccurrence occ = context.getSession().storeMagicMessage(msg, kind, objectId);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));

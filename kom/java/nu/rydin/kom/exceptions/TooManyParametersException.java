@@ -12,7 +12,7 @@ package nu.rydin.kom.exceptions;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class TooManyParametersException extends KOMUserException {
+public class TooManyParametersException extends UserException {
 
     public TooManyParametersException() {
         super();

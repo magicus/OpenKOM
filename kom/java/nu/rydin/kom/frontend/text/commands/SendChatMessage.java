@@ -12,8 +12,8 @@ import java.io.StringWriter;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ChatRecipientStatus;
+import nu.rydin.kom.exceptions.GenericException;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.KOMUserException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.*;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
@@ -96,7 +96,7 @@ public class SendChatMessage extends AbstractCommand
 		}
 		if(error)
 		{
-		    throw new KOMUserException(sw.toString());
+		    throw new GenericException(sw.toString());
 		}
 	
 		if (message == null)
@@ -116,10 +116,10 @@ public class SendChatMessage extends AbstractCommand
 			
 			// Read message
 			//
-			AbstractEditor editor = new SimpleChatEditor(context.getMessageFormatter());
-			message = editor.edit(context, -1).getBody();
+			AbstractEditor editor = new SimpleChatEditor(context);
+			message = editor.edit(-1).getBody();
 		}
-		
+				
 		// Empty message? User interrupted
 		//
 		if(message.length() == 0)

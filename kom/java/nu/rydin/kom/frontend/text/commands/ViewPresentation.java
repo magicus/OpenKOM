@@ -7,8 +7,8 @@
 package nu.rydin.kom.frontend.text.commands;
 
 import nu.rydin.kom.backend.data.MessageManager;
+import nu.rydin.kom.exceptions.GenericException;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.KOMUserException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -39,7 +39,7 @@ public class ViewPresentation extends AbstractCommand
 		catch (UnexpectedException e)
 		{
 			MessageFormatter formatter = context.getMessageFormatter();
-			throw new KOMUserException(formatter.format("read.message.not.found"));
+			throw new GenericException(formatter.format("read.message.not.found"));
 		}
 	}
 }

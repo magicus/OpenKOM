@@ -38,7 +38,7 @@ import nu.rydin.kom.exceptions.BadParameterException;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMRuntimeException;
-import nu.rydin.kom.exceptions.KOMUserException;
+import nu.rydin.kom.exceptions.UserException;
 import nu.rydin.kom.exceptions.LoginNotAllowedException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
@@ -359,7 +359,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 			//
 			m_heartbeatSender.start();
 			
-			// Enter main command loop
+			// MAIN SCREEN TURN ON!
 			//		
 			this.mainloop();
 			m_out.println(m_formatter.format("login.goodbye", m_session.getLoggedInUser().getName()));			
@@ -542,7 +542,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
     			m_out.println();
     			Logger.error(this, e);
     		}			
-    		catch(KOMUserException e)
+    		catch(UserException e)
     		{
     			m_out.println(e.formatMessage(this));
     			m_out.println();
@@ -670,7 +670,10 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
         else if(dayDiff == 1)
        	    answer = m_formatter.format("date.yesterday");
         else if(dayDiff < 7)
-        	answer = m_dateSymbols.getWeekdays()[now.get(Calendar.DAY_OF_WEEK)];
+        {
+        	answer = m_dateSymbols.getWeekdays()[then.get(Calendar.DAY_OF_WEEK)];
+        	answer = answer.substring(0, 1).toUpperCase() + answer.substring(1);
+        }
         else
             return answer;
         return answer + ", " + m_formatter.format("time.short", then.getTime());
@@ -720,7 +723,7 @@ public class ClientSession implements Runnable, Context, EventTarget, TerminalSi
 		//
 		try
 		{
-			return new SimpleMessageEditor(m_formatter);
+			return new SimpleMessageEditor(this);
 		}
 		catch(IOException e)
 		{

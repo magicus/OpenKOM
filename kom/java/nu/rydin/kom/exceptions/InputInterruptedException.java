@@ -13,6 +13,6 @@ package nu.rydin.kom.exceptions;
  * 
  * @author Henrik Schröder
  */
-public class InputInterruptedException extends KOMSystemException
+public class InputInterruptedException extends SystemException
 {
 }

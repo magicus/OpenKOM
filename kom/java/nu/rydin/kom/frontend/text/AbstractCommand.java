@@ -43,11 +43,13 @@ public abstract class AbstractCommand implements Command
 		out.println();
 	}	
 
-	public String toString() {
+	public String toString() 
+	{
         return getClass().getName() + "[" + m_fullName + "]";
     }
     
-    public CommandLineParameter[] getSignature() {
+    public CommandLineParameter[] getSignature() 
+    {
         return m_signature;
     }
 }

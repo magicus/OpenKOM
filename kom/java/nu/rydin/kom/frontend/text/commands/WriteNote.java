@@ -28,7 +28,7 @@ public class WriteNote extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray)
 	throws KOMException, IOException, InterruptedException 
 	{
-		UnstoredMessage msg = context.getMessageEditor().edit(context, -1);
+		UnstoredMessage msg = context.getMessageEditor().edit(-1);
 		MessageOccurrence occ = context.getSession().storeMagicMessage(msg, MessageManager.ATTR_NOTE, -1L);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));

@@ -36,7 +36,7 @@ public class WriteMessage extends AbstractCommand
 			
 		// Get editor and execute it
 		//
-		UnstoredMessage msg = context.getMessageEditor().edit(context, -1);
+		UnstoredMessage msg = context.getMessageEditor().edit(-1);
 				
 		// Store text
 		//

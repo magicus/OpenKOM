@@ -43,6 +43,9 @@ public class ServerSessionFactoryImpl
 	
 	protected ServerSessionFactoryImpl()
 	{
+	    // Make sure the DataAccess pool is initialized.
+	    //
+	    DataAccessPool.instance();
 	}
 	
 	public void requestShutdown(String user, String password)

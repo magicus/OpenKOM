@@ -9,7 +9,7 @@ package nu.rydin.kom.exceptions;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class NotMemberException extends KOMUserException
+public class NotMemberException extends UserException
 {
 	public NotMemberException()
 		{
