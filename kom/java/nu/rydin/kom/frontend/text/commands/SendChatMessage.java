@@ -28,13 +28,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class SendChatMessage extends AbstractCommand
 {
-    private Context m_context; 
-
 	public SendChatMessage(Context context, String fullName)
 	{
 	    // Säg foo, bar: Du är bäst!
 		super(fullName, new CommandLineParameter[] { new EllipsisParameter("chat.fulhack.raw.ask", true, new ChatRececipientParameter(true)), new RawParameter("chat.fulhack.raw.ask", false)});
-		m_context = context;
 	}
 
 	public void execute(Context context, Object[] parameterArray)
@@ -50,7 +47,7 @@ public class SendChatMessage extends AbstractCommand
 		//Retrieve array of id's of receivers.
 		Object[] nameAssociations = (Object[])parameterArray[0];
 		if (nameAssociations.length == 1 && nameAssociations[0] == ChatRececipientParameter.ALL_USERS) {
-		    m_context.getParser().getCommand(SendBroadcastChatMessage.class).execute(m_context, new Object[] { parameterArray[1] });
+		    new SendBroadcastChatMessage(context, "").execute(context, new Object[] { parameterArray[1] });
 		    return;
 		}
 		long[] destinations = new long[nameAssociations.length];
