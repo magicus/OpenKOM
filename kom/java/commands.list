@@ -19,6 +19,7 @@ nu.rydin.kom.frontend.text.commands.Reply
 nu.rydin.kom.frontend.text.commands.PersonalReply
 nu.rydin.kom.frontend.text.commands.NoComment
 nu.rydin.kom.frontend.text.commands.SkipSubject
+nu.rydin.kom.frontend.text.commands.SkipGlobalSubject
 nu.rydin.kom.frontend.text.commands.SkipTree
 nu.rydin.kom.frontend.text.commands.ReadMessage
 nu.rydin.kom.frontend.text.commands.ReadLastMessageAgain
