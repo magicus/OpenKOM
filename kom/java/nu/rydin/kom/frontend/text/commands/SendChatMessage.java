@@ -51,15 +51,19 @@ public class SendChatMessage extends AbstractCommand
 		for (int i = 0; i < nameAssociations.length; i++)
         {
 		    long id = ((NameAssociation) nameAssociations[i]).getId();
-		    if (id == -1)
-		    {
+			if (id == -1)
+			{
+			    // "*" detected, abort and send a broadcast instead.
+			    //
 			    new SendBroadcastChatMessage(context, "").execute(context, new Object[] { parameterArray[1] });
 			    return;
-		    }
-		    
-            destinations[i] = id;
-            //Build string of recipients...
-            recipients += ", " + session.getName(id);
+			}
+			if (notExistsIn(id, destinations))
+			{
+			    destinations[i] = id;
+	            //Build string of recipients...
+	            recipients += ", " + session.getName(id);
+			}
         }
 	    
 		//Retrieve message.
@@ -161,4 +165,16 @@ public class SendChatMessage extends AbstractCommand
 		        out.println(line);
 		}
 	}
+
+	// Linear. Ugly. Really does not belong in this class. I don't care - Skrolle. :-)
+	//
+	private boolean notExistsIn(long id, long[] destinations)
+    {
+        for (int i = 0; i < destinations.length; i++)
+        {
+            if (destinations[i] == id)
+                return false;
+        }
+        return true;
+    }
 }
