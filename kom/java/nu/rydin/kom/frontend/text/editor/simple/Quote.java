@@ -45,7 +45,7 @@ public class Quote extends AbstractCommand
         //
         ServerSession session = context.getSession();
         String body = session.readGlobalMessage(replyTo).getMessage().getBody();
-        WordWrapper ww = context.getWordWrapper(body, 70); // TODO: Width?
+        WordWrapper ww = context.getWordWrapper(body, context.getTerminalSettings().getWidth() - 8); //8 = length of ">" + linenumber.
         LineEditor in = context.getIn();
         PrintWriter out = context.getOut();
         MessageFormatter formatter = context.getMessageFormatter();
