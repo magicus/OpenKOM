@@ -588,9 +588,9 @@ public class LineEditor implements NewlineListener
 			
 			// Erase the prompt
 			//
-			m_out.print('\r');
+			m_out.print(RET);
 			PrintUtils.printRepeated(m_out, ' ', m_morePrompt.length());
-			m_out.print('\r');
+			m_out.print(RET);
 			m_out.flush();	
 		return result;
 	}
@@ -752,7 +752,10 @@ public class LineEditor implements NewlineListener
 		    {
 		    	case TOKEN_ABORT:
 		    	    if((flags & FLAG_INHIBIT_ABORT) == 0)
+		    	    {
+		    	        m_out.println();
 		    	        throw new OperationInterruptedException();
+		    	    }
 		    	    break;
 		    	case TOKEN_PREV:
 		    	case TOKEN_UP:
@@ -811,8 +814,7 @@ public class LineEditor implements NewlineListener
 					break;
 				case TOKEN_CR:
 					editing = false;
-					m_out.write('\r');					
-					m_out.write('\n');
+					m_out.println();
 					break;
 				case TOKEN_BS:
 					if(cursorpos == 0)

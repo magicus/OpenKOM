@@ -24,7 +24,7 @@ public class KOMWriter extends PrintWriter
 	private PrintWriter m_writer;
 	private final OutputStream m_out;
 	private String m_charSet;
-	private int m_lineNo = 0;
+	//private int m_lineNo = 0;
 	private static final String s_lineSeparator = "\r\n";
 	private final List m_newlineListeners = new LinkedList();
 
@@ -210,10 +210,14 @@ public class KOMWriter extends PrintWriter
 		    synchronized(m_newlineListeners)
 		    {
 		        for(Iterator itor = m_newlineListeners.iterator(); itor.hasNext();)
+		        {
 		            ((NewlineListener) itor.next()).onNewline();
+		        }
 		    }
 		} else if(c == '\r')
-		    m_writer.flush();
+		{
+		    //m_writer.flush();
+		}
 	}
 
 	public void write(String str) 

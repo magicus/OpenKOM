@@ -213,6 +213,7 @@ public class Parser
         // Ask user to chose
         //
         if (printHeading)
+            out.println();
             out.println(fmt.format(headingKey));
         int top = candidates.size();
         for (int idx = 0; idx < top; ++idx)
@@ -304,7 +305,7 @@ public class Parser
             commandNames.add(potentialTarget.getCommand().getFullName());
         }
 
-        int selection = askForResolution(context, commandNames, "parser.chose",
+        int selection = askForResolution(context, commandNames, "parser.choose",
                 true, "parser.ambiguous", false);
 
         CommandToMatches potentialTarget = (CommandToMatches) potentialTargets
