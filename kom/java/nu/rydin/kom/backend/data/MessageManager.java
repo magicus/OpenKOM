@@ -24,6 +24,7 @@ import nu.rydin.kom.structs.MessageOccurrence;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  * @author Henrik Schröder
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class MessageManager
 {
@@ -44,6 +45,9 @@ public class MessageManager
 	private final PreparedStatement m_getVisibleOccurrencesStmt;
 	private final PreparedStatement m_getMessageAttributesStmt;
 	private final PreparedStatement m_addMessageAttributeStmt;
+	private final PreparedStatement m_dropMessageOccurrenceStmt;
+	private final PreparedStatement m_countMessageOccurrencesStmt;
+	private final PreparedStatement m_dropMessageStmt;
 	
 	private final Connection m_conn; 
 	
@@ -52,6 +56,7 @@ public class MessageManager
 	public static final short ACTION_MOVED		= 2;
 
 	public static final short ATTR_NOCOMMENT = 0;
+	public static final short ATTR_MOVEDFROM = 1;
 	
 	public MessageManager(Connection conn)
 	throws SQLException
@@ -101,6 +106,16 @@ public class MessageManager
 		m_addMessageAttributeStmt = conn.prepareStatement(
 		    "INSERT INTO messageattributes (message, kind, created, value) " +
 		    "VALUES (?, ?, ?, ?)");
+		m_dropMessageOccurrenceStmt = conn.prepareStatement(
+			"delete from messageoccurrences " +
+			"where localnum = ? and conference = ?");
+		m_countMessageOccurrencesStmt = conn.prepareStatement(
+			 "select count(*) from messageoccurrences " +
+			 "where message = ?");
+		m_dropMessageStmt = conn.prepareStatement(
+			 "delete from messages " + 
+			 "where id = ?");
+
 	}
 	
 	public void close()
@@ -133,7 +148,13 @@ public class MessageManager
 		if(m_loadOccurrenceStmt != null)
 			m_loadOccurrenceStmt.close();		
 		if(m_getVisibleOccurrencesStmt != null)
-		m_getVisibleOccurrencesStmt.close();																									
+			m_getVisibleOccurrencesStmt.close();
+		if(m_dropMessageOccurrenceStmt != null)
+			m_dropMessageOccurrenceStmt.close();
+		if(m_countMessageOccurrencesStmt != null)
+			m_countMessageOccurrencesStmt.close();
+		if(m_dropMessageStmt != null)
+			m_dropMessageStmt.close();
 	}
 	
 	public void finalize()
@@ -701,5 +722,50 @@ public class MessageManager
 		m_addMessageAttributeStmt.executeUpdate();
 
 		return new MessageAttribute(message, kind, now, value);
+	}
+	
+	public int getMessageOccurrenceCount (long globalId)
+	throws SQLException
+	{
+		ResultSet rs = null;
+		try
+		{
+			this.m_countMessageOccurrencesStmt.clearParameters();
+			this.m_countMessageOccurrencesStmt.setLong(1, globalId);
+			rs = this.m_countMessageOccurrencesStmt.executeQuery();
+			rs.first();
+			return rs.getInt(1);
+		}
+		finally
+		{
+			if (rs != null)
+				rs.close();
+		}
+	}
+	
+	public void dropMessageOccurrence(int localNum, long conference)
+	throws SQLException, ObjectNotFoundException
+	{
+		// TODO: When we migrate to stored procedures, this is the first transaction we convert.
+		long globalNum = this.getGlobalMessageId(conference, localNum);
+		
+		this.m_dropMessageOccurrenceStmt.clearParameters();
+		this.m_dropMessageOccurrenceStmt.setInt(1, localNum);
+		this.m_dropMessageOccurrenceStmt.setLong(2, conference);
+		this.m_dropMessageOccurrenceStmt.execute();
+		
+		if (0 == this.getMessageOccurrenceCount(globalNum))
+		{
+			// last occurrence deleted, so drop the message
+			dropMessage (globalNum);
+		}
+	}
+	
+	public void dropMessage(long globalNum)
+	throws SQLException
+	{
+		this.m_dropMessageStmt.clearParameters();
+		this.m_dropMessageStmt.setLong(1, globalNum);
+		this.m_dropMessageStmt.execute();		
 	}
 }

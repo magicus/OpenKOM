@@ -16,6 +16,7 @@ nu.rydin.kom.frontend.text.commands.WriteMessage
 nu.rydin.kom.frontend.text.commands.Reply
 nu.rydin.kom.frontend.text.commands.NoComment
 nu.rydin.kom.frontend.text.commands.ReadMessage
+nu.rydin.kom.frontend.text.commands.DeleteMessage
 nu.rydin.kom.frontend.text.commands.Status
 nu.rydin.kom.frontend.text.commands.PrintDebug
 nu.rydin.kom.frontend.text.commands.GenerateTestdata
@@ -32,6 +33,7 @@ nu.rydin.kom.frontend.text.commands.ChangeCharacterset
 nu.rydin.kom.frontend.text.commands.AddPermissions
 nu.rydin.kom.frontend.text.commands.ReadNextReply
 nu.rydin.kom.frontend.text.commands.Copy
+nu.rydin.kom.frontend.text.commands.MoveMessage
 nu.rydin.kom.frontend.text.commands.ChangeSuffix
 nu.rydin.kom.frontend.text.commands.RenameObject
 nu.rydin.kom.frontend.text.commands.ChangePassword

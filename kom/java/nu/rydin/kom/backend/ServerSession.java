@@ -37,6 +37,7 @@ import nu.rydin.kom.structs.UserListItem;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public interface ServerSession 
 {
@@ -735,7 +736,63 @@ public interface ServerSession
 	 */
 	public void copyMessage(long globalNum, long conferenceId)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * Moves a message to another conference. As with copyMessage(), the message isn't moved
+	 * as such, only the occurrence is changed. The source occurrence is dropped and a destination
+	 * occurrence is added. Furthermore, a matching MessageAttribute is created, in which we store
+	 * the source conference ID.
+	 * 
+	 * @param localNum Local text number
+	 * @param sourceConfId Conference to move from
+	 * @param destConfId Conference to move to.
+	 * @throws AuthorizationException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public void moveMessage(int localNum, long sourceConfId, long destConfId)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 
+	/**
+	 * Moves a message from the current conference to another conference. As with copyMessage(), 
+	 * the message isn't moved as such, only the occurrence is changed. The source occurrence is 
+	 * dropped and a destination occurrence is added. Furthermore, a matching MessageAttribute is 
+	 * created, in which we store the source conference ID.
+	 * 
+	 * @param localNum Local text number
+	 * @param destConfId Conference to move to.
+	 * @throws AuthorizationException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public void moveMessage(int localNum, long destConfId)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+
+	/**
+	 * Delete the given local message occurrence (and the message itself, if this was the
+	 * last occurrence).
+	 * 
+	 * @param localNum Local text number
+	 * @param conference Conference ID
+	 * @throws AuthorizationException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public void deleteMessage(int localNum, long conference)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+
+	/**
+	 * Delete the given local message occurrence (and the message itself, if this was the
+	 * last occurrence).
+	 * 
+	 * @param localNum Local text number
+	 * @throws AuthorizationException
+	 * @throws ObjectNotFoundException
+	 * @throws UnexpectedException
+	 */
+	public void deleteMessageInCurrentConference(int localNum)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
+	
 	/**
 	 * Returns various debug information
 	 * @return

@@ -42,6 +42,7 @@ import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
 import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
+import nu.rydin.kom.events.ReevaluateDefaultEvent;
 import nu.rydin.kom.frontend.text.commands.GotoNextConference;
 import nu.rydin.kom.frontend.text.commands.Logout;
 import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
@@ -53,6 +54,7 @@ import nu.rydin.kom.structs.UserInfo;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class ClientSession implements Runnable, Context, EventTarget
 {
@@ -600,6 +602,11 @@ public class ClientSession implements Runnable, Context, EventTarget
 	{
 		// Not much to do. Command loop will reevaluate default command
 		// and try again.
+		//
+	}
+	
+	public void onEvent(ReevaluateDefaultEvent event)
+	{
 		//
 	}
 	

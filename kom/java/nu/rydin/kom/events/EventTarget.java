@@ -9,6 +9,7 @@ package nu.rydin.kom.events;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public interface EventTarget
 {
@@ -23,4 +24,6 @@ public interface EventTarget
 	public void onEvent(UserAttendanceEvent event);
 	
 	public void onEvent(ReloadUserProfileEvent event);
+	
+	public void onEvent(ReevaluateDefaultEvent event);
 }

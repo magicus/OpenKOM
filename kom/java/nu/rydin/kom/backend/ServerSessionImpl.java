@@ -45,6 +45,7 @@ import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.NewMessageEvent;
 import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
+import nu.rydin.kom.events.ReevaluateDefaultEvent;
 import nu.rydin.kom.structs.*;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferencePermission;
@@ -62,6 +63,7 @@ import nu.rydin.kom.structs.UserListItem;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class ServerSessionImpl implements ServerSession, EventTarget
 {	
@@ -780,6 +782,93 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}		
 	}
 	
+	public void deleteMessageInCurrentConference (int localNum)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+	{
+		deleteMessage (localNum, this.getCurrentConferenceId());
+	}
+	
+	public void deleteMessage (int localNum, long conference)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+	{
+		if (!canDeleteOccurrence(localNum, conference))
+		{
+			throw new AuthorizationException();
+		}
+		
+		try
+		{
+			m_da.getMessageManager().dropMessageOccurrence(localNum, conference);
+			this.broadcastEvent(new ReevaluateDefaultEvent(this.getLoggedInUserId(), conference));
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+	
+	private boolean canDeleteOccurrence (int localNum, long conference)
+	throws UnexpectedException, ObjectNotFoundException
+	{
+		try
+		{
+			return (m_da.getMessageManager().loadMessageOccurrence(conference, localNum).getUser() == this.getLoggedInUserId()) ||
+					this.hasPermissionInConference(conference, ConferencePermissions.DELETE_PERMISSION | ConferencePermissions.ADMIN_PERMISSION);
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+
+	public void moveMessage(int localNum, long destConfId)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+	{
+		this.moveMessage(localNum, this.getCurrentConferenceId(), destConfId);
+	}
+	
+	public void moveMessage(int localNum, long sourceConfId, long destConfId)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+	{
+		try
+		{
+			// Now, to move a message you need to be able to remove it from it's original location
+			// and place it in the new location.
+			//
+			long me = this.getLoggedInUserId();
+			if (!(this.hasPermissionInConference(destConfId, ConferencePermissions.WRITE_PERMISSION) && 
+			      this.canDeleteOccurrence(localNum, sourceConfId)))
+			{
+				throw new AuthorizationException();
+			}
+			MessageManager mm = m_da.getMessageManager();
+			long globId = this.localToGobal(sourceConfId, localNum);
+
+			// Start by creating the new occurrence (TODO: Fix localToGobal misspelling.)
+			// We must retain the message occurrence, as we'll be using it in the broadcast event.
+			//
+			MessageOccurrence occ = mm.createMessageOccurrence(globId, 
+									MessageManager.ACTION_MOVED, me, this.getName(me), destConfId);
+
+			// Drop the original occurrence
+			//
+			mm.dropMessageOccurrence(localNum, sourceConfId);
+			
+			// Tag the message with an ATTR_MOVEDFROM attribute containing the source conference id.
+			//
+			mm.addMessageAttribute(globId, MessageManager.ATTR_MOVEDFROM, Long.toString(sourceConfId));
+
+			// Hello, world!
+			//			
+			this.broadcastEvent(new NewMessageEvent(me, destConfId, occ.getLocalnum(), occ.getGlobalId()));
+			this.broadcastEvent(new ReevaluateDefaultEvent(me, this.getCurrentConferenceId()));
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException(this.getLoggedInUserId(), e);
+		}
+	}
+
 	public MessageOccurrence globalToLocalInConference(long conferenceId, long globalNum)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -1759,7 +1848,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		// Just post it!
 		// 
 		this.postEvent(e);
-	}		
+	}
+	
+	public void onEvent(ReevaluateDefaultEvent e)
+	{
+		this.postEvent(e);
+	}
 	
 	public synchronized void onEvent(NewMessageEvent e)
 	{
