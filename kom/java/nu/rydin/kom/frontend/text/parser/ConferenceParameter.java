@@ -7,18 +7,11 @@
 package nu.rydin.kom.frontend.text.parser;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.data.NameManager;
-import nu.rydin.kom.exceptions.InvalidChoiceException;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.ObjectNotFoundException;
-import nu.rydin.kom.exceptions.OperationInterruptedException;
-import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.NamePicker;
-import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author Magnus Ihse (magnus@ihse.net)
@@ -26,22 +19,26 @@ import nu.rydin.kom.structs.NameAssociation;
 public class ConferenceParameter extends NamedObjectParameter
 {
 
-	public ConferenceParameter(String missingObjectQuestionKey, boolean isRequired)
-	{
-		super(missingObjectQuestionKey, isRequired);
-	}
+    public ConferenceParameter(String missingObjectQuestionKey,
+            boolean isRequired)
+    {
+        super(missingObjectQuestionKey, isRequired);
+    }
 
-	public ConferenceParameter(boolean isRequired)
-	{
-		super("parser.parameter.conference.ask", isRequired);
-	}
+    public ConferenceParameter(boolean isRequired)
+    {
+        super("parser.parameter.conference.ask", isRequired);
+    }
 
-	public Object resolveFoundObject(Context context, Match match) throws KOMException, IOException, InterruptedException
-	{
-		return NamePicker.resolveName(match.getParsedObject().toString(), NameManager.CONFERENCE_KIND, context);
-	}
-	
-    protected String getUserDescriptionKey() {
+    public Object resolveFoundObject(Context context, Match match)
+            throws KOMException, IOException, InterruptedException
+    {
+        return NamePicker.resolveName(match.getParsedObject().toString(),
+                NameManager.CONFERENCE_KIND, context);
+    }
+
+    protected String getUserDescriptionKey()
+    {
         return "parser.parameter.conference.description";
     }
 }
