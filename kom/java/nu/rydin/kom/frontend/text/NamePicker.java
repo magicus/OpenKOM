@@ -46,7 +46,7 @@ public class NamePicker
         //
         String mailboxName = ctx.getMessageFormatter().format(
                 "misc.mailboxtitle");
-        if (NameUtils.match(name, mailboxName))
+        if (NameUtils.match(name, mailboxName, false))
         {
             // It's the mailbox! Create an association to the logged-in person
             //
@@ -106,7 +106,7 @@ public class NamePicker
         }
         
         assocs[0].getName();
-        int selection = Parser.askForResolution(ctx, candidates, "name.chose", true, "name.ambiguous");
+        int selection = Parser.askForResolution(ctx, candidates, "name.chose", true, "name.ambiguous", false);
         return assocs[selection];
     }
 

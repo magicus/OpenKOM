@@ -14,7 +14,7 @@ public class RightParameter extends EnumParameter
 
     public RightParameter(String missingObjectQuestionKey, String[] rightLabels, boolean isRequired)
     {
-        super(missingObjectQuestionKey, "parser.parameter.right.header", missingObjectQuestionKey, rightLabels, isRequired);
+        super(missingObjectQuestionKey, "parser.parameter.right.header", missingObjectQuestionKey, rightLabels, false, isRequired);
     }
 
     public RightParameter(boolean isRequired, String[] rightLabels)

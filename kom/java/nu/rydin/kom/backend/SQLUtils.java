@@ -53,7 +53,7 @@ public class SQLUtils
 		while(rs.next())
 		{
 		    String name = rs.getString(nameIndex);
-		    if(NameUtils.match(pattern, name))
+		    if(NameUtils.match(pattern, name, false))
 		        l.add(new Name(name, rs.getShort(visibilityIndex)));
 		}
 		int top = l.size();
@@ -69,7 +69,7 @@ public class SQLUtils
 		while(rs.next())
 		{
 		    String name = rs.getString(nameIndex);
-		    if(NameUtils.match(pattern, name))
+		    if(NameUtils.match(pattern, name, false))
 		        l.add(new NameAssociation(rs.getLong(idIndex), new Name(name, rs.getShort(visibilityIndex))));
 		}
 		int top = l.size();
