@@ -6,20 +6,11 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.LinkedList;
 
-import nu.rydin.kom.EventDeliveredException;
-import nu.rydin.kom.LineOverflowException;
-import nu.rydin.kom.LineUnderflowException;
-import nu.rydin.kom.OutputInterruptedException;
-import nu.rydin.kom.StopCharException;
+import nu.rydin.kom.*;
 import nu.rydin.kom.backend.ServerSession;
-import nu.rydin.kom.backend.SessionManager;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;

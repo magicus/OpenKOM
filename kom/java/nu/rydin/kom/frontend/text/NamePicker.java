@@ -9,11 +9,7 @@ package nu.rydin.kom.frontend.text;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import nu.rydin.kom.AmbiguousNameException;
-import nu.rydin.kom.InvalidChoiceException;
-import nu.rydin.kom.ObjectNotFoundException;
-import nu.rydin.kom.OperationInterruptedException;
-import nu.rydin.kom.UnexpectedException;
+import nu.rydin.kom.*;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
