@@ -169,7 +169,13 @@ public class MembershipList
 		mi.setReadMessages(new MessageRangeList(new MessageRange(low, high)));
 		m_dirty.add(mi);
 	}
-	
+
+	public long getFirstConferenceWithUnreadMessages(ConferenceManager cm)
+	throws SQLException
+	{
+	    return innerNextConferenceWithUnreadMessages(0, cm);
+	}
+
 	public long getNextConferenceWithUnreadMessages(long startId, ConferenceManager cm)
 	throws SQLException
 	{
@@ -193,12 +199,18 @@ public class MembershipList
 				break;
 			}
 		}
-					
+		return innerNextConferenceWithUnreadMessages(offset, cm);
+	}
+
+	private long innerNextConferenceWithUnreadMessages(int startIndex, ConferenceManager cm)
+	throws SQLException
+	{
 		// Find the first conference with unread messages
 		//
+	    int top = m_order.length;
 		for(int idx = 0; idx < top; ++idx)
 		{
-			MembershipInfo each = m_order[(idx + offset) % top];
+			MembershipInfo each = m_order[(idx + startIndex) % top];
 			long id = each.getConference();
 			
 			try
@@ -217,6 +229,7 @@ public class MembershipList
 		//
 		return -1;
 	}
+
 	
 	public void save(long userId, MembershipManager mm)
 	throws SQLException
