@@ -2466,7 +2466,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		}		
 	}
 
-    public LocalMessageHeader[] listGlobalMessagesByUser(long userId, int offset, int length) throws UnexpectedException 
+    public LocalMessageHeader[] listGlobalMessagesByUser(long userId, int offset, int length)
+    throws UnexpectedException 
 	{
 		try
 		{
@@ -2475,6 +2476,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget
 		catch (SQLException e)
 		{
 			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+    
+    public MessageSearchResult[] searchMessagesInConference(long conference, String searchterm, int offset, int length)
+    throws UnexpectedException
+	{
+    	try
+		{
+    		return m_da.getMessageManager().searchMessagesInConference(conference, searchterm, offset, length);
+		}
+    	catch (SQLException e)
+		{
+    		throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
 }

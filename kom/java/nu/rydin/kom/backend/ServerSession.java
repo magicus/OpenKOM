@@ -33,6 +33,7 @@ import nu.rydin.kom.structs.MembershipListItem;
 import nu.rydin.kom.structs.MessageLogItem;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.MessageSearchResult;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.NamedObject;
 import nu.rydin.kom.structs.UnstoredMessage;
@@ -1082,4 +1083,18 @@ public interface ServerSession
 	 */
 	public MessageLogItem[] getMessagesFromLog(short kind, int limit)
 	throws UnexpectedException;
+	
+	/**
+	 * Returns an array of results from doing a search in the given conference
+	 * with the given searchterm.
+	 * 
+	 * @param conference The id of the conference to search in
+	 * @param searchterm The searchterm in MySQL IN BOOLEAN MODE format.
+	 * @param offset
+	 * @param length
+	 * @throws UnexpectedException
+	 */
+    public MessageSearchResult[] searchMessagesInConference(long conference, String searchterm, int offset, int length)
+    throws UnexpectedException;
+
 }

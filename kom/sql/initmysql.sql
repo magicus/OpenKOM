@@ -99,6 +99,15 @@ CREATE TABLE IF NOT EXISTS messages
 	FOREIGN KEY (reply_to) REFERENCES messages(id) ON DELETE SET NULL
 ) TYPE=INNODB;
 
+CREATE TABLE messagesearch 
+(
+	id BIGINT(20) NOT NULL,
+	subject VARCHAR(80) NOT NULL,
+	body TEXT NOT NULL,
+	PRIMARY KEY (id),
+	FULLTEXT KEY search_ix (subject,body)
+) TYPE=MyISAM; 
+
 CREATE TABLE IF NOT EXISTS messageoccurrences
 (
 	localnum INT NOT NULL,

@@ -22,6 +22,7 @@ import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.MessageSearchResult;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -36,6 +37,7 @@ public class MessageManager
 	private final PreparedStatement m_loadMessageOccurrenceStmt;
 	private final PreparedStatement m_getNextNumStmt;
 	private final PreparedStatement m_addMessageStmt;
+	private final PreparedStatement m_addMessageSearchStmt;
 	private final PreparedStatement m_addMessageOccurrenceStmt;
 	private final PreparedStatement m_listOccurrencesStmt;
 	private final PreparedStatement m_getFirstOccurrenceStmt;
@@ -58,6 +60,7 @@ public class MessageManager
 	private final PreparedStatement m_getLatestMagicMessageStmt;
 	private final PreparedStatement m_updateConferenceLasttext;
     private final PreparedStatement m_listMessagesByUserStmt;
+    private final PreparedStatement m_searchMessagesInConference;
 	
 	private final Connection m_conn; 
 	
@@ -87,6 +90,9 @@ public class MessageManager
 		m_getNextNumStmt = conn.prepareStatement(			"SELECT MAX(localnum) FROM messageoccurrences WHERE conference = ? FOR UPDATE");
 		m_addMessageStmt = conn.prepareStatement(
 			"INSERT INTO messages(created, author, author_name, reply_to, subject, body) " +			"VALUES(?, ?, ?, ?, ?, ?)");
+		m_addMessageSearchStmt = conn.prepareStatement(
+			"INSERT INTO messagesearch(id, subject, body) " +
+			"VALUES(?, ?, ?)");
 		m_addMessageOccurrenceStmt = conn.prepareStatement(
 			"INSERT INTO messageoccurrences(message, action_ts, kind, user, user_name, conference, localnum) " +
 			"VALUES(?, ?, ?, ?, ?, ?, ?)");
@@ -178,6 +184,13 @@ public class MessageManager
 				"FROM messageoccurrences mo JOIN messages m ON mo.message=m.id " +
 				"WHERE mo.user = ? AND mo.kind = ? " +
 				"ORDER BY m.created DESC, m.id DESC " +
+				"LIMIT ? OFFSET ?");
+		
+		m_searchMessagesInConference = conn.prepareStatement(
+				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject " +
+				"FROM messagesearch ms, messageoccurrences mo " +
+				"WHERE ms.id = mo.message AND mo.conference = ? AND MATCH(subject, body) AGAINST (? IN BOOLEAN MODE) " +
+				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
 	}
 	
@@ -433,6 +446,14 @@ public class MessageManager
 			// Get hold of id of newly created record
 			//
 			long id = ((com.mysql.jdbc.PreparedStatement) m_addMessageStmt).getLastInsertID();
+			
+			//Duplicate into search table
+			//
+			m_addMessageSearchStmt.clearParameters();
+			m_addMessageSearchStmt.setLong(1, id);
+			m_addMessageSearchStmt.setString(2, subject);
+			m_addMessageSearchStmt.setString(3, body);
+			m_addMessageSearchStmt.executeUpdate();
 			
 			// Create message occurrence record
 			//
@@ -962,7 +983,6 @@ public class MessageManager
 		
 	}
 
-	//TODO (skrolle) Fix this shit, add subject.
     public LocalMessageHeader[] getGlobalMessagesByUser(long userId, int offset, int length) 
     throws SQLException
     {
@@ -988,5 +1008,29 @@ public class MessageManager
             LocalMessageHeader[] result = new LocalMessageHeader[l.size()];
 			l.toArray(result);
 			return result;
+    }
+    
+    public MessageSearchResult[] searchMessagesInConference(long conference, String searchterm, int offset, int length)
+    throws SQLException
+    {
+    	this.m_searchMessagesInConference.clearParameters();
+    	this.m_searchMessagesInConference.setLong(1, conference);
+    	this.m_searchMessagesInConference.setString(2, searchterm);
+        this.m_searchMessagesInConference.setLong(3, length);
+        this.m_searchMessagesInConference.setLong(4, offset);
+        ResultSet rs = this.m_searchMessagesInConference.executeQuery();
+        List l = new ArrayList();
+        while (rs.next()) {
+ 		   l.add(new MessageSearchResult(
+ 		   		rs.getLong(1),			// Global id
+			   	rs.getInt(2),			// Local id
+				rs.getLong(3),			// user id
+			   	rs.getString(4),		// username
+			   	rs.getString(5))		// subject	
+			   	);
+        }
+        MessageSearchResult[] result = new MessageSearchResult[l.size()];
+		l.toArray(result);
+		return result;
     }
 }
