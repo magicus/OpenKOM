@@ -5,12 +5,12 @@
 	<classpathentry kind="lib" path="distr/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="distr/xml-apis.jar"/>
 	<classpathentry kind="lib" path="distr/concurrent.jar"/>
-	<classpathentry kind="lib" path="distr/mysql-connector-java-3.0.14-production-bin.jar"/>
 	<classpathentry kind="lib" path="distr/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="distr/commons-logging.jar"/>
 	<classpathentry kind="lib" path="distr/j2ssh-common-0.2.7.jar"/>
 	<classpathentry kind="lib" path="distr/j2ssh-core-0.2.7.jar"/>
 	<classpathentry kind="lib" path="distr/j2ssh-daemon-0.2.7.jar"/>
 	<classpathentry kind="lib" path="distr/j2ssh-ext-1.1.0.jar"/>
+	<classpathentry kind="lib" path="distr/mysql-connector-java-3.0.16-ga-bin.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
