@@ -8,9 +8,12 @@ package nu.rydin.kom.frontend.text;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.exceptions.*;
+import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
 
@@ -20,7 +23,7 @@ import nu.rydin.kom.structs.NameAssociation;
 public class NamePicker
 {
     private static NameAssociation innerResolveName(String name, short kind,
-            Context ctx) throws ObjectNotFoundException, UnexpectedException,
+            Context ctx) throws KOMException, UnexpectedException,
             IOException, InterruptedException, OperationInterruptedException,
             InvalidChoiceException
     {
@@ -73,7 +76,7 @@ public class NamePicker
     public static long resolveNameToId(String name, short kind, Context context)
             throws ObjectNotFoundException, UnexpectedException, IOException,
             InterruptedException, OperationInterruptedException,
-            InvalidChoiceException
+            KOMException
     {
         return innerResolveName(name, kind, context).getId();
     }
@@ -81,7 +84,7 @@ public class NamePicker
     public static NameAssociation resolveName(String name, short kind,
             Context context) throws ObjectNotFoundException,
             UnexpectedException, IOException, InterruptedException,
-            OperationInterruptedException, InvalidChoiceException
+            OperationInterruptedException, KOMException
     {
         NameAssociation assoc = innerResolveName(name, kind, context);
         if (assoc.getName() == null)
@@ -92,43 +95,16 @@ public class NamePicker
         return assoc;
     }
 
-    public static NameAssociation pickName(NameAssociation[] assocs, Context ctx)
-            throws IOException, OperationInterruptedException,
-            InterruptedException, InvalidChoiceException
-    {
-        MessageFormatter formatter = ctx.getMessageFormatter();
-        PrintWriter out = ctx.getOut();
-        LineEditor in = ctx.getIn();
-        out.println(formatter.format("name.ambiguous"));
-        int top = assocs.length;
-        for (int idx = 0; idx < top; ++idx)
+    public static NameAssociation pickName(NameAssociation[] assocs, Context ctx) throws IOException, InterruptedException, KOMException {
+        List candidates = new ArrayList(assocs.length);
+        for (int i = 0; i < assocs.length; i++)
         {
-            out.print(idx + 1);
-            out.print(". ");
-            out.println(assocs[idx].getName());
+            candidates.add(assocs[i].getName());
         }
-        out.println();
-        out.print(formatter.format("name.chose"));
-        out.flush();
-        String input = in.readLine();
-        out.println();
-        if (input.length() == 0)
-        {
-            throw new OperationInterruptedException();
-        }
-        int idx = -1;
-        try
-        {
-            idx = Integer.parseInt(input);
-        } catch (NumberFormatException e)
-        {
-            throw new InvalidChoiceException();
-        }
-        if (idx < 1 || idx > top)
-        {
-            throw new InvalidChoiceException();
-        }
-        return assocs[idx - 1];
+        
+        assocs[0].getName();
+        int selection = Parser.askForResolution(ctx, candidates, "name.ambiguous", "name.chose");
+        return assocs[selection];
     }
 
 }

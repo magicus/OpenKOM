@@ -178,7 +178,7 @@ public class Parser
 	    return resolveMatchingCommand(context, commandLine).getCommand();
 	}
 
-    private static int resolveAmbiguousString(Context context, List candidates, String headingKey, String promptKey) throws IOException, InterruptedException, KOMException
+    public static int askForResolution(Context context, List candidates, String headingKey, String promptKey) throws IOException, InterruptedException, KOMException
     {
         LineEditor in = context.getIn();
         PrintWriter out = context.getOut();
@@ -246,7 +246,7 @@ public class Parser
             return index.intValue();
         } else {
             // Still ambiguous. Let the user chose again, recursively.
-            int newIndex = resolveAmbiguousString(context, matchingCandidates, headingKey, promptKey);
+            int newIndex = askForResolution(context, matchingCandidates, headingKey, promptKey);
             // This is the index in our (shorter) list of remaining candidates, but we need to
             // return the index of the original list. Good thing we saved that number! :-)
             Integer oldIndex = (Integer) originalNumbers.get(newIndex);
@@ -263,7 +263,7 @@ public class Parser
             commandNames.add(potentialTarget.getCommand().getFullName());
         }
         
-        int selection = resolveAmbiguousString(context, commandNames, "parser.ambiguous", "parser.chose");
+        int selection = askForResolution(context, commandNames, "parser.ambiguous", "parser.chose");
 
         CommandToMatches potentialTarget = (CommandToMatches) potentialTargets.get(selection);
 

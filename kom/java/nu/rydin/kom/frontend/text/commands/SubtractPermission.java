@@ -6,14 +6,13 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.FlagParameter;
+import nu.rydin.kom.frontend.text.parser.RightParameter;
 import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
@@ -26,11 +25,11 @@ public class SubtractPermission extends AbstractCommand
     public SubtractPermission(Context context, String fullName)
     {
         super(fullName, new CommandLineParameter[] { new UserParameter("subtract.permission.user.question", true), 
-                new FlagParameter(true, context.getRightsLabels()) });
+                new RightParameter(true, context.getRightsLabels()) });
     }
 
     public void execute(Context context, Object[] parameters)
-    throws KOMException, IOException, InterruptedException
+    throws KOMException
     {
         NameAssociation nameAssoc = (NameAssociation) parameters[0]; 
         long user = nameAssoc.getId();
