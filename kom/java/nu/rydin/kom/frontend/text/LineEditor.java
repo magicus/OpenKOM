@@ -588,9 +588,9 @@ public class LineEditor implements NewlineListener
 			
 			// Erase the prompt
 			//
-			m_out.print(RET);
+			m_out.print('\r');
 			PrintUtils.printRepeated(m_out, ' ', m_morePrompt.length());
-			m_out.print(RET);
+			m_out.print('\r');
 			m_out.flush();	
 		return result;
 	}
