@@ -197,6 +197,7 @@ public abstract class AbstractEditor
 							s = e.getLine();
 							if(s.length() > 0)
 								buffer.add(s);
+							defaultLine = null;
 							out.println();
 					        refresh();
 					    }
