@@ -107,7 +107,7 @@ public class BasicMessagePrinter implements MessagePrinter
 					PrintUtils.printRepeated(out, ' ', space);
 					out.println(formatter.format("BasicMessagePrinter.copied", 
 						new Object[] { context.formatObjectName(occ.getUserName(), occ.getUser()), 
-					        occ.getTimestamp().toString() }));
+					        context.smartFormatDate(occ.getTimestamp()) }));
 					break;
 				case MessageManager.ACTION_MOVED:
 					MessageAttribute[] attributes = envelope.getAttributes();
@@ -123,7 +123,7 @@ public class BasicMessagePrinter implements MessagePrinter
 					PrintUtils.printRepeated(out, ' ', space);
 					out.println(formatter.format("BasicMessagePrinter.moved.long", 
 						new Object[] { movedFrom, context.formatObjectName(occ.getUserName(), 
-						        occ.getUser()), occ.getTimestamp().toString() }));
+						        occ.getUser()), context.smartFormatDate(occ.getTimestamp()) }));
 					break;					
 			}
 		} 
