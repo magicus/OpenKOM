@@ -283,7 +283,7 @@ public class MessageManager
 				rs.getTimestamp(1),		// created
 				rs.getLong(2), 			// author
 				rs.getString(3),		// Author name
-				rs.getLong(4),			// reply to
+				rs.getObject(4) != null ? rs.getLong(4) : -1, // reply to
 				rs.getString(5),		// subject
 				rs.getString(6),		// body
 				this.getOccurrences(id)
@@ -321,7 +321,7 @@ public class MessageManager
 				rs.getTimestamp(2),		// created
 				rs.getLong(3), 			// author
 				rs.getString(4), 		// author name				
-				rs.getLong(5),			// reply to
+				rs.getObject(5) != null ? rs.getLong(5) : -1, // reply to
 				rs.getString(6),		// subject
 				rs.getString(7),		// body 
 				this.getOccurrences(id)
@@ -358,7 +358,7 @@ public class MessageManager
 			   	rs.getTimestamp(1),		// created
 			   	rs.getLong(2), 			// author
 			   	rs.getString(3),		// author name	
-			   	rs.getLong(4),			// reply to
+			   	rs.getObject(4) != null ? rs.getLong(4) : -1,			// reply to
 			   	rs.getString(5)		
 			   	);
 			
@@ -743,7 +743,7 @@ public class MessageManager
 					 rs.getTimestamp(2),	// created
 					 rs.getLong(3), 		// author
 					 rs.getString(4),		// author name	
-					 rs.getLong(5),			// reply to
+					 rs.getObject(4) != null ? rs.getLong(5) : -1,	// reply to
 					 rs.getString(6)		// subject	
 					 ));
 			}
@@ -999,7 +999,7 @@ public class MessageManager
     			   	rs.getTimestamp(2),		// created
     			   	rs.getLong(3), 			// author
     			   	rs.getString(4),		// author name	
-    			   	rs.getLong(5),			// reply to
+    			   	rs.getObject(5) != null ? rs.getLong(5) : -1, // reply to
     			   	rs.getString(6),		// subject
 					rs.getLong(7),			// conference
 					rs.getInt(8))			// localnum
