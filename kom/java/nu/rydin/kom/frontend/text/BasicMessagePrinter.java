@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.ansi.ANSISequences;
@@ -65,6 +66,15 @@ public class BasicMessagePrinter implements MessagePrinter
 		sb.append(message.getId());
 		sb.append(')');
 		
+		// Print thread id if requested
+		//
+		if(context.isFlagSet(0, UserFlags.DISPLAY_THREAD_ID))
+		{
+		    sb.append(" [");
+		    sb.append(message.getThread());
+		    sb.append(']');
+		}
+		
 		// Print name of author
 		//
 		sb.append("; ");
@@ -81,7 +91,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		for(int idx = 0; idx < attributes.length; ++idx)
 		{
 		    MessageAttribute each = attributes[idx];
-		    if(each.getKind() == MessageManager.ATTR_MAIL_RECIPIENT && each.getUserId() != context.getLoggedInUserId())
+		    if(each.getKind() == MessageAttributes.MAIL_RECIPIENT && each.getUserId() != context.getLoggedInUserId())
 		    {
 		        PrintUtils.printIndented(out,
 		                formatter.format("BasicMessagePrinter.original.mail.recipient", context.formatObjectName(each.getUsername(), each.getUserId())),
@@ -129,7 +139,7 @@ public class BasicMessagePrinter implements MessagePrinter
 			for(int idx = 0; idx < attributes.length; ++idx)
 			{
 			    MessageAttribute each = attributes[idx];
-			    if(each.getKind() == MessageManager.ATTR_ORIGINAL_DELETED)
+			    if(each.getKind() == MessageAttributes.ORIGINAL_DELETED)
 			    {
 			        PrintUtils.printIndented(out, 
 			                formatter.format("BasicMessagePrinter.reply.to.deleted.text", context.formatObjectName(each.getUsername(), each.getUserId())),
@@ -178,7 +188,7 @@ public class BasicMessagePrinter implements MessagePrinter
 						for(int attrIdx = attributes.length-1; 0 <= attrIdx; --attrIdx)
 						{
 							MessageAttribute each = attributes[attrIdx];
-							if(each.getKind() == MessageManager.ATTR_MOVEDFROM)
+							if(each.getKind() == MessageAttributes.MOVEDFROM)
 							{
 								movedFrom = new String(each.getValue());
 								break;
@@ -248,6 +258,25 @@ public class BasicMessagePrinter implements MessagePrinter
 			}
 		}
 		
+		// Print list of footnotes
+		//
+		for(int idx = 0; idx < attributes.length; ++idx)
+		{
+		    MessageAttribute each = attributes[idx];
+		    if(each.getKind() == MessageAttributes.FOOTNOTE)
+		    {
+		        dc.highlight();
+		        String label = formatter.format("BasicMessagePrinter.footnote"); 
+		        out.print(label);
+		        dc.messageBody();
+		        PrintUtils.printIndented(
+		                out,
+		                each.getValue(),
+		                width, 0, label.length());		        
+		    }
+		}
+
+		
 		// Print list of replies
 		//
 		Envelope.RelatedMessage[] replies = envelope.getReplies();
@@ -281,7 +310,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		for(int idx = 0; idx < attributes.length; ++idx)
 		{
 		    MessageAttribute each = attributes[idx];
-		    if(each.getKind() == MessageManager.ATTR_NOCOMMENT)
+		    if(each.getKind() == MessageAttributes.NOCOMMENT)
 		    {
 		        PrintUtils.printIndented(
 		                out,

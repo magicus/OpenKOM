@@ -16,8 +16,10 @@ import java.util.List;
 
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.SQLUtils;
+import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
+import nu.rydin.kom.exceptions.SelectionOverflowException;
 import nu.rydin.kom.structs.GlobalMessageSearchResult;
 import nu.rydin.kom.structs.LocalMessageSearchResult;
 import nu.rydin.kom.structs.Message;
@@ -73,21 +75,13 @@ public class MessageManager
     private final PreparedStatement m_searchMessagesGlobally;
     private final PreparedStatement m_countStmt;
     private final PreparedStatement m_setThreadIdStmt;
+    private final PreparedStatement m_selectByThreadStmt;
 	
 	private final Connection m_conn; 
 	
 	public static final short ACTION_CREATED 		= 0;
 	public static final short ACTION_COPIED			= 1;
 	public static final short ACTION_MOVED			= 2;
-
-	public static final short ATTR_NOCOMMENT 		= 0;
-	public static final short ATTR_MOVEDFROM 		= 1;
-	public static final short ATTR_RULEPOST 		= 2;
-	public static final short ATTR_PRESENTATION 	= 3;
-	public static final short ATTR_NOTE 			= 4;
-	public static final short ATTR_ORIGINAL_DELETED = 5;
-	public static final short ATTR_MAIL_RECIPIENT 	= 6;
-	public static final short ATTR_FOOTNOTE			= 7;
 	
 	public MessageManager(Connection conn)
 	throws SQLException
@@ -243,6 +237,8 @@ public class MessageManager
 		        "LIMIT ? OFFSET ?");
 		m_setThreadIdStmt = m_conn.prepareStatement(
 		        "UPDATE messages SET thread = ? WHERE id = ?");
+		m_selectByThreadStmt = m_conn.prepareStatement(
+		        "SELECT id FROM messages WHERE thread = ?");
 	}
 	
 	public void close()
@@ -298,6 +294,8 @@ public class MessageManager
 		    m_countStmt.close();
 		if(m_setThreadIdStmt != null)
 		    m_setThreadIdStmt.close();
+		if(m_selectByThreadStmt != null)
+		    m_selectByThreadStmt.close();
 	}
 	
 	public void finalize()
@@ -1027,7 +1025,7 @@ public class MessageManager
             MessageHeader original = loadMessageHeader(globalNum);
 			for (int i = 0; i < replies.length; i++)
 	        {
-	            addMessageAttribute(replies[i].getId(), ATTR_ORIGINAL_DELETED, MessageAttribute.constructUsernamePayload(original.getAuthor(), original.getAuthorName().getName()));
+	            addMessageAttribute(replies[i].getId(), MessageAttributes.ORIGINAL_DELETED, MessageAttribute.constructUsernamePayload(original.getAuthor(), original.getAuthorName().getName()));
 	        }
         } 
 		catch (MessageNotFoundException e)
@@ -1248,6 +1246,34 @@ public class MessageManager
             rs = m_countStmt.executeQuery();
             rs.first();
             return rs.getLong(1);
+        }
+        finally
+        {
+            if(rs != null)
+                rs.close();
+        }
+    }
+    
+    public long[] selectByThread(long threadId, int max)
+    throws SQLException, SelectionOverflowException
+    {
+        ResultSet rs = null;
+        long[] buffer = new long[max];
+        try
+        {
+            m_selectByThreadStmt.clearParameters();
+            m_selectByThreadStmt.setLong(1, threadId);
+            rs = m_selectByThreadStmt.executeQuery();
+            int idx = 0;
+            while(rs.next())
+                buffer[idx++] = rs.getLong(1);
+            long[] result = new long[idx];
+            System.arraycopy(buffer, 0, result, 0, idx);
+            return result;
+        }
+        catch(ArrayIndexOutOfBoundsException e)
+        {
+            throw new SelectionOverflowException(buffer);
         }
         finally
         {

@@ -621,23 +621,23 @@ public interface ServerSession
 	throws ObjectNotFoundException, UnexpectedException;
 	
 	/**
-	 * Queues all messages in a thread to be marked as unread at logout
+	 * Marks all messages in a thread as unread
 	 * @param root The root of the thread
 	 * @return The number of messages marked as unread
 	 * @throws UnexpectedException
 	 */
-	public int markThreadAsUnreadAtLogout(long root)
+	public int markThreadAsUnread(long root)
 	throws ObjectNotFoundException, UnexpectedException;
 	
 	/**
-	 * Marks all messages with a matching subject as unread at logout.
+	 * Marks all messages with a matching subject as unread
 	 * 
 	 * @param subject The subject
 	 * @param localOnly Look in current conference only
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
-	public int markSubjectAsUnreadAtLogout(String subject, boolean localOnly)
+	public int markSubjectAsUnread(String subject, boolean localOnly)
 	throws ObjectNotFoundException, UnexpectedException;
 	
 	/**
@@ -970,6 +970,19 @@ public interface ServerSession
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
 	
 	/**
+	 * Adds a message attribute to a message
+	 * 
+	 * @param message The global message id
+	 * @param attribute The attribute type
+	 * @param payload The attribute payload
+	 * @param deleteOld Delete previous occurrences of this attribute
+	 * @throws UnexpectedException
+	 * @throws AuthorizationException
+	 */
+	public void addMessageAttribute(long message, short attribute, String payload, boolean deleteOld)
+	throws UnexpectedException, AuthorizationException;
+	
+	/**
 	 * Returns various debug information
 	 * @return
 	 */
@@ -1128,6 +1141,17 @@ public interface ServerSession
 	throws UnexpectedException, ObjectNotFoundException;
 	
 	/**
+	 * Skips an entire thread.
+	 * 
+	 * @param msg A message in the thread to skip
+	 * @return Number of texts skipped.
+	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
+	 */	
+	public int skipThread (long msg)
+	throws UnexpectedException, ObjectNotFoundException, SelectionOverflowException;
+	
+	/**
 	 * Skips all messages in the tree rooted at the node given.
 	 * 
 	 * @param node Root of tree to skip.
@@ -1135,8 +1159,9 @@ public interface ServerSession
 	 * @throws UnexpectedException
 	 * @throws ObjectNotFoundException
 	 */	
-	public int skipTree (long node)
+	public int skipBranch (long node)
 	throws UnexpectedException, ObjectNotFoundException;
+
 	
 	/**
 	 * This method drops a conference, including all message occurrences (and, sometimes, messages)
@@ -1484,4 +1509,10 @@ public interface ServerSession
      */
     public Relationship[] listFilters()
     throws UnexpectedException;
+    
+    /**
+     * Clears all caches
+     */
+    public void clearCache()
+    throws AuthorizationException;
 }

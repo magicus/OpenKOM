@@ -6,7 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import nu.rydin.kom.backend.data.MessageManager;
+import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.exceptions.GenericException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -34,7 +34,7 @@ public class ViewPresentation extends AbstractCommand
 		{
 			long objectId = ((NameAssociation)parameterArray[0]).getId();
 			context.getMessagePrinter().printMessage(context, context.getSession().
-			        readTaggedMessage(MessageManager.ATTR_PRESENTATION, objectId));
+			        readTaggedMessage(MessageAttributes.PRESENTATION, objectId));
 		}
 		catch (UnexpectedException e)
 		{

@@ -43,6 +43,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.SkipGlobalSubject"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SkipSubject"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SkipTree"/>			
+		<command class="nu.rydin.kom.frontend.text.commands.SkipBranch"/>			
 		<command class="nu.rydin.kom.frontend.text.commands.MarkAsUnread"/>
 		<command class="nu.rydin.kom.frontend.text.commands.MarkTreeAsUnread"/>
 		<command class="nu.rydin.kom.frontend.text.commands.MarkSubjectAsUnread"/>		
@@ -61,6 +62,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.Copy"/>
 		<command class="nu.rydin.kom.frontend.text.commands.MoveMessage"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.DeleteMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.AddFootnote"/>		
 	</category>
 	<category id="search" i18n="command.category.search" order="80">	
 		<command class="nu.rydin.kom.frontend.text.commands.ListLocalMessage"/>
@@ -74,6 +76,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.DeleteConference"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeReplyToConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ChangePermissions"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ClearCache"/>		
 	</category>	
 	<category id="profile" i18n="command.category.profile" order="100">
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeSuffix"/>

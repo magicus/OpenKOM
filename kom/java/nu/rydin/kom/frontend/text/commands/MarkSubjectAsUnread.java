@@ -26,7 +26,7 @@ public class MarkSubjectAsUnread extends AbstractCommand
 	throws KOMException
 	{
  		ServerSession ss = context.getSession();
- 		int n = ss.markSubjectAsUnreadAtLogout(ss.getLastMessageHeader().getSubject(), true);
+ 		int n = ss.markSubjectAsUnread(ss.getLastMessageHeader().getSubject(), true);
  		MessageFormatter mf = context.getMessageFormatter();
  		context.getOut().println (mf.format("mark.tree.as.unread.confirmation", n));
 	}

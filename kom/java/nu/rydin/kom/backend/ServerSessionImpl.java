@@ -32,6 +32,7 @@ import nu.rydin.kom.constants.CommandSuggestions;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.FileProtection;
 import nu.rydin.kom.constants.FilterFlags;
+import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.RelationshipKinds;
 import nu.rydin.kom.constants.SettingKeys;
@@ -66,6 +67,7 @@ import nu.rydin.kom.exceptions.NotMemberException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.OriginalsNotAllowedException;
 import nu.rydin.kom.exceptions.RepliesNotAllowedException;
+import nu.rydin.kom.exceptions.SelectionOverflowException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferenceListItem;
@@ -163,7 +165,18 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     	public void perform(long messageId)
     	throws ObjectNotFoundException, UnexpectedException
     	{
-    	    ServerSessionImpl.this.markAsUnreadAtLogout(messageId);
+    	    ServerSessionImpl that = ServerSessionImpl.this;
+    	    try
+    	    {
+	    	    MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(
+	    	            that.getCurrentConferenceId(), messageId);
+	    	    m_memberships.markAsUnread(occ.getConference(), occ.getLocalnum());
+	    	    that.markAsUnreadAtLogout(messageId);
+    	    }
+    		catch (SQLException e)
+    		{
+    			throw new UnexpectedException (that.getLoggedInUserId(), e);
+    		}
     	}
     }
     
@@ -1053,7 +1066,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// recipient in case the occurrences are lost.
 			//
 			String payload = MessageAttribute.constructUsernamePayload(recipient, this.getCensoredName(recipient).getName());
-			mm.addMessageAttribute(occ.getGlobalId(), MessageManager.ATTR_MAIL_RECIPIENT, payload);
+			mm.addMessageAttribute(occ.getGlobalId(), MessageAttributes.MAIL_RECIPIENT, payload);
 			
 			// Store a copy in sender's mailbox
 			//
@@ -1118,7 +1131,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			this.broadcastEvent(
 				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
 					occ.getGlobalId()));
-			this.m_da.getMessageManager().addMessageAttribute(occ.getGlobalId(), MessageManager.ATTR_PRESENTATION, new Long(object).toString());
+			this.m_da.getMessageManager().addMessageAttribute(occ.getGlobalId(), MessageAttributes.PRESENTATION, new Long(object).toString());
 			
 			// Make this the "current" message
 			//
@@ -1148,30 +1161,44 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
-	public void storeNoComment(long message)
+	public void addMessageAttribute(long message, short attribute, String payload, boolean deleteOld)
 	throws UnexpectedException, AuthorizationException
 	{
 		try
 		{
+		    MessageManager mm = m_da.getMessageManager();
+		    
 			// Determine conference of message
-			long targetConf = m_da.getMessageManager().getFirstOccurrence(message).getConference();
+		    //
+			long targetConf = mm.getFirstOccurrence(message).getConference();
 
 			// Check that we have the permission to write there.
+			//
 			this.assertConferencePermission(targetConf, ConferencePermissions.WRITE_PERMISSION);
-
-			MessageManager mm = m_da.getMessageManager(); 
-
-			//Delete already existing "no comment"
-			MessageAttribute[] attributes = mm.getMessageAttributes(message);
-			for (int i = 0; i < attributes.length; i++)
-            {
-                if (attributes[i].getKind() == MessageManager.ATTR_NOCOMMENT && attributes[i].getUserId() == this.getLoggedInUserId())
-                {
-                    mm.dropMessageAttribute(attributes[i].getId(), message);
-                }
-            }
 			
-			mm.addMessageAttribute(message, MessageManager.ATTR_NOCOMMENT, MessageAttribute.constructUsernamePayload(this.getLoggedInUser().getId(), this.getLoggedInUser().getName()));
+			// If this is the kind of attribute that only the owner can change, we need
+			// to check that we own the text (or that we have enough privs).
+			//
+			if(MessageAttributes.onlyOwner[attribute])
+			{
+			    if(mm.loadMessageHeader(message).getAuthor() != this.getLoggedInUserId())
+			        throw new AuthorizationException();
+			}
+
+			// Delete already existing "no comment"
+			//
+			long user = this.getLoggedInUserId();
+			if(deleteOld)
+			{
+				MessageAttribute[] attributes = mm.getMessageAttributes(message);
+				for (int i = 0; i < attributes.length; i++)
+	            {
+	                if (attributes[i].getKind() == attribute && attributes[i].getUserId() == user)
+	                    mm.dropMessageAttribute(attributes[i].getId(), message);
+	            }
+			}
+			
+			mm.addMessageAttribute(message, attribute, payload);
 		}
 		catch(ObjectNotFoundException e)
 		{
@@ -1180,7 +1207,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		catch(SQLException e)
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
+		}	    
+	}
+	
+	public void storeNoComment(long message)
+	throws UnexpectedException, AuthorizationException
+	{
+	    this.addMessageAttribute(message, MessageAttributes.NOCOMMENT, 
+	            MessageAttribute.constructUsernamePayload(this.getLoggedInUser().getId(), this.getLoggedInUser().getName()), true);
 	}
 	
 	public void createUser(String userid, String password, String fullname, String address1,
@@ -1455,7 +1489,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			
 			// Tag the message with an ATTR_MOVEDFROM attribute containing the source conference id.
 			//
-			mm.addMessageAttribute(globId, MessageManager.ATTR_MOVEDFROM, 
+			mm.addMessageAttribute(globId, MessageAttributes.MOVEDFROM, 
 			        this.getCensoredName(sourceConfId).getName());
 
 			// Hello, world!
@@ -1769,13 +1803,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
-	public int markThreadAsUnreadAtLogout(long root)
+	public int markThreadAsUnread(long root)
 	throws ObjectNotFoundException, UnexpectedException
 	{
 	    return this.performTreeOperation(root, new MarkAsUnreadOperation());
 	}
 	
-	public int markSubjectAsUnreadAtLogout(String subject, boolean localOnly)
+	public int markSubjectAsUnread(String subject, boolean localOnly)
 	throws ObjectNotFoundException, UnexpectedException
 	{
 	    return localOnly
@@ -2206,6 +2240,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}		
 	}
 	
+	public void clearCache()
+	throws AuthorizationException
+	{
+	    // Only sysops can do this.
+	    //
+	    this.checkRights(UserPermissions.ADMIN);
+	    CacheManager.instance().clear();
+	}
+	
 	public short getObjectKind(long object)
 	throws ObjectNotFoundException
 	{
@@ -2546,8 +2589,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    	? this.performOperationBySubject(subject, new MarkAsReadOperation())
 	    	: this.performOperationBySubjectInConference(subject, new MarkAsReadOperation());
 	}
+	
+	public int skipThread(long message)
+	throws UnexpectedException, ObjectNotFoundException, SelectionOverflowException
+	{
+	    try
+	    {
+		    Message m = m_da.getMessageManager().loadMessage(message);
+		    long thread = m.getThread();
+		    if(thread <= 0)
+		        return 0;
+		    return this.performThreadOperation(m.getId(), 100000, new MarkAsReadOperation());
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
+	}	
 		
-	public int skipTree(long root)
+	public int skipBranch(long root)
 	throws UnexpectedException, ObjectNotFoundException
 	{
 	    return this.performTreeOperation(root, new MarkAsReadOperation());
@@ -2896,6 +2956,23 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	throws ObjectNotFoundException
 	{
 		return m_memberships.markAsReadEx(conference, localnum);
+	}
+	
+	protected int performThreadOperation(long thread, int max, MessageOperation op)
+	throws UnexpectedException, ObjectNotFoundException, SelectionOverflowException
+	{
+	    try
+	    {
+	        long[] ids = m_da.getMessageManager().selectByThread(thread, max);
+	        int top = ids.length;
+	        for(int idx = 0; idx < top; ++idx)
+	            op.perform(ids[idx]);
+	        return top;
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
 	}
 	
 	protected int performTreeOperation(long root, MessageOperation op)
@@ -3590,7 +3667,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			return this.readLocalMessage(conference, m_da.getMessageManager().findLastOccurrenceInConferenceWithAttrStmt(MessageManager.ATTR_RULEPOST, conference));
+			return this.readLocalMessage(conference, m_da.getMessageManager().findLastOccurrenceInConferenceWithAttrStmt(MessageAttributes.RULEPOST, conference));
 		}
 		catch (SQLException e)
 		{
@@ -3610,7 +3687,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		try
 		{
 		    MessageOccurrence mo = this.storeMessage(m_currentConferenceId, msg);
-			m_da.getMessageManager().addMessageAttribute(mo.getGlobalId(), MessageManager.ATTR_RULEPOST, null);
+			m_da.getMessageManager().addMessageAttribute(mo.getGlobalId(), MessageAttributes.RULEPOST, null);
 			return mo;
 		}
 		catch (SQLException e)

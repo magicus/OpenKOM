@@ -26,7 +26,7 @@ public class MarkTreeAsUnread extends AbstractCommand
 	throws KOMException
 	{
  		ServerSession ss = context.getSession();
- 		int n = ss.markThreadAsUnreadAtLogout(ss.getLastMessageHeader().getId());
+ 		int n = ss.markThreadAsUnread(ss.getLastMessageHeader().getId());
  		MessageFormatter mf = context.getMessageFormatter();
  		context.getOut().println (mf.format("mark.tree.as.unread.confirmation", n));
 	}

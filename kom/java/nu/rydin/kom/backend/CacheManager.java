@@ -39,7 +39,15 @@ public class CacheManager
 		m_userCache.discardDeferredInvalidations();
 		m_conferenceCache.discardDeferredInvalidations();
 		m_messageCache.discardDeferredInvalidations();
-		m_messageCache.discardDeferredInvalidations();
+		m_nameCache.discardDeferredInvalidations();
+	}
+	
+	public void clear()
+	{
+	    m_userCache.clear();
+		m_conferenceCache.clear();
+		m_messageCache.clear();
+		m_nameCache.clear();
 	}
 	 
 	public KOMCache getUserCache()

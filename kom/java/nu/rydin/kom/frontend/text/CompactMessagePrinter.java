@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.ansi.ANSISequences;
@@ -76,7 +77,7 @@ public class CompactMessagePrinter implements MessagePrinter
 		for(int idx = 0; idx < attributes.length; ++idx)
 		{
 		    MessageAttribute each = attributes[idx];
-		    if(each.getKind() == MessageManager.ATTR_MAIL_RECIPIENT && each.getUserId() != context.getLoggedInUserId())
+		    if(each.getKind() == MessageAttributes.MAIL_RECIPIENT && each.getUserId() != context.getLoggedInUserId())
 		    {
 		        out.println(formatter.format("CompactMessagePrinter.original.mail.recipient", context.formatObjectName(each.getUsername(), each.getUserId())));		        
 		    }
@@ -112,7 +113,7 @@ public class CompactMessagePrinter implements MessagePrinter
 			for(int idx = 0; idx < attributes.length; ++idx)
 			{
 			    MessageAttribute each = attributes[idx];
-			    if(each.getKind() == MessageManager.ATTR_ORIGINAL_DELETED)
+			    if(each.getKind() == MessageAttributes.ORIGINAL_DELETED)
 			    {
 			        out.println(formatter.format("BasicMessagePrinter.reply.to.deleted.text", context.formatObjectName(each.getUsername(), each.getUserId())));		        
 			    }
@@ -144,7 +145,7 @@ public class CompactMessagePrinter implements MessagePrinter
 						for(int attrIdx = attributes.length-1; 0 <= attrIdx; --attrIdx)
 						{
 							MessageAttribute each = attributes[attrIdx];
-							if(each.getKind() == MessageManager.ATTR_MOVEDFROM)
+							if(each.getKind() == MessageAttributes.MOVEDFROM)
 							{
 								movedFrom = new String(each.getValue());
 								break;
@@ -260,7 +261,7 @@ public class CompactMessagePrinter implements MessagePrinter
 		for(int idx = 0; idx < attributes.length; ++idx)
 		{
 		    MessageAttribute each = attributes[idx];
-		    if(each.getKind() == MessageManager.ATTR_NOCOMMENT)
+		    if(each.getKind() == MessageAttributes.NOCOMMENT)
 		    {
 				out.println(formatter.format("BasicMessagePrinter.nocomment", context.formatObjectName(each.getUsername(), each.getUserId())));
 		    }
