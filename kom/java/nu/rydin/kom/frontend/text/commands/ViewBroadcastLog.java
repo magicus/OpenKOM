@@ -11,6 +11,7 @@ import java.io.IOException;
 import nu.rydin.kom.KOMException;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -25,6 +26,8 @@ public class ViewBroadcastLog extends ViewMessageLog
     public void execute(Context context, String[] parameters)
     throws KOMException, IOException, InterruptedException	
     {	
+    	DisplayController dc = context.getDisplayController();
+    	dc.broadcastMessage();
         this.innerExecute(context, parameters, MessageLogKinds.BROADCAST);
     }
 }
