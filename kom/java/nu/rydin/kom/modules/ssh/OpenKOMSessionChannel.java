@@ -7,6 +7,7 @@
 package nu.rydin.kom.modules.ssh;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,7 +97,18 @@ public class OpenKOMSessionChannel extends IOChannel
                 SshMsgChannelExtendedData.SSH_EXTENDED_DATA_STDERR));
     }
 
-	public void addSizeListener(TerminalSizeListener listener)
+    protected void onChannelClose() throws IOException
+    {
+        Logger.debug(this, "ON CHANNEL CLOSE");
+        super.onChannelClose();
+    }
+    protected void onChannelEOF() throws IOException
+    {
+        Logger.debug(this, "ON CHANNEL EOF");
+        super.onChannelEOF();
+    }
+
+	private void addSizeListener(TerminalSizeListener listener)
 	{
 		synchronized(m_sizeListeners)
 		{
@@ -104,6 +116,59 @@ public class OpenKOMSessionChannel extends IOChannel
 		}
 	}
     
+	private static class SessionReaper extends Thread
+	{	
+	    private OpenKOMSessionChannel m_channel;
+		private Thread m_clientThread;
+		private ClientSession m_session;
+		
+		public SessionReaper(OpenKOMSessionChannel channel, Thread clientThread, ClientSession session)
+		{
+			super("SessionReaper");
+			m_channel = channel;
+			m_clientThread 	= clientThread;
+			m_session		= session;
+		}
+		
+		public void run()
+		{
+			// Wait for the client to die
+			//
+			try
+			{
+				m_clientThread.join();
+				try
+				{
+					m_session.shutdown();
+                    m_channel.setLocalEOF();
+                    m_channel.setRemoteEOF();
+                    m_channel.close();
+				}
+				catch(UnexpectedException e)
+				{
+					Logger.warn(this, "Error while reaping session: " + e.getMessage());
+                } catch (IOException e1)
+                {
+                    Logger.warn(this, "Error while reaping session: " + e1.getMessage());
+                }
+			}
+			catch(InterruptedException e)
+			{
+				// Interruped while waiting? We're going down, so
+				// just fall thru and kill the connection.
+				//
+			}
+			finally
+			{
+				// Release references
+				//
+				m_clientThread 	= null;
+				m_session 		= null;
+			}
+			Logger.debug(this, "Closing channel");
+		}
+	}
+	
     protected void onChannelRequest(String requestType, boolean wantReply,
             byte[] requestData) throws IOException
     {
@@ -121,6 +186,8 @@ public class OpenKOMSessionChannel extends IOChannel
                 addSizeListener(client);
                 client.setTicket(ticket);
                 Thread clientThread = new Thread(client, "Session (not logged in)");
+				Thread reaper = new SessionReaper(this, clientThread, client);
+				reaper.start();
 				clientThread.start();
 				client.terminalSizeChanged(ptyColumns, ptyRows);
 				

@@ -14,6 +14,7 @@ import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.NoSuchModuleException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.modules.Modules;
+import nu.rydin.kom.utils.Logger;
 
 import com.sshtools.daemon.platform.NativeAuthenticationProvider;
 import com.sshtools.daemon.platform.PasswordChangeException;
@@ -69,9 +70,11 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
     {
         try
         {
+            Logger.info(this, "Trying to log in as: " + username);
             String ticket = ((ServerSessionFactory) Modules.getModule("Backend")).generateTicket(
                     username, password);
             postTicket(ticket);
+            Logger.info(this, "Successfully logged in as: " + username);
             return true;
         } catch (AuthenticationException e)
         {
@@ -80,6 +83,7 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
         } catch (NoSuchModuleException e)
         {
         }
+        Logger.info(this, "Failed login");
         return false;
     }
 
