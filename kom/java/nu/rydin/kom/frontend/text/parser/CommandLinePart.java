@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.parser;
 import java.io.IOException;
 
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.exceptions.InvalidChoiceException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
@@ -87,7 +88,7 @@ public abstract class CommandLinePart
     }
 
     public abstract Match fillInMissingObject(Context context) 
-    throws IOException, InterruptedException, OperationInterruptedException;
+    throws IOException, InterruptedException, OperationInterruptedException, InvalidChoiceException;
 	
 	public Object resolveFoundObject(Context context, Match match) 
 	throws IOException, InterruptedException, KOMException

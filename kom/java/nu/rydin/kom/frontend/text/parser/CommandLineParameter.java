@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.parser;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.exceptions.InvalidChoiceException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -36,7 +37,7 @@ public abstract class CommandLineParameter extends CommandLinePart
 	}
 
 	public Match fillInMissingObject(Context context) 
-	throws IOException, InterruptedException, OperationInterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException, InvalidChoiceException
 	{
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();

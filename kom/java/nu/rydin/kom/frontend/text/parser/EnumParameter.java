@@ -9,9 +9,9 @@ package nu.rydin.kom.frontend.text.parser;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import nu.rydin.kom.exceptions.InvalidChoiceException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
@@ -62,26 +62,22 @@ public abstract class EnumParameter extends CommandLineParameter
     }
     
 	public Match fillInMissingObject(Context context) 
-	throws IOException, InterruptedException, OperationInterruptedException
+	throws InvalidChoiceException, OperationInterruptedException, IOException, InterruptedException
 	{
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
 
-		while (true) {
-			out.print(fmt.format(m_missingObjectQuestionKey) + fmt.format("parser.parameter.enum.prompt.listall"));
-			out.flush();
-			String line = in.readLine();
-			if(line.length() == 0) {
-			    throw new OperationInterruptedException();
-			}
-			if(line.trim().equals("?")) {
-				for (Iterator iter = m_alternatives.iterator(); iter.hasNext();) {
-					String s = (String) iter.next();
-					out.println(s);
-				}
-				continue;
-			}
+		out.print(fmt.format(m_missingObjectQuestionKey) + fmt.format("parser.parameter.enum.prompt.listall"));
+		out.flush();
+		String line = in.readLine();
+		if(line.length() == 0) {
+		    throw new OperationInterruptedException();
+		}
+		if(line.trim().equals("?")) {
+			int selection = Parser.askForResolution(context, m_alternatives, m_promptKey, false, m_headingKey);
+			return innerMatch((String) m_alternatives.get(selection), "");
+		} else {
 			Match newMatch = innerMatch(line, "");
 			return newMatch;
 		}

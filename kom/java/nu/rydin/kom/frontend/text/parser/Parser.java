@@ -178,7 +178,7 @@ public class Parser
 	    return resolveMatchingCommand(context, commandLine).getCommand();
 	}
 
-    public static int askForResolution(Context context, List candidates, String headingKey, String promptKey) throws IOException, InterruptedException, KOMException
+    public static int askForResolution(Context context, List candidates, String promptKey, boolean printHeading, String headingKey) throws IOException, InterruptedException, InvalidChoiceException, OperationInterruptedException
     {
         LineEditor in = context.getIn();
         PrintWriter out = context.getOut();
@@ -186,7 +186,9 @@ public class Parser
         
         // Ask user to chose
         //
-        out.println(fmt.format(headingKey));
+        if (printHeading) {
+            out.println(fmt.format(headingKey));
+        }
         int top = candidates.size();
         for(int idx = 0; idx < top; ++idx)
         {
@@ -221,7 +223,7 @@ public class Parser
         }
     }
 	
-    public static int resolveString(Context context, String input, List candidates, String headingKey, String promptKey) throws InvalidChoiceException, IOException, InterruptedException, KOMException
+    public static int resolveString(Context context, String input, List candidates, String headingKey, String promptKey) throws InvalidChoiceException, OperationInterruptedException, IOException, InterruptedException
     {
         // Nope. Assume it is a name to be matched against the list.
         String cookedInput = NameUtils.normalizeName(input);
@@ -246,7 +248,7 @@ public class Parser
             return index.intValue();
         } else {
             // Still ambiguous. Let the user chose again, recursively.
-            int newIndex = askForResolution(context, matchingCandidates, headingKey, promptKey);
+            int newIndex = askForResolution(context, matchingCandidates, promptKey, true, headingKey);
             // This is the index in our (shorter) list of remaining candidates, but we need to
             // return the index of the original list. Good thing we saved that number! :-)
             Integer oldIndex = (Integer) originalNumbers.get(newIndex);
@@ -263,7 +265,7 @@ public class Parser
             commandNames.add(potentialTarget.getCommand().getFullName());
         }
         
-        int selection = askForResolution(context, commandNames, "parser.ambiguous", "parser.chose");
+        int selection = askForResolution(context, commandNames, "parser.chose", true, "parser.ambiguous");
 
         CommandToMatches potentialTarget = (CommandToMatches) potentialTargets.get(selection);
 
