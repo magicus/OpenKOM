@@ -12,6 +12,7 @@ nu.rydin.kom.frontend.text.commands.Signup
 nu.rydin.kom.frontend.text.commands.GotoConference
 nu.rydin.kom.frontend.text.commands.WriteMessage
 nu.rydin.kom.frontend.text.commands.Reply
+nu.rydin.kom.frontend.text.commands.NoComment
 nu.rydin.kom.frontend.text.commands.ReadMessage
 nu.rydin.kom.frontend.text.commands.Status
 nu.rydin.kom.frontend.text.commands.PrintDebug
