@@ -19,9 +19,9 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class WriteNote extends AbstractCommand 
 {
-	public WriteNote(Context context, String fullname)
+	public WriteNote(Context context, String fullname, long permissions)
 	{
-		super(fullname, AbstractCommand.NO_PARAMETERS);
+		super(fullname, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)

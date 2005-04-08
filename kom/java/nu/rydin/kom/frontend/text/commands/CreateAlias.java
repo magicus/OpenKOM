@@ -20,11 +20,11 @@ import nu.rydin.kom.frontend.text.parser.StringParameter;
  */
 public class CreateAlias extends AbstractCommand
 {
-	public CreateAlias(Context context, String fullName)
+	public CreateAlias(Context context, String fullName, long permissions)
 	{
 		super(fullName, new CommandLineParameter[] { 
 		        new StringParameter("create.alias.param.ask.0", true), 
-		        new RawParameter("create.alias.param.ask.1", true) });	
+		        new RawParameter("create.alias.param.ask.1", true) }, permissions);	
 	}
 
     public void execute(Context context, Object[] parameters)

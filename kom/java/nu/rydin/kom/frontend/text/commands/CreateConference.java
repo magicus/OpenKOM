@@ -31,9 +31,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class CreateConference extends AbstractCommand
 {
-	public CreateConference(Context context, String fullName)
+	public CreateConference(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new RawParameter("create.conference.param.0.ask", true) });
+		super(fullName, new CommandLineParameter[] { new RawParameter("create.conference.param.0.ask", true) }, permissions);
 	}
 	
     public void checkAccess(Context context) throws AuthorizationException

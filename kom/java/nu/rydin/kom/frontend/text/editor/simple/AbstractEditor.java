@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.LineEditingInterruptedException;
 import nu.rydin.kom.exceptions.LineOverflowException;
 import nu.rydin.kom.exceptions.LineUnderflowException;
@@ -20,11 +21,13 @@ import nu.rydin.kom.exceptions.StopCharException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
+import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.parser.Parser;
+import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -60,8 +63,40 @@ public abstract class AbstractEditor
 	
 	protected abstract void refresh() throws KOMException;
 	
-    protected abstract void handleLineEditingInterruptedException(EditorContext context, LineEditingInterruptedException e)
-    throws InterruptedException, OperationInterruptedException, IOException;
+	protected abstract String getAbortQuestionFormat();
+	
+    protected void handleLineEditingInterruptedException(EditorContext context, LineEditingInterruptedException e)
+    throws InterruptedException, OperationInterruptedException, IOException
+    {
+        for(;;)
+        {
+	        // If user has written no more than three lines, abort immediately.
+	        if (context.getBuffer().size() <= 3)
+	        {
+	            throw e;
+	        }
+	        
+	        // Otherwise, ask user if he wants to abort.
+	        //
+		    MessageFormatter formatter = context.getMessageFormatter();
+		    KOMWriter out = context.getOut();
+		    LineEditor in = context.getIn();
+		    out.print(formatter.format(this.getAbortQuestionFormat()));
+		    out.flush();
+		    try
+		    {
+		        String answer = in.readLine();
+			    if (answer.equals(formatter.format("misc.y"))) 
+			    {
+			        throw e;
+			    }
+		    }
+		    catch(LineEditingDoneException e2)
+		    {
+		        continue;
+		    }
+        }
+    }
 	
 	protected void mainloop(boolean stopOnEmpty)
 	throws InterruptedException, OperationInterruptedException, UnexpectedException, IOException
@@ -95,7 +130,14 @@ public abstract class AbstractEditor
 			    int flags = LineEditor.FLAG_ECHO | LineEditor.FLAG_STOP_ON_EOL;
 			    if(buffer.size() > 0)
 			        flags |= LineEditor.FLAG_STOP_ON_BOL;
-				 line = in.readLine(defaultLine, MESSAGE_EDITOR_STOP_CHARS, width, flags);
+			    try
+			    {
+			        line = in.readLine(defaultLine, MESSAGE_EDITOR_STOP_CHARS, width, flags);
+			    }
+			    catch(LineEditingDoneException e)
+			    {
+			        // TODO
+			    }
 				 	
 				 // Check if we got a command
 				 //

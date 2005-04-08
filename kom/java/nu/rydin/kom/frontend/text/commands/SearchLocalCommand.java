@@ -27,9 +27,9 @@ public abstract class SearchLocalCommand extends SearchCommand
 
     protected static final int SUBJECT_COL_WIDTH = 28;
 
-    public SearchLocalCommand(String fullName, CommandLineParameter[] signature)
+    public SearchLocalCommand(String fullName, CommandLineParameter[] signature, long permissions)
     {
-        super(fullName, signature);
+        super(fullName, signature, permissions);
     }
 
     protected void innerPrintSearchResultRow(Context context, KOMWriter out,

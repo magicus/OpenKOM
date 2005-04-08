@@ -21,9 +21,9 @@ import nu.rydin.kom.frontend.text.parser.RawParameter;
  */
 public class ChangeSubject extends AbstractCommand
 {
-    public ChangeSubject(Context context, String fullName)
+    public ChangeSubject(Context context, String fullName, long permissions)
     {
-        super(fullName, new CommandLineParameter[] { new RawParameter("simple.editor.subject", true) });
+        super(fullName, new CommandLineParameter[] { new RawParameter("simple.editor.subject", true) }, permissions);
     }
 
     public void execute(Context context, Object[] parameters)

@@ -9,6 +9,9 @@ package nu.rydin.kom.backend;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
+
+import javax.xml.parsers.SAXParserFactory;
 
 import nu.rydin.kom.exceptions.InternalException;
 
@@ -20,7 +23,7 @@ public class TransactionalInvocationHandler implements InvocationHandler
 	private final ServerSessionImpl m_session;
 	
 	private final CacheManager m_cacheManager = CacheManager.instance();
-	
+		
 	public TransactionalInvocationHandler(ServerSessionImpl session)
 	{
 		m_session = session;

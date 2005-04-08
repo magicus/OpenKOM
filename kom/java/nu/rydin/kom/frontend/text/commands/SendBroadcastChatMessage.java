@@ -26,24 +26,29 @@ import nu.rydin.kom.structs.NameAssociation;
 /**
  * @author Henrik Schröder
  */
-public class SendBroadcastChatMessage extends AbstractCommand {
+public class SendBroadcastChatMessage extends AbstractCommand
+{
 
-    public SendBroadcastChatMessage(Context context, String fullName) {
-        super(fullName, new CommandLineParameter[] { new RawParameter("chat.saytoall", false) });
+    public SendBroadcastChatMessage(Context context, String fullName,
+            long permissions)
+    {
+        super(fullName, new CommandLineParameter[]
+        { new RawParameter("chat.saytoall", false) }, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)
-            throws KOMException, IOException, InterruptedException {
+            throws KOMException, IOException, InterruptedException
+    {
 
         // Set up
         //
         DisplayController dc = context.getDisplayController();
         PrintWriter out = context.getOut();
         ServerSession session = context.getSession();
-		MessageFormatter formatter = context.getMessageFormatter();
+        MessageFormatter formatter = context.getMessageFormatter();
 
-		String message;
-        
+        String message;
+
         if (parameterArray[0] == null)
         {
             //No message given, use chat message editor.
@@ -55,45 +60,44 @@ public class SendBroadcastChatMessage extends AbstractCommand {
             //
             AbstractEditor editor = new SimpleChatEditor(context);
             message = editor.edit(-1).getBody();
-        }
-        else
+        } else
         {
-            message = (String)parameterArray[0];
+            message = (String) parameterArray[0];
         }
-        
 
         // Empty message? User interrupted
         //
         if (message.length() == 0)
             return;
 
-		// Send it
-		//
-		NameAssociation[] refused = session.broadcastChatMessage(message, MessageLogKinds.BROADCAST);
-		
-		// Print refused destinations (if any)
-		//
-		int top = refused.length;
-		if(top > 0)
-		{
-		    // Build message
-		    //
-		    StringBuffer sb = new StringBuffer(200);
-		    sb.append(formatter.format("chat.refused"));
-		    for(int idx = 0; idx < top; ++idx)
-		    {
-		        sb.append(refused[idx].getName());
-		        if(idx < top - 1)
-		            sb.append(", ");
-		    } 
-		    
-		    // Wordwrap it!
-		    //
-		    out.println();
-		    WordWrapper ww = context.getWordWrapper(sb.toString());
-		    String line = null;
-		    while((line = ww.nextLine()) != null)
-		        out.println(line);
-		}
+        // Send it
+        //
+        NameAssociation[] refused = session.broadcastChatMessage(message,
+                MessageLogKinds.BROADCAST);
+
+        // Print refused destinations (if any)
+        //
+        int top = refused.length;
+        if (top > 0)
+        {
+            // Build message
+            //
+            StringBuffer sb = new StringBuffer(200);
+            sb.append(formatter.format("chat.refused"));
+            for (int idx = 0; idx < top; ++idx)
+            {
+                sb.append(refused[idx].getName());
+                if (idx < top - 1)
+                    sb.append(", ");
+            }
+
+            // Wordwrap it!
+            //
+            out.println();
+            WordWrapper ww = context.getWordWrapper(sb.toString());
+            String line = null;
+            while ((line = ww.nextLine()) != null)
+                out.println(line);
+        }
     }
 }

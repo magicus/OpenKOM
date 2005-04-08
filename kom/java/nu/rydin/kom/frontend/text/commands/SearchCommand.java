@@ -23,9 +23,9 @@ public abstract class SearchCommand extends AbstractCommand
     protected static final int CHUNK_SIZE = 500;
     
     public SearchCommand(String fullName,
-            CommandLineParameter[] signature)
+            CommandLineParameter[] signature, long permissions)
     {
-        super(fullName, signature);
+        super(fullName, signature, permissions);
     }
 
 	public void execute(Context context, Object[] parameterArray)

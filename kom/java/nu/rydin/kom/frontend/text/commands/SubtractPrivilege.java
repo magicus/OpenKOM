@@ -19,10 +19,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class SubtractPrivilege extends AbstractCommand
 {
-    public SubtractPrivilege(Context context, String fullName)
+    public SubtractPrivilege(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[] { new UserParameter("subtract.privilege.user.question", true), 
-                new RightParameter(true, context.getFlagLabels("userprivs")) });
+                new RightParameter(true, context.getFlagLabels("userprivs")) }, permissions);
     }
 
     public void execute(Context context, Object[] parameters)

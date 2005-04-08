@@ -22,9 +22,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class KillSession extends AbstractCommand
 {
-	public KillSession(Context context, String fullName)
+	public KillSession(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new UserParameter(true) });	
+		super(fullName, new CommandLineParameter[] { new UserParameter(true) }, permissions);	
 	}
 
     public void checkAccess(Context context) throws AuthorizationException

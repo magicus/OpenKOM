@@ -29,9 +29,9 @@ public class UserPermissions
 	public static final long CONFERENCE_ADMIN		= 0x0004L;
 	
 	/**
-	 * Obsolete. Use this when defining a new bit
+	 * Normal user, i.e. not a twit
 	 */
-	public static final long OBSOLETE1				= 0x0008L;
+	public static final long NOT_TWIT				= 0x0008L;
 	
 	/**
 	 * Disregard conference permissions, i.e. enter any conference
@@ -59,6 +59,36 @@ public class UserPermissions
 	public static final long ADMIN					= 0x0100L;
 	
 	/**
+	 * Permission to send chat messages
+	 */
+	public static final long CHAT					= 0x0200L;
+	
+	/**
+	 * Permission to send broadcast messages
+	 */
+	public static final long BROADCAST				= 0x0400L;
+	
+	/**
+	 * Permission to post messages
+	 */
+	public static final long POST					= 0x0800L;
+	
+	/**
+	 * Permission to copy messages
+	 */
+	public static final long COPY					= 0x1000L;
+	
+	/**
+	 * Permission to move message
+	 */
+	public static final long MOVE					= 0x2000L;	
+	
+	/**
+	 * Permission to change suffix	
+	 */
+	public static final long CHANGE_SUFFIX			= 0x4000L;
+		
+	/**
 	 * All permissions
 	 */
 	public static final long EVERYTHING				= 0xffffffffffffffffL;
@@ -66,5 +96,6 @@ public class UserPermissions
 	/**
 	 * Normal permissions
 	 */
-	public static final long NORMAL					= LOGIN | CREATE_CONFERENCE;
+	public static final long NORMAL					= LOGIN | CREATE_CONFERENCE | NOT_TWIT 
+														| CHAT | BROADCAST | POST | COPY | MOVE;
 }

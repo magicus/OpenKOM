@@ -21,10 +21,10 @@ import nu.rydin.kom.frontend.text.parser.RawParameter;
 public class SendCondensedBroadcast extends AbstractCommand
 {
 
-    public SendCondensedBroadcast(Context context, String fullName)
+    public SendCondensedBroadcast(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[]
-        { new RawParameter("send.condensed.param.0.ask", true) });
+        { new RawParameter("send.condensed.param.0.ask", true) }, permissions);
     }
 
     public void execute(Context context, Object[] parameters)

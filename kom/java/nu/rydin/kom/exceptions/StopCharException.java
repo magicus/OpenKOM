@@ -11,20 +11,14 @@ package nu.rydin.kom.exceptions;
  */
 public class StopCharException extends LineEditorException
 {
-	private String m_line;
 	private char m_stopChar;
 	
-	public StopCharException(String line, char stopChar)
+	public StopCharException(String line, int pos, char stopChar)
 	{
-		m_line 		= line;
+		super(line, pos);
 		m_stopChar 	= stopChar;
 	}
 
-	public String getLine()
-	{
-		return m_line;
-	}
-	
 	public char getStopChar()
 	{
 		return m_stopChar;

@@ -25,9 +25,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class Copy extends AbstractCommand
 {
-	public Copy(Context context, String fullName)
+	public Copy(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(true) });	
+		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(true) }, permissions);	
 	}
 	
 	public void execute(Context context, Object[] parameterArray) 

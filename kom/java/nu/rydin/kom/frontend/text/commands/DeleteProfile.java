@@ -19,10 +19,10 @@ import nu.rydin.kom.frontend.text.parser.RawParameter;
  */
 public class DeleteProfile extends AbstractCommand
 {
-	public DeleteProfile(Context context, String fullname)
+	public DeleteProfile(Context context, String fullname, long permissions)
 	{
 		super(fullname, new CommandLineParameter[] { 
-		        new RawParameter("delete.profile.prompt", true) });
+		        new RawParameter("delete.profile.prompt", true) }, permissions);
 	}
 
     public void execute(Context context, Object[] parameters)

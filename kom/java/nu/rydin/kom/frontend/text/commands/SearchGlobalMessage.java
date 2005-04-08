@@ -17,10 +17,10 @@ import nu.rydin.kom.structs.MessageSearchResult;
  */
 public class SearchGlobalMessage extends SearchGlobalCommand
 {
-    public SearchGlobalMessage(Context context, String fullName)
+    public SearchGlobalMessage(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[] { new RawParameter(
-                "search.param.0.ask", true) });
+                "search.param.0.ask", true) }, permissions);
     }
 
     MessageSearchResult[] innerSearch(Context context, Object[] parameterArray,

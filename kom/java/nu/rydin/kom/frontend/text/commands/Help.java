@@ -237,9 +237,9 @@ public class Help extends AbstractCommand
 	     }
 	}
 
-	public Help (Context context, String fullName)
+	public Help (Context context, String fullName, long permissions)
 	{
-		super (fullName, new CommandLineParameter[] {new OtherCommandParameter ("", false)});	
+		super (fullName, new CommandLineParameter[] {new OtherCommandParameter ("", false)}, permissions);	
 	}
 	
 	public void execute (Context context, Object[] parameterArray)

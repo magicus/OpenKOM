@@ -6,8 +6,8 @@
  */
 package nu.rydin.kom.frontend.text.emulation;
 
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Vector;
 import nu.rydin.kom.utils.CompoundHashMap;
 
 /**
@@ -433,7 +433,7 @@ public class Emulator
 		// any of these characters, we short-circuit and ignore the rest. By terminfo convention, all key identifiers start with a lower-case k, so we
 		// just walk the compound hash and pull out anything that matches.
 		//
-		Vector v = new Vector();
+		HashSet v = new HashSet();
 		Iterator it = associations.keySet().iterator();
 		String key;
 		String value;

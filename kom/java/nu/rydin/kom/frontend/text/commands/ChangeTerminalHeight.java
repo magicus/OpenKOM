@@ -23,9 +23,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
 public class ChangeTerminalHeight extends AbstractCommand
 {
 
-	public ChangeTerminalHeight(Context context, String fullName)
+	public ChangeTerminalHeight(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new IntegerParameter("change.height.param.0.ask", true) } );	
+		super(fullName, new CommandLineParameter[] { new IntegerParameter("change.height.param.0.ask", true) }, permissions );	
 	}
 
 	public void execute(Context context, Object[] parameterArray)

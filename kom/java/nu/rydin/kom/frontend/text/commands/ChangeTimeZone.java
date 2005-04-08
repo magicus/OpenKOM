@@ -22,9 +22,10 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class ChangeTimeZone extends AbstractCommand
 {
-    public ChangeTimeZone(Context context, String fullName)
+    public ChangeTimeZone(Context context, String fullName, long permissions)
     {
-        super(fullName, new CommandLineParameter[] { new TimeZoneParameter(true) });    }
+        super(fullName, new CommandLineParameter[] { new TimeZoneParameter(true) }, permissions);    
+    }
 
     public void execute(Context context, Object[] parameters)
             throws KOMException, IOException, InterruptedException

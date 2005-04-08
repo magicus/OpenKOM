@@ -29,9 +29,9 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class ListFiles extends AbstractCommand
 {
-	public ListFiles(Context context, String fullname)
+	public ListFiles(Context context, String fullname, long permissions)
 	{
-		super(fullname, new CommandLineParameter[] {  new NamedObjectParameter(false)});
+		super(fullname, new CommandLineParameter[] {  new NamedObjectParameter(false)}, permissions);
 	}
 
     public void execute(Context context, Object[] parameters)

@@ -24,17 +24,18 @@ import nu.rydin.kom.structs.TextNumber;
  */
 public class ReadMessage extends AbstractCommand
 {
-	public ReadMessage(Context context, String fullName)
+	public ReadMessage(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true), new ConferenceParameter(false) });	
+		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true)}, permissions);	
 	}
 	
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
 	    TextNumber textNum = (TextNumber) parameterArray[0];
-	    
-	    NameAssociation conf = (NameAssociation) parameterArray[1];
+	    NameAssociation conf = parameterArray.length > 1 
+	    	? (NameAssociation) parameterArray[1]
+	    	: null;
 		
 		try
 		{

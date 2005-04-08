@@ -29,10 +29,10 @@ import nu.rydin.kom.structs.NameAssociation;
 public class EditFile extends AbstractCommand
 {
 
-    public EditFile(Context context, String fullname)
+    public EditFile(Context context, String fullname, long permissions)
     {
         super(fullname, new CommandLineParameter[] {
-                new FilenameParameter(true), new NamedObjectParameter(false) });
+                new FilenameParameter(true), new NamedObjectParameter(false) }, permissions);
     }
 
     public void execute(Context context, Object[] parameters)

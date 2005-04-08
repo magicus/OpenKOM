@@ -15,7 +15,7 @@ import nu.rydin.kom.frontend.text.ansi.ANSISequences;
  */
 public class ANSIDisplayController implements DisplayController 
 {
-    private final PrintWriter m_writer;
+    protected final PrintWriter m_writer;
     
     public ANSIDisplayController(PrintWriter writer)
     {

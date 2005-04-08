@@ -11,4 +11,22 @@ package nu.rydin.kom.exceptions;
  */
 public class LineEditorException extends SystemException
 {
+    private final String m_line;
+    private final int m_pos;
+    
+    public LineEditorException(String line, int pos)
+    {
+        m_line = line;
+        m_pos = pos;
+    }
+    
+    public String getLine()
+    {
+        return m_line;
+    }
+    
+    public int getPos()
+    {
+        return m_pos;
+    }
 }

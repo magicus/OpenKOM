@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.CommandLinePart;
 import nu.rydin.kom.frontend.text.parser.CommandNamePart;
@@ -20,14 +21,15 @@ public abstract class AbstractCommand implements Command
 {
     public final static CommandLineParameter[] NO_PARAMETERS = new CommandLineParameter[0];
 	
-    private String m_fullName;
+    private final String m_fullName;
     private String m_category;
 	
-	private CommandLineParameter[] m_signature;
-    private CommandNamePart[] m_nameSignature;
-    private CommandLinePart[] m_fullSignature;
+	private final CommandLineParameter[] m_signature;
+    private final CommandNamePart[] m_nameSignature;
+    private final CommandLinePart[] m_fullSignature;
+    private final long m_permissions;
 	
-	protected AbstractCommand(String fullName, CommandLineParameter[] signature)
+	protected AbstractCommand(String fullName, CommandLineParameter[] signature, long permissions)
 	{
 		m_fullName = fullName;
 		m_signature = signature;
@@ -37,11 +39,15 @@ public abstract class AbstractCommand implements Command
 		m_fullSignature = new CommandLinePart[m_nameSignature.length + m_signature.length];
 		System.arraycopy(m_nameSignature, 0, m_fullSignature, 0, m_nameSignature.length);
 		System.arraycopy(m_signature, 0, m_fullSignature, m_nameSignature.length, m_signature.length);
+		m_permissions = permissions;
 	}
 	
-	public void checkAccess(Context context) throws AuthorizationException
+	public void checkAccess(Context context) 
+	throws AuthorizationException, UnexpectedException
 	{
-	    //Restricted commands have to override and implement access checking.
+	    long rp = this.getRequiredPermissions();
+	    if((rp & context.getCachedUserInfo().getRights()) != rp)
+	        throw new AuthorizationException();
 	}
 	
 	public String getCategory()
@@ -87,6 +93,11 @@ public abstract class AbstractCommand implements Command
         return m_nameSignature;
     }
     
+    public long getRequiredPermissions()
+    {
+        return m_permissions;
+    }
+    
 	private CommandNamePart[] splitName(String name)
 	{
 	    CommandNamePart[] result;
@@ -108,5 +119,4 @@ public abstract class AbstractCommand implements Command
 	    }
 		return result;
 	}
-    
 }

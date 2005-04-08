@@ -26,9 +26,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class ChangeWelcomeMessage extends AbstractCommand
 {
-    public ChangeWelcomeMessage(Context context, String fullName)
+    public ChangeWelcomeMessage(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);	
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);	
 	}
     
     public void checkAccess(Context context) throws AuthorizationException

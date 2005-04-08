@@ -11,20 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class LineOverflowException extends LineEditorException
 {
-	private String m_line;
-	 
-	public LineOverflowException()
+	public LineOverflowException(String line, int pos)
 	{
-		super();
-	}
-
-	public LineOverflowException(String line)
-	{
-		m_line = line;
-	}
-
-	public String getLine()
-	{
-		return m_line;
+	    super(line, pos);
 	}
 }

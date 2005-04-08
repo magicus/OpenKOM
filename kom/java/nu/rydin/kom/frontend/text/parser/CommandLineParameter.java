@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.InvalidChoiceException;
+import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -42,15 +43,24 @@ public abstract class CommandLineParameter extends CommandLinePart
 		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
-
-		out.println();
-		out.print(fmt.format(m_missingObjectQuestionKey));
-		out.flush();
-		String line = in.readLine();
-		if(line.length() == 0)
-		    throw new OperationInterruptedException();
-		Match newMatch = innerMatch(line, "");
-		return newMatch;
+	    for(;;)
+	    {
+	        try
+	        {
+				out.println();
+				out.print(fmt.format(m_missingObjectQuestionKey));
+				out.flush();
+				String line = in.readLine();
+				if(line.length() == 0)
+				    throw new OperationInterruptedException();
+				Match newMatch = innerMatch(line, "");
+				return newMatch;
+	        }
+	        catch(LineEditingDoneException e)
+	        {
+	            continue;
+	        }
+	    }
 	}
 
     public boolean isRequired() 

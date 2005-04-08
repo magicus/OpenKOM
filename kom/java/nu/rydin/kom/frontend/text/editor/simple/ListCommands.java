@@ -16,9 +16,9 @@ import nu.rydin.kom.frontend.text.parser.Parser;
 
 public class ListCommands extends nu.rydin.kom.frontend.text.commands.ListCommands
 {
-	public ListCommands(Context context, String fullName)
+	public ListCommands(Context context, String fullName, long permissions)
 	{
-		super(context, fullName);
+		super(context, fullName, permissions);
 	}
 
     protected Collection getCategories(Context context) throws KOMException, IOException 

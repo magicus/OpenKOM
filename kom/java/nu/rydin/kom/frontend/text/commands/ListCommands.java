@@ -23,9 +23,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
 
 public class ListCommands extends AbstractCommand
 {
-	public ListCommands(Context context, String fullName)
+	public ListCommands(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 	
 	protected Collection getCategories(Context context) throws IOException, KOMException 

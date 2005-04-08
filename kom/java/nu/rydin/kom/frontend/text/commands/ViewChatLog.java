@@ -17,9 +17,9 @@ import nu.rydin.kom.structs.MessageLogItem;
  */
 public class ViewChatLog extends ViewMessageLog
 {
-    public ViewChatLog(Context context, String fullName)
+    public ViewChatLog(Context context, String fullName, long permissions)
     {
-        super(context, fullName);
+        super(context, fullName, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)

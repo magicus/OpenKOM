@@ -26,9 +26,9 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class WriteMailReply extends AbstractCommand
 {
-    public WriteMailReply(Context context, String fullName)
+    public WriteMailReply(Context context, String fullName, long permissions)
     {
-        super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)});
+        super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)}, permissions);
     }
 
 	public void execute(Context context, Object[] parameterArray) 

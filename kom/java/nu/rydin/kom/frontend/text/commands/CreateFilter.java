@@ -22,12 +22,12 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class CreateFilter extends AbstractCommand
 {
-	public CreateFilter(Context context, String fullName)
+	public CreateFilter(Context context, String fullName, long permissions)
 	{
 		super(fullName, new CommandLineParameter[] 
 		   { new UserParameter(true), 
 		        new EllipsisParameter("create.filter.type.ask", true, new FlagParameter(true, 
-		                context.getFlagLabels("filterflags")))});	
+		                context.getFlagLabels("filterflags")))}, permissions);	
 	}
 
     public void execute(Context context, Object[] parameters)

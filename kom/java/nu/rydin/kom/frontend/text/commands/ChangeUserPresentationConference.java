@@ -23,9 +23,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ChangeUserPresentationConference extends AbstractCommand
 {
-	public ChangeUserPresentationConference(Context context, String fullName)
+	public ChangeUserPresentationConference(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });	
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) }, permissions);	
 	}
 
     public void checkAccess(Context context) throws AuthorizationException

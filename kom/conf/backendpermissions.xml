@@ -1,0 +1,3 @@
+<class name="nu.rydin.kom.backend.ServerSession">
+	<method signature="readLocalMessage(int)" permissions="0008"/>
+</class>

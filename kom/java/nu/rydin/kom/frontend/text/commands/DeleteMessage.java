@@ -20,9 +20,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class DeleteMessage extends AbstractCommand
 {
-    public DeleteMessage(Context context, String fullName)
+    public DeleteMessage(Context context, String fullName, long permissions)
     {
-        super(fullName, new CommandLineParameter[] { new LocalTextNumberParameter(true) });
+        super(fullName, new CommandLineParameter[] { new LocalTextNumberParameter(true) }, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)

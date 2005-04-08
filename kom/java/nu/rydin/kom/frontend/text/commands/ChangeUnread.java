@@ -19,9 +19,9 @@ import nu.rydin.kom.frontend.text.parser.IntegerParameter;
  */
 public class ChangeUnread extends AbstractCommand
 {
-	public ChangeUnread(Context context, String fullName)
+	public ChangeUnread(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new IntegerParameter("change.unread.param.0.ask", true) } );	
+		super(fullName, new CommandLineParameter[] { new IntegerParameter("change.unread.param.0.ask", true) }, permissions );	
 	}
 
 	public void execute(Context context, Object[] parameterArray)

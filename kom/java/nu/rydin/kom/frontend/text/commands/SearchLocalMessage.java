@@ -18,10 +18,10 @@ import nu.rydin.kom.structs.MessageSearchResult;
  */
 public class SearchLocalMessage extends SearchLocalCommand
 {
-    public SearchLocalMessage(Context context, String fullName)
+    public SearchLocalMessage(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[]
-        { new RawParameter("search.param.0.ask", true) });
+        { new RawParameter("search.param.0.ask", true) }, permissions);
     }
 
     protected MessageSearchResult[] innerSearch(Context context,

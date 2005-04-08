@@ -13,6 +13,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Stack;
 
 import nu.rydin.kom.backend.EventSource;
 import nu.rydin.kom.backend.ServerSession;
@@ -21,12 +22,14 @@ import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.ImmediateShutdownException;
+import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.LineEditingInterruptedException;
 import nu.rydin.kom.exceptions.LineOverflowException;
 import nu.rydin.kom.exceptions.LineUnderflowException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.OutputInterruptedException;
 import nu.rydin.kom.exceptions.StopCharException;
+import nu.rydin.kom.frontend.text.constants.Keystrokes;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.utils.Logger;
 import nu.rydin.kom.utils.PrintUtils;
@@ -43,27 +46,13 @@ public class LineEditor implements NewlineListener
 	public static final int FLAG_STOP_ONLY_WHEN_EMPTY	= 0x10;
 	public static final int FLAG_RECORD_HISTORY			= 0x20;
 	public static final int FLAG_ALLOW_HISTORY			= 0x40;
+	public static final int FLAG_DONT_REFRESH			= 0x80;
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
 	private static final char TAB				= 9;
 	private static final char SPACE				= 32;
-	
-	private static final int TOKEN_UP			= 1;
-	private static final int TOKEN_DOWN			= 2;
-	private static final int TOKEN_LEFT			= 3;
-	private static final int TOKEN_RIGHT		= 4;
-	private static final int TOKEN_DELETE_LINE	= 5;
-	private static final int TOKEN_DELETE_WORD	= 6;
-	private static final int TOKEN_BOL			= 7;
-	private static final int TOKEN_EOL			= 8;
-	private static final int TOKEN_BS			= 9;
-	private static final int TOKEN_CR			= 10;
-	private static final int TOKEN_PREV			= 11;
-	private static final int TOKEN_NEXT			= 12;
-	private static final int TOKEN_ABORT		= 13;
-	private static final int TOKEN_SKIP			= 100;
-	
+		
 	/**
 	 * Maximum number of keystrokes on one line before session
 	 * shutdown. For protection against DOS-attacks.
@@ -97,24 +86,24 @@ public class LineEditor implements NewlineListener
 			                "\u0010",			// Ctrl-P
 			                "\u000e"},			// Ctrl-N
 			        new int[] {
-			                TOKEN_SKIP,			// Newline
-			                TOKEN_CR,			// CR
-			                TOKEN_BS,			// BS
-			                TOKEN_BS,			// DEL
-			                TOKEN_BOL,			// Ctrl-A
-			                TOKEN_EOL,			// Ctrl-E
-			                TOKEN_DELETE_LINE, 	// Ctrl-U
-			                TOKEN_DELETE_LINE, 	// Ctrl-X
-			                TOKEN_DELETE_WORD, 	// Ctrl-W
-			                TOKEN_UP, 			// <esc> [ A
-			                TOKEN_DOWN, 		// <esc> [ B
-			                TOKEN_RIGHT,		// <esc> [ C
-			                TOKEN_RIGHT, 		// Ctrl-F
-			                TOKEN_LEFT, 		// <esc> [ D
-			                TOKEN_LEFT,			// Ctrl-B
-			                TOKEN_ABORT,		// Ctrl-C
-		    				TOKEN_PREV,			// Ctrl-P
-		    				TOKEN_NEXT });		// Ctrl-N
+			                Keystrokes.TOKEN_SKIP,			// Newline
+			                Keystrokes.TOKEN_CR,			// CR
+			                Keystrokes.TOKEN_BS,			// BS
+			                Keystrokes.TOKEN_BS,			// DEL
+			                Keystrokes.TOKEN_BOL,			// Ctrl-A
+			                Keystrokes.TOKEN_EOL,			// Ctrl-E
+			                Keystrokes.TOKEN_CLEAR_LINE, 	// Ctrl-U
+			                Keystrokes.TOKEN_CLEAR_LINE, 	// Ctrl-X
+			                Keystrokes.TOKEN_DELETE_WORD, 	// Ctrl-W
+			                Keystrokes.TOKEN_UP, 			// <esc> [ A
+			                Keystrokes.TOKEN_DOWN, 			// <esc> [ B
+			                Keystrokes.TOKEN_RIGHT,			// <esc> [ C
+			                Keystrokes.TOKEN_RIGHT, 		// Ctrl-F
+			                Keystrokes.TOKEN_LEFT, 			// <esc> [ D
+			                Keystrokes.TOKEN_LEFT,			// Ctrl-B
+			                Keystrokes.TOKEN_ABORT,			// Ctrl-C
+			                Keystrokes.TOKEN_PREV,			// Ctrl-P
+			                Keystrokes.TOKEN_NEXT });		// Ctrl-N
 	    }
 	    catch(AmbiguousPatternException e)
 	    {
@@ -122,7 +111,7 @@ public class LineEditor implements NewlineListener
 	    }
 	}
 	
-	private final KeystrokeTokenizer m_tokenizer;
+	private final Stack m_tokenizerStack = new Stack();
 	
 	private final ReaderProxy m_in;
 	
@@ -378,7 +367,7 @@ public class LineEditor implements NewlineListener
 		
 		// Create tokenizer
 		//
-		m_tokenizer = s_tokenizerDef.createKeystrokeTokenizer();
+		m_tokenizerStack.push(s_tokenizerDef.createKeystrokeTokenizer());
 		
 		// Start pollers
 		//
@@ -394,6 +383,16 @@ public class LineEditor implements NewlineListener
 	{
 	    m_keystrokePoller = new KeystrokePoller();
 	    m_keystrokePoller.start();
+	}
+	
+	public void pushTokenizer(KeystrokeTokenizer tokenizer)
+	{
+	    m_tokenizerStack.push(tokenizer);
+	}
+	
+	public void popTokenizer()
+	{
+	    m_tokenizerStack.pop();
 	}
 	
 	public void setSession(ServerSession session)
@@ -418,7 +417,8 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readLineStopOnEvent()
-	throws IOException, InterruptedException, OperationInterruptedException, EventDeliveredException
+	throws IOException, InterruptedException, OperationInterruptedException, EventDeliveredException,
+	LineEditingDoneException
 	{
 		try
 		{
@@ -440,7 +440,8 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readLineStopOnEvent(String defaultString)
-	throws IOException, InterruptedException, OperationInterruptedException, EventDeliveredException
+	throws IOException, InterruptedException, OperationInterruptedException, EventDeliveredException,
+	LineEditingDoneException
 	{
 		try
 		{
@@ -468,7 +469,7 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readPassword()
-	throws IOException, InterruptedException, OperationInterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException, LineEditingDoneException
 	{
 		try
 		{
@@ -496,13 +497,15 @@ public class LineEditor implements NewlineListener
 	}
 	
 	public String readLine()
-	throws IOException, InterruptedException, OperationInterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException,
+	LineEditingDoneException
 	{
 		return this.readLine(null);
 	}
 	
 	public String readLine(String defaultString)
-	throws IOException, InterruptedException, OperationInterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException,
+	LineEditingDoneException
 	{
 		try
 		{
@@ -531,14 +534,16 @@ public class LineEditor implements NewlineListener
 	
 	public String readLine(String defaultString, String stopChars, int length, int flags)
 	throws LineOverflowException, StopCharException, LineUnderflowException, IOException, 
-	InterruptedException, OperationInterruptedException, EventDeliveredException
+	InterruptedException, OperationInterruptedException, EventDeliveredException,
+	LineEditingDoneException
 	{
 		return innerReadLine(defaultString, stopChars, length, flags);
 	}
 
 	
 	public int getChoice(String prompt, String[] choices, int defaultChoice, String errorString)
-	throws IOException, InterruptedException, OperationInterruptedException
+	throws IOException, InterruptedException, OperationInterruptedException,
+	LineEditingDoneException
 	{		String defaultString = defaultChoice != -1 ? choices[defaultChoice] : null;
 		int top = choices.length;
 		for(;;)
@@ -676,7 +681,7 @@ public class LineEditor implements NewlineListener
 				//
 				ev.dispatch(m_target);
 				if((flags & FLAG_STOP_ON_EVENT) != 0)
-					throw new EventDeliveredException(ev);
+					throw new EventDeliveredException(ev, "", -1);
 				
 				// This is not the event we're looking for. Move along.
 				//
@@ -696,7 +701,21 @@ public class LineEditor implements NewlineListener
 	
 	protected String innerReadLine(String defaultString, String stopChars, int maxLength, int flags)
 	throws EventDeliveredException, StopCharException, LineOverflowException, LineUnderflowException, 
-	IOException, OperationInterruptedException, InterruptedException
+	IOException, OperationInterruptedException, InterruptedException, LineEditingDoneException
+	{
+	    return this.editLine(defaultString, stopChars, maxLength, -1, flags);
+	}
+	
+	public String editLine(String defaultString, int maxLength, int pos, int flags)
+	throws EventDeliveredException, StopCharException, LineOverflowException, LineUnderflowException, 
+	IOException, OperationInterruptedException, InterruptedException, LineEditingDoneException
+	{
+	    return this.editLine(defaultString, "", maxLength, pos, flags);
+	}
+	
+	public String editLine(String defaultString, String stopChars, int maxLength, int pos, int flags)
+	throws EventDeliveredException, StopCharException, LineOverflowException, LineUnderflowException, 
+	IOException, OperationInterruptedException, InterruptedException, LineEditingDoneException
 	{
 	    /**
 	     * Position in history buffer
@@ -704,6 +723,7 @@ public class LineEditor implements NewlineListener
 	    int historyPos = m_history.size();
 		StringBuffer buffer = new StringBuffer(500);
 		int cursorpos = 0;
+		boolean newLine = false;
 		
 		// Did we get a default string?
 		//
@@ -711,12 +731,22 @@ public class LineEditor implements NewlineListener
 		{
 			// Strip newlines
 			//
+		   
 			if(defaultString.endsWith("\n"))
+			{
 				defaultString = defaultString.substring(0, defaultString.length() - 1);
+				newLine = true;
+			}
 			buffer.append(defaultString);
 			m_out.print(defaultString);
-			m_out.flush();
 			cursorpos = defaultString.length();
+			if(pos != -1)
+			{
+			    for(;cursorpos > pos; --cursorpos)
+			        m_out.print(BS);
+			}
+			m_out.flush();
+			
 		}
 		
 		int count = 0;
@@ -756,15 +786,25 @@ public class LineEditor implements NewlineListener
 			            }
 			        }
 		        }
-		        token = m_tokenizer.feedCharacter(ch);
+		        token = ((KeystrokeTokenizer) m_tokenizerStack.peek()).feedCharacter(ch);
 		    }
 		    int kind = token.getKind();
+		    boolean exit = (kind & Keystrokes.TOKEN_MOFIDIER_BREAK) != 0;
+		    kind &= ~Keystrokes.TOKEN_MOFIDIER_BREAK; // Strip break bit
+		    
+		    // Break?
+		    //
+		    if(exit)
+		    {
+		        String line = buffer.toString();
+		        throw new LineEditingDoneException(token, newLine ? line + '\n' : line , cursorpos);
+		    }
 		    switch(kind)
 		    {
-		    	case TOKEN_ABORT:
+		    	case Keystrokes.TOKEN_ABORT:
 	    	        throw new LineEditingInterruptedException(buffer.toString());
-		    	case TOKEN_PREV:
-		    	case TOKEN_UP:
+		    	case Keystrokes.TOKEN_PREV:
+		    	case Keystrokes.TOKEN_UP:
 		    	    if(historyPos > 0 && (flags & FLAG_ALLOW_HISTORY) != 0)
 		    	    {
 				    	this.deleteLine(buffer, cursorpos);
@@ -777,8 +817,8 @@ public class LineEditor implements NewlineListener
 		    	    else
 		    	        m_out.write(BELL);
 		    		break;
-		    	case TOKEN_NEXT:
-		    	case TOKEN_DOWN:
+		    	case Keystrokes.TOKEN_NEXT:
+		    	case Keystrokes.TOKEN_DOWN:
 		    	    if(historyPos < m_history.size() - 1 && (flags & FLAG_ALLOW_HISTORY) != 0)
 		    	    {
 				    	this.deleteLine(buffer, cursorpos);
@@ -791,7 +831,7 @@ public class LineEditor implements NewlineListener
 		    	    else
 		    	        m_out.write(BELL);
 	    			break;
-	    		case TOKEN_RIGHT:
+	    		case Keystrokes.TOKEN_RIGHT:
 	    		    if(cursorpos==buffer.length() || (flags & FLAG_ECHO) == 0)
 		    		{
 		    			//If at end of buffer or no echo, ignore arrow and beep.
@@ -803,10 +843,11 @@ public class LineEditor implements NewlineListener
 						cursorpos++;
 		    		}
 	    		    break;
-	    		case TOKEN_LEFT:
+	    		case Keystrokes.TOKEN_LEFT:
 					if(cursorpos == 0 || (flags & FLAG_ECHO) == 0)
 					{
 					    //If at end of buffer or no echo, ignore arrow and beep.
+					    //
 						if((flags & FLAG_STOP_ON_BOL) != 0) 
 						{
 						    //FIXME Disabled this, breaks lots of stuff. :-)
@@ -820,16 +861,16 @@ public class LineEditor implements NewlineListener
 						m_out.write(BS);
 					}
 					break;
-				case TOKEN_CR:
+				case Keystrokes.TOKEN_CR:
 					editing = false;
 					m_out.write('\r');					
 					m_out.write('\n');
 					break;
-				case TOKEN_BS:
+				case Keystrokes.TOKEN_BS:
 					if(cursorpos == 0)
 					{
 						if((flags & FLAG_STOP_ON_BOL) != 0)
-							throw new LineUnderflowException();
+							throw new LineUnderflowException(buffer.toString(), cursorpos);
 						m_out.write(BELL);
 					}
 					else
@@ -846,7 +887,7 @@ public class LineEditor implements NewlineListener
 						}
 					}	
 					break;
-				case TOKEN_BOL:
+				case Keystrokes.TOKEN_BOL:
 					if(((flags & FLAG_ECHO) != 0) && cursorpos > 0)
 					{
 						//Advance cursor to beginning of line
@@ -854,7 +895,7 @@ public class LineEditor implements NewlineListener
 						cursorpos = 0;
 					}
 					break;
-				case TOKEN_EOL:
+				case Keystrokes.TOKEN_EOL:
 					if(((flags & FLAG_ECHO) != 0) && cursorpos < buffer.length())
 					{
 					    // Advance cursor to end of line
@@ -863,13 +904,13 @@ public class LineEditor implements NewlineListener
 						cursorpos = buffer.length();
 					}
 					break;
-				case TOKEN_DELETE_LINE:
+				case Keystrokes.TOKEN_CLEAR_LINE:
 					{
 				    	this.deleteLine(buffer, cursorpos);
 						cursorpos = 0;						
 						break;
 					}					
-				case TOKEN_DELETE_WORD:
+				case Keystrokes.TOKEN_DELETE_WORD:
 				{
 					//Move i to beginning of current word.
 					int i = cursorpos;
@@ -902,11 +943,11 @@ public class LineEditor implements NewlineListener
 					}
 					break;				
 				}
-				case TOKEN_SKIP:
+				case Keystrokes.TOKEN_SKIP:
 				    break;
 				case KeystrokeTokenizerDefinition.LITERAL:
 					if(stopChars != null && stopChars.indexOf(ch) != -1)
-					    throw new StopCharException(buffer.toString(), ch);
+					    throw new StopCharException(buffer.toString(), cursorpos, ch);
 
 					// Are we exceeding max length?
 					//
@@ -917,7 +958,7 @@ public class LineEditor implements NewlineListener
 						if((flags & FLAG_STOP_ON_EOL) != 0)
 						{
 							buffer.insert(cursorpos++, ch);
-							throw new LineOverflowException(buffer.toString());
+							throw new LineOverflowException(buffer.toString(), cursorpos);
 						}
 						// Don't break. Just make noise and ignore keystroke
 						//
@@ -958,7 +999,7 @@ public class LineEditor implements NewlineListener
 		if((flags & FLAG_RECORD_HISTORY) != 0 && buffer.length() > 0 && 
 		        (m_history.size() == 0 || !answer.equals(m_history.get(m_history.size() - 1))))
 		    m_history.add(answer);
-		return answer;
+		return newLine ? answer + '\n' : answer;
 	}
 	
 	private void deleteLine(StringBuffer buffer, int cursorpos)

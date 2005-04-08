@@ -18,10 +18,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ListGlobalMessage extends SearchGlobalCommand
 {
-    public ListGlobalMessage(Context context, String fullName)
+    public ListGlobalMessage(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[]
-        { new UserParameter(true) });
+        { new UserParameter(true) }, permissions);
     }
 
     MessageSearchResult[] innerSearch(Context context, Object[] parameterArray,

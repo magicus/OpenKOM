@@ -21,9 +21,9 @@ import nu.rydin.kom.frontend.text.Context;
 public class ProhibitLogin extends AbstractCommand
 {
 
-	public ProhibitLogin(Context context, String fullName)
+	public ProhibitLogin(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 
     public void checkAccess(Context context) throws AuthorizationException

@@ -19,10 +19,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ListLocalMessage extends SearchLocalCommand
 {
-    public ListLocalMessage(Context context, String fullName)
+    public ListLocalMessage(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[]
-        { new UserParameter(false) });
+        { new UserParameter(false) }, permissions);
     }
 
     MessageSearchResult[] innerSearch(Context context,

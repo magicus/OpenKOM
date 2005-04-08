@@ -20,10 +20,10 @@ import nu.rydin.kom.frontend.text.parser.FlagParameter;
  */
 public class ClearFlag extends AbstractCommand
 {
-    public ClearFlag(Context context, String fullName)
+    public ClearFlag(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[]
-        { new FlagParameter(true, context.getFlagLabels("userflags")) });
+        { new FlagParameter(true, context.getFlagLabels("userflags")) }, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)

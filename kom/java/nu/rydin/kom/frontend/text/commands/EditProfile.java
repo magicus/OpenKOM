@@ -25,10 +25,10 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class EditProfile extends AbstractCommand
 {
-	public EditProfile(Context context, String fullname)
+	public EditProfile(Context context, String fullname, long permissions)
 	{
 		super(fullname, new CommandLineParameter[] { 
-		        new RawParameter("edit.profile.prompt", true) });
+		        new RawParameter("edit.profile.prompt", true) }, permissions);
 	}
 
     public void execute(Context context, Object[] parameters)

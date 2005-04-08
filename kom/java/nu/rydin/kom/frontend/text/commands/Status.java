@@ -33,9 +33,9 @@ public class Status extends AbstractCommand
 {
     private final int LABEL_LENGTH = 25;
     
-	public Status(Context context, String fullName)
+	public Status(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(false) });		
+		super(fullName, new CommandLineParameter[] { new NamedObjectParameter(false) }, permissions);		
 	}
 	
 	public void execute(Context context, Object[] parameters) 
@@ -167,7 +167,7 @@ public class Status extends AbstractCommand
 		        this.formatPermissions(info.getNonmemberPermissions(), formatter));
 		
 		// TODO: fulkod
-		ListMembers l = new ListMembers(context, "");
+		ListMembers l = new ListMembers(context, "", this.getRequiredPermissions());
 		String [] args = {info.getName()};
 		try
 		{

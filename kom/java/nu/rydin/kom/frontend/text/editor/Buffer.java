@@ -14,6 +14,18 @@ import java.util.Iterator;
  */
 public class Buffer
 {
+    private static class Line
+    {
+        public String m_content;
+        
+        public boolean m_newline = false;
+        
+        public Line(String content)
+        {
+            m_content = content;
+        }
+    }
+    
 	private ArrayList m_lines = new ArrayList();
 	
 	public Buffer()
@@ -30,7 +42,7 @@ public class Buffer
 	{
 		String line;
 		while((line = wrapper.nextLine()) != null)
-			m_lines.add(new StringBuffer(line));	    
+			m_lines.add(new Line(line));	    
 	}
 	
 	public String toString()
@@ -38,44 +50,50 @@ public class Buffer
 		StringBuffer buffer = new StringBuffer();
 		for(Iterator itor = m_lines.iterator(); itor.hasNext();)
 		{
-			StringBuffer line = (StringBuffer) itor.next();
-			if(line.length() > 0)
+			Line line = (Line) itor.next();
+			String content = line.m_content;
+			if(content.length() > 0)
 			{
-				buffer.append(line);
-				if(!Character.isWhitespace(line.charAt(line.length() - 1)))
-					buffer.append(' ');
+				buffer.append(content);
+				if(!Character.isWhitespace(content.charAt(content.length() - 1)))
+					buffer.append(line.m_newline ? '\n' : ' ');
 			}
-			else
+			else if(line.m_newline)
 			    buffer.append('\n');
 		}
 		return buffer.toString();
 	}
 	
-	public StringBuffer get(int idx)
+	public String get(int idx)
 	{
-		return (StringBuffer) m_lines.get(idx);
+		return ((Line) m_lines.get(idx)).m_content;
 	}
-	
-	public void put(int idx, StringBuffer buffer)
-	{
-		m_lines.set(idx, buffer);
-	}
-	
+		
 	public void put(int idx, String buffer)
 	{
-		m_lines.set(idx, new StringBuffer(buffer));
+		m_lines.set(idx, new Line(buffer));
+	}
+	
+	public void setNewline(int idx, boolean nl)
+	{
+	    ((Line) m_lines.get(idx)).m_newline = nl;
+	}
+	
+	public boolean isNewline(int idx)
+	{
+	    return ((Line) m_lines.get(idx)).m_newline;
 	}
 	
 	public void insertBefore(int where, String buffer)
 	{
-		this.insertBefore(where, new StringBuffer(buffer));
+		this.insertBefore(where, new Line(buffer));
 	}
 	
-	public void insertBefore(int where, StringBuffer buffer)
+	public void insertBefore(int where, Line line)
 	{
 		int top = m_lines.size();
 		if(where == top)
-			m_lines.add(buffer);
+			m_lines.add(line);
 		else
 		{
 			// We're adding before the end. A little tricker.
@@ -85,7 +103,7 @@ public class Buffer
 			where = Math.min(where, m_lines.size());
 			for(idx = 0; idx < where; ++idx)
 				newList.add(m_lines.get(idx));
-			newList.add(buffer);
+			newList.add(line);
 			for(; idx < top; ++idx)
 				newList.add(m_lines.get(idx));
 			m_lines = newList;
@@ -107,18 +125,19 @@ public class Buffer
 	
 	public void set(int idx, String buffer)
 	{
-		this.set(idx, new StringBuffer(buffer));
-	}
-	
-	public void set(int idx, StringBuffer buffer)
-	{
 		int top = m_lines.size();
 		if(idx > top)
 			throw new ArrayIndexOutOfBoundsException();
 		if(idx == top)
-			m_lines.add(buffer);
+			m_lines.add(new Line(buffer));
 		else
-			m_lines.set(idx, buffer);
+		{
+		    Line line = (Line) m_lines.get(idx);
+		    if(line != null)
+		        line.m_content = buffer;
+		    else
+		        m_lines.set(idx, new Line(buffer));
+		}
 	}
 	
 	public int size()
@@ -128,11 +147,7 @@ public class Buffer
 	
 	public void add(String string)
 	{
-		m_lines.add(new StringBuffer(string));
+		m_lines.add(new Line(string));
 	}
 	
-	public void add(StringBuffer buffer)
-	{
-		m_lines.add(buffer);
-	}
 }

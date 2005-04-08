@@ -17,9 +17,9 @@ import nu.rydin.kom.frontend.text.parser.LineNumberParameter;
 
 public class Delete extends AbstractCommand
 {
-	public Delete(Context context, String fullName)
+	public Delete(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) } );
+		super(fullName, new CommandLineParameter[] { new LineNumberParameter(true) }, permissions );
 	}
 	
 	public void execute(Context context, Object[] parameterArray)

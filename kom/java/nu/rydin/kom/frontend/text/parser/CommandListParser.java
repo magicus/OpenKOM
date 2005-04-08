@@ -32,7 +32,7 @@ public class CommandListParser extends DefaultHandler
     public static final short STATE_COMMAND			= 3;
     
     private static final Class[] s_commandCtorSignature = new Class[]
-          { Context.class, String.class };
+          { Context.class, String.class, long.class };
 
     private final Map m_categories 	= new HashMap();
     
@@ -81,6 +81,8 @@ public class CommandListParser extends DefaultHandler
 	            String className = atts.getValue("class");
 	            Class clazz = Class.forName(className);
 	            Constructor ctor = clazz.getConstructor(s_commandCtorSignature);
+	            String pString = atts.getValue("permissions");
+	            long permissions = pString != null ? Long.parseLong(pString, 16) : 0L;
 	
 	            // Install primary command
 	            //
@@ -89,7 +91,7 @@ public class CommandListParser extends DefaultHandler
 	            
 	            Command primaryCommand = (Command) ctor
 	                    .newInstance(new Object[]
-	                    { m_context, name });
+	                    { m_context, name, new Long(permissions) });
 	            m_commands.add(primaryCommand);
 	            m_currentCat.addCommand(primaryCommand);
 	
@@ -109,7 +111,7 @@ public class CommandListParser extends DefaultHandler
 	                //
 	                Command aliasCommand = (Command) ctor
 	                        .newInstance(new Object[]
-	                        { m_context, alias });
+	                        { m_context, alias, new Long(permissions) });
 	                m_commands.add(aliasCommand);
 	                m_currentCat.addCommand(aliasCommand);
 	            }

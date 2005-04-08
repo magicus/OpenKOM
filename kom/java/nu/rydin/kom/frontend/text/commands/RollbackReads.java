@@ -20,9 +20,9 @@ import nu.rydin.kom.frontend.text.parser.IntegerParameter;
 public class RollbackReads extends AbstractCommand
 {
 
-	public RollbackReads(Context context, String fullName)
+	public RollbackReads(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new IntegerParameter("rollback.reads.param.0.ask", true) } );	
+		super(fullName, new CommandLineParameter[] { new IntegerParameter("rollback.reads.param.0.ask", true) }, permissions );	
 	}
 
     public void execute(Context context, Object[] parameters)

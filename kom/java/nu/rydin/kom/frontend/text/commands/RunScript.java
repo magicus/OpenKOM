@@ -22,11 +22,11 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class RunScript extends AbstractCommand
 {
-	public RunScript(Context context, String fullname)
+	public RunScript(Context context, String fullname, long permissions)
 	{
 		super(fullname, new CommandLineParameter[] { 
 		        new RawParameter("edit.file.prompt", true),
-		        new NamedObjectParameter(false)});
+		        new NamedObjectParameter(false)}, permissions);
 	}
 
     public void execute(Context context, Object[] parameters)

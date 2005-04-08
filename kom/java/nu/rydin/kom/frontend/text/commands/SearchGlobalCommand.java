@@ -27,9 +27,9 @@ public abstract class SearchGlobalCommand extends SearchCommand
     protected static final int CONFERENCE_COL_WIDTH = 30;
     protected static final int SUBJECT_COL_WIDTH = 28;
     
-    public SearchGlobalCommand(String fullName, CommandLineParameter[] signature)
+    public SearchGlobalCommand(String fullName, CommandLineParameter[] signature, long permissions)
     {
-        super(fullName, signature);
+        super(fullName, signature, permissions);
     }
     
     protected void innerPrintSearchResultRow(Context context, KOMWriter out, MessageSearchResult msr)

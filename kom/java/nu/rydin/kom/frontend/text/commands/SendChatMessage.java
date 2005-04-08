@@ -28,10 +28,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class SendChatMessage extends AbstractCommand
 {
-	public SendChatMessage(Context context, String fullName)
+	public SendChatMessage(Context context, String fullName, long permissions)
 	{
 	    // Säg foo, bar: Du är bäst!
-		super(fullName, new CommandLineParameter[] { new EllipsisParameter("chat.fulhack.raw.ask", true, new ChatRececipientParameter(true)), new RawParameter("chat.fulhack.raw.ask", false)});
+		super(fullName, new CommandLineParameter[] { new EllipsisParameter("chat.fulhack.raw.ask", true, new ChatRececipientParameter(true)), new RawParameter("chat.fulhack.raw.ask", false)}, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)
@@ -55,7 +55,7 @@ public class SendChatMessage extends AbstractCommand
 			{
 			    // "*" detected, abort and send a broadcast instead.
 			    //
-			    new SendBroadcastChatMessage(context, "").execute(context, new Object[] { parameterArray[1] });
+			    new SendBroadcastChatMessage(context, "", this.getRequiredPermissions()).execute(context, new Object[] { parameterArray[1] });
 			    return;
 			}
 			if (notExistsIn(id, destinations))

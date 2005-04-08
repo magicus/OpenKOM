@@ -28,9 +28,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class DeleteConference extends AbstractCommand 
 {
-	public DeleteConference (Context context, String fullname)
+	public DeleteConference (Context context, String fullname, long permissions)
 	{
-		super(fullname, new CommandLineParameter[] { new ConferenceParameter(true)});
+		super(fullname, new CommandLineParameter[] { new ConferenceParameter(true)}, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)

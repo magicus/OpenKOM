@@ -22,6 +22,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.text.terminal.TerminalController;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -250,5 +251,10 @@ public class EditorContext implements Context
     throws DuplicateNameException, InvalidNameException, UnexpectedException
     {
         m_underlying.checkName(name);
+    }
+    
+    public TerminalController getTerminalController()
+    {
+        return m_underlying.getTerminalController();
     }
 }

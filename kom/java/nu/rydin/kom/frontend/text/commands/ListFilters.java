@@ -25,9 +25,9 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class ListFilters extends AbstractCommand
 {
-	public ListFilters(Context context, String fullName)
+	public ListFilters(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS); 
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions); 
 	}
 
     public void execute(Context context, Object[] parameters)

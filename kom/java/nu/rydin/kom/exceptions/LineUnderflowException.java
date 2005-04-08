@@ -11,20 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class LineUnderflowException extends LineEditorException
 {
-	private String m_line;
-	 
-	public LineUnderflowException()
+	public LineUnderflowException(String line, int pos)
 	{
-		super();
-	}
-
-	public LineUnderflowException(String line)
-	{
-		m_line = line;
-	}
-
-	public String getLine()
-	{
-		return m_line;
+		super(line, pos);
 	}
 }

@@ -22,10 +22,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class DeleteFile extends AbstractCommand
 {
-    public DeleteFile(Context context, String fullname)
+    public DeleteFile(Context context, String fullname, long permissions)
     {
         super(fullname, new CommandLineParameter[]
-            { new FilenameParameter(true), new NamedObjectParameter(false) });
+            { new FilenameParameter(true), new NamedObjectParameter(false) }, permissions);
     }
 
     public void execute(Context context, Object[] parameters)

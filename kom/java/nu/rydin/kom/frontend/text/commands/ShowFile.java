@@ -22,10 +22,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ShowFile extends AbstractCommand
 {
-    public ShowFile(Context context, String fullname)
+    public ShowFile(Context context, String fullname, long permissions)
     {
         super(fullname, new CommandLineParameter[] {
-                new FilenameParameter(true), new NamedObjectParameter(false) });
+                new FilenameParameter(true), new NamedObjectParameter(false) }, permissions);
     }
 
     public void execute(Context context, Object[] parameters)

@@ -26,9 +26,9 @@ import nu.rydin.kom.structs.NameAssociation;
 
 public class MoveMessage extends AbstractCommand 
 {
-	public MoveMessage(Context context, String fullName) 
+	public MoveMessage(Context context, String fullName, long permissions) 
 	{
-		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true)});
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true)}, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)

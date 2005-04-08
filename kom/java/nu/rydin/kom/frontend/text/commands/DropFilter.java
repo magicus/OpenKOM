@@ -20,9 +20,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class DropFilter extends AbstractCommand
 {
-	public DropFilter(Context context, String fullName)
+	public DropFilter(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new UserParameter(true) });	
+		super(fullName, new CommandLineParameter[] { new UserParameter(true) }, permissions);	
 	}
 
     public void execute(Context context, Object[] parameters)

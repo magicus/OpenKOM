@@ -29,10 +29,10 @@ import nu.rydin.kom.structs.UnstoredMessage;
  */
 public class WriteReply extends AbstractCommand
 {
-    public WriteReply(Context context, String fullName)
+    public WriteReply(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[] { new TextNumberParameter(
-                false) });
+                false) }, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)

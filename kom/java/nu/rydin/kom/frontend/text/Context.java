@@ -22,6 +22,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.text.terminal.TerminalController;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -225,4 +226,10 @@ public interface Context extends TerminalSettingsProvider
 	 */
 	public void checkName(String name)
 	throws DuplicateNameException, InvalidNameException, UnexpectedException;
+	
+	/**
+	 * Returns the terminal controller associated with the users
+	 * terminal.
+	 */
+	public TerminalController getTerminalController();
 }

@@ -17,8 +17,9 @@ public class EventDeliveredException extends LineEditorException
 {
 	private Event m_event;
 	
-	public EventDeliveredException(Event event)
+	public EventDeliveredException(Event event, String line, int pos)
 	{
+	    super(line, pos);
 		m_event = event;
 	}
 	

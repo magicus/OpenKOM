@@ -18,9 +18,9 @@ import nu.rydin.kom.structs.MessageSearchResult;
  */
 public class GrepLocalMessage extends SearchLocalCommand 
 {
-	public GrepLocalMessage(Context context, String fullName) 
+	public GrepLocalMessage(Context context, String fullName, long permissions) 
 	{
-		super(fullName, new CommandLineParameter[] { new RawParameter("search.param.0.ask", true) });
+		super(fullName, new CommandLineParameter[] { new RawParameter("search.param.0.ask", true) }, permissions);
 	}
 
     MessageSearchResult[] innerSearch(Context context, Object[] parameterArray, int offset) throws UnexpectedException

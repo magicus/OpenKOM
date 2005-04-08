@@ -16,9 +16,9 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class ShowLicense extends AbstractCommand
 {
-	public ShowLicense(Context context, String fullName)
+	public ShowLicense(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);	
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);	
 	}
 
 	public void execute(Context context, Object[] parameterArray)

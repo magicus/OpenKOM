@@ -18,10 +18,10 @@ import nu.rydin.kom.frontend.text.parser.FlagParameter;
  */
 public class SetFlag extends AbstractCommand
 {
-    public SetFlag(Context context, String fullName)
+    public SetFlag(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[]
-            { new FlagParameter(true, context.getFlagLabels("userflags")) });
+            { new FlagParameter(true, context.getFlagLabels("userflags")) }, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)

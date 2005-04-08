@@ -22,9 +22,9 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class ShowSimpleFile extends AbstractCommand
 {
-	public ShowSimpleFile(Context context, String fullName)
+	public ShowSimpleFile(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)

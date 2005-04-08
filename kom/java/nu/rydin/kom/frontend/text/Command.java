@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.CommandLinePart;
 import nu.rydin.kom.frontend.text.parser.CommandNamePart;
@@ -42,8 +43,9 @@ public interface Command
 	 * Used by the parser to abort execution before parameter completion.
 	 * @param context
 	 * @throws AuthorizationException
+	 * @throws UnexpectedException
 	 */
-	public void checkAccess(Context context) throws AuthorizationException;
+	public void checkAccess(Context context) throws AuthorizationException, UnexpectedException;
 	
 	/**
 	 * Prints characters preceeding command output, typically 
@@ -76,5 +78,10 @@ public interface Command
 	 * @return
 	 */
 	public CommandLinePart[] getFullSignature();
-
+	
+	/**
+	 * Returns a bit pattern of the permissions required to run this command
+	 * @return
+	 */
+	public long getRequiredPermissions();
 }

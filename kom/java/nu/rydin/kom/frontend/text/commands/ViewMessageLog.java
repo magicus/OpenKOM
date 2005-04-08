@@ -27,9 +27,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public abstract class ViewMessageLog extends AbstractCommand
 {
-    public ViewMessageLog(Context context, String fullName)
+    public ViewMessageLog(Context context, String fullName, long permissions)
     {
-        super(fullName, new CommandLineParameter[] { new IntegerParameter(false) });
+        super(fullName, new CommandLineParameter[] { new IntegerParameter(false) }, permissions);
     }
 
     public abstract void execute(Context context, Object[] parameterArray)

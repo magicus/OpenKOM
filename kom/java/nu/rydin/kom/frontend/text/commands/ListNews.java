@@ -23,9 +23,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ListNews extends AbstractCommand
 {
-	public ListNews(Context context, String fullName)
+	public ListNews(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] {new UserParameter ("", false)});
+		super(fullName, new CommandLineParameter[] {new UserParameter ("", false)}, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)

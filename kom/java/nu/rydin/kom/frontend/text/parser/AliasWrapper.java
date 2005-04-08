@@ -8,6 +8,7 @@ package nu.rydin.kom.frontend.text.parser;
 
 import java.io.IOException;
 
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -21,7 +22,7 @@ public class AliasWrapper extends AbstractCommand
     
     public AliasWrapper(String fullName, String actualCommand)
     {
-        super(fullName, new CommandLineParameter[] { new RawParameter(null, false) });
+        super(fullName, new CommandLineParameter[] { new RawParameter(null, false) }, 0L);
         m_actualCommand = actualCommand;
     }
 
@@ -38,6 +39,17 @@ public class AliasWrapper extends AbstractCommand
         if(parameters[0] != null)
             commandLine += " " + (String) parameters[0];
         Parser.ExecutableCommand cmd = context.getParser().parseCommandLine(context, commandLine);
+        long rp = cmd.getCommand().getRequiredPermissions(); 
+        if((rp & context.getCachedUserInfo().getRights()) != rp)
+            throw new AuthorizationException();
         cmd.executeBatch(context);
+    }
+    
+    public long getRequiredPermissions()
+    {
+        // Since we don't know the parameters here, we can't infer the command
+        // class. Permissions are enfored by the execute method instead.
+        //
+        return 0L;
     }
 }

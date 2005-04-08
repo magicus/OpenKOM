@@ -21,10 +21,12 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import nu.rydin.kom.backend.NameUtils;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.CommandNotFoundException;
 import nu.rydin.kom.exceptions.InvalidChoiceException;
 import nu.rydin.kom.exceptions.InvalidParametersException;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.TooManyParametersException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -73,6 +75,9 @@ public class Parser
         public void execute(Context context) throws KOMException, IOException,
                 InterruptedException
         {
+            long rp = m_command.getRequiredPermissions();
+            if((rp & context.getCachedUserInfo().getRights()) != rp)
+                throw new AuthorizationException();
             m_command.printPreamble(context.getOut());
             m_command.execute(context, m_parameterArray);
             m_command.printPostamble(context.getOut());
@@ -253,45 +258,55 @@ public class Parser
         PrintWriter out = context.getOut();
         MessageFormatter fmt = context.getMessageFormatter();
 
-        // Ask user to chose
-        //
-        if (printHeading)
-            out.println();
-            out.println(fmt.format(headingKey));
-        int top = candidates.size();
-        for (int idx = 0; idx < top; ++idx)
+        for(;;)
         {
-            String candidate = candidates.get(idx).toString();
-            int printIndex = idx + 1;
-            PrintUtils
-                    .printRightJustified(out, Integer.toString(printIndex), 2);
-            out.print(". ");
-            out.println(candidate);
-        }
-        out.print(fmt.format(promptKey));
-        out.flush();
-        String input = in.readLine().trim();
-
-        // Empty string given? Abort!
-        //
-        if (input.length() == 0)
-        {
-            throw new OperationInterruptedException();
-        }
-
-        try
-        {
-            // Is it a number the user entered?
-            int selection = Integer.parseInt(input);
-            if (selection < 1 || selection > top)
+            try
             {
-                throw new InvalidChoiceException();
+		        // Ask user to chose
+		        //
+		        if (printHeading)
+		            out.println();
+		            out.println(fmt.format(headingKey));
+		        int top = candidates.size();
+		        for (int idx = 0; idx < top; ++idx)
+		        {
+		            String candidate = candidates.get(idx).toString();
+		            int printIndex = idx + 1;
+		            PrintUtils
+		                    .printRightJustified(out, Integer.toString(printIndex), 2);
+		            out.print(". ");
+		            out.println(candidate);
+		        }
+		        out.print(fmt.format(promptKey));
+		        out.flush();
+		        String input = in.readLine().trim();
+		
+		        // Empty string given? Abort!
+		        //
+		        if (input.length() == 0)
+		        {
+		            throw new OperationInterruptedException();
+		        }
+		
+		        try
+		        {
+		            // Is it a number the user entered?
+		            int selection = Integer.parseInt(input);
+		            if (selection < 1 || selection > top)
+		            {
+		                throw new InvalidChoiceException();
+		            }
+		            return selection - 1;
+		        } catch (NumberFormatException e)
+		        {
+		            return resolveString(context, input, candidates, headingKey,
+		                    promptKey, allowPrefixes);
+		        }
             }
-            return selection - 1;
-        } catch (NumberFormatException e)
-        {
-            return resolveString(context, input, candidates, headingKey,
-                    promptKey, allowPrefixes);
+            catch(LineEditingDoneException e)
+            {
+                continue;
+            }
         }
     }
 

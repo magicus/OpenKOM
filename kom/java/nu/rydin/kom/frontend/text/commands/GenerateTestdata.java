@@ -26,9 +26,9 @@ public class GenerateTestdata extends AbstractCommand
 	private static final String s_body1 = "Katter är solitära";
 	private static final String s_body2 = "Jag har ingen TV";
 	
-	public GenerateTestdata(Context context, String fullName)
+	public GenerateTestdata(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new IntegerParameter(false)});
+		super(fullName, new CommandLineParameter[] { new IntegerParameter(false)}, permissions);
 	}
 	
     public void checkAccess(Context context) throws AuthorizationException

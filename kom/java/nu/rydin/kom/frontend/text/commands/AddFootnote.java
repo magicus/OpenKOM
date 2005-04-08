@@ -22,10 +22,10 @@ import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
  */
 public class AddFootnote extends AbstractCommand
 {
-    public AddFootnote(Context context, String fullName)
+    public AddFootnote(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[] { new TextNumberParameter(
-                false), new StringParameter("add.footnote.text.ask", true) });
+                false), new StringParameter("add.footnote.text.ask", true) }, permissions);
     }
     
     public void execute(Context context, Object[] parameters)

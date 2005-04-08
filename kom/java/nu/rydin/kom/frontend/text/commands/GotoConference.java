@@ -26,9 +26,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class GotoConference extends AbstractCommand
 {
-	public GotoConference(Context context, String fullName)
+	public GotoConference(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true)});
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true)}, permissions);
 	}
 	
 	public void execute(Context context, Object[] parameterArray) 

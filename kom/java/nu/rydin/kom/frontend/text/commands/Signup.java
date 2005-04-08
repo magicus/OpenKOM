@@ -21,9 +21,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class Signup extends AbstractCommand
 {
-	public Signup(Context context, String fullName)
+	public Signup(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) });	
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) }, permissions);	
 	}
 	
 	public void execute(Context context, Object[] parameterArray) 

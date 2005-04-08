@@ -23,9 +23,9 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class ListConferences extends AbstractCommand
 {
-	public ListConferences(Context context, String fullName)
+	public ListConferences(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray) 

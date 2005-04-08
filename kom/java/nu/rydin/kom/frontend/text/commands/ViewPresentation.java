@@ -22,9 +22,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ViewPresentation extends AbstractCommand 
 {
-	public ViewPresentation(Context context, String fullname)
+	public ViewPresentation(Context context, String fullname, long permissions)
 	{
-		super(fullname, new CommandLineParameter[] { new NamedObjectParameter(true)});
+		super(fullname, new CommandLineParameter[] { new NamedObjectParameter(true)}, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)

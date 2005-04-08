@@ -22,9 +22,9 @@ import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
  */
 public class ChangeCharacterset extends AbstractCommand
 {
-	public ChangeCharacterset(Context context, String fullName)
+	public ChangeCharacterset(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new CharacterSetParameter(true, getCharacterSets()) } );
+		super(fullName, new CommandLineParameter[] { new CharacterSetParameter(true, getCharacterSets()) }, permissions );
 	}
 	
     public void execute(Context context, Object[] parameterArray) throws KOMException, IOException

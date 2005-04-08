@@ -22,9 +22,9 @@ import nu.rydin.kom.structs.TextNumber;
  */
 public class MarkAsUnread extends AbstractCommand
 {
-	public MarkAsUnread(Context context, String fullName)
+	public MarkAsUnread(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)});	
+		super(fullName, new CommandLineParameter[] { new TextNumberParameter(false)}, permissions);	
 	}
     public void execute(Context context, Object[] parameters)
             throws KOMException, IOException, InterruptedException

@@ -23,9 +23,9 @@ import nu.rydin.kom.structs.NameAssociation;
 
 public class ListMembers extends AbstractCommand 
 {
-	public ListMembers(Context context, String fullName) 
+	public ListMembers(Context context, String fullName, long permissions) 
 	{
-		super(fullName, new CommandLineParameter[] { new ConferenceParameter(false)});
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter(false)}, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)

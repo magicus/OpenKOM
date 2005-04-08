@@ -17,9 +17,9 @@ import nu.rydin.kom.structs.MessageLogItem;
  */
 public class ViewBroadcastLog extends ViewMessageLog
 {
-    public ViewBroadcastLog(Context context, String fullName)
+    public ViewBroadcastLog(Context context, String fullName, long permissions)
     {
-        super(context, fullName);
+        super(context, fullName, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)

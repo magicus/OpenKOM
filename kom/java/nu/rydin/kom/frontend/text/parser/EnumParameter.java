@@ -13,6 +13,7 @@ import java.util.List;
 
 import nu.rydin.kom.exceptions.InvalidChoiceException;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
@@ -78,23 +79,33 @@ public abstract class EnumParameter extends CommandLineParameter
         LineEditor in = context.getIn();
         MessageFormatter fmt = context.getMessageFormatter();
 
-        out.print(fmt.format(m_missingObjectQuestionKey)
-                + fmt.format("parser.parameter.enum.prompt.listall"));
-        out.flush();
-        String line = in.readLine();
-        if (line.length() == 0)
+        for(;;)
         {
-            throw new OperationInterruptedException();
-        }
-        if (line.trim().equals("?"))
-        {
-            int selection = Parser.askForResolution(context, m_alternatives,
-                    m_promptKey, false, m_headingKey, m_allowPrefixes);
-            return innerMatch((String) m_alternatives.get(selection), "");
-        } else
-        {
-            Match newMatch = innerMatch(line, "");
-            return newMatch;
+            try
+            {
+		        out.print(fmt.format(m_missingObjectQuestionKey)
+		                + fmt.format("parser.parameter.enum.prompt.listall"));
+		        out.flush();
+		        String line = in.readLine();
+		        if (line.length() == 0)
+		        {
+		            throw new OperationInterruptedException();
+		        }
+		        if (line.trim().equals("?"))
+		        {
+		            int selection = Parser.askForResolution(context, m_alternatives,
+		                    m_promptKey, false, m_headingKey, m_allowPrefixes);
+		            return innerMatch((String) m_alternatives.get(selection), "");
+		        } else
+		        {
+		            Match newMatch = innerMatch(line, "");
+		            return newMatch;
+		        }
+            }
+            catch(LineEditingDoneException e)
+            {
+                continue;
+            }
         }
     }
 

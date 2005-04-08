@@ -33,7 +33,7 @@ public class FileEditor extends AbstractEditor
 
 	protected void refresh() throws KOMException
 	{
-	    new ShowSimpleFile(m_context, "").execute(m_context, new Object[0]);
+	    new ShowSimpleFile(m_context, "", 0).execute(m_context, new Object[0]);
 	}
     
 	//FIXME EDITREFACTOR: replyTo is completely irrelevant in this context.
@@ -44,24 +44,8 @@ public class FileEditor extends AbstractEditor
         return new UnstoredMessage("", m_context.getBuffer().toString());
     }
     
-    protected void handleLineEditingInterruptedException(EditorContext context, LineEditingInterruptedException e)
-    throws InterruptedException, OperationInterruptedException, IOException
+    protected String getAbortQuestionFormat()
     {
-        // If user has written no more than three lines, abort immediately.
-        if (context.getBuffer().size() <= 3)
-        {
-            throw e;
-        }
-        
-        // Otherwise, ask user if he wants to abort.
-	    MessageFormatter formatter = context.getMessageFormatter();
-	    KOMWriter out = context.getOut();
-	    LineEditor in = context.getIn();
-	    out.print(formatter.format("simple.editor.abortfilequestion"));
-	    out.flush();
-	    String answer = in.readLine();
-	    if (answer.equals(formatter.format("misc.y"))) {
-	        throw e;
-	    }
+        return "simple.editor.abortfilequestion";
     }
 }

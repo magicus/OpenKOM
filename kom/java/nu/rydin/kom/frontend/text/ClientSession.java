@@ -48,6 +48,7 @@ import nu.rydin.kom.exceptions.InternalException;
 import nu.rydin.kom.exceptions.InvalidNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMRuntimeException;
+import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.LineEditorException;
 import nu.rydin.kom.exceptions.LineOverflowException;
 import nu.rydin.kom.exceptions.LineUnderflowException;
@@ -68,6 +69,7 @@ import nu.rydin.kom.frontend.text.commands.ShowTime;
 import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
+import nu.rydin.kom.frontend.text.editor.fullscreen.FullscrenEditor;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleMessageEditor;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand;
@@ -78,6 +80,9 @@ import nu.rydin.kom.structs.FileStatus;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.SessionState;
 import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.text.terminal.ANSITerminalController;
+import nu.rydin.kom.text.terminal.TerminalController;
+import nu.rydin.kom.text.terminal.VT100Controller;
 import nu.rydin.kom.utils.Logger;
 
 /**
@@ -626,28 +631,36 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 				//
 				m_out.print(m_formatter.format("login.terminate.session"));
 				m_out.flush();
-				String answer = m_in.readLine().toUpperCase();
+				try
+				{
+				    String answer = m_in.readLine().toUpperCase();
 				
-				// If the user didn't let us kill the other session, we're
-				// out of here!
-				//
-				if(answer.length() == 0 || !m_formatter.format("misc.yes").toUpperCase().startsWith(answer))
-					throw new InterruptedException();
+					// If the user didn't let us kill the other session, we're
+					// out of here!
+					//
+					if(answer.length() == 0 || !m_formatter.format("misc.yes").toUpperCase().startsWith(answer))
+						throw new InterruptedException();
+						
+					// Ask server to shut down the other session
+					//
+					if (m_useTicket)
+	                {
+	                    ssf.killSession(ticket);
+	                } else
+	                {
+	                    ssf.killSession(userid, password);
+	                }
+					Logger.info(this, "Successfully killed old session.");
 					
-				// Ask server to shut down the other session
-				//
-				if (m_useTicket)
-                {
-                    ssf.killSession(ticket);
-                } else
-                {
-                    ssf.killSession(userid, password);
-                }
-				Logger.info(this, "Successfully killed old session.");
-				
-				// Try to login again
-				//
-				continue;
+					// Try to login again
+					//
+					continue;
+				}
+				catch(LineEditingDoneException e1)
+				{
+				    throw new RuntimeException("This should not happen", e1);
+				}
+
 			}
 			// User was authenticated! Now check if they are allowed to log in.
 			//
@@ -1025,6 +1038,13 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
             throw new RuntimeException(e);
         }
     }
+    
+    public TerminalController getTerminalController()
+    {
+        // TODO: Read from configuration
+        //
+        return new ANSITerminalController(this.getOut());
+    }
 			
 	public void printCurrentConference()
 	throws ObjectNotFoundException, UnexpectedException
@@ -1052,11 +1072,11 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	public MessageEditor getMessageEditor()
 	throws UnexpectedException
 	{
-		// TODO: Determine editor class by reading user config
-		//
 		try
 		{
-			return new SimpleMessageEditor(this);
+			return (this.getCachedUserInfo().getFlags1() & UserFlags.USE_FULL_SCREEN_EDITOR) != 0
+				? (MessageEditor) new FullscrenEditor(this)
+		        : (MessageEditor) new SimpleMessageEditor(this);
 		}
 		catch(IOException e)
 		{
@@ -1290,6 +1310,10 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		        if(ev instanceof TicketDeliveredEvent)
 		            return ((TicketDeliveredEvent) ev).getTicket();
 		    }
+		    catch(LineEditingDoneException e)
+		    {
+		        throw new RuntimeException("This should not happen!", e);
+		    }		    
 		    catch(LineUnderflowException e)
 		    {
 		        // Ignore

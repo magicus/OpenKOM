@@ -21,10 +21,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class Prioritize extends AbstractCommand
 {
-    public Prioritize(Context context, String fullName)
+    public Prioritize(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[] {
-                new ConferenceParameter(true), new ConferenceParameter(false) });
+                new ConferenceParameter(true), new ConferenceParameter(false) }, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)

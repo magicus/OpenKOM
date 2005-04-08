@@ -19,9 +19,9 @@ import nu.rydin.kom.frontend.text.ansi.ANSISequences;
  */
 public class ClearScreen extends AbstractCommand
 {
-	public ClearScreen(Context context, String fullName)
+	public ClearScreen(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 
     public void execute(Context context, Object[] parameters)

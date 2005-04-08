@@ -22,9 +22,9 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class ShowSimpleChatMessage extends AbstractCommand
 {
-	public ShowSimpleChatMessage(Context context, String fullName)
+	public ShowSimpleChatMessage(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 
 	public void execute(Context context, Object[] parameterArray)

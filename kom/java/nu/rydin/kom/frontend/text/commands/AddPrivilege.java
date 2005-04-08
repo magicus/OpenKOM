@@ -23,10 +23,10 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class AddPrivilege extends AbstractCommand
 {
-    public AddPrivilege(Context context, String fullName)
+    public AddPrivilege(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[] { new UserParameter("add.privilege.user.question", true), 
-                new RightParameter(true, context.getFlagLabels("userprivs")) });
+                new RightParameter(true, context.getFlagLabels("userprivs")) }, permissions);
     }
 
     public void checkAccess(Context context) throws AuthorizationException

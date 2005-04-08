@@ -15,9 +15,9 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class ReadNextReply extends AbstractCommand
 {
-	public ReadNextReply(Context context, String fullName)
+	public ReadNextReply(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 	
 	public void execute(Context context, Object[] parameterArray) 

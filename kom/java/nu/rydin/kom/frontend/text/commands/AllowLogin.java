@@ -20,9 +20,9 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class AllowLogin extends AbstractCommand
 {
-	public AllowLogin(Context context, String fullName)
+	public AllowLogin(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 
     public void checkAccess(Context context) throws AuthorizationException

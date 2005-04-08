@@ -42,6 +42,7 @@ public class UserFlags
 	public static long SHOW_NUM_UNREAD						= 0x00010000;
 	public static long USE_COMPACT_MESSAGEPRINTER			= 0x00020000;
 	public static long DISPLAY_THREAD_ID					= 0x00040000;
+	public static long USE_FULL_SCREEN_EDITOR				= 0x00080000;
 
 	/**
 	 * Default value for flagword 1

@@ -13,7 +13,8 @@ import java.util.StringTokenizer;
  */
 public class StandardWordWrapper implements WordWrapper
 {
-	private final StringTokenizer m_tokenizer; 
+	private final StringTokenizer m_paraTokenizer;
+	private StringTokenizer m_wordTokenizer;
 	private final int m_width;
 	private int m_offset;
 	private String m_paragraph;
@@ -39,7 +40,7 @@ public class StandardWordWrapper implements WordWrapper
 	
 	protected StandardWordWrapper(String content, int width, int offset)
 	{
-		m_tokenizer = new StringTokenizer(content, "\n", true);
+		m_paraTokenizer = new StringTokenizer(content, "\n", true);
 		
 		// Negative widths make no sense, set to 1 in that case.
 		//
@@ -53,7 +54,7 @@ public class StandardWordWrapper implements WordWrapper
 		// the remainder of offset/width will always be smaller than width
 		// and always the number we want.
 		//
-		m_offset = offset%m_width;
+		m_offset = offset % m_width;
 	}
 	
 	public String nextLine()
@@ -90,9 +91,9 @@ public class StandardWordWrapper implements WordWrapper
 	{
 		if(m_paragraph == null)
 		{
-			if(!m_tokenizer.hasMoreTokens())
+			if(!m_paraTokenizer.hasMoreTokens())
 				return null;
-			m_paragraph = m_tokenizer.nextToken();
+			m_paragraph = m_paraTokenizer.nextToken();
 			int top = m_paragraph.length();
 			if(m_paragraph.endsWith("\n"))
 				--top;
@@ -141,17 +142,10 @@ public class StandardWordWrapper implements WordWrapper
 		for(int idx = top; idx >= m_start; --idx)
 		{
 			char ch = m_paragraph.charAt(idx);
-			if(ch == ' ')
+			if(ch == ' ' || ch == '-')
 			{
-				p = idx;
-				advance = true;
+				p = idx + 1;
 				break;
-			}
-		    if(ch == '-')
-			{
-		        //TODO Fix editor so it doesn't eat hyphens while wrapping.
-		        p = idx+1;
-			    break;
 			}
 		}
 		
@@ -161,7 +155,7 @@ public class StandardWordWrapper implements WordWrapper
 
 	    // If the above loop defaulted, we might be breaking in the middle of a
 	    // word, in which case we should not advance the pointer, since there is 
-	    // no space or hyphen to strip away.
+	    // no space to strip away.
 		m_start = advance 
 					? p+1 
 					: p;

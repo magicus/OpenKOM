@@ -16,8 +16,8 @@ import nu.rydin.kom.events.Event;
  */
 public class SessionShutdownException extends UrgentEventException
 {
-	public SessionShutdownException(Event e)
+	public SessionShutdownException(Event e, String line, int pos)
 	{
-		super(e);
+		super(e, line, pos);
 	}
 }

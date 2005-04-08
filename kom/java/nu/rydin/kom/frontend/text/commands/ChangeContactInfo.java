@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -27,9 +28,9 @@ import nu.rydin.kom.structs.UserInfo;
 public class ChangeContactInfo extends AbstractCommand
 {
 
-    public ChangeContactInfo(Context context, String fullName)
+    public ChangeContactInfo(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new UserParameter(false) });	
+		super(fullName, new CommandLineParameter[] { new UserParameter(false) }, permissions);	
 	}
 
     public void execute(Context context, Object[] parameters)
@@ -74,7 +75,7 @@ public class ChangeContactInfo extends AbstractCommand
     }
     
     private String getLine(Context ctx, String promptKey, String defaultValue)
-    throws IOException, InterruptedException, OperationInterruptedException
+    throws IOException, InterruptedException, OperationInterruptedException, LineEditingDoneException
     {
         ctx.getOut().print(ctx.getMessageFormatter().format(promptKey));
         ctx.getOut().flush();

@@ -12,6 +12,7 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.exceptions.CantChangeMailboxPermissionsException;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -26,9 +27,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ChangePermissions extends AbstractCommand
 {
-	public ChangePermissions(Context context, String fullName)
+	public ChangePermissions(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new UserParameter("change.permissions.user.question", true) });
+		super(fullName, new CommandLineParameter[] { new UserParameter("change.permissions.user.question", true) }, permissions);
 	}
 
     public void execute(Context context, Object[] parameterArray) 
@@ -81,12 +82,24 @@ public class ChangePermissions extends AbstractCommand
 	protected int askForPermission(Context context, String format, int permissions, int old)
 	throws IOException, InterruptedException, OperationInterruptedException
 	{
-		MessageFormatter formatter = context.getMessageFormatter();
-		String error = formatter.format("create.conference.invalid.choice");
-		String prefix = formatter.format("change.permissions.prefix");
-		int defaultChoice = (old & permissions) == permissions ? 1 : 0; 
-		int choice = context.getIn().getChoice(prefix + " " + formatter.format(format) + ": ", 
-			new String[] { formatter.format("misc.no"), formatter.format("misc.yes")}, defaultChoice, error);
-		return choice != 0 ? permissions : 0;
+	    for(;;)
+	    {
+		    try
+		    {
+				MessageFormatter formatter = context.getMessageFormatter();
+				String error = formatter.format("create.conference.invalid.choice");
+				String prefix = formatter.format("change.permissions.prefix");
+				int defaultChoice = (old & permissions) == permissions ? 1 : 0; 
+				int choice = context.getIn().getChoice(prefix + " " + formatter.format(format) + ": ", 
+					new String[] { formatter.format("misc.no"), formatter.format("misc.yes")}, defaultChoice, error);
+				return choice != 0 ? permissions : 0;
+		    }
+		    catch(LineEditingDoneException e)
+		    {
+		        // Restart on arrows
+		        //
+		        continue;
+		    }
+	    }
 	}
 }

@@ -18,8 +18,8 @@ import nu.rydin.kom.events.Event;
  */
 public class SystemShutdownException extends UrgentEventException
 {
-	public SystemShutdownException(Event e)
+	public SystemShutdownException(Event e, String line, int pos)
 	{
-		super(e);
+		super(e, line, pos);
 	}
 }

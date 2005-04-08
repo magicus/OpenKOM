@@ -17,9 +17,9 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class SkipSubject extends AbstractCommand 
 {
-	public SkipSubject (Context context, String fullname)
+	public SkipSubject (Context context, String fullname, long permissions)
 	{
-		super(fullname, AbstractCommand.NO_PARAMETERS);
+		super(fullname, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 	
  	public void execute(Context context, Object[] parameterArray)

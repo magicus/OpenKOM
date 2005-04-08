@@ -26,9 +26,9 @@ public class ShowSystemInfo extends AbstractCommand
 {
     private static final int WIDTH = 25;
     
-	public ShowSystemInfo(Context context, String fullName)
+	public ShowSystemInfo(Context context, String fullName, long permissions)
 	{
-		super(fullName, AbstractCommand.NO_PARAMETERS);
+		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 
     public void execute(Context context, Object[] parameters)

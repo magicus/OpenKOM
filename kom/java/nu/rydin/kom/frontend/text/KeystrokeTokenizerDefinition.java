@@ -14,8 +14,8 @@ import java.util.Map;
  */
 public class KeystrokeTokenizerDefinition 
 {
-    public static final int NON_TERMINAL 	= -1;
-    public static final int LITERAL 		= -2;
+    public static final int NON_TERMINAL 	= 1;
+    public static final int LITERAL 		= 2;
     
     public static class State
     {

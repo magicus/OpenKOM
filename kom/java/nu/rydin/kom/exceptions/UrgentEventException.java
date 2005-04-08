@@ -16,8 +16,8 @@ import nu.rydin.kom.events.Event;
  */
 public class UrgentEventException extends EventDeliveredException
 {
-	public UrgentEventException(Event event)
+	public UrgentEventException(Event event, String line, int pos)
 	{
-		super(event);
+		super(event, line, pos);
 	}
 }

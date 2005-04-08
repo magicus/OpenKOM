@@ -21,9 +21,9 @@ import nu.rydin.kom.structs.NameAssociation;
  */
 public class ChangeReplyToConference extends AbstractCommand
 {
-	public ChangeReplyToConference(Context context, String fullName)
+	public ChangeReplyToConference(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new ConferenceParameter("change.replyto.conference.param.0.ask", true), new ConferenceParameter(false) });
+		super(fullName, new CommandLineParameter[] { new ConferenceParameter("change.replyto.conference.param.0.ask", true), new ConferenceParameter(false) }, permissions);
 	}
 	
     public void execute(Context context, Object[] parameterArray) 
