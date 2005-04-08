@@ -47,7 +47,7 @@ import nu.rydin.kom.utils.PrintUtils;
 /**
  * @author Pontus Rydin
  */
-public class FullscrenEditor implements MessageEditor
+public class FullscreenEditor implements MessageEditor
 {
     private EditorContext m_context;
     
@@ -65,7 +65,7 @@ public class FullscrenEditor implements MessageEditor
     /**
      * 
      */
-    public FullscrenEditor(Context context)
+    public FullscreenEditor(Context context)
     throws IOException, UnexpectedException
     {
         m_context = new EditorContext(context);

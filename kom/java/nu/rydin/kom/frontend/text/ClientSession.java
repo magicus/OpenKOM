@@ -69,7 +69,7 @@ import nu.rydin.kom.frontend.text.commands.ShowTime;
 import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
-import nu.rydin.kom.frontend.text.editor.fullscreen.FullscrenEditor;
+import nu.rydin.kom.frontend.text.editor.fullscreen.FullscreenEditor;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleMessageEditor;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand;
@@ -1075,7 +1075,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		try
 		{
 			return (this.getCachedUserInfo().getFlags1() & UserFlags.USE_FULL_SCREEN_EDITOR) != 0
-				? (MessageEditor) new FullscrenEditor(this)
+				? (MessageEditor) new FullscreenEditor(this)
 		        : (MessageEditor) new SimpleMessageEditor(this);
 		}
 		catch(IOException e)
