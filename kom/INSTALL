@@ -7,11 +7,11 @@ Prerequirements:
 Database initialization:
 
 Apply the script sql/initmysql.sql to your database. It creates a database 
-named "kom", and create a user "kom" with password "kom" with access to this.
+named "kom", and creates a user "kom" with password "kom" with access to this.
 
 SSH2:
 
-You need to create a server host key-file with an empty passpphrase and place
+You need to create a server host key-file with an empty passphrase and place
 it in the top openkom directory with the name "server_host_key". Check for example
 http://www.openssh.com for a keygen.
 
