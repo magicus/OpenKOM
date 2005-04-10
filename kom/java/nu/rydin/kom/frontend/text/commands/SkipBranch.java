@@ -3,13 +3,10 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
-import java.io.IOException;
-
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 
 /**

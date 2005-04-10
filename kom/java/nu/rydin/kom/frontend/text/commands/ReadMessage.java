@@ -13,7 +13,6 @@ import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.NameAssociation;

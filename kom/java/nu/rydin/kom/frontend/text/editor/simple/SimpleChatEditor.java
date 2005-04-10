@@ -10,15 +10,8 @@ import java.io.IOException;
 
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.LineEditingInterruptedException;
-import nu.rydin.kom.exceptions.LineEditorException;
-import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
-import nu.rydin.kom.frontend.text.KOMWriter;
-import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.frontend.text.editor.EditorContext;
-import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
