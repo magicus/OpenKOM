@@ -35,7 +35,7 @@
 	</target>
 
 	<target name="release" depends="build-jar">
-		<zip destfile="openkom.1.0.1.6.zip">
+		<zip destfile="openkom.1.0.1.7.zip">
 			<zipfileset dir="." includes="OpenKOM.LICENSE, INSTALL, run.sh, run.bat"/>
 			<zipfileset dir="${libPath}/" prefix="${libPath}/" />
 			<zipfileset dir="${distrPath}/" prefix="${distrPath}/" />
