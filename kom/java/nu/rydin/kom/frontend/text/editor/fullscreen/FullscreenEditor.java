@@ -138,8 +138,11 @@ public class FullscreenEditor implements MessageEditor
 			
 			// Establish viewport
 			//
-			m_tc = new ViewportOffset(m_tc, NUM_HEADER_ROWS, 0);
-			m_maxY -= NUM_HEADER_ROWS;
+			int headerRows = NUM_HEADER_ROWS;
+			if(replyTo != -1)
+			    ++headerRows;
+			m_tc = new ViewportOffset(m_tc, headerRows, 0);
+			m_maxY -= headerRows;
 						
 			// Enter the main editor loop
 			//
