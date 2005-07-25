@@ -2163,17 +2163,24 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Temporary kludge. I need to extend the event class and rewrite
 			// some of the formatting.
 			//
-			String msgToSend = "[";
-			Iterator buildRecIter = rec_names.iterator();
-			while (buildRecIter.hasNext())
+			String msgToSend;
+			if (s.size()>1)
 			{
-				msgToSend += buildRecIter.next().toString();
-				msgToSend += ", ";
+				msgToSend = "[";
+				Iterator buildRecIter = rec_names.iterator();
+				while (buildRecIter.hasNext())
+				{
+					msgToSend += buildRecIter.next().toString();
+					msgToSend += ", ";
+				}
+				msgToSend = msgToSend.substring(0, msgToSend.length()-2);
+				msgToSend += "] ";
+				msgToSend += message;
 			}
-			msgToSend = msgToSend.substring(0, msgToSend.length()-2);
-			msgToSend += "] ";
-			msgToSend += message;
-			
+			else
+			{
+				msgToSend = message;
+			}
 			
 			// Now just send it
 			//
