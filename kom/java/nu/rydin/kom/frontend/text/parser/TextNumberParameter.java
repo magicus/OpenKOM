@@ -43,11 +43,18 @@ public class TextNumberParameter extends CommandLineParameter
 		
 		if ((cooked.length() > 2) && (cooked.charAt(0) == '(') && (cooked.charAt(top-1) == ')'))
 		{
-		    // It might be a global number!
+		    // Global number on the form "(123456)"
 		    global = true;
 		    cooked = cooked.substring(1, top-1);
 		}
-		
+
+        if ((cooked.length() > 1) && (cooked.charAt(0) == '('))
+        {
+            // Global number on the form "(123456"
+            global = true;
+            cooked = cooked.substring(1, top);
+        }
+        
 		try
 		{
 			int number = Integer.parseInt(cooked);
