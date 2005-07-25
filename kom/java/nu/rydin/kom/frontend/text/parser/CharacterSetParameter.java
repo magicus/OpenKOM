@@ -14,7 +14,7 @@ public class CharacterSetParameter extends EnumParameter
 {
     public CharacterSetParameter(String missingObjectQuestionKey, String[] flagLabels, boolean isRequired)
     {
-        super(missingObjectQuestionKey, "parser.parameter.charset.header", missingObjectQuestionKey, flagLabels, false, isRequired);
+        super(missingObjectQuestionKey, "parser.parameter.charset.header", missingObjectQuestionKey, flagLabels, false, "charset", isRequired);
     }
 
     public CharacterSetParameter(boolean isRequired, String[] flagLabels)

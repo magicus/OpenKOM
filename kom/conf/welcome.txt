@@ -1,0 +1,3 @@
+Welcome to OpenKOM!
+
+OpenKOM is distributed under GPL and was designed and implemented by Pontus Rydin, Henrik Schröder, Magnus Ihse, Jepson, Benny Löfgren and Ulf Hedlund.

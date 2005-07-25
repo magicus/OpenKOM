@@ -191,7 +191,7 @@ public class UserManager
 	 * @throws SQLException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public void addUser(String userid, String password, String fullname, String address1,
+	public long addUser(String userid, String password, String fullname, String address1,
 		String address2, String address3, String address4, String phoneno1, 
 		String phoneno2, String email1, String email2, String url, String charset, String locale, long flags1, 
 		long flags2, long flags3, long flags4, long rights)
@@ -244,6 +244,7 @@ public class UserManager
 			try
 			{
 				new MembershipManager(m_conn).signup(nameId, nameId, 0, ConferencePermissions.ALL_PERMISSIONS, 0);
+				return nameId;
 			}
 			catch(AuthorizationException e)
 			{

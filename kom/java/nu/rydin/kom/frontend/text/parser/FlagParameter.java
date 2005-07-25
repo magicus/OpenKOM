@@ -14,7 +14,7 @@ public class FlagParameter extends EnumParameter
 {
     public FlagParameter(String missingObjectQuestionKey, String[] flagLabels, boolean isRequired)
     {
-        super(missingObjectQuestionKey, "parser.parameter.flag.header", missingObjectQuestionKey, flagLabels, false, isRequired);
+        super(missingObjectQuestionKey, "parser.parameter.flag.header", missingObjectQuestionKey, flagLabels, false, null, isRequired);
     }
 
     public FlagParameter(boolean isRequired, String[] flagLabels)

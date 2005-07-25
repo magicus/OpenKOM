@@ -18,7 +18,7 @@ public class TextRunner
 		try
 		{
 			CacheManager cm = new CacheManager();
-			ClientSession server = new ClientSession(System.in, System.out, false);
+			ClientSession server = new ClientSession(System.in, System.out, false, false);
 			server.run();
 		}
 		catch(Exception e)

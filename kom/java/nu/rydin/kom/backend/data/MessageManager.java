@@ -47,6 +47,7 @@ public class MessageManager
 	private final PreparedStatement m_addMessageOccurrenceStmt;
 	private final PreparedStatement m_listOccurrencesStmt;
 	private final PreparedStatement m_getFirstOccurrenceStmt;
+	private final PreparedStatement m_getFirstOccurrenceInMyConfsStmt;
 	private final PreparedStatement m_getOccurrenceInConferenceStmt;
 	private final PreparedStatement m_getGlobalIdStmt;
 	private final PreparedStatement m_getRepliesStmt;
@@ -112,7 +113,9 @@ public class MessageManager
 		m_getOccurrenceInConferenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name, conference, localnum FROM messageoccurrences " +
 			"WHERE conference = ? AND message = ?");
-
+		m_getFirstOccurrenceInMyConfsStmt = m_conn.prepareStatement(
+				"SELECT mo.message, mo.action_ts, mo.kind, mo.user, mo.user_name, mo.conference, mo.localnum FROM messageoccurrences mo, memberships mbr " +
+				"WHERE mbr.conference = mo.conference AND mbr.user = ? AND mo.message = ?");
 		m_getFirstOccurrenceStmt = m_conn.prepareStatement(
 			"SELECT message, action_ts, kind, user, user_name, conference, localnum FROM messageoccurrences " +
 			"WHERE message = ? ORDER BY action_ts LIMIT 1");
@@ -260,6 +263,8 @@ public class MessageManager
 			m_listOccurrencesStmt.close();
 		if(m_getFirstOccurrenceStmt != null)
 			m_getFirstOccurrenceStmt.close();
+		if(m_getFirstOccurrenceInMyConfsStmt != null)
+			m_getFirstOccurrenceInMyConfsStmt.close();
 		if(m_getOccurrenceInConferenceStmt != null)
 			m_getOccurrenceInConferenceStmt.close();
 		if(m_getGlobalIdStmt != null)
@@ -753,13 +758,14 @@ public class MessageManager
 	 * Given a message id and a conference, this method returns the message occurrence
 	 * the user is most likely interested in. The occurrence is determined as follows:
 	 * <br>1: If the message exists in the current conference, pick that one
-	 * <br>2: Otherwise, pick the earliest occurrence 
+	 * <br>2: Otherwise, pick the earliest occurrence
+	 * @param user The id of the requestor 
 	 * @param conference The conference id
 	 * @param id The message id
 	 * @throws MessageNotFoundException
 	 * @throws SQLException
 	 */
-	public MessageOccurrence getMostRelevantOccurrence(long conference, long id)
+	public MessageOccurrence getMostRelevantOccurrence(long user, long conference, long id)
 	throws MessageNotFoundException, SQLException
 	{
 		try
@@ -768,7 +774,33 @@ public class MessageManager
 		}
 		catch(MessageNotFoundException e)
 		{
-			// Does not exist in this conference. Pick the first occurrence!
+		    ResultSet rs = null;
+		    try
+		    {
+		        // Get first occurrence in a conference we're members of
+		        //
+		        m_getFirstOccurrenceInMyConfsStmt.clearParameters();
+		        m_getFirstOccurrenceInMyConfsStmt.setLong(1, user);
+		        m_getFirstOccurrenceInMyConfsStmt.setLong(2, id);
+		        rs = m_getFirstOccurrenceInMyConfsStmt.executeQuery();
+		        if(rs.next())
+					return new MessageOccurrence(
+							rs.getLong(1),		// Global id
+							rs.getTimestamp(2),	// Timestamp
+							rs.getShort(3),		// Kind,
+							new NameAssociation(rs.getLong(4),		// User
+							rs.getString(5)),	// User name
+							rs.getLong(6),		// Conference
+							rs.getInt(7)		// Localnum
+							);
+		    }
+		    finally
+		    {
+		        if(rs != null)
+		            rs.close();
+		    }
+		    // 
+			// Does not exist in a conference we're members of. Pick the first occurrence!
 			//
 			return this.getFirstOccurrence(id);
 		}

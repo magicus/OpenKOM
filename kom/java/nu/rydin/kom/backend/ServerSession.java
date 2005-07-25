@@ -135,10 +135,11 @@ public interface ServerSession
 	 * 
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws NoCurrentMessageException
 	 */
 	
 	public Envelope readLastMessage()
-	throws ObjectNotFoundException, UnexpectedException;
+	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException;
 
 	/**
 	 * Retrievs a message and marks it as unread
@@ -905,6 +906,14 @@ public interface ServerSession
 	 */	
 	public void checkRights(long mask)
 	throws AuthorizationException;
+	
+	/**
+	 * Checks if a user with a certain userid exists.
+	 * @param userid The userid to check for
+	 * @return <tt>true</tt> if the user exists
+	 */
+	public boolean checkForUserid(String userid)
+	throws UnexpectedException;
 
 	/**
 	 * Change reply-to conference.
@@ -1127,7 +1136,7 @@ public interface ServerSession
 	 */
 	
 	public MessageHeader getLastMessageHeader()
-	throws ObjectNotFoundException, UnexpectedException;
+	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException;
 
 	/**
 	 * Skips all messages with the given subject in all conferences the user is a member of.
@@ -1138,7 +1147,7 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 */
 	public int skipMessagesBySubject (String subject, boolean skipGlobal)
-	throws UnexpectedException, ObjectNotFoundException;
+	throws UnexpectedException, NoCurrentMessageException, ObjectNotFoundException;
 	
 	/**
 	 * Skips an entire thread.
@@ -1149,7 +1158,8 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 */	
 	public int skipThread (long msg)
-	throws UnexpectedException, ObjectNotFoundException, SelectionOverflowException;
+	throws UnexpectedException, ObjectNotFoundException, NoCurrentMessageException, 
+	SelectionOverflowException;
 	
 	/**
 	 * Skips all messages in the tree rooted at the node given.
@@ -1160,7 +1170,7 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 */	
 	public int skipBranch (long node)
-	throws UnexpectedException, ObjectNotFoundException;
+	throws UnexpectedException, NoCurrentMessageException, ObjectNotFoundException;
 
 	
 	/**
@@ -1515,4 +1525,22 @@ public interface ServerSession
      */
     public void clearCache()
     throws AuthorizationException;
+    
+    /**
+     * Allows self registration.
+     * 
+     * @throws AuthorizationException
+     * @throws UnexpectedException
+     */
+    public void enableSelfRegistration()
+    throws AuthorizationException, UnexpectedException;
+    
+    /**
+     * Disallows self registration.
+     * 
+     * @throws AuthorizationException
+     * @throws UnexpectedException
+     */
+    public void disableSelfRegistration()
+    throws AuthorizationException, UnexpectedException;
 }

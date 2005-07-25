@@ -42,16 +42,22 @@ import com.sshtools.j2ssh.util.StartStopState;
 public class SSHServer implements Module
 {
     private ConnectionListener listener = null;
+    private boolean selfRegister;
 
     public void configureServices(ConnectionProtocol connection)
             throws IOException
     {
         connection.addChannelFactory(
                 OpenKOMSessionChannelFactory.SESSION_CHANNEL,
-                new OpenKOMSessionChannelFactory());
+                new OpenKOMSessionChannelFactory(this));
     }
 
     protected List activeConnections = new Vector();
+    
+    public boolean allowsSelfRegister()
+    {
+        return selfRegister;
+    }
 
     protected void refuseSession(Socket socket) throws IOException
     {
@@ -237,6 +243,7 @@ public class SSHServer implements Module
                             .parseInt((String) parameters.get("maxauthretry")),
                     Integer.parseInt((String) parameters.get("maxconn")));
             ConfigurationLoader.initialize(true, dummy);
+            selfRegister = "true".equals(parameters.get("selfRegister"));
         } catch (ConfigurationException e)
         {
             Logger.fatal(this,

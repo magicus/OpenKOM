@@ -45,7 +45,7 @@ public class StandardWordWrapper implements WordWrapper
 		// Negative widths make no sense, set to 1 in that case.
 		//
 		if (width > 0)
-			m_width 	= width;
+			m_width = width - 1;
 		else 
 			m_width = 1;
 		

@@ -97,7 +97,8 @@ CREATE TABLE IF NOT EXISTS messages
 	INDEX msgauthor_ix(author),
 	FOREIGN KEY (author) REFERENCES users(id) ON DELETE SET NULL,
 	INDEX msgreply_ix(reply_to),
-	FOREIGN KEY (reply_to) REFERENCES messages(id) ON DELETE SET NULL
+	FOREIGN KEY (reply_to) REFERENCES messages(id) ON DELETE SET NULL,
+	INDEX thread_ix(thread)
 ) TYPE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messagesearch 
@@ -222,3 +223,22 @@ CREATE TABLE IF NOT EXISTS relationships
 	FOREIGN KEY (referee) REFERENCES names(id) ON DELETE CASCADE
 ) TYPE=INNODB;
 
+-- Create sysop
+--
+INSERT INTO names
+	(id, norm_name, fullname, kind, visibility) 
+VALUES 
+	(1, 'SYSOP', 'Sysop', 0, 0);
+
+INSERT INTO users
+	(id, userid, pwddigest, flags1, rights, locale, charset, created)
+VALUES
+	(1, 'sysop', '$1$7jv0PRm9$sBErMtzDqq33l2WByDWEc1', 124239, -1, 'sv_SE', 'ISO-8859-1', NOW());
+INSERT INTO conferences
+	(id, administrator, replyConf, permissions, nonmember_permissions, created)
+VALUES
+	(1, 1, null, 0, 0, NOW());
+INSERT INTO memberships
+	(conference, user, priority, flags, active, permissions, negation_mask, markers)
+VALUES
+	(1, 1, 1, 0, 1, 32727, 0, null);

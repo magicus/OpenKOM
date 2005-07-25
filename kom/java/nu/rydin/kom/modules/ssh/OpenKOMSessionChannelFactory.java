@@ -21,13 +21,12 @@ import com.sshtools.j2ssh.connection.InvalidChannelException;
 public class OpenKOMSessionChannelFactory implements ChannelFactory
 {
 
+    private final SSHServer server;
     public final static String SESSION_CHANNEL = "session";
 
-    Class sessionChannelImpl;
-
-    public OpenKOMSessionChannelFactory() throws ConfigurationException
+    public OpenKOMSessionChannelFactory(SSHServer server) throws ConfigurationException
     {
-        sessionChannelImpl = OpenKOMSessionChannel.class;
+        this.server = server;
     }
 
     public Channel createChannel(String channelType, byte[] requestData)
@@ -37,7 +36,7 @@ public class OpenKOMSessionChannelFactory implements ChannelFactory
         {
             if (channelType.equals("session"))
             {
-                return (Channel) sessionChannelImpl.newInstance();
+                return (Channel) new OpenKOMSessionChannel(server);
             } 
             else
             {
@@ -47,9 +46,7 @@ public class OpenKOMSessionChannelFactory implements ChannelFactory
         } 
         catch (Exception e)
         {
-            throw new InvalidChannelException(
-                    "Failed to create session channel implemented by "
-                            + sessionChannelImpl.getName());
+            throw new InvalidChannelException("Failed to create session channel");
         }
     }
 }

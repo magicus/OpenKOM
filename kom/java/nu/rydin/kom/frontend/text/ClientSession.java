@@ -7,16 +7,19 @@
 package nu.rydin.kom.frontend.text;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
@@ -39,12 +42,14 @@ import nu.rydin.kom.events.ReloadUserProfileEvent;
 import nu.rydin.kom.events.TicketDeliveredEvent;
 import nu.rydin.kom.events.UserAttendanceEvent;
 import nu.rydin.kom.exceptions.AlreadyLoggedInException;
+import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.ImmediateShutdownException;
 import nu.rydin.kom.exceptions.InternalException;
+import nu.rydin.kom.exceptions.InvalidChoiceException;
 import nu.rydin.kom.exceptions.InvalidNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMRuntimeException;
@@ -82,8 +87,9 @@ import nu.rydin.kom.structs.SessionState;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.text.terminal.ANSITerminalController;
 import nu.rydin.kom.text.terminal.TerminalController;
-import nu.rydin.kom.text.terminal.VT100Controller;
+import nu.rydin.kom.utils.FileUtils;
 import nu.rydin.kom.utils.Logger;
+import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -115,6 +121,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private final boolean m_useTicket;
 	private SessionState m_state;
 	private String m_ticket;
+	private final boolean m_selfRegister;
 
 	private Parser m_parser;
     private boolean m_loggedIn;	
@@ -274,7 +281,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		}
 	}
 	
-	public ClientSession(InputStream in, OutputStream out, boolean useTicket)
+	public ClientSession(InputStream in, OutputStream out, boolean useTicket, boolean selfRegister)
 	throws UnexpectedException, InternalException
 	{
 		// Set up I/O
@@ -285,6 +292,10 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		// Set up authentication method
 		//
 		m_useTicket = useTicket;
+		
+		// Do we allow self registration
+		//
+		m_selfRegister = selfRegister;
 				
 		// Install commands and init parser
 		//
@@ -313,6 +324,26 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		    // Start keystroke poller
 		    //
 		    m_in.start();
+		    
+            // Print welcome message if defined
+            //
+		    if(!m_useTicket)
+		    {
+	            try
+	            {
+	                String content = FileUtils.loadTextFromResource("welcome.txt");
+	                PrintUtils.printIndented(m_out, content, 80, 0);
+	                m_out.println();
+	            }
+	            catch(FileNotFoundException e)
+	            {
+	                // No message defined, no problem.
+	            }
+	            catch(IOException e)
+	            {
+	                m_out.println("This should not happen!");
+	            }
+		    }
 
 			// Try to login
 			//
@@ -588,8 +619,14 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 
 	protected UserInfo login()
 	throws AuthenticationException, LoginNotAllowedException, UnexpectedException, IOException, 
-	InterruptedException, OperationInterruptedException, LoginProhibitedException, NoSuchModuleException
+	InterruptedException, OperationInterruptedException, LoginProhibitedException, NoSuchModuleException,
+	AuthorizationException
 	{
+	    // Find backend. We are going to need it
+	    //
+	    ServerSessionFactory ssf = (ServerSessionFactory) Modules.getModule("Backend");
+	    boolean selfRegister = ssf.allowsSelfRegistration();
+	    
 		// Collect information
 		//
 	    String ticket = null;
@@ -601,13 +638,36 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	    {
 	        try
 	        {
+	            // Print self-registration prompt if requested
+	            //
+	            String srToken = m_formatter.format("login.self.register.token");
+	            if(selfRegister)
+	            {
+	                
+	                m_out.println(m_formatter.format("login.self.register", srToken));
+	                m_out.println();
+	            }
 				m_out.print(m_formatter.format("login.user"));
 				m_out.flush();
 				userid = m_in.readLine(null, null, 100, LineEditor.FLAG_ECHO);
-				Logger.info(this, "Trying to login as: " + userid);
-				m_out.print(m_formatter.format("login.password"));
-				m_out.flush();
-				password = m_in.readLine(null, null, 100, 0);
+				
+				// Self registration?
+				//
+				if(selfRegister && srToken.equals(userid))
+				{
+				    String[] login = this.selfRegister();
+				    userid = login[0];
+				    password = login[1];
+				}
+				else
+				{
+				    // Normal login
+				    //
+					Logger.info(this, "Trying to login as: " + userid);
+					m_out.print(m_formatter.format("login.password"));
+					m_out.flush();
+					password = m_in.readLine(null, null, 100, 0);
+				}
 	        }
 	        catch(LineEditorException e)
 	        {
@@ -619,7 +679,6 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		{
 			// Authenticate
 			//
-			ServerSessionFactory ssf = (ServerSessionFactory) Modules.getModule("Backend");
 			try
 			{
 				m_session = m_useTicket? ssf.login(ticket) : ssf.login(userid, password);
@@ -675,6 +734,103 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			Logger.info(this, "Successfully logged in as: " + m_session.getLoggedInUser().getUserid());
 			return user;
 		}
+	}
+	
+	public String[] selfRegister() 
+	throws LineOverflowException, StopCharException, LineUnderflowException, 
+	EventDeliveredException, LineEditingDoneException, OperationInterruptedException, 
+	IOException, InterruptedException, NoSuchModuleException, 
+	AuthorizationException, UnexpectedException
+	{
+	    // Find backend. We are going to need it
+	    //
+	    ServerSessionFactory ssf = (ServerSessionFactory) Modules.getModule("Backend");
+	    
+	    // Ask for character set
+	    //
+	    String charSet = "ISO-8859-1";
+        ArrayList list = new ArrayList();
+        for(StringTokenizer st = new StringTokenizer(ClientSettings.getCharsets(), ",");
+        	st.hasMoreTokens();)
+        	list.add(st.nextToken());        	
+        for(;;)
+        {
+            m_out.println();
+            try
+            {
+	        	int n = Parser.askForResolution(this, list, "parser.parameter.charset.ask", true, 
+	        	        "parser.parameter.charset.ask", false, "charset");
+	        	charSet = (String) list.get(n);
+	        	m_in.setCharset(charSet);
+	        	m_out.setCharset(charSet);
+	        	break;
+            }
+            catch(InvalidChoiceException e)
+            {
+                // Try again
+            }
+        }
+        
+	    for(;;)
+	    {
+		    String password;
+		    String userid;
+		    String fullname;
+		    for(;;)
+		    {
+			    m_out.print(m_formatter.format("login.self.register.login"));
+			    m_out.flush();
+			    userid = m_in.readLine(null, null, 100, LineEditor.FLAG_ECHO);
+			    if(userid.length() == 0)
+			        continue;
+			    if(!ssf.loginExits(userid))
+			        break;
+			    m_out.println(m_formatter.format("login.self.register.duplicate"));
+			    m_out.println();		    
+		    }
+		    for(;;)
+		    {
+			    m_out.print(m_formatter.format("login.self.register.password"));
+			    m_out.flush();	    
+			    password = m_in.readLine(null, null, 100, 0);
+			    if(password.length() == 0)
+			        continue;
+			    m_out.print(m_formatter.format("login.self.register.password.verify"));
+			    m_out.flush();
+			    String verify = m_in.readLine(null, null, 100, 0);
+			    if(password.equals(verify))
+			        break;
+			    m_out.println(m_formatter.format("login.self.register.password.mismatch"));
+			    m_out.println();		    
+		    }
+		    for(;;)
+		    {
+			    m_out.print(m_formatter.format("login.self.register.fullname"));
+			    m_out.flush();	    
+			    fullname = m_in.readLine(null, null, 100, LineEditor.FLAG_ECHO);
+			    if(fullname.length() > 0)
+			        break;
+		    }
+		    
+		    // Register user
+		    //
+		    try
+		    {
+			    ssf.selfRegister(userid, password, fullname, charSet);
+			    m_out.println();
+			    return new String[] { userid, password, fullname };
+		    }
+		    catch(DuplicateNameException e)
+		    {
+		        m_out.println(m_formatter.format("login.self.register.duplicate.name"));
+			    m_out.println();
+		    }
+		    catch(AmbiguousNameException e)
+		    {
+		        m_out.println(m_formatter.format("login.self.register.duplicate.name"));
+			    m_out.println();
+		    }		    
+	    }
 	}
 	
 	public synchronized void shutdown()

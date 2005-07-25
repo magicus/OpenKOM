@@ -26,7 +26,7 @@ public class TimeZoneParameter extends EnumParameter
     public TimeZoneParameter(String missingObjectQuestionKey, boolean isRequired)
     {
         super(missingObjectQuestionKey, "parser.parameter.timezone.header",
-                missingObjectQuestionKey, m_presentableTimeZones, true,
+                missingObjectQuestionKey, m_presentableTimeZones, true, null,
                 isRequired);
     }
 

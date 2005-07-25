@@ -72,7 +72,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.GrepLocalMessage"/>
 	</category>
 	<category id="conf.admin" i18n="command.category.conf.admin" order="90">
-		<command class="nu.rydin.kom.frontend.text.commands.CreateConference"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.CreateConference" permissions="0009"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.DeleteConference"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeReplyToConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ChangePermissions"/>		
@@ -130,5 +130,8 @@
 		<command class="nu.rydin.kom.frontend.text.commands.GenerateTestdata" permission="0108"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.PrintDebug" permission="0108"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ClearCache" permission="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.EnableSelfRegistration" permission="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.DisableSelfRegistration" permission="0108"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.EnableNormalPrivs" permission="0108"/>		
 	</category>	
 </commandlist>

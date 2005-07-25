@@ -251,7 +251,7 @@ public class Parser
 
     public static int askForResolution(Context context, List candidates,
             String promptKey, boolean printHeading, String headingKey,
-            boolean allowPrefixes) throws IOException, InterruptedException,
+            boolean allowPrefixes, String legendKeyPrefix) throws IOException, InterruptedException,
             InvalidChoiceException, OperationInterruptedException
     {
         LineEditor in = context.getIn();
@@ -275,7 +275,18 @@ public class Parser
 		            PrintUtils
 		                    .printRightJustified(out, Integer.toString(printIndex), 2);
 		            out.print(". ");
-		            out.println(candidate);
+		            out.print(candidate);
+		            if(legendKeyPrefix != null)
+		            {
+		                String legend = fmt.getStringOrNull(legendKeyPrefix + '.' + candidate);
+		                if(legend != null)
+		                {
+		                    out.print(" (");
+		                    out.print(legend);
+		                    out.print(')');
+		                }
+		            }
+		            out.println();
 		        }
 		        out.print(fmt.format(promptKey));
 		        out.flush();
@@ -300,7 +311,7 @@ public class Parser
 		        } catch (NumberFormatException e)
 		        {
 		            return resolveString(context, input, candidates, headingKey,
-		                    promptKey, allowPrefixes);
+		                    promptKey, allowPrefixes, legendKeyPrefix);
 		        }
             }
             catch(LineEditingDoneException e)
@@ -312,7 +323,8 @@ public class Parser
 
     public static int resolveString(Context context, String input,
             List candidates, String headingKey, String promptKey,
-            boolean allowPrefixes) throws InvalidChoiceException,
+            boolean allowPrefixes, String legendKeyPrefix) 
+    throws InvalidChoiceException,
             OperationInterruptedException, IOException, InterruptedException
     {
         // Nope. Assume it is a name to be matched against the list.
@@ -345,7 +357,7 @@ public class Parser
         {
             // Still ambiguous. Let the user chose again, recursively.
             int newIndex = askForResolution(context, matchingCandidates,
-                    promptKey, true, headingKey, false);
+                    promptKey, true, headingKey, false, legendKeyPrefix);
             // This is the index in our (shorter) list of remaining candidates,
             // but we need to
             // return the index of the original list. Good thing we saved that
@@ -366,7 +378,7 @@ public class Parser
         }
 
         int selection = askForResolution(context, commandNames, "parser.choose",
-                true, "parser.ambiguous", false);
+                true, "parser.ambiguous", false, null);
 
         CommandToMatches potentialTarget = (CommandToMatches) potentialTargets
                 .get(selection);

@@ -97,5 +97,11 @@ public class UserPermissions
 	 * Normal permissions
 	 */
 	public static final long NORMAL					= LOGIN | CREATE_CONFERENCE | NOT_TWIT 
-														| CHAT | BROADCAST | POST | COPY | MOVE;
+														| CHAT | BROADCAST | POST | COPY | MOVE
+														| CHANGE_SUFFIX;
+	/**
+	 * Self registered user permissions permissions
+	 */
+	public static final long SELF_REGISTERED_USER	= LOGIN | CHAT | BROADCAST | NOT_TWIT;
+
 }

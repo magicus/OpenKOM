@@ -29,16 +29,19 @@ public abstract class EnumParameter extends CommandLineParameter
     private final String m_headingKey;
 
     private final String m_promptKey;
+    
+    private final String m_legendKeyPrefix;
 
     private boolean m_allowPrefixes;
 
     public EnumParameter(String missingObjectQuestionKey, String headingKey,
             String promptKey, String[] alternatives, boolean allowPrefixes,
-            boolean isRequired)
+            String legendKeyPrefix, boolean isRequired)
     {
         super(missingObjectQuestionKey, isRequired);
         m_headingKey = headingKey;
         m_promptKey = promptKey;
+        m_legendKeyPrefix = legendKeyPrefix;
         m_allowPrefixes = allowPrefixes;
         m_alternatives = new ArrayList(alternatives.length);
         for (int i = 0; i < alternatives.length; i++)
@@ -67,7 +70,7 @@ public abstract class EnumParameter extends CommandLineParameter
             throws IOException, InterruptedException, KOMException
     {
         int selected = Parser.resolveString(context, match.getMatchedString(),
-                m_alternatives, m_headingKey, m_promptKey, m_allowPrefixes);
+                m_alternatives, m_headingKey, m_promptKey, m_allowPrefixes, m_legendKeyPrefix);
         return new Integer(selected);
     }
 
@@ -94,7 +97,7 @@ public abstract class EnumParameter extends CommandLineParameter
 		        if (line.trim().equals("?"))
 		        {
 		            int selection = Parser.askForResolution(context, m_alternatives,
-		                    m_promptKey, false, m_headingKey, m_allowPrefixes);
+		                    m_promptKey, false, m_headingKey, m_allowPrefixes, m_legendKeyPrefix);
 		            return innerMatch((String) m_alternatives.get(selection), "");
 		        } else
 		        {

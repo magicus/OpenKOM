@@ -20,4 +20,9 @@ public class SettingKeys
      * Holds conference id of conference presentations
      */
     public static final String CONFERENCE_PRESENTATIONS 	= "CONFERENCE_PRESENTATIONS";
+    
+    /**
+     * Holds nonzero if sysem allows self registration
+     */
+    public static final String ALLOW_SELF_REGISTER			= "ALLOW_SELF_REGISTER";
 }

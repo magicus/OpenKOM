@@ -6,6 +6,9 @@
  */
 package nu.rydin.kom.backend;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationHandler;
@@ -21,13 +24,17 @@ import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import nu.rydin.kom.backend.data.FileManager;
+import nu.rydin.kom.backend.data.SettingsManager;
 import nu.rydin.kom.backend.data.UserManager;
+import nu.rydin.kom.constants.SettingKeys;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
 import nu.rydin.kom.events.UserAttendanceEvent;
 import nu.rydin.kom.exceptions.AlreadyLoggedInException;
 import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.AuthenticationException;
+import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.LoginProhibitedException;
 import nu.rydin.kom.exceptions.ModuleException;
@@ -37,6 +44,7 @@ import nu.rydin.kom.frontend.text.ClientSettings;
 import nu.rydin.kom.modules.Module;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Base64;
+import nu.rydin.kom.utils.FileUtils;
 import nu.rydin.kom.utils.Logger;
 
 /**
@@ -413,4 +421,113 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 			DataAccessPool.instance().returnDataAccess(da);
 		}
 	}
+	
+    public boolean allowsSelfRegistration()
+    throws UnexpectedException
+    {
+        DataAccessPool dap = DataAccessPool.instance();
+        DataAccess da = dap.getDataAccess();
+        try
+        {
+            SettingsManager sm = da.getSettingManager();
+            return sm.getNumber(SettingKeys.ALLOW_SELF_REGISTER) != 0;
+        }
+        catch(ObjectNotFoundException e)
+        {
+            // Not found? Not set!
+            //
+            return false;
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(-1, e);
+        }
+        finally
+        {
+            dap.returnDataAccess(da);
+        }
+    }
+    
+    public boolean loginExits(String userid)
+    throws AuthorizationException, UnexpectedException
+    {
+        DataAccessPool dap = DataAccessPool.instance();
+        DataAccess da = dap.getDataAccess();
+        try
+        {
+            da.getUserManager().getUserIdByLogin(userid);
+            return true;
+        }
+        catch(ObjectNotFoundException e)
+        {
+            return false;
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(-1, e);
+        }        
+        finally
+        {
+            dap.returnDataAccess(da);
+        }        
+    }
+    
+    public long selfRegister(String login, String password, String fullName, String charset)
+    throws AuthorizationException, UnexpectedException, AmbiguousNameException, DuplicateNameException
+    {
+        DataAccessPool dap = DataAccessPool.instance();
+        DataAccess da = dap.getDataAccess();
+        boolean committed = false;
+        try
+        {
+            // Are we allowed to do this?
+            //
+            if(!this.allowsSelfRegistration())
+                throw new AuthorizationException();
+            
+            // Create user
+            //
+            long id = da.getUserManager().addUser(login, password, fullName, "", "", "", "", "", "", "", "", "", 
+					charset, "sv_SE", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, 
+				UserFlags.DEFAULT_FLAGS3, UserFlags.DEFAULT_FLAGS4, UserPermissions.SELF_REGISTERED_USER);
+            
+            // Create a login-script to help this user set stuff up
+            //
+            InputStream is = null; 
+            try
+            {
+                String content = FileUtils.loadTextFromResource("selfregistered.login"); 
+	            FileManager fm = da.getFileManager();
+	            fm.store(id, ".login.cmd", content);
+            }
+            catch(FileNotFoundException e)
+            {
+                // No command file exists? Probably just means the
+                // sysop doesn't think one is needed. Just skip!
+            }
+            catch(IOException e)
+            {
+                throw new UnexpectedException(-1, e);
+            }            
+            // Done!
+            //
+            da.commit();
+            committed = true;
+            return id;
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(-1, e);
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            throw new UnexpectedException(-1, e);
+        }                
+        finally
+        {
+            if(!committed)
+                da.rollback();
+            dap.returnDataAccess(da);
+        }                
+    }
 }

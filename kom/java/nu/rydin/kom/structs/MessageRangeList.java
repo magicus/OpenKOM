@@ -168,14 +168,14 @@ public class MessageRangeList extends ListAtom implements Serializable
 		do
 		{
 			MessageRange mr = each.getRange().intersect(r);
-			if(mr == null)
-				continue;
-			MessageRangeList mrl = new MessageRangeList(mr);
-			if(answer == null)
-				answer = mrl;
-			else
-			    mrl.precede(answer);
-			
+			if(mr != null)
+			{
+				MessageRangeList mrl = new MessageRangeList(mr);
+				if(answer == null)
+					answer = mrl;
+				else
+				    mrl.precede(answer);
+			}
 			each = (MessageRangeList)each.next();
 		} while(each != this);
 		return answer != null

@@ -6,6 +6,8 @@
 package nu.rydin.kom.backend;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -95,6 +97,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.structs.UserListItem;
 import nu.rydin.kom.structs.UserLogItem;
+import nu.rydin.kom.utils.FileUtils;
 import nu.rydin.kom.utils.FilterUtils;
 import nu.rydin.kom.utils.Logger;
 import edu.oswego.cs.dl.util.concurrent.Mutex;
@@ -169,7 +172,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     	    try
     	    {
 	    	    MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(
-	    	            that.getCurrentConferenceId(), messageId);
+	    	            that.getLoggedInUserId(), that.getCurrentConferenceId(), messageId);
 	    	    m_memberships.markAsUnread(occ.getConference(), occ.getLocalnum());
 	    	    that.markAsUnreadAtLogout(messageId);
     	    }
@@ -671,8 +674,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public Envelope readLastMessage()
-	throws ObjectNotFoundException, UnexpectedException
+	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
 	{
+	    if(m_lastReadMessageId == -1)
+	        throw new NoCurrentMessageException();
 		return this.innerReadMessage(this.m_lastReadMessageId);
 	}
 	
@@ -683,7 +688,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			long conf = this.getCurrentConferenceId(); 
 			Envelope env = this.innerReadMessage(m_da.getMessageManager().getMostRelevantOccurrence(
-				conf, messageId));
+				this.getLoggedInUserId(), conf, messageId));
 			return env;
 		}
 		catch(SQLException e)
@@ -693,8 +698,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public MessageHeader getLastMessageHeader()
-	throws ObjectNotFoundException, UnexpectedException
+	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
 	{
+	    if(m_lastReadMessageId == -1)
+	        throw new NoCurrentMessageException();
 		try
 		{
 			return m_da.getMessageManager().loadMessageHeader(this.m_lastReadMessageId);
@@ -1226,8 +1233,26 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		this.checkRights(UserPermissions.USER_ADMIN);
 		try
 		{
-			m_da.getUserManager().addUser(userid, password, fullname, address1, address2, address3, address4, 
+		    // Create the user
+		    //
+			long id = m_da.getUserManager().addUser(userid, password, fullname, address1, address2, address3, address4, 
 				phoneno1, phoneno2, email1, email2, url, charset, "sv_SE", flags1, flags2, flags3, flags4, rights);
+			
+			// Add default login script if requested
+			//
+			try
+			{
+			    String content = FileUtils.loadTextFromResource("firsttime.login");
+			    m_da.getFileManager().store(id, ".login.cmd", content);
+			}
+			catch(FileNotFoundException e)
+			{
+			    // No file specified? That's totally cool...
+			}
+			catch(IOException e)
+			{
+				throw new UnexpectedException(this.getLoggedInUserId(), e);
+			}
 		}
 		catch(SQLException e)
 		{
@@ -1342,7 +1367,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			return m_da.getMessageManager().getMostRelevantOccurrence(conferenceId, globalNum);
+			return m_da.getMessageManager().getMostRelevantOccurrence(
+			        this.getLoggedInUserId(), conferenceId, globalNum);
 		}
 		catch(SQLException e)
 		{
@@ -1532,8 +1558,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			return m_da.getMessageManager().getMostRelevantOccurrence(m_currentConferenceId, 
-				this.getCurrentMessage());
+			return m_da.getMessageManager().getMostRelevantOccurrence(this.getLoggedInUserId(),
+			        m_currentConferenceId, this.getCurrentMessage());
 		}
 		catch(SQLException e)
 		{
@@ -1550,7 +1576,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 	    try
         {
-            return m_da.getMessageManager().getMostRelevantOccurrence(conferenceId, messageId);
+            return m_da.getMessageManager().getMostRelevantOccurrence(
+                    this.getLoggedInUserId(), conferenceId, messageId);
         } 
 	    catch (SQLException e)
         {
@@ -1790,7 +1817,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    try
 	    {
 		    MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(
-		            this.getCurrentConferenceId(), messageId);
+		            this.getLoggedInUserId(), this.getCurrentConferenceId(), messageId);
 		    m_pendingUnreads = new ReadLogItem(m_pendingUnreads, occ.getConference(), occ.getLocalnum());
 	    }
 		catch(SQLException e)
@@ -1996,6 +2023,35 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 	    return m_lastHeartbeat;
 	}
+	
+    public void enableSelfRegistration()
+    throws AuthorizationException, UnexpectedException
+    {
+        this.checkRights(UserPermissions.ADMIN);
+        try
+        {
+            m_da.getSettingManager().changeSetting(SettingKeys.ALLOW_SELF_REGISTER, "", 1);
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(-1, e);
+        }
+    }
+    
+    public void disableSelfRegistration()
+    throws AuthorizationException, UnexpectedException
+    {
+        this.checkRights(UserPermissions.ADMIN);
+        try
+        {
+            m_da.getSettingManager().changeSetting(SettingKeys.ALLOW_SELF_REGISTER, "", 0);
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(-1, e);
+        }
+
+    }
 		
 	private void sendChatMessageHelper(long userId, String message)
 	{
@@ -2537,8 +2593,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		try
 		{
 			// Load current flags.
-			//
+			// 
 			UserInfo ui = this.getLoggedInUser();
+			long id = ui.getId();
 			long[] oldFlags = ui.getFlags();
 			
 			// Calculate new flags sets
@@ -2549,7 +2606,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			
 			// Store in database
 			//
-			m_da.getUserManager().changeFlags(this.getLoggedInUserId(), flags);
+			m_da.getUserManager().changeFlags(id, flags);
+			
+			// Force clients to reload local cache
+			//
+			this.sendEvent(id, new ReloadUserProfileEvent(id));
 		}
 		catch(SQLException e)
 		{
@@ -2575,6 +2636,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Store new permissions in database
 			//
 			um.changePermissions(user, (oldFlags | set) & ~reset);
+			
+			// Force clients to invalidate local cache
+			//
+			this.sendEvent(user, new ReloadUserProfileEvent(user));
 		}
 		catch(SQLException e)
 		{
@@ -2599,7 +2664,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    long thread = m.getThread();
 		    if(thread <= 0)
 		        return 0;
-		    return this.performThreadOperation(m.getId(), 100000, new MarkAsReadOperation());
+		    return this.performThreadOperation(m.getThread(), 100000, new MarkAsReadOperation());
 	    }
 	    catch(SQLException e)
 	    {
@@ -3170,7 +3235,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			{
 				// This is a reply. Fill in info.
 				//
-				MessageOccurrence occ = mm.getMostRelevantOccurrence(conf, replyToId);
+				MessageOccurrence occ = mm.getMostRelevantOccurrence(
+				        this.getLoggedInUserId(), conf, replyToId);
 				MessageHeader replyToMh = mm.loadMessageHeader(replyToId);
 				replyTo = new Envelope.RelatedMessage(occ, replyToMh.getAuthor(), replyToMh.getAuthorName(), 
 					occ.getConference(), this.getCensoredName(occ.getConference()), occ.getConference() == conf);
@@ -3197,7 +3263,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			for(int idx = 0; idx < top; ++idx)
 			{
 				MessageHeader each = replyHeaders[idx];
-				MessageOccurrence replyOcc = mm.getMostRelevantOccurrence(conf, each.getId());
+				MessageOccurrence replyOcc = mm.getMostRelevantOccurrence(
+				        this.getLoggedInUserId(), conf, each.getId());
 				
 				// Don't show replies written by filtered users
 				//
@@ -3331,7 +3398,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			reply = m_replyStack.peek();
 			try
 			{
-				MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(m_currentConferenceId, reply);
+				MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(
+				        this.getLoggedInUserId(), m_currentConferenceId, reply);
 				
 				// Check that we have permission to see this one
 				//
@@ -3368,6 +3436,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		if(!this.getLoggedInUser().hasRights(mask))
 			throw new AuthorizationException(); 
 	}	
+	
+	public boolean checkForUserid(String userid)
+	throws UnexpectedException
+	{
+	    UserManager um = m_da.getUserManager();
+	    try
+	    {
+	        um.getUserIdByLogin(userid);
+	        return true;
+	    }
+	    catch(ObjectNotFoundException e)
+	    {
+	        return false;
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException(this.getLoggedInUserId(), e);
+	    }
+	}
 	
 	/**
 	 * Sends an event to a specified user

@@ -4,7 +4,8 @@
 		<!-- Name of the JDBC driver class. -->
 		<parameter name="server.jdbc.driver.class" value="com.mysql.jdbc.Driver"/>
 		<!-- JDBC connection string. Change this to reflect your database configuration. -->
-		<parameter name="server.jdbc.connect" value="jdbc:mysql://localhost/kom?user=kom&amp;password=kom"/>
+		<!-- parameter name="server.jdbc.connect" value="jdbc:mysql://localhost/kom?user=kom&amp;password=kom"/ -->
+		<parameter name="server.jdbc.connect" value="jdbc:mysql://mozart/sklommon?user=sklommon&amp;password=sklommon"/>		
 		<!-- Alternate connection string with trusted login -->
 		<!-- <parameter name="server.jdbc.connect" value="server.jdbc.connect=jdbc:mysql://localhost/kom"/> -->
 		<!-- Number of data access objects to create initially -->
@@ -28,6 +29,7 @@
 	<module name="TelnetServer" class="nu.rydin.kom.modules.TelnetServer">
 		<parameter name="port" value="23"/>
 		<parameter name="authentication" value="password"/>
+		<parameter name="selfRegister" value="false"/>
 	</module>
 	<module name="TelnetServerTicketLogin" class="nu.rydin.kom.modules.TelnetServer">
 		<parameter name="port" value="2300"/>
@@ -42,5 +44,6 @@
 		<parameter name="port" value="22"/>
 		<parameter name="maxauthretry" value="3"/>
 		<parameter name="maxconn" value="1000"/>
+		<parameter name="selfRegister" value="false"/>		
 	</module>
 </modules>

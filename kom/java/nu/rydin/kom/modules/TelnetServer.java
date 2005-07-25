@@ -94,6 +94,7 @@ public class TelnetServer implements Module, Runnable
 	private ServerSocket m_socket;
 	private Thread m_thread;
 	private boolean m_useTicket;
+	private boolean m_selfRegister;
 		
 	public void start(Map parameters)
 	{
@@ -101,6 +102,7 @@ public class TelnetServer implements Module, Runnable
 	    //
 		int port = Integer.parseInt((String) parameters.get("port"));
 		m_useTicket = "ticket".equals(parameters.get("authentication"));
+		m_selfRegister = "true".equals(parameters.get("selfRegister"));
 		
 		try
 		{
@@ -162,7 +164,7 @@ public class TelnetServer implements Module, Runnable
 					//
 					TelnetInputStream eis = new TelnetInputStream(incoming.getInputStream(), 
 						incoming.getOutputStream());
-					ClientSession client = new ClientSession(eis, incoming.getOutputStream(), m_useTicket);
+					ClientSession client = new ClientSession(eis, incoming.getOutputStream(), m_useTicket, m_selfRegister);
 					eis.addSizeListener(client);
 					eis.addEnvironmentListener(client);
 					

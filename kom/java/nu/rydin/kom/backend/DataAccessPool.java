@@ -9,7 +9,6 @@ package nu.rydin.kom.backend;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.LinkedList;
 
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -51,6 +50,8 @@ public class DataAccessPool
 	public DataAccess getDataAccess()
 	throws UnexpectedException
 	{
+	    // Have we already requested a da for this thread? 
+	    //
 		DataAccess da = null;
 		synchronized(this)
 		{
@@ -60,12 +61,12 @@ public class DataAccessPool
 		
 		// Did we get anything? Is it working?
 		//
-		if(da != null && da.isValid())
-			return da;
+		if(da == null || !da.isValid())
+			da = this.createDataAccess();
 		
-		// Otwherwise, create one!
+		// Associate with thread
 		//
-		return this.createDataAccess();
+		return da;
 	}
 		
 	private DataAccess createDataAccess()
@@ -77,8 +78,8 @@ public class DataAccessPool
 			Class.forName(ServerSettings.getJDBCDriverClass()).newInstance();
 			conn = DriverManager.getConnection(ServerSettings.getJDBCConnectString());
 			conn.setAutoCommit(false);
-			Statement stmt = conn.createStatement();
-			stmt.execute("SET AUTOCOMMIT=0");
+//			Statement stmt = conn.createStatement();
+//			stmt.execute("SET AUTOCOMMIT=0");
 			return new DataAccess(conn);			
 		}
 		catch(IllegalAccessException e)
@@ -101,6 +102,21 @@ public class DataAccessPool
 	
 	public synchronized void returnDataAccess(DataAccess da)
 	{
+	    // Whatever we do, let's not leave uncomitted transactions around
+	    //
+	    try
+	    { 
+	        da.rollback();
+	    }
+	    catch(UnexpectedException e)
+	    {
+	        // This DataAccess seems broken. Don't return to pool.
+	        //
+	        return;
+	    }
+	    
+	    // Return to pool
+	    //
 		m_pool.addLast(da);
 	}
 }
