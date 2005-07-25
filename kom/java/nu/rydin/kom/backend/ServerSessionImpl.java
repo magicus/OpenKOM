@@ -2090,9 +2090,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    ArrayList refused = new ArrayList(destinations.length);
 		    boolean explicitToSelf = false;
 		    
+		    
 			// Set to make sure we don't send the message to the same user more than once.
 			//
 			HashSet s = new HashSet();
+			HashSet rec_names = new HashSet();
 			for (int i = 0; i < destinations.length; ++i)
 			{
 			    long each = destinations[i];
@@ -2115,6 +2117,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 					                    FilterFlags.CHAT))
 						{
 							s.add(new Long(each));
+							rec_names.add(ui.getName());
 						}
 						else
 						{
@@ -2125,6 +2128,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 					else // conference
 					{
 						MembershipInfo[] mi = m_da.getMembershipManager().listMembershipsByConference(each);
+						rec_names.add(this.getName(each));
 						for (int j = 0; j < mi.length; ++j)
 						{
 						    long uid = mi[j].getUser();
@@ -2156,13 +2160,28 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				s.remove(new Long(this.getLoggedInUserId()));
 			}
 			
+			// Temporary kludge. I need to extend the event class and rewrite
+			// some of the formatting.
+			//
+			String msgToSend = "[";
+			Iterator buildRecIter = rec_names.iterator();
+			while (buildRecIter.hasNext())
+			{
+				msgToSend += buildRecIter.next().toString();
+				msgToSend += ", ";
+			}
+			msgToSend = msgToSend.substring(0, msgToSend.length()-2);
+			msgToSend += "] ";
+			msgToSend += message;
+			
+			
 			// Now just send it
 			//
 			Iterator iter = s.iterator();
 			while (iter.hasNext())
 			{
 			    long user = ((Long)iter.next()).longValue();
-				sendChatMessageHelper(user, message);
+				sendChatMessageHelper(user, msgToSend);
 				
 				// Create link from recipient to message
 				//
