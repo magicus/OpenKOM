@@ -20,6 +20,7 @@ import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
+import nu.rydin.kom.exceptions.AmbiguousPatternException;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.ImmediateShutdownException;
 import nu.rydin.kom.exceptions.LineEditingDoneException;

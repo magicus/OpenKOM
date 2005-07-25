@@ -8,8 +8,8 @@ package nu.rydin.kom.text.terminal;
 
 import java.io.PrintWriter;
 
+import nu.rydin.kom.exceptions.AmbiguousPatternException;
 import nu.rydin.kom.frontend.text.ANSIDisplayController;
-import nu.rydin.kom.frontend.text.AmbiguousPatternException;
 import nu.rydin.kom.frontend.text.KeystrokeTokenizer;
 import nu.rydin.kom.frontend.text.KeystrokeTokenizerDefinition;
 import nu.rydin.kom.frontend.text.constants.Keystrokes;

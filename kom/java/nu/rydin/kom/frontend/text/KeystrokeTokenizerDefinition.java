@@ -8,6 +8,7 @@ package nu.rydin.kom.frontend.text;
 
 import java.util.HashMap;
 import java.util.Map;
+import nu.rydin.kom.exceptions.AmbiguousPatternException;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
