@@ -13,6 +13,7 @@ import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
 import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.utils.Logger;
 
 /**
  * Holds the currently active sessions.
@@ -38,6 +39,10 @@ public class SessionManager
 	
 	private class Broadcaster extends Thread
 	{
+	    private int INITIAL_RETRY_WAIT 	= 1000;
+	    private int RETRY_WAIT_INC	 	= 1000;
+	    private int MAX_RETRY_WAIT	 	= 5000;
+	    
 		public Broadcaster() 
 		{
 			super("Broadcaster");
@@ -70,26 +75,70 @@ public class SessionManager
 					// potentially be high (event handlers do not execute in 
 					// deterministic time), we accept that trade-off.
 					//
+					int retryWait = INITIAL_RETRY_WAIT;
 					int top = sessions.length;
 					for(int idx = 0; idx < top; ++idx)
 					{
-						ServerSession each = sessions[idx];
-						
-						// Don't send to originator unless the event explicitly ask
-						// for it.
-						//
-						if(!e.sendToSelf() && each.getLoggedInUserId() == e.getOriginatingUser())
-							continue;
-						ServerSessionImpl sess = (ServerSessionImpl) sessions[idx];
-						sess.acquireMutex();
-						try
-						{
-						    e.dispatch((EventTarget) sessions[idx]);
-						}
-						finally
-						{
-						    sess.releaseMutex();
-						}
+					    for(;;)
+					    {
+						    // We absolutely don't want this thread to die, so we need
+						    // to handle exceptions carefully.
+						    //
+						    try
+						    {
+								ServerSession each = sessions[idx];
+								
+								// Don't send to originator unless the event explicitly ask
+								// for it.
+								//
+								if(!e.sendToSelf() && each.getLoggedInUserId() == e.getOriginatingUser())
+									break;
+								ServerSessionImpl sess = (ServerSessionImpl) sessions[idx];
+								sess.acquireMutex();
+								try
+								{
+								    e.dispatch((EventTarget) sessions[idx]);
+								}
+								finally
+								{
+								    sess.releaseMutex();
+								}
+								
+								// If we get here, we didn't run into any problems
+								// and we don't have to retry.
+								//
+								break;
+						    }
+						    catch(InterruptedException ex)
+						    {
+						        // Shutting down, we're outta here!
+						        //
+						        throw ex;
+						    }
+						    catch(Throwable t)
+						    {
+						        // Log this!
+						        //
+						        Logger.error(this, "Exception in Broadcaster", t);
+						        
+						        // Unhandled exception. Wait and retry. We increase the wait 
+						        // for every failure and eventually give up.
+						        //
+						        if(retryWait > MAX_RETRY_WAIT)
+						        {
+						            // We've exceeded the max retry time. Skip this session!
+						            //
+						            Logger.warn(this, "Giving up!");
+						            break;
+						        }
+						        
+						        // Try again, but first, wait a little
+						        //
+						        Logger.warn(this, "Retrying... ");
+						        Thread.sleep(retryWait);
+						        retryWait += RETRY_WAIT_INC;
+						    }
+					    } 
 					}
 				}
 			}

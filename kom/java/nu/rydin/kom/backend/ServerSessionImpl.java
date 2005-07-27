@@ -3232,9 +3232,42 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	protected void pushReplies(long messageId)
 	throws ObjectNotFoundException, UnexpectedException
 	{
+	    // Not reading in reply-tree-order? We're outta here!
+	    //
+	    if((this.getLoggedInUser().getFlags1() & UserFlags.READ_REPLY_TREE) == 0)
+	        return;
 		try
 		{
 			long[] replies = m_da.getMessageManager().getReplyIds(messageId);
+			
+			// If we're not interested in replies across conferences, we have
+			// to filter the list.
+			//
+			if((this.getLoggedInUser().getFlags1() & UserFlags.READ_CROSS_CONF_REPLIES) == 0)
+			{
+			    MessageManager mm = m_da.getMessageManager();
+			    ArrayList list = new ArrayList(replies.length);
+			    int p = 0;
+				for(int idx = 0; idx < replies.length; idx++)
+	            {
+				    long reply = replies[idx];
+				    try
+				    {
+				        mm.getOccurrenceInConference(this.getCurrentConferenceId(), reply);
+				        replies[p++] = reply;
+				    }
+				    catch(ObjectNotFoundException e)
+				    {
+				        // Skip...
+				    }
+	            }
+				if(p != replies.length)
+				{
+				    long[] copy = replies;
+				    replies = new long[p];
+				    System.arraycopy(copy, 0, replies, 0, p);
+				}
+			}
 			if(replies.length > 0)
 				m_replyStack = new ReplyStackFrame(replies, m_replyStack);
 		}
@@ -3301,6 +3334,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				//
 				if(cm.isMailbox(replyOcc.getConference()))
 				    continue;
+				
+				// Don't show replies in conferences we're not allowed to see
+				//
+				if(this.getName(replyOcc.getConference()).getVisibility() == Visibilities.PROTECTED
+				    && !this.hasPermissionInConference(replyOcc.getConference(), ConferencePermissions.READ_PERMISSION))
+				    continue;
+				    
+				// Add to list
+				//
 				list.add(new Envelope.RelatedMessage(replyOcc, each.getAuthor(), each.getAuthorName(),
 				        replyOcc.getConference(), this.getCensoredName(replyOcc.getConference()), replyOcc.getConference() == conf));  
 			}

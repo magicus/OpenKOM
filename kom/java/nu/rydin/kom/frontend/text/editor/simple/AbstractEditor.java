@@ -244,9 +244,15 @@ public abstract class AbstractEditor
 				if(buffer.size() > 0)
 				{
 					defaultLine = buffer.get(buffer.size() - 1).toString();
+					
+					// Backspacing to the previous line implicitly deletes 
+					// the newline. Handle that!
+					//
+					if(defaultLine.endsWith("\n"))
+					    defaultLine = defaultLine.substring(0, defaultLine.length() - 1);
 					buffer.remove(buffer.size() - 1);
 				}
-				out.println();
+				out.print('\r');
 			}
 			catch(StopCharException e)
 			{

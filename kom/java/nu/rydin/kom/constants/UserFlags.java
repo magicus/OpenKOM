@@ -43,13 +43,16 @@ public class UserFlags
 	public static long USE_COMPACT_MESSAGEPRINTER			= 0x00020000;
 	public static long DISPLAY_THREAD_ID					= 0x00040000;
 	public static long USE_FULL_SCREEN_EDITOR				= 0x00080000;
+	public static long READ_CROSS_CONF_REPLIES				= 0x00100000;
+	public static long READ_REPLY_TREE						= 0x00200000;
 
 	/**
 	 * Default value for flagword 1
 	 */
 	public static long DEFAULT_FLAGS1 = SHOW_ATTENDANCE_MESSAGES | ALLOW_BROADCAST_MESSAGES |
 		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT | BEEP_ON_CHAT
-		| PRIORITIZE_MAIL | BEEP_ON_NEW_MESSAGES | SHOW_NUM_UNREAD;
+		| PRIORITIZE_MAIL | BEEP_ON_NEW_MESSAGES | SHOW_NUM_UNREAD | READ_CROSS_CONF_REPLIES 
+		| READ_REPLY_TREE;
 	
 	/**
 	 * Default value for flagword 2

@@ -12,10 +12,12 @@ import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.constants.UserFlags;
+import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.ansi.ANSISequences;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;
@@ -208,9 +210,14 @@ public class BasicMessagePrinter implements MessagePrinter
 		String subjLine = formatter.format("BasicMessagePrinter.subject"); 
 		out.print(subjLine);
 		dc.messageSubject();
-		out.println(message.getSubject());
+        int sl = subjLine.length();
+        PrintUtils.printIndented(
+                out,
+                message.getSubject(),
+                width - sl, 0, sl);		        
+		// out.println(message.getSubject());
 		dc.messageHeader();
-		PrintUtils.printRepeated(out, '-', subjLine.length() + message.getSubject().length());
+		PrintUtils.printRepeated(out, '-', Math.min(width - 1, subjLine.length() + message.getSubject().length()));
 		out.println();
 		
 		// Print body
@@ -269,10 +276,11 @@ public class BasicMessagePrinter implements MessagePrinter
 		        String label = formatter.format("BasicMessagePrinter.footnote"); 
 		        out.print(label);
 		        dc.messageBody();
+		        int ll = label.length();
 		        PrintUtils.printIndented(
 		                out,
 		                each.getValue(),
-		                width, 0, label.length());		        
+		                width - ll, 0, ll);		        
 		    }
 		}
 
@@ -296,7 +304,7 @@ public class BasicMessagePrinter implements MessagePrinter
 			                    width, 0);
 			}
 			else
-			{
+			{			        
 			    PrintUtils.printIndented(out,
 			            formatter.format("BasicMessagePrinter.reply.different.conference",
 			                    new Object[] { new Long(occ.getLocalnum()), new Long(occ.getGlobalId()), 

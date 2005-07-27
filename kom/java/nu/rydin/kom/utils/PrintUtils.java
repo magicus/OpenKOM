@@ -100,14 +100,14 @@ public class PrintUtils
 	        {
 	            out.println(thisRow);
 	            thisRow = indent + thisWord + " ";
-	            rowLength = indentLength + wordLength;
+	            rowLength = /* indentLength + */ wordLength;
 	            continue; //
 	        }
 	        if (thisWord.endsWith("\r") || thisWord.endsWith("\n")) //
 	        {	//
 	            out.print(thisRow);
 	            thisRow = indent;
-	            rowLength = indentLength;
+	            rowLength = 0 /* indentLength */;
 	            continue;
 	        }
 	    }

@@ -37,6 +37,7 @@ public class CompactMessagePrinter implements MessagePrinter
 		Message message = envelope.getMessage();
 		MessageOccurrence primaryOcc = envelope.getPrimaryOccurrence();
 		MessageAttribute[] attributes = envelope.getAttributes();
+		int width = context.getTerminalSettings().getWidth();
 		
 		// Clear screen if requested by user
 		//
@@ -209,6 +210,25 @@ public class CompactMessagePrinter implements MessagePrinter
 				        new Object[] { new Long(message.getId()), 
 				        	context.formatObjectName(message.getAuthorName(), message.getAuthor()) }));
 			}
+		}
+		
+		// Print list of footnotes
+		//
+		for(int idx = 0; idx < attributes.length; ++idx)
+		{
+		    MessageAttribute each = attributes[idx];
+		    if(each.getKind() == MessageAttributes.FOOTNOTE)
+		    {
+		        dc.highlight();
+		        String label = formatter.format("BasicMessagePrinter.footnote"); 
+		        out.print(label);
+		        dc.messageBody();
+		        int ll = label.length();
+		        PrintUtils.printIndented(
+		                out,
+		                each.getValue(),
+		                width - ll, 0, ll);		        
+		    }
 		}
 
 		// Print copies

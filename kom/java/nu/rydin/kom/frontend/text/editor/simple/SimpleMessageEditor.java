@@ -41,6 +41,7 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 		PrintWriter out = m_context.getOut();
 		LineEditor in = m_context.getIn();
 		MessageFormatter formatter = m_context.getMessageFormatter();	
+		int width = m_context.getTerminalSettings().getWidth();
 		String oldSubject = null;
 		try
 		{
@@ -95,7 +96,7 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			out.flush();
 			m_context.setSubject(in.readLine(oldSubject));
 			dc.messageHeader();
-			PrintUtils.printRepeated(out, '-', subjLine.length() + m_context.getSubject().length());
+			PrintUtils.printRepeated(out, '-', Math.min(width - 1, subjLine.length() + m_context.getSubject().length()));
 			out.println();
 						
 			// Enter the main editor loop
