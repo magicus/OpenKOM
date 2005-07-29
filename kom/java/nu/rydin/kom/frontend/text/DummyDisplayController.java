@@ -6,13 +6,18 @@
  */
 package nu.rydin.kom.frontend.text;
 
+import java.io.PrintWriter;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class DummyDisplayController implements DisplayController 
 {   
-    public DummyDisplayController()
+    private PrintWriter m_writer; 
+    
+    public DummyDisplayController(PrintWriter writer)
     {
+        m_writer = writer;
     }
     
     public void prompt() 
@@ -70,7 +75,17 @@ public class DummyDisplayController implements DisplayController
         // We're a dummy, so we ignore everything        
     }
     
+    public void header()
+    {
+        // We're a dummy, so we ignore everything
+    }
+    
     public void highlight() 
+    {
+        // We're a dummy, so we ignore everything        
+    }
+    
+    public void quotedHighlight() 
     {
         // We're a dummy, so we ignore everything        
     }
@@ -93,5 +108,12 @@ public class DummyDisplayController implements DisplayController
     public void reset()
     {
         // We're a dummy, so we ignore everything
+    }
+    
+    public void printWithAttributes(String s)
+    {
+        // We don't understand attributes, so we just print the string as is.
+        //
+        m_writer.print(s);
     }
 }

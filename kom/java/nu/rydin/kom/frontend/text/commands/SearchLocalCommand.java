@@ -45,7 +45,7 @@ public abstract class SearchLocalCommand extends SearchCommand
         PrintUtils.printLeftJustified(out, context.formatObjectName(lmsr
                 .getAuthor()), AUTHOR_COL_WIDTH);
         out.print(" ");
-		dc.highlight();
+		dc.header();
 		out.print(msr.getReplyTo() > 0 ? "  " : "* ");
 		dc.output();        
         PrintUtils

@@ -54,7 +54,7 @@ public class ListConferences extends AbstractCommand
 		    ConferenceListItem item = list[idx]; 
 		    dc.normal();
 		    PrintUtils.printLeftJustified(out, context.smartFormatDate(item.getLastActive()), 17);
-		    dc.highlight();
+		    dc.header();
 		    out.print(' ');
 		    out.print(item.isMember() ? ' ' : '*');
 		    out.print(item.isOwner() ? 'A' : ' ');

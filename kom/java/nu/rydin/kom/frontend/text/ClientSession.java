@@ -1187,7 +1187,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
         {
 	        return (this.getCachedUserInfo().getFlags1() & UserFlags.ANSI_ATTRIBUTES) != 0
 	        	? (DisplayController) new ANSIDisplayController(m_out)
-	        	: (DisplayController) new DummyDisplayController();
+	        	: (DisplayController) new DummyDisplayController(m_out);
         }
         catch(UnexpectedException e)
         {

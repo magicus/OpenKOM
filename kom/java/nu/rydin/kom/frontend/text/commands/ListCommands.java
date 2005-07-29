@@ -45,7 +45,7 @@ public class ListCommands extends AbstractCommand
 		    // Print category header
 		    //
 		    CommandCategory cat = (CommandCategory) itor.next();
-		    dc.highlight();
+		    dc.header();
 		    out.println();
 		    out.println(formatter.format(cat.getI18nKey()));
 		    

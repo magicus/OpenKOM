@@ -48,7 +48,7 @@ public abstract class SearchGlobalCommand extends SearchCommand
 		PrintUtils.printLeftJustified(out, 
 		        context.formatObjectName(gmsr.getConference()), CONFERENCE_COL_WIDTH);
 		out.print(" ");
-		dc.highlight();
+		dc.header();
 		out.print(msr.getReplyTo() > 0 ? "  " : "* ");
 		dc.output();
 		PrintUtils.printLeftJustified(out, 

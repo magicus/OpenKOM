@@ -161,6 +161,10 @@ public class TerminalDecorator implements TerminalController
     {
         m_underlying.highlight();
     }
+    public void quotedHighlight() 
+    {
+        m_underlying.quotedHighlight();        
+    }
     public void input()
     {
         m_underlying.input();
@@ -232,5 +236,15 @@ public class TerminalDecorator implements TerminalController
     public void up(int n)
     {
         m_underlying.up(n);
+    }
+    
+    public void printWithAttributes(String s)
+    {
+        m_underlying.printWithAttributes(s);
+    }
+
+    public void header()
+    {
+        m_underlying.header();
     }
 }

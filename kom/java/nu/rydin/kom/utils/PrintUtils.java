@@ -111,7 +111,7 @@ public class PrintUtils
 	            continue;
 	        }
 	    }
-	    if (rowLength != indentLength)
+	    if (rowLength != 0)
 	    {
 	        out.println(thisRow);
 	    }

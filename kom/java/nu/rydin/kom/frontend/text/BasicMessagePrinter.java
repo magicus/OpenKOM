@@ -12,12 +12,10 @@ import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.constants.UserFlags;
-import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.ansi.ANSISequences;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;
@@ -227,15 +225,8 @@ public class BasicMessagePrinter implements MessagePrinter
 		String line;
 		while((line = ww.nextLine()) != null)
 		{
-		    boolean quoted = false;
-		    if(line.startsWith("> "))
-		    {
-		        dc.quotedMessageBody();
-		        quoted = true;
-		    }
-			out.println(line);
-			if(quoted)
-			    dc.messageBody();
+		    dc.printWithAttributes(line);
+		    out.println();
 		}
 		out.println();
 		dc.messageFooter();
@@ -272,7 +263,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		    MessageAttribute each = attributes[idx];
 		    if(each.getKind() == MessageAttributes.FOOTNOTE)
 		    {
-		        dc.highlight();
+		        dc.header();
 		        String label = formatter.format("BasicMessagePrinter.footnote"); 
 		        out.print(label);
 		        dc.messageBody();

@@ -178,15 +178,8 @@ public class CompactMessagePrinter implements MessagePrinter
 		String line;
 		while((line = ww.nextLine()) != null)
 		{
-		    boolean quoted = false;
-		    if(line.startsWith("> "))
-		    {
-		        dc.quotedMessageBody();
-		        quoted = true;
-		    }
-			out.println(line);
-			if(quoted)
-			    dc.messageBody();
+		    dc.printWithAttributes(line);
+		    out.println();
 		}
 		out.println();
 		dc.messageFooter();
@@ -219,7 +212,7 @@ public class CompactMessagePrinter implements MessagePrinter
 		    MessageAttribute each = attributes[idx];
 		    if(each.getKind() == MessageAttributes.FOOTNOTE)
 		    {
-		        dc.highlight();
+		        dc.header();
 		        String label = formatter.format("BasicMessagePrinter.footnote"); 
 		        out.print(label);
 		        dc.messageBody();

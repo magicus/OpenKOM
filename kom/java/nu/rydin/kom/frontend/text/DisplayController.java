@@ -39,7 +39,13 @@ public interface DisplayController
 
     public void output();
     
+    public void header();
+    
     public void highlight();
     
+    public void quotedHighlight();
+    
     public void reset();
+    
+    public void printWithAttributes(String string);
 }
