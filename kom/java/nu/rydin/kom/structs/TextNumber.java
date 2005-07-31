@@ -7,7 +7,7 @@
 package nu.rydin.kom.structs;
 
 /**
- * @author Magnus Ihse (magnus@ihse.net)
+ * @author Magnus Ihse Bursie (magnus@ihse.net)
  */
 public class TextNumber
 {

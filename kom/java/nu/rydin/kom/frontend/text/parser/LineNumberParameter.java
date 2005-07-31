@@ -13,7 +13,7 @@ import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public class LineNumberParameter extends IntegerParameter {
 

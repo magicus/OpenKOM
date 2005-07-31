@@ -39,7 +39,7 @@ import nu.rydin.kom.utils.PrintUtils;
 import org.xml.sax.SAXException;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  * @author Henrik Schröder
  */
 public class Parser

@@ -8,7 +8,7 @@ package nu.rydin.kom.frontend.text.parser;
 
 
 /**
- * @author Magnus Ihse 
+ * @author Magnus Ihse Bursie
  */
 public class FlagParameter extends EnumParameter
 {

@@ -15,7 +15,7 @@ import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.Context;
 
 /**
- * @author Magnus Ihse (magnus@ihse.net)
+ * @author Magnus Ihse Bursie (magnus@ihse.net)
  */
 public abstract class CommandLinePart
 {

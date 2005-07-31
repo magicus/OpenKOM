@@ -14,7 +14,7 @@ import nu.rydin.kom.structs.TextNumber;
  * 
  * The "return type" for a TextNumberParameter is a TextNumber object.
  * 
- * @author Magnus Ihse (magnus@ihse.net)
+ * @author Magnus Ihse Bursie (magnus@ihse.net)
  */
 public class TextNumberParameter extends CommandLineParameter
 {

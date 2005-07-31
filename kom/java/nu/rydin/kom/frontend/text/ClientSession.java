@@ -95,7 +95,7 @@ import nu.rydin.kom.utils.PrintUtils;
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  * @author Henrik Schröder
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public class ClientSession implements Runnable, Context, ClientEventTarget, TerminalSizeListener, EnvironmentListener
 {

@@ -18,7 +18,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
 
 
 /**
- * @author Magnus Ihse (magnus@ihse.net)
+ * @author Magnus Ihse Bursie (magnus@ihse.net)
  */
 public abstract class CommandLineParameter extends CommandLinePart
 {

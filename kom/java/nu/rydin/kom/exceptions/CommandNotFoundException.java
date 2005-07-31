@@ -10,7 +10,7 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public class CommandNotFoundException extends UserException {
 

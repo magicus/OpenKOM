@@ -20,7 +20,7 @@ import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public abstract class EnumParameter extends CommandLineParameter
 {

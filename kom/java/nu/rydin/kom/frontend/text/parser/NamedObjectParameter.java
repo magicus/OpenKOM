@@ -19,7 +19,7 @@ import nu.rydin.kom.frontend.text.NamePicker;
  * 
  * The "return type" for a NamedObjectParameter is a NameAssociation object.
  * 
- * @author Magnus Ihse (magnus@ihse.net)
+ * @author Magnus Ihse Bursie (magnus@ihse.net)
  * @author Henrik Schröder
  */
 public class NamedObjectParameter extends CommandLineParameter

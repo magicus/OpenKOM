@@ -7,7 +7,7 @@
 package nu.rydin.kom.frontend.text.parser;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  * @author Henrik Schröder
  */
 public final class Match

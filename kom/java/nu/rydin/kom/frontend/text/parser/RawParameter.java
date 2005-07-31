@@ -11,7 +11,7 @@ package nu.rydin.kom.frontend.text.parser;
  * 
  * The "return type" for a RawParameter is a String.
  * 
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public class RawParameter extends CommandLineParameter {
 

@@ -9,7 +9,7 @@ package nu.rydin.kom.frontend.text.parser;
 import java.util.TimeZone;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public class TimeZoneParameter extends EnumParameter
 {

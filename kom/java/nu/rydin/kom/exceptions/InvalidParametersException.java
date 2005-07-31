@@ -7,7 +7,7 @@
 package nu.rydin.kom.exceptions;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public class InvalidParametersException extends UserException
 {

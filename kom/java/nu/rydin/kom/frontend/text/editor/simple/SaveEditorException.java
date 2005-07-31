@@ -6,7 +6,7 @@ package nu.rydin.kom.frontend.text.editor.simple;
 import nu.rydin.kom.exceptions.SystemException;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public class SaveEditorException extends SystemException
 {

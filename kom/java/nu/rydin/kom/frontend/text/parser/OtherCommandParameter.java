@@ -18,7 +18,7 @@ import nu.rydin.kom.frontend.text.Context;
  * 
  * The "return type" for an OtherCommandParameter is a Command object.
  * 
- * @author Magnus Ihse 
+ * @author Magnus Ihse Bursie
  */
 public class OtherCommandParameter extends CommandLineParameter
 {

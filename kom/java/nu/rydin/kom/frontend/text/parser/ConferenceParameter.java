@@ -19,7 +19,7 @@ import nu.rydin.kom.frontend.text.NamePicker;
  * 
  * The "return type" for a ConferenceParameter is a NameAssociation object.
  * 
- * @author Magnus Ihse (magnus@ihse.net)
+ * @author Magnus Ihse Bursie (magnus@ihse.net)
  */
 public class ConferenceParameter extends NamedObjectParameter
 {

@@ -9,7 +9,7 @@ package nu.rydin.kom.frontend.text.parser;
 import nu.rydin.kom.frontend.text.Context;
 
 /**
- * @author Magnus Ihse (magnus@ihse.net)
+ * @author Magnus Ihse Bursie (magnus@ihse.net)
  */
 public class CommandNamePart extends CommandLinePart
 {

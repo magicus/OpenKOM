@@ -4,7 +4,7 @@
 package nu.rydin.kom.exceptions;
 
 /**
- * @author Magnus Ihse
+ * @author Magnus Ihse Bursie
  */
 public class LineEditingInterruptedException extends
         OperationInterruptedException
