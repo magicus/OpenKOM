@@ -51,22 +51,26 @@ public class ChatRececipientParameter extends NamedObjectParameter
         
         ServerSession session = context.getSession();
         ArrayList list = new ArrayList();
-        UserListItem[] users = session.listLoggedInUsers();
-        int top = users.length;
-        for(int idx = 0; idx < top; ++idx)
-        {
-            NameAssociation name = users[idx].getUser();
-            if(NameUtils.match(pattern, name.getName().getName(), true))
-                list.add(name);
+        if (pattern.startsWith("*")) {
+            // Argument was prefixed by "*". That means, we want to select
+            // recipient from the list of conferences.
+            pattern = pattern.substring(1); // Remove "*".
+            
+            NameAssociation[] conferences = session.getAssociationsForPatternAndKind(
+                    pattern, NameManager.CONFERENCE_KIND);
+            for (int idx = 0; idx < conferences.length; ++idx) {
+                list.add(conferences[idx]);
+            }
+        } else {
+            // Otherwise, we select it from the list of logged in users.
+            UserListItem[] users = session.listLoggedInUsers();
+            for (int idx = 0; idx < users.length; ++idx) {
+                NameAssociation name = users[idx].getUser();
+                if (NameUtils.match(pattern, name.getName().getName(), true)) {
+                    list.add(name);
+                }
+            }
         }
-        
-        // Now, get the list of all matching conferences
-        //
-        NameAssociation[] conferences = session.getAssociationsForPatternAndKind(
-                match.getMatchedString(), NameManager.CONFERENCE_KIND);
-        top = conferences.length;
-        for(int idx = 0; idx < top; ++idx)
-            list.add(conferences[idx]);
         
         // What did we get?
         //
@@ -96,6 +100,6 @@ public class ChatRececipientParameter extends NamedObjectParameter
 
     protected boolean isValidName(String name)
     {
-        return (super.isValidName(name) || name.equals("*"));
+        return (super.isValidName(name) || name.equals("*") || (name.startsWith("*") && super.isValidName(name.substring(1))));
     }
 }
