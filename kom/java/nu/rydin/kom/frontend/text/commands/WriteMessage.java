@@ -44,7 +44,7 @@ public class WriteMessage extends AbstractCommand
         ConferenceInfo recipient = session.getCurrentConference();
         editor.setRecipient(new NameAssociation(recipient.getId(), recipient
                 .getName()));
-        UnstoredMessage msg = editor.edit(-1);
+        UnstoredMessage msg = editor.edit();
 
         // Store text
         //

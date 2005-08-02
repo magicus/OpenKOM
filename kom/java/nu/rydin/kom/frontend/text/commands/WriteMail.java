@@ -39,7 +39,7 @@ public class WriteMail extends AbstractCommand
         //
         MessageEditor editor = context.getMessageEditor();
         editor.setRecipient(recipient);
-        UnstoredMessage msg = editor.edit(-1);
+        UnstoredMessage msg = editor.edit();
         MessageOccurrence occ = context.getSession().storeMail(
                 editor.getRecipient().getId(), msg);
 

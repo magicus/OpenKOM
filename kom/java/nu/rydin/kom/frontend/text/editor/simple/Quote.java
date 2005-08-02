@@ -26,6 +26,8 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public class Quote extends AbstractCommand
 {
+    private final int QUOTE_WIDTH = 76;
+    
 	public Quote(Context context, String fullName, long permissions)
 	{
 		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
@@ -45,7 +47,8 @@ public class Quote extends AbstractCommand
         //
         ServerSession session = context.getSession();
         String body = session.readGlobalMessage(replyTo).getMessage().getBody();
-        WordWrapper ww = context.getWordWrapper(body, context.getTerminalSettings().getWidth() - 8); //8 = length of ">" + linenumber.
+        WordWrapper ww = context.getWordWrapper(body, 
+                QUOTE_WIDTH - 8); //8 = length of ">" + linenumber.
         LineEditor in = context.getIn();
         PrintWriter out = context.getOut();
         MessageFormatter formatter = context.getMessageFormatter();

@@ -48,7 +48,7 @@ public abstract class AbstractEditor
 		m_context 	  = new EditorContext(context);
 	}
 	
-	public abstract UnstoredMessage edit(long replyTo)
+	public abstract UnstoredMessage edit()
 	throws KOMException, InterruptedException, IOException;
 	
 	public void fill(String content)
@@ -153,7 +153,9 @@ public abstract class AbstractEditor
 				 		try
 				 		{
 					 		// It's a command! How great! Go parse it!
+				 		    // But first, make sure we clear the current line
 					 		//
+				 		    defaultLine = "";
 					 		line = line.substring(1);
 					 		Parser.ExecutableCommand executableCommand = null;
 					 		executableCommand = m_parser.parseCommandLine(m_context, line);

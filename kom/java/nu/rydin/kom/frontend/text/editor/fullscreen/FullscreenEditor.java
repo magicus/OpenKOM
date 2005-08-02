@@ -68,15 +68,21 @@ public class FullscreenEditor implements MessageEditor
         m_maxX = ts.getWidth() - 1;
         m_maxY = ts.getHeight() - 1;
     }
-
-    public UnstoredMessage edit(long replyTo) throws KOMException,
-            InterruptedException, IOException
+    
+	public UnstoredMessage edit()
+	throws KOMException, InterruptedException
+	{
+	    return this.edit(-1, -1, -1, null, -1, null, null);
+	}
+    
+    public UnstoredMessage edit(long replyTo, long replyToLocal, long recipientId, 
+            String recipientName, long replyToAuthor, String replyToAuthorName, String oldSubject)
+		throws KOMException, InterruptedException
     {
         DisplayController dc = m_context.getDisplayController();
 		PrintWriter out = m_context.getOut();
 		LineEditor in = m_context.getIn();
 		MessageFormatter formatter = m_context.getMessageFormatter();	
-		String oldSubject = null;
 		try
 		{
 		    m_tc.eraseScreen();
@@ -92,32 +98,23 @@ public class FullscreenEditor implements MessageEditor
 			//
 			if(replyTo != -1)
 			{
-			    // Fetch reply-to
-			    //
-			    Message oldMessage = m_context.getSession().innerReadMessage(replyTo).getMessage();
-			    MessageOccurrence oldMessageOcc = m_context.getSession().getMostRelevantOccurrence(m_context.getSession().getCurrentConferenceId(), replyTo); 
-			    
-			    // Fetch old subject
-			    //
-			    oldSubject = oldMessage.getSubject();
-			    
-				if(m_context.getRecipient().getId() == oldMessageOcc.getConference())
+				if(m_context.getRecipient().getId() == recipientId)
 				{
 					// Simple case: Original text is in same conference
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.same.conference", 
-						new Object[] { new Long(oldMessageOcc.getLocalnum()), 
-							m_context.formatObjectName(oldMessage.getAuthorName(), oldMessage.getAuthor()) } ));		
+						new Object[] { new Long(replyToLocal), 
+							m_context.formatObjectName(recipientName, recipientId) } ));		
 				}
 				else
 				{
 					// Complex case: Original text was in a different conference
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
-						new Object[] { new Long(oldMessageOcc.getLocalnum()),
-					        m_context.formatObjectName(m_context.getSession().getConference(oldMessageOcc.getConference()).getName(),
-					        oldMessageOcc.getConference()), 
-					        m_context.formatObjectName(oldMessage.getAuthorName(), oldMessage.getAuthor()) }));
+						new Object[] { new Long(replyToLocal),
+					        m_context.formatObjectName(recipientName,
+					        recipientId), 
+					        m_context.formatObjectName(replyToAuthorName, replyToAuthor) }));
 				}
 			}
 			

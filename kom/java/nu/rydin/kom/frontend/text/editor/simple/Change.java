@@ -41,7 +41,6 @@ public class Change extends AbstractCommand
 		try
 		{
 			String oldLine = buffer.get(line).toString();
-			boolean hasNl = oldLine.endsWith("\n");
 			PrintWriter out = context.getOut();
 			DisplayController dc = context.getDisplayController();
 			
@@ -52,8 +51,6 @@ public class Change extends AbstractCommand
 			out.flush();
 			String newLine = context.getIn().readLine(oldLine, null, context.getTerminalSettings().getWidth() - 6, 
 				LineEditor.FLAG_ECHO);
-			if(hasNl)
-				newLine += "\n";
 			buffer.set(line, newLine);
 		}
 		catch(EventDeliveredException e)

@@ -62,7 +62,7 @@ public class EditProfile extends AbstractCommand
             out.println(formatter.format("edit.file.new.file"));
             out.println();
         }
-        String newContent = editor.edit(-1).getBody();
+        String newContent = editor.edit().getBody();
         
         // Store in file
         //

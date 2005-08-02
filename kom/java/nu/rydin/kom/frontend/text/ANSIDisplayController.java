@@ -6,7 +6,11 @@
  */
 package nu.rydin.kom.frontend.text;
 
+
+
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import nu.rydin.kom.frontend.text.ansi.ANSISequences;
 
@@ -15,10 +19,12 @@ import nu.rydin.kom.frontend.text.ansi.ANSISequences;
  */
 public class ANSIDisplayController implements DisplayController 
 {
-    private static final String HILITE_CHARS = "_";
+    private static  Pattern PATTERN = Pattern.compile("(^_|.*?\\s_)([^\\s^_]+)(_\\s.*|_$)");
+    private static final String HILITE_CHARS 		= "_";
     private static final short STATE_NORMAL 		= 0;
     private static final short STATE_READY_FOR_ATTR	= 1;
     private static final short STATE_AFTER_ATTR		= 2;
+    private static final short STATE_AFTER_HILITE	= 3;
     
     protected final PrintWriter m_writer;
     
@@ -136,79 +142,41 @@ public class ANSIDisplayController implements DisplayController
     
     public void printWithAttributes(String s)
     {
-        char attrChar = 0;
-        int p = 0;
         boolean quoted = false;
         if(s.length() > 0 && s.charAt(0) == '>')
         {
             this.quotedMessageBody();
             quoted = true;
         }
-        short state = STATE_READY_FOR_ATTR;
-        for (int i = 0; i < s.length(); i++)
+        for(;;)
         {
-            char ch = s.charAt(i);
-            switch(state)
-            {
-            case STATE_NORMAL:
-                m_writer.print(ch);
-                if(Character.isWhitespace(ch))
-                    state = STATE_READY_FOR_ATTR;
-                break;
-            case STATE_READY_FOR_ATTR:
-                if(HILITE_CHARS.indexOf(ch) != -1)
-                {
-                    attrChar = ch;
-                    p = i;
-                    state = STATE_AFTER_ATTR;
-                }
-                else
-                {
-                    m_writer.print(ch);
-                    if(!Character.isWhitespace(ch))
-                        state = STATE_NORMAL;
-                }
-                break;
-            case STATE_AFTER_ATTR:
-                if(Character.isWhitespace(ch))
-                {
-                    // No whitespace allowed in hilited words
-                    //
-                    m_writer.print(s.substring(p, i));
-                    attrChar = 0;
-                }
-                else if(ch == attrChar)
-                {
-                    // End of hilited word.
-                    //
-                    if(p + 1 == i)
-                    {
-	                    // Two attrchars in a row? Print one of them and move on
-	                    //
-                        m_writer.print(ch);
-                    }
-                    else
-                    {
-                        // Print with attributes
-                        //
-                        if(quoted)
-                            this.quotedHighlight();
-                        else
-                            this.highlight();
-                        m_writer.print(s.substring(p + 1, i));
-                        if(quoted)
-                            this.quotedMessageBody();
-                        else
-                            this.messageBody();
-                    }
-                    attrChar = 0;
-                    state = STATE_NORMAL;
-                    break;
-                }
-            }
+            Matcher matcher = PATTERN.matcher(s);
+            boolean processed = false;
+	        while(matcher.find())
+	        {
+	            String preamble = matcher.group(1);
+	            if(preamble == null)
+	                continue;
+	            m_writer.print(preamble.substring(0, preamble.length() - 1));
+	            if(quoted)
+	                this.quotedHighlight();
+	            else
+	                this.highlight();
+	            m_writer.print(matcher.group(2));
+	            if(quoted)
+	                this.quotedMessageBody();
+	            else
+	                this.messageBody();            
+	            s = matcher.group(3).substring(1);
+	            processed = true;
+	        }
+	        if(!processed)
+	        {
+	            m_writer.print(s);
+	            break;
+	        }
         }
-        if(attrChar != 0)
-            m_writer.print(s.substring(p));
-        this.messageBody();
+        if(quoted)
+            this.messageBody();
     }
 }

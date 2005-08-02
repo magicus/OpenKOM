@@ -16,8 +16,13 @@ import nu.rydin.kom.structs.*;
  */
 public interface MessageEditor
 {
-	public UnstoredMessage edit(long replyTo)
+	public UnstoredMessage edit()
 	throws KOMException, InterruptedException, IOException;
+	
+	public UnstoredMessage edit(long replyTo, long replyToLocal, long recipientId, 
+	        String recipientName, long replyToAuthor, String replyToAuthorName, 
+	        String oldSubject)
+		throws KOMException, InterruptedException;	
 	
 	public NameAssociation getRecipient();
 	

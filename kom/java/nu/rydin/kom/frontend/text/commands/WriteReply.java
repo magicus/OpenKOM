@@ -86,7 +86,15 @@ public class WriteReply extends AbstractCommand
             MessageEditor editor = context.getMessageEditor();
             editor.setRecipient(originalMessage.getUser());
             editor.setReplyTo(replyToId);
-            UnstoredMessage msg = editor.edit(replyToId);
+            UnstoredMessage msg = editor.edit(
+                    replyToId, 
+                    originalMessage.getLocalnum(),
+                    originalConference.getId(),
+                    originalConference.getName(),
+                    originalMessage.getUser().getId(), 
+                    originalMessage.getUser().getName().getName(), 
+                    context.getSession().getMessageHeader(replyToId).getSubject()
+                    );
             
             MessageOccurrence newMessage = session.storeReplyAsMail(editor.getRecipient().getId(), msg, replyToId);
 
@@ -128,10 +136,20 @@ public class WriteReply extends AbstractCommand
             session.assertConferencePermission(recipient.getId(), ConferencePermissions.REPLY_PERMISSION);
             
             // Launch editor, get message, store message as reply.
+            
             MessageEditor editor = context.getMessageEditor();
             editor.setRecipient(new NameAssociation(recipient.getId(), recipient.getName()));
             editor.setReplyTo(replyToId);
-            UnstoredMessage msg = editor.edit(replyToId);
+            UnstoredMessage msg = editor.edit(
+                    replyToId, 
+                    originalMessage.getLocalnum(),
+                    recipient.getId(),
+                    recipient.getName(),
+                    originalMessage.getUser().getId(), 
+                    originalMessage.getUser().getName().getName(), 
+                    context.getSession().getMessageHeader(replyToId).getSubject()
+                    );
+
 
             MessageOccurrence newMessage = session.storeReplyAsMessage(editor.getRecipient().getId(), msg, replyToId);            
 

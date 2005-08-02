@@ -72,7 +72,7 @@ public class EditFile extends AbstractCommand
         
 		out.println(formatter.format("edit.file.header", fileName));
         //FIXME EDITREFACTOR: When editing an existing file the previous contents are not displayed.
-        String newContent = editor.edit(-1).getBody();
+        String newContent = editor.edit().getBody();
 
         // Store in file
         //

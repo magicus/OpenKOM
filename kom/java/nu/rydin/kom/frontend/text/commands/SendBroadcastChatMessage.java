@@ -59,7 +59,7 @@ public class SendBroadcastChatMessage extends AbstractCommand
             // Read message
             //
             AbstractEditor editor = new SimpleChatEditor(context);
-            message = editor.edit(-1).getBody();
+            message = editor.edit().getBody();
         } else
         {
             message = (String) parameterArray[0];

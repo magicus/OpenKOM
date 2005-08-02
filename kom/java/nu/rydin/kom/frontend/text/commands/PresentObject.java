@@ -38,7 +38,8 @@ public class PresentObject extends AbstractCommand
 		ServerSession ss = context.getSession();
 		if(!ss.canManipulateObject(objectId))
 		    throw new AuthorizationException();
-		UnstoredMessage msg = context.getMessageEditor().edit(-1);
+		UnstoredMessage msg = context.getMessageEditor().
+			edit(-1, -1, -1, null, -1, null, nameAssociation.getName().getName());
 		MessageOccurrence occ = ss.storePresentation(msg, objectId);
 		context.getOut().println(context.getMessageFormatter().format(
 			"write.message.saved", new Integer(occ.getLocalnum())));

@@ -31,7 +31,7 @@ public class FileEditor extends AbstractEditor
 	}
     
 	//FIXME EDITREFACTOR: replyTo is completely irrelevant in this context.
-    public UnstoredMessage edit(long replyTo)
+    public UnstoredMessage edit()
             throws KOMException, InterruptedException, IOException
     {
         this.mainloop(false);

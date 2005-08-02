@@ -54,7 +54,7 @@ public class WriteMailReply extends AbstractCommand
         MessageEditor editor = context.getMessageEditor();
         editor.setRecipient(new NameAssociation(mh.getAuthor(), mh.getAuthorName()));
         editor.setReplyTo(mh.getId());
-        UnstoredMessage msg = editor.edit(mh.getId());
+        UnstoredMessage msg = editor.edit();
 		
 		// Store the message
 		//
