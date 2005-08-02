@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.exceptions.AmbigiousAndNotLoggedInException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.NotLoggedInException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
@@ -81,11 +82,20 @@ public class ChatRececipientParameter extends NamedObjectParameter
         	    // Either the object doesn't exist, or the it represents
         	    // a user the wasn't logged in. Find out what the problem
         	    // is!
+                if (pattern.startsWith("*")) {
+                    pattern = pattern.substring(1); // Remove "*".
+                    throw new ObjectNotFoundException(pattern);
+                } else {
+                    NameAssociation[] names = session.getAssociationsForPatternAndKind(pattern, NameManager.USER_KIND);
+                    if (names.length == 0) {
+                        throw new ObjectNotFoundException(pattern);
+                    } else if (names.length == 1) {
+                        throw new NotLoggedInException(names[0].getName().toString());
+                    } else {
+                        throw new AmbigiousAndNotLoggedInException(pattern);
+                    }
+                }
         	    //
-        	    NameAssociation[] names = session.getAssociationsForPattern(pattern);
-        	    if(names.length == 0)
-        	        throw new ObjectNotFoundException(pattern);
-        	    throw new NotLoggedInException(names[0].getName().toString());
         	}
         	case 1:
         	    return ((NameAssociation) list.get(0));
