@@ -13,6 +13,7 @@ import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.Envelope;
 import nu.rydin.kom.structs.NameAssociation;
@@ -25,7 +26,7 @@ public class ReadMessage extends AbstractCommand
 {
 	public ReadMessage(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true)}, permissions);	
+		super(fullName, new CommandLineParameter[] { new TextNumberParameter(true), new ConferenceParameter(false)}, permissions);	
 	}
 	
 	public void execute(Context context, Object[] parameterArray) 
