@@ -722,9 +722,12 @@ public interface ServerSession
 	 * Sends a chat message to multiple recipients (users and conferences).
 	 * @param destinations The intended message destinations
 	 * @param message The message
+	 * @param logAsMulticas 'true' if message should be logged as multicas 
+	 * (i.e. message to everyone in a conference)
 	 * @return An array of NameAssociations of users that refused the message
 	 */
-	public NameAssociation[] sendMulticastMessage (long destinations[], String message)	
+	public NameAssociation[] sendMulticastMessage (long destinations[], String message,
+	        boolean logAsMulticast)	
 	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException, UnexpectedException;
 
 	/**
@@ -1272,6 +1275,15 @@ public interface ServerSession
 	 */
 	public MessageLogItem[] getChatMessagesFromLog(int limit)
 	throws UnexpectedException;
+	
+	/**
+	 * Returns an array of multicast messages from the message log
+	 *
+	 * @param limit Maximum number of messages to return
+	 * @throws UnexpectedException
+	 */
+	public MessageLogItem[] getMulticastMessagesFromLog(int limit)
+	throws UnexpectedException;	
 
 	/**
 	 * Returns an array of broadcast messages from the message log

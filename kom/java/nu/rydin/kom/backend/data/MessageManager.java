@@ -188,7 +188,7 @@ public class MessageManager
 			 "limit 1 offset 0");
 				
 		m_searchMessagesLocally = m_conn.prepareStatement(
-				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject, m.reply_to " +
+				"SELECT ms.id, mo.localnum, mo.user, m.author_name, ms.subject, m.reply_to " +
 				"FROM messagesearch ms, messageoccurrences mo, messages m " +
 				"WHERE ms.id = mo.message AND ms.id = m.id AND mo.conference = ? " +
 				"AND MATCH(ms.subject, ms.body) AGAINST (? IN BOOLEAN MODE) " +
@@ -201,7 +201,7 @@ public class MessageManager
 		        "SELECT COUNT(*) FROM messagesearch");
 
 		m_grepMessagesLocally = m_conn.prepareStatement(
-				"SELECT ms.id, mo.localnum, mo.user, mo.user_name, ms.subject, m.reply_to " +
+				"SELECT ms.id, mo.localnum, mo.user, m.author_name, ms.subject, m.reply_to " +
 				"FROM messagesearch ms, messageoccurrences mo, messages m " +
 				"WHERE ms.id = mo.message AND ms.id = m.id AND mo.conference = ? " +
 				"AND (ms.subject LIKE ? OR ms.body LIKE ?) " +
@@ -209,7 +209,7 @@ public class MessageManager
 				"LIMIT ? OFFSET ?");
 		
 		m_listAllMessagesLocally = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject, m.reply_to " +
+		        "SELECT m.id, mo.localnum, mo.user, m.author_name, m.subject, m.reply_to " +
 		        "FROM messages m JOIN messageoccurrences mo " +
 		        "ON m.id = mo.message " +
 		        "WHERE mo.conference = ? " +
@@ -217,22 +217,22 @@ public class MessageManager
 		        "LIMIT ? OFFSET ?");
 		
 		m_listMessagesLocallyByAuthor = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.user, mo.user_name, m.subject, m.reply_to " +
+		        "SELECT m.id, mo.localnum, mo.user, m.author_name, m.subject, m.reply_to " +
 		        "FROM messages m JOIN messageoccurrences mo " +
 		        "ON m.id = mo.message " +
-		        "WHERE mo.conference = ? AND mo.user = ? " +
+		        "WHERE mo.conference = ? AND m.author = ? " +
 		        "ORDER BY localnum DESC " +
 		        "LIMIT ? OFFSET ?");
 		
 		m_listMessagesGloballyByAuthor = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject, m.reply_to " +
+		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, m.author_name, m.subject, m.reply_to " +
 		        "FROM messages m, messageoccurrences mo, names n " +
-		        "WHERE m.id = mo.message AND n.id = mo.conference AND mo.user = ? " +
+		        "WHERE m.id = mo.message AND n.id = mo.conference AND m.author = ? " +
 		        "ORDER BY mo.action_ts DESC " +
 		        "LIMIT ? OFFSET ?");
 		
 		m_searchMessagesGlobally = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, mo.user_name, m.subject, me.reply_to " +
+		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, me.author_name, m.subject, me.reply_to " +
 		        "FROM messagesearch m, messages me, messageoccurrences mo, names n " +
 		        "WHERE m.id = mo.message AND n.id = mo.conference AND m.id = me.id " +
 		        "AND MATCH(m.subject, m.body) AGAINST (? IN BOOLEAN MODE) " +

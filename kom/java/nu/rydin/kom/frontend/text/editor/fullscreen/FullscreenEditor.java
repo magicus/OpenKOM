@@ -29,8 +29,6 @@ import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.Message;
-import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.text.terminal.TerminalController;

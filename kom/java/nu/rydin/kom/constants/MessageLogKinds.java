@@ -26,4 +26,9 @@ public class MessageLogKinds
      * "Pontus Rydin goes home". 
      */
     public static short CONDENSED_BROADCAST	= 2;
+    
+    /**
+     * Message sent to a group of users
+     */
+    public static short MULTICAST			= 3;
 }

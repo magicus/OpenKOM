@@ -2071,7 +2071,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		m_stats.incNumChats();
 	}
 	
-	public NameAssociation[] sendMulticastMessage (long destinations[], String message)	
+	public NameAssociation[] sendMulticastMessage (long destinations[], String message,
+	        boolean logAsMulticast)	
 	throws NotLoggedInException, ObjectNotFoundException, AllRecipientsNotReachedException, UnexpectedException
 	{
 	    try
@@ -2085,7 +2086,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    
 		    // Create a link for the logged in user. Used for retrieving messages sent.
 		    //
-		    mlm.storeMessagePointer(logId, this.getLoggedInUserId(), true, MessageLogKinds.CHAT);
+		    mlm.storeMessagePointer(logId, this.getLoggedInUserId(), true, 
+		            logAsMulticast ? MessageLogKinds.MULTICAST : MessageLogKinds.CHAT);
 		    
 		    ArrayList refused = new ArrayList(destinations.length);
 		    boolean explicitToSelf = false;
@@ -2192,7 +2194,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				
 				// Create link from recipient to message
 				//
-				mlm.storeMessagePointer(logId, user, false, MessageLogKinds.CHAT);
+				mlm.storeMessagePointer(logId, user, false, 
+				        logAsMulticast ? MessageLogKinds.MULTICAST : MessageLogKinds.CHAT);
 			}
 			
 			NameAssociation[] answer = new NameAssociation[refused.size()];
@@ -2717,6 +2720,18 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    }
 	}
 	
+	public MessageLogItem[] getMulticastMessagesFromLog(int limit)
+	throws UnexpectedException
+	{
+	    try
+	    {
+	        return m_da.getMessageLogManager().listMulticastMessages(this.getLoggedInUserId(), limit);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException (this.getLoggedInUserId(), e);
+	    }
+	}	
 	public MessageLogItem[] getBroadcastMessagesFromLog(int limit)
 	throws UnexpectedException
 	{

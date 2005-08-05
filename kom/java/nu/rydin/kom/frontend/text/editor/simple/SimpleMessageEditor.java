@@ -17,8 +17,6 @@ import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.Message;
-import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;

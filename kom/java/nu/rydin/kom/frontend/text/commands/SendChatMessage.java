@@ -75,6 +75,7 @@ public class SendChatMessage extends AbstractCommand
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		boolean error = false;
+		boolean multicast = false;
 		int[] status = session.verifyChatRecipients(destinations);
 		int top = status.length;
 		for(int idx = 0; idx < top; ++idx)
@@ -95,6 +96,8 @@ public class SendChatMessage extends AbstractCommand
 		    		error = true;	
 		    		break;			    	
 		    	case ChatRecipientStatus.OK_CONFERENCE:
+		    	    multicast = true;
+		    		break;
 		    	case ChatRecipientStatus.OK_USER:
 		    	    break;
 		    	default:
@@ -138,7 +141,7 @@ public class SendChatMessage extends AbstractCommand
 		//
 		// Can't make it less ugly than this...
 		//
-		NameAssociation[] refused = session.sendMulticastMessage(destinations, message);
+		NameAssociation[] refused = session.sendMulticastMessage(destinations, message, multicast);
 		
 		// Print refused destinations (if any)
 		//

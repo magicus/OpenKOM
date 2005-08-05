@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text;
 
-
-
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,7 +17,7 @@ import nu.rydin.kom.frontend.text.ansi.ANSISequences;
  */
 public class ANSIDisplayController implements DisplayController 
 {
-    private static  Pattern PATTERN = Pattern.compile("(^_|.*?\\s_)([^\\s^_]+)(_\\s.*|_$)");
+    private static  Pattern PATTERN = Pattern.compile("(^[_*]|.*?\\s[_*])([^\\s^_^*]+)([_*]\\s.*|[_*]$)");
     private static final String HILITE_CHARS 		= "_";
     private static final short STATE_NORMAL 		= 0;
     private static final short STATE_READY_FOR_ATTR	= 1;

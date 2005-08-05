@@ -19,6 +19,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.SendCondensedBroadcast" permissions="0408"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ViewBroadcastLog"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ViewChatLog"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ViewMulticastMessageLog"/>		
 	</category>
 	<category id="navigation" i18n="command.category.navigation" order="30">
 		<command class="nu.rydin.kom.frontend.text.commands.GotoConference"/>
