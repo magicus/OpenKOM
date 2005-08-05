@@ -2332,6 +2332,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    //
 	    this.checkRights(UserPermissions.ADMIN);
 	    CacheManager.instance().clear();
+	    
+	    // Tell all clients to reload their local user profile copy
+	    //
+	    this.broadcastEvent(new ReloadUserProfileEvent(-1));
 	}
 	
 	public short getObjectKind(long object)
