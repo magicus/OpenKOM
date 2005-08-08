@@ -17,6 +17,8 @@ import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.Message;
+import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
@@ -56,13 +58,16 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			
 			if(replyTo != -1)
 			{
-				if(m_context.getRecipient().getId() == recipientId)
+                //Nope, we still need to fetch this shit.
+                long replyToConferenceId = m_context.getSession().getMostRelevantOccurrence(m_context.getSession().getCurrentConferenceId(), replyTo).getConference(); 
+                
+				if(m_context.getRecipient().getId() == replyToConferenceId)
 				{
 					// Simple case: Original text is in same conference
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.same.conference", 
 						new Object[] { new Long(replyToLocal), 
-							m_context.formatObjectName(recipientName, recipientId) } ));		
+							m_context.formatObjectName(replyToAuthorName, replyToAuthor) } ));		
 				}
 				else
 				{
@@ -70,8 +75,7 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
 						new Object[] { new Long(replyToLocal),
-					        m_context.formatObjectName(recipientName,
-					        recipientId), 
+                            m_context.formatConferenceName(replyToConferenceId, m_context.getSession().getConference(replyToConferenceId).getName()),
 					        m_context.formatObjectName(replyToAuthorName, replyToAuthor) }));
 				}
 			}
