@@ -38,16 +38,17 @@ public class Who extends AbstractCommand
 		DisplayController dc = context.getDisplayController();
 		dc.normal();
 		HeaderPrinter hp = new HeaderPrinter();
-		hp.addHeader(formatter.format("who.login"), 6, true);
-		hp.addHeader(formatter.format("who.idle"), 6, true);
+		hp.addHeader(formatter.format("who.login"), 7, true);
+		hp.addHeader(formatter.format("who.idle"), 7, true);
 		hp.addSpace(1);
 		int termWidth = context.getTerminalSettings().getWidth();
-		int firstColsWidth = 6 + 6 + 1;
+		int firstColsWidth = 7 + 7 + 1;
 		int lastColWidth = termWidth - firstColsWidth - 1 ; 
 		hp.addHeader(formatter.format("who.name"), lastColWidth, false);
 		hp.printOn(out);
 		int top = users.length;
 		dc.output();
+		int active = 0;
 		for(int idx = 0; idx < top; ++idx)
 		{
 			UserListItem each = users[idx];
@@ -55,13 +56,17 @@ public class Who extends AbstractCommand
 				? formatter.format("misc.mailboxtitle")
 				: context.formatObjectName(each.getConference());
 			long now = System.currentTimeMillis();
-			PrintUtils.printRightJustified(out, StringUtils.formatElapsedTime(now - each.getLoginTime()), 6);
+			PrintUtils.printRightJustified(out, StringUtils.formatElapsedTime(now - each.getLoginTime()), 7);
 			long idle = now - each.getLastHeartbeat();
-			PrintUtils.printRightJustified(out, idle >= 60000 ? StringUtils.formatElapsedTime(now - each.getLastHeartbeat()) : "", 6);
+			PrintUtils.printRightJustified(out, idle >= 60000 ? StringUtils.formatElapsedTime(now - each.getLastHeartbeat()) : "", 7);
 			out.print(' ');
 			PrintUtils.printIndented(out, 
 			        formatter.format("who.format", new Object[] { context.formatObjectName(each.getUser()), confName }),
 			        lastColWidth, 0, firstColsWidth);
+			if(idle < 60000)
+			    ++active;
 		}
+		out.println();
+		out.println(formatter.format("who.total", new Object[] { new Integer(top), new Integer(active) }));
     }
 }

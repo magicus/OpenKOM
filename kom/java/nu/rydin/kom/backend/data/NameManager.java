@@ -46,6 +46,7 @@ public class NameManager
 	private final PreparedStatement m_renameObjectStmt;
 	private final PreparedStatement m_getKindStmt;
 	private final PreparedStatement m_dropNamedObjectStmt;
+	private final PreparedStatement m_changeVisibilityStmt;
 	
 	public NameManager(Connection conn)
 	throws SQLException
@@ -77,6 +78,8 @@ public class NameManager
 			"select kind from names where id=?");
 		m_dropNamedObjectStmt = conn.prepareStatement(
 			"delete from names where id = ?");
+		m_changeVisibilityStmt = conn.prepareStatement(
+		    "UPDATE names SET visibility = ? WHERE id = ?");
 	}
 	
 	public void finalize()
@@ -119,6 +122,8 @@ public class NameManager
 			m_getKindStmt.close();
 		if (m_dropNamedObjectStmt != null)
 			m_dropNamedObjectStmt.close();
+		if(m_changeVisibilityStmt != null)
+		    m_changeVisibilityStmt.close();
 	}
 	
 	/**
@@ -152,7 +157,22 @@ public class NameManager
 		}
 	}
 	
-	/**
+	public void changeVisibility(long id, short visibility)
+	throws SQLException
+	{
+	    // Update database
+	    //
+	    m_changeVisibilityStmt.clearParameters();
+	    m_changeVisibilityStmt.setShort(1, visibility);
+	    m_changeVisibilityStmt.setLong(2, id);
+	    m_changeVisibilityStmt.executeUpdate();
+	    
+	    // Invalidate caches
+	    //	    
+	    this.invalidateCache(id);
+	}
+	
+    /**
 	 * Returns a set of name ids matching a search pattern. Each distinct
 	 * word is matched separately, such that "Po Ry" matches "Pontus Rydin".
 	 * 
@@ -443,11 +463,7 @@ public class NameManager
 		
 		// Update caches
 		//
-		Long key = new Long(id);
-		CacheManager cmgr = CacheManager.instance();
-		cmgr.getUserCache().registerInvalidation(key);
-		cmgr.getConferenceCache().registerInvalidation(key);
-		cmgr.getNameCache().registerInvalidation(key);
+		invalidateCache(id);
 	}
 	
 	
@@ -498,10 +514,15 @@ public class NameManager
 		
 		// Update caches
 		//
-		Long key = new Long(objectId);
+		invalidateCache(objectId);
+	}
+	
+    private void invalidateCache(long id)
+    {
+        Long key = new Long(id);
 		CacheManager cmgr = CacheManager.instance();
 		cmgr.getUserCache().registerInvalidation(key);
-		cmgr.getConferenceCache().registerInvalidation(key);		
+		cmgr.getConferenceCache().registerInvalidation(key);
 		cmgr.getNameCache().registerInvalidation(key);
-	}
+    }
 }

@@ -6,12 +6,12 @@
  */
 package nu.rydin.kom.frontend.text.editor.simple;
 
-import nu.rydin.kom.exceptions.SystemException;
+import nu.rydin.kom.exceptions.EscapeException;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class QuitEditorException extends SystemException
+public class QuitEditorException extends EscapeException
 {
     public QuitEditorException()
     {

@@ -74,6 +74,7 @@
 	</category>
 	<category id="conf.admin" i18n="command.category.conf.admin" order="90">
 		<command class="nu.rydin.kom.frontend.text.commands.CreateConference" permissions="0009"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeConferenceParameters"/>
 		<command class="nu.rydin.kom.frontend.text.commands.DeleteConference"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeReplyToConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ChangePermissions"/>		
@@ -116,23 +117,24 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ShowVersion"/>		
 	</category>
 	<category id="admin" i18n="command.category.admin" order="300">
-		<command class="nu.rydin.kom.frontend.text.commands.CreateUser" permission="000a"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.RenameObject" permission="0048"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.CreateUser" permissions="000a"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.RenameObject" permissions="0048"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ListPrivileges"/>
-		<command class="nu.rydin.kom.frontend.text.commands.AddPrivilege" permission="000a"/>
-		<command class="nu.rydin.kom.frontend.text.commands.SubtractPrivilege" permission="000a"/>
-		<command class="nu.rydin.kom.frontend.text.commands.KillSession" permission="0108"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.ProhibitLogin" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.EnterSingleUserMode" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.AllowLogin" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeWelcomeMessage" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeConferencePresentationConference" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ChangeUserPresentationConference" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.GenerateTestdata" permission="0108"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.PrintDebug" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ClearCache" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.EnableSelfRegistration" permission="0108"/>
-		<command class="nu.rydin.kom.frontend.text.commands.DisableSelfRegistration" permission="0108"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.EnableNormalPrivs" permission="0108"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.AddPrivilege" permissions="000a"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SubtractPrivilege" permissions="000a"/>
+		<command class="nu.rydin.kom.frontend.text.commands.KillSession" permissions="0108"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ProhibitLogin" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.EnterSingleUserMode" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.AllowLogin" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeWelcomeMessage" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeConferencePresentationConference" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeUserPresentationConference" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.GenerateTestdata" permissions="0108"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.PrintDebug" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ClearCache" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.EnableSelfRegistration" permissions="0108"/>
+		<command class="nu.rydin.kom.frontend.text.commands.DisableSelfRegistration" permissions="0108"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.EnableNormalPrivs" permissions="0108"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ListSystemThreads"/>
 	</category>	
 </commandlist>

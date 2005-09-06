@@ -53,6 +53,6 @@ public class WriteMessage extends AbstractCommand
         context.getOut().println();
         context.getOut().println(
                 context.getMessageFormatter().format("write.message.saved",
-                        new Integer(occ.getLocalnum())));
+                        new Object[] { new Integer(occ.getLocalnum()), new Long(occ.getGlobalId())} ));
     }
 }

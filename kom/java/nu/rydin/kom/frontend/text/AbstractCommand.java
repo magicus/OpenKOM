@@ -45,10 +45,18 @@ public abstract class AbstractCommand implements Command
 	public void checkAccess(Context context) 
 	throws AuthorizationException, UnexpectedException
 	{
-	    long rp = this.getRequiredPermissions();
-	    if((rp & context.getCachedUserInfo().getRights()) != rp)
+	    if(!this.hasAccess(context))
 	        throw new AuthorizationException();
 	}
+	
+	public boolean hasAccess(Context context) 
+	throws UnexpectedException
+	{
+	    long rp = this.getRequiredPermissions();
+	    long x = rp & context.getCachedUserInfo().getRights();
+	    return (rp & context.getCachedUserInfo().getRights()) == rp;
+	}
+
 	
 	public String getCategory()
 	{

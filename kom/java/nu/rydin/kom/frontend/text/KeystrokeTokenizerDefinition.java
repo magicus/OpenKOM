@@ -7,13 +7,14 @@
 package nu.rydin.kom.frontend.text;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import nu.rydin.kom.exceptions.AmbiguousPatternException;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class KeystrokeTokenizerDefinition 
+public class KeystrokeTokenizerDefinition implements Cloneable
 {
     public static final int NON_TERMINAL 	= 1;
     public static final int LITERAL 		= 2;
@@ -53,6 +54,19 @@ public class KeystrokeTokenizerDefinition
         {
             return (State) m_nextStates.get(new Character(ch));
         }
+        
+        public State deepCopy()
+        {
+            State copy = new State(m_tokenKind);
+            HashMap map = new HashMap(m_nextStates.size());
+            for(Iterator itor = m_nextStates.entrySet().iterator(); itor.hasNext();)
+            {
+                Map.Entry each = (Map.Entry) itor.next();
+                map.put(each.getKey(), ((State) each.getValue()).deepCopy());
+            }
+            copy.m_nextStates = map;
+            return copy;
+        }
     }
     
     private State m_rootState = new State();
@@ -63,6 +77,27 @@ public class KeystrokeTokenizerDefinition
         int top = patterns.length;
         for(int idx = 0; idx < top; ++idx)
             this.addPattern(patterns[idx], kinds[idx]);
+    }
+    
+    public KeystrokeTokenizerDefinition(State root)
+    {
+        m_rootState = root;
+    }
+    
+    public KeystrokeTokenizerDefinition deepCopy()
+    {
+        try
+        {
+            KeystrokeTokenizerDefinition copy = (KeystrokeTokenizerDefinition) this.clone();
+            copy.m_rootState = m_rootState.deepCopy();
+            return copy;
+        }
+        catch(CloneNotSupportedException e)
+        {
+            // Yes it is! (Getting here means things are screwed up like crazy!)
+            //
+            throw new RuntimeException(e);
+        }
     }
     
     public void addPattern(String pattern, int kind)
@@ -79,7 +114,7 @@ public class KeystrokeTokenizerDefinition
             //
             if(next != null)
             {
-                // We're at end but there's already a state here? Amboguous!
+                // We're at end but there's already a state here? Ambiguous!
                 //
                 if(idx == top - 1)
                     throw new AmbiguousPatternException(pattern);
@@ -89,8 +124,8 @@ public class KeystrokeTokenizerDefinition
                 // No state here! Create a new one.
                 //
                 next = idx == top - 1
-                	? new State(kind)
-                	: new State();
+                	? new State(kind)  	// Terminal
+                	: new State();		// Non-terminal
                 state.addState(ch, next);
             }
             state = next;

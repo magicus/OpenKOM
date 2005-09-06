@@ -43,6 +43,8 @@ public interface TerminalController extends DisplayController
     
     public void eraseLine();
     
+    public void reverseVideo();
+    
     public void eraseToStartOfLine();
     
     public boolean canStartOfLine();

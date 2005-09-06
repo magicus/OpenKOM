@@ -37,7 +37,7 @@ public class ListMembers extends AbstractCommand
 	        confid = context.getSession().getCurrentConference().getId();
 	    else
 	        confid = nameAssociation.getId();
-		Name[] mbrs = context.getSession().listMemberNamesByConference(confid);
+		NameAssociation[] mbrs = context.getSession().listMembersByConference(confid);
 					  	
 		PrintWriter out = context.getOut();
 		MessageFormatter fmt = context.getMessageFormatter();
@@ -52,7 +52,7 @@ public class ListMembers extends AbstractCommand
 			out.println();
 			for (int i = 0; i < mbrs.length; ++i)
 			{
-				out.println(mbrs[i]);
+				out.println(context.formatObjectName(mbrs[i].getName(), mbrs[i].getId()));
 			}
 		}
 	}

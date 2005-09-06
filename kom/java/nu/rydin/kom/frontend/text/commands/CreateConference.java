@@ -24,6 +24,8 @@ import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.ConferenceType;
+import nu.rydin.kom.utils.ConferenceUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -54,70 +56,14 @@ public class CreateConference extends AbstractCommand
 		// Check name validity
 		//
 		context.checkName(fullname);
-
-		int choice = 0;
-
-		// User may create magic conferences. Do it?
-		//		
-		String error = fmt.format("create.conference.invalid.choice"); 
 		
-		short flags = 0;
-		
-		// Get conference type
+		// Get conference permissions and visibility
 		//
-		choice = in.getChoice(fmt.format("create.conference.type"),
-			new String[] 
-			{
-				fmt.format("create.conference.public"), 
-				fmt.format("create.conference.exclusive"),
-				fmt.format("create.conference.protected"),
-			}, 0, error); 
-		if(choice == 0)
-			flags |= ConferencePermissions.READ_PERMISSION;
-		short visibility = choice == 2 ? Visibilities.PROTECTED : Visibilities.PUBLIC;
-			
-		// Get permission to write
-		//
-		choice = in.getChoice(fmt.format("create.conference.allowwrite"), 
-			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
-		if(choice == 0)
-			flags |= ConferencePermissions.WRITE_PERMISSION;
-			
-		// Get permission to reply
-		//
-		choice = in.getChoice(fmt.format("create.conference.allowreply"), 
-			new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
-		if(choice == 0)
-			flags |= ConferencePermissions.REPLY_PERMISSION;
-		
-		// Don't even ask if members don't have read permissions
-		//
-		int nonmemberFlags = 0;
-		if((flags & ConferencePermissions.READ_PERMISSION) != 0)
-		{
-			// NONMEMBER PERMISSIONS
-			//
-			// Get permission to read
-			//
-			choice = in.getChoice(fmt.format("create.conference.nonmember.allowread"), 
-				new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
-			if(choice == 0)
-			    nonmemberFlags |= ConferencePermissions.READ_PERMISSION;
-	
-			// Get permission to write
-			//
-			choice = in.getChoice(fmt.format("create.conference.nonmember.allowwrite"), 
-				new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
-			if(choice == 0)
-			    nonmemberFlags |= ConferencePermissions.WRITE_PERMISSION;
-				
-			// Get permission to reply
-			//
-			choice = in.getChoice(fmt.format("create.conference.nonmember.allowreply"), 
-				new String[] { fmt.format("misc.yes"), fmt.format("misc.no")}, 0, error);
-			if(choice == 0)
-			    nonmemberFlags |= ConferencePermissions.REPLY_PERMISSION;
-		}
+		ConferenceType ct = ConferenceUtils.askForConferenceType(
+		        context,
+		        ConferencePermissions.NORMAL_PERMISSIONS,
+		        ConferencePermissions.READ_PERMISSION,
+		        Visibilities.PUBLIC);
 			
 		// Ask for reply conference
 		//
@@ -145,7 +91,7 @@ public class CreateConference extends AbstractCommand
 		//			
 		try
 		{
-			context.getSession().createConference(fullname, flags, nonmemberFlags, visibility, replyConf);
+			context.getSession().createConference(fullname, ct.getPermissions(), ct.getNonMemberPermissions(), ct.getVisibility(), replyConf);
 		}
 		catch(DuplicateNameException e)
 		{

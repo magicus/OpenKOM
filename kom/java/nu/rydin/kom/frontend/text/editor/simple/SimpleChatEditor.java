@@ -27,7 +27,7 @@ public class SimpleChatEditor extends AbstractEditor
 
 	protected void refresh() throws KOMException
 	{
-	    new ShowSimpleChatMessage(m_context, "", 0).execute(m_context, new Object[0]);
+	    new ShowSimpleChatMessage(this, "", 0).execute(this, new Object[0]);
 	}
     
 	//FIXME EDITREFACTOR: replyTo is completely irrelevant in this context.
@@ -35,8 +35,8 @@ public class SimpleChatEditor extends AbstractEditor
             throws KOMException, InterruptedException, IOException 
     {
 		this.mainloop(
-		        (m_context.getCachedUserInfo().getFlags1() & UserFlags.EMPTY_LINE_FINISHES_CHAT) != 0);
-		return new UnstoredMessage("", m_context.getBuffer().toString());
+		        (this.getCachedUserInfo().getFlags1() & UserFlags.EMPTY_LINE_FINISHES_CHAT) != 0);
+		return new UnstoredMessage("", this.getBuffer().toString());
     }
     
     protected String getAbortQuestionFormat()

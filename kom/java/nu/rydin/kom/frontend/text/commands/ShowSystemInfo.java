@@ -129,7 +129,7 @@ public class ShowSystemInfo extends AbstractCommand
         // Number of threads
         //
         PrintUtils.printLabelled(out, formatter.format("system.info.threads"), WIDTH, 
-                Integer.toString(Thread.enumerate(new Thread[1000])));
+                Integer.toString(Thread.enumerate(new Thread[100000])));
         
         // Java VM
         //

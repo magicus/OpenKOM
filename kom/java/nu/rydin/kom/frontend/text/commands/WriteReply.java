@@ -157,7 +157,9 @@ public class WriteReply extends AbstractCommand
             //
             context.getOut().println(
                     context.getMessageFormatter().format("write.message.saved",
-                            new Integer(newMessage.getLocalnum())));
+                            new Object[] { 
+                            	new Integer(newMessage.getLocalnum()),
+                            	new Long(newMessage.getGlobalId()) } ));
         }
     }
 }

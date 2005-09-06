@@ -17,9 +17,6 @@ import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.Message;
-import nu.rydin.kom.structs.MessageOccurrence;
-import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -44,45 +41,44 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 	        String recipientName, long replyToAuthor, String replyToAuthorName, String oldSubject)
 		throws KOMException, InterruptedException
 	{
-		DisplayController dc = m_context.getDisplayController();
-		PrintWriter out = m_context.getOut();
-		LineEditor in = m_context.getIn();
-		MessageFormatter formatter = m_context.getMessageFormatter();	
-		int width = m_context.getTerminalSettings().getWidth();
+		DisplayController dc = this.getDisplayController();
+		PrintWriter out = this.getOut();
+		LineEditor in = this.getIn();
+		MessageFormatter formatter = this.getMessageFormatter();	
+		int width = this.getTerminalSettings().getWidth();
 		try
 		{
 			dc.messageHeader();
 			// Print author
 			//
-			out.println(formatter.format("simple.editor.author", m_context.getCachedUserInfo().getName()));
+			out.println(formatter.format("simple.editor.author", this.getCachedUserInfo().getName()));
 			
 			if(replyTo != -1)
 			{
-                //Nope, we still need to fetch this shit.
-                long replyToConferenceId = m_context.getSession().getMostRelevantOccurrence(m_context.getSession().getCurrentConferenceId(), replyTo).getConference(); 
+                long replyToConferenceId = this.getSession().getMostRelevantOccurrence(this.getSession().getCurrentConferenceId(), replyTo).getConference(); 
                 
-				if(m_context.getRecipient().getId() == replyToConferenceId)
+				if(this.getRecipient().getId() == replyToConferenceId)
 				{
 					// Simple case: Original text is in same conference
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.same.conference", 
 						new Object[] { new Long(replyToLocal), 
-							m_context.formatObjectName(replyToAuthorName, replyToAuthor) } ));		
+							this.formatObjectName(recipientName, recipientId) } ));		
 				}
 				else
 				{
 					// Complex case: Original text was in a different conference
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
-						new Object[] { new Long(replyToLocal),
-                            m_context.formatConferenceName(replyToConferenceId, m_context.getSession().getConference(replyToConferenceId).getName()),
-					        m_context.formatObjectName(replyToAuthorName, replyToAuthor) }));
+							new Object[] { new Long(replyToLocal),
+	                            this.formatConferenceName(replyToConferenceId, this.getSession().getConference(replyToConferenceId).getName()),
+						        this.formatObjectName(replyToAuthorName, replyToAuthor) }));
 				}
 			}
 			
 			// Print receiver
 			//
-			out.println(formatter.format("simple.editor.receiver", m_context.formatObjectName(m_context.getRecipient())));
+			out.println(formatter.format("simple.editor.receiver", this.formatObjectName(this.getRecipient())));
 			
 			// Read subject
 			//
@@ -90,15 +86,15 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			out.print(subjLine);
 			dc.input();
 			out.flush();
-			m_context.setSubject(in.readLine(oldSubject));
+			this.setSubject(in.readLine(oldSubject));
 			dc.messageHeader();
-			PrintUtils.printRepeated(out, '-', Math.min(width - 1, subjLine.length() + m_context.getSubject().length()));
+			PrintUtils.printRepeated(out, '-', Math.min(width - 1, subjLine.length() + this.getSubject().length()));
 			out.println();
 						
 			// Enter the main editor loop
 			//
 			this.mainloop(false);
-			return new UnstoredMessage(m_context.getSubject(), m_context.getBuffer().toString());
+			return new UnstoredMessage(this.getSubject(), this.getBuffer().toString());
 		}
 		catch(IOException e) 
 		{
@@ -109,24 +105,9 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 	protected void refresh() throws KOMException
 	{
 
-	    new ShowSimpleMessage(m_context, "", 0).execute(m_context, new Object[0]);
+	    new ShowSimpleMessage(this, "", 0).execute(this, new Object[0]);
 	}
 	
-	public void setRecipient(NameAssociation recipient)
-	{
-	    m_context.setRecipient(recipient);
-	}
-	
-	public NameAssociation getRecipient()
-	{
-	    return m_context.getRecipient();
-	}
-	
-	public void setReplyTo(long replyTo)
-	{
-	    m_context.setReplyTo(replyTo);
-	}
-
 	protected String getAbortQuestionFormat()
     {
         return "simple.editor.abortquestion";

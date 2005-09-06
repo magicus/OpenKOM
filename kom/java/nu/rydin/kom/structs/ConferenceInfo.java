@@ -16,6 +16,7 @@ public class ConferenceInfo extends NamedObject
 	private final long m_administrator;
 	private final int m_permissions;
 	private final int m_nonmemberPermissions;
+	private final short m_visibility;
 	private final long m_replyConf;
 	private final int m_firstMessage;
 	private final int m_lastMessage;
@@ -23,13 +24,14 @@ public class ConferenceInfo extends NamedObject
 	private final Timestamp m_lasttext;
 	
 	public ConferenceInfo(long id, String name, long administrator, int permissions, 
-	        int nonmemberPermissions, long replyConf,
+	        int nonmemberPermissions, short visibility, long replyConf,
 			Timestamp created, Timestamp lasttext, int firstMessage, int lastMessage )
 	{
 		super(id, name);
 		m_administrator			= administrator;
 		m_permissions 			= permissions;
 		m_nonmemberPermissions 	= nonmemberPermissions;
+		m_visibility			= visibility;
 		m_replyConf				= replyConf;
 		m_firstMessage 			= firstMessage;
 		m_lastMessage 			= lastMessage;
@@ -60,6 +62,11 @@ public class ConferenceInfo extends NamedObject
 	public int getNonmemberPermissions()
 	{
 	    return m_nonmemberPermissions;
+	}
+	
+	public short getVisibility()
+	{
+	    return m_visibility;
 	}
 
 	public int getLastMessage()

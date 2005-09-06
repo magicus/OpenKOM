@@ -197,6 +197,12 @@ public class ANSITerminalController extends ANSIDisplayController implements Ter
         m_writer.print("2J");
     }
     
+    public void reverseVideo()
+    {
+        this.printPreamble();
+        m_writer.print("7m");
+    }
+    
     public boolean canStartOfLine()
     {
         return false;

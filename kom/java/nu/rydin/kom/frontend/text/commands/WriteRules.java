@@ -40,7 +40,8 @@ public class WriteRules extends AbstractCommand
 		//
 		MessageOccurrence occ = context.getSession().storeRulePosting(msg);
 		
-		context.getOut().println(context.getMessageFormatter().format(
-			"write.message.saved", new Integer(occ.getLocalnum())));
+        context.getOut().println(
+                context.getMessageFormatter().format("write.message.saved",
+                        new Object[] { new Integer(occ.getLocalnum()), new Long(occ.getGlobalId())} ));
 	}
 }

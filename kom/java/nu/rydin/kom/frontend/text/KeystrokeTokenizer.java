@@ -9,7 +9,7 @@ package nu.rydin.kom.frontend.text;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public class KeystrokeTokenizer 
+public class KeystrokeTokenizer implements Cloneable
 {
     public static class Token
     {
@@ -43,6 +43,11 @@ public class KeystrokeTokenizer
         m_current = root;
     }
     
+    public KeystrokeTokenizer deepCopy()
+    {
+        return new KeystrokeTokenizer(m_root.deepCopy());
+    }
+    
     public Token feedCharacter(char ch)
     {
         KeystrokeTokenizerDefinition.State state = m_current.getNextState(ch);
@@ -58,5 +63,10 @@ public class KeystrokeTokenizer
         }
         m_current = m_root;
         return new Token(state.getKind(), ch);
+    }
+    
+    public KeystrokeTokenizerDefinition getDefinition()
+    {
+        return new KeystrokeTokenizerDefinition(m_root);
     }
 }

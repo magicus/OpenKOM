@@ -40,6 +40,7 @@ public class ConferenceManager // extends NameManager
 	private final PreparedStatement m_listByDateStmt;
 	private final PreparedStatement m_listByNameStmt;
 	private final PreparedStatement m_countStmt;
+	private final PreparedStatement m_changePermissionsStmt;
 	
 	public ConferenceManager(Connection conn, NameManager nameManager)
 	throws SQLException
@@ -50,7 +51,7 @@ public class ConferenceManager // extends NameManager
 		m_changeReplyToConfStmt = conn.prepareStatement(
 		    "UPDATE conferences SET replyConf = ? WHERE id = ?");
 		m_loadConfStmt = conn.prepareStatement(
-			"SELECT n.fullname, c.administrator, c.permissions, c.nonmember_permissions, c.replyConf, c.created, c.lasttext " +
+			"SELECT n.fullname, c.administrator, c.permissions, c.nonmember_permissions, n.visibility, c.replyConf, c.created, c.lasttext " +
 			"FROM names n, conferences c " +
 			"WHERE c.id = ? AND n.id = c.id");
 		m_loadRangeStmt = conn.prepareStatement(	
@@ -72,6 +73,8 @@ public class ConferenceManager // extends NameManager
 		     "WHERE n.kind = " + NameManager.CONFERENCE_KIND + ' '+
 		     "ORDER BY n.norm_name");
 		m_countStmt = conn.prepareStatement("SELECT count(*) FROM conferences");
+		m_changePermissionsStmt = conn.prepareStatement(
+		     "UPDATE conferences SET permissions = ?, nonmember_permissions = ? WHERE id = ?");
 	}
 	
 	public void close()
@@ -155,6 +158,26 @@ public class ConferenceManager // extends NameManager
         m_changeReplyToConfStmt.setLong(2, originalConferenceId);
         m_changeReplyToConfStmt.executeUpdate();
     }
+    
+    public void changePermissions(long id, int permissions, int nonmemberpermissions, short visibility)
+    throws SQLException
+    {
+        // Change conference permissions
+        //
+        m_changePermissionsStmt.clearParameters();
+        m_changePermissionsStmt.setInt(1, permissions);
+        m_changePermissionsStmt.setInt(2, nonmemberpermissions);
+        m_changePermissionsStmt.setLong(3, id);
+        m_changePermissionsStmt.executeUpdate();
+        
+        // Change visibility
+        //
+        m_nameManager.changeVisibility(id, visibility);
+        
+        // Update cache
+        //
+        CacheManager.instance().getConferenceCache().registerInvalidation(new Long(id));
+    }
 	
 	/**
 	 * Adds a personal mailbox
@@ -206,9 +229,10 @@ public class ConferenceManager // extends NameManager
 				rs.getLong(2),				// Admin
 				rs.getInt(3),				// Permissions
 				rs.getInt(4),				// Nonmember permissions
-				rs.getObject(5) != null ? rs.getLong(5) : -1, // Reply conference
-				rs.getTimestamp(6),
+				rs.getShort(5),				// Visibility
+				rs.getObject(6) != null ? rs.getLong(6) : -1, // Reply conference
 				rs.getTimestamp(7),
+				rs.getTimestamp(8),
 				r.getMin(),					// First text
 				r.getMax()					// Last text
 				);

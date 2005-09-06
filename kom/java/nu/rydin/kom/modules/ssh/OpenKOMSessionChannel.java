@@ -145,14 +145,18 @@ public class OpenKOMSessionChannel extends IOChannel
 				try
 				{
 					m_session.shutdown();
-                    m_channel.setLocalEOF();
-                    m_channel.setRemoteEOF();
-                    m_channel.close();
 				}
 				catch(UnexpectedException e)
 				{
 					Logger.warn(this, "Error while reaping session: " + e.getMessage());
-                } catch (IOException e1)
+                }
+				try
+				{
+                    m_channel.setLocalEOF();
+                    m_channel.setRemoteEOF();
+                    m_channel.close();
+				}
+				catch (IOException e1)
                 {
                     Logger.warn(this, "Error while reaping session: " + e1.getMessage());
                 }

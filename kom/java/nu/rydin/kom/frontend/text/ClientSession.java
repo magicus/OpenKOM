@@ -74,7 +74,7 @@ import nu.rydin.kom.frontend.text.commands.ShowTime;
 import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapperFactory;
-import nu.rydin.kom.frontend.text.editor.fullscreen.FullscreenEditor;
+import nu.rydin.kom.frontend.text.editor.fullscreen.FullscreenMessageEditor;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleMessageEditor;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand;
@@ -581,6 +581,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			// Start heartbeat sender
 			//
 			m_heartbeatSender = new HeartbeatSender();
+			m_heartbeatSender.setName("Heartbeat sender (" + m_thisUserCache.getUserid() + ')');
 			m_heartbeatSender.start();
 			m_in.setKeystrokeListener(m_heartbeatSender);
 			
@@ -589,7 +590,16 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			this.mainloop();
 			m_out.println();
 			m_out.println();
-			m_out.println(m_formatter.format("login.goodbye", m_session.getLoggedInUser().getName()));			
+			try
+			{
+			    m_out.println(m_formatter.format("login.goodbye", this.getCachedUserInfo().getName()));
+			}
+			catch(UnexpectedException e)
+			{
+			    // Probably issues getting hold of user. Just get us out of here!
+			    //
+			    Logger.error(this, "Error logging out", e);
+			}
 		}
 		finally
 		{
@@ -841,7 +851,17 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		m_in.shutdown();
 		if(m_session != null)
 		{
-			m_session.close();
+		    try
+		    {
+		        m_session.close();
+		    }
+		    catch(Exception e)
+		    {
+		        // Trying to close an invalid session. Not much
+		        // to do really...
+		        //
+		        Logger.warn(this, "Error while closing session: " + e.toString());
+		    }
 			m_session = null;
 		}
 	}
@@ -1231,7 +1251,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		try
 		{
 			return (this.getCachedUserInfo().getFlags1() & UserFlags.USE_FULL_SCREEN_EDITOR) != 0
-				? (MessageEditor) new FullscreenEditor(this)
+				? (MessageEditor) new FullscreenMessageEditor(this)
 		        : (MessageEditor) new SimpleMessageEditor(this);
 		}
 		catch(IOException e)

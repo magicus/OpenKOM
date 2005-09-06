@@ -1772,13 +1772,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 
-	public Name[] listMemberNamesByConference(long confId)
+	public NameAssociation[] listMembersByConference(long confId)
 	throws ObjectNotFoundException, UnexpectedException
 	{
 		MembershipInfo[] mi = this.listConferenceMembers(confId);
-		Name[] s = new Name[mi.length];
+		NameAssociation[] s = new NameAssociation[mi.length];
 		for (int i = 0; i < mi.length; ++i)
-			s[i] = this.getName(mi[i].getUser());
+			s[i] = new NameAssociation(mi[i].getUser(), this.getName(mi[i].getUser()));
 		return s;
 	}
 	
@@ -2678,6 +2678,33 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}		
+	}
+	
+	public void updateConferencePermissions(long id, int permissions, int nonmemberpermissions,
+	        short visibility)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+	{
+	    // Load conference 
+	    //
+	    ConferenceInfo ci = this.getConference(id);
+	    
+	    // Check permissions. If we own the conference, we can change it. Otherwise, we
+	    // can change it only if we hold the CONFERENCE_ADMIN priv.
+	    //
+	    if(ci.getAdministrator() != this.getLoggedInUserId() && 
+	            !this.getLoggedInUser().hasRights(UserPermissions.CONFERENCE_ADMIN))
+	        throw new AuthorizationException();
+
+	    // Update!
+	    //
+	    try
+	    {
+	        m_da.getConferenceManager().changePermissions(id, permissions, nonmemberpermissions, visibility);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException(this.getLoggedInUserId(), e);
+	    }
 	}
 	
 	public int skipMessagesBySubject (String subject, boolean skipGlobal)

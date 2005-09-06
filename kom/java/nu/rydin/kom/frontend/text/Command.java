@@ -47,6 +47,13 @@ public interface Command
 	 */
 	public void checkAccess(Context context) throws AuthorizationException, UnexpectedException;
 	
+	/** 
+	 * Returns <tt>true</tt> if the current user is allowed to execute this command
+	 * @param context
+	 * @throws UnexpectedException
+	 */
+	public boolean hasAccess(Context context) throws UnexpectedException;
+	
 	/**
 	 * Prints characters preceeding command output, typically 
 	 * a newline.

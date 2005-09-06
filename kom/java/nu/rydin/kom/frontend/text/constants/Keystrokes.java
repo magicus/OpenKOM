@@ -12,6 +12,7 @@ package nu.rydin.kom.frontend.text.constants;
 public class Keystrokes
 {
     // Keystroke codes below 16 are reserved
+    // Core keystrokes
     //
     public static final int TOKEN_UP				= 16;
 	public static final int TOKEN_DOWN				= 17;
@@ -31,4 +32,9 @@ public class Keystrokes
 	public static final int TOKEN_DELETE_LINE		= 31;
 	public static final int TOKEN_SKIP				= 200;
 	public static final int TOKEN_MOFIDIER_BREAK	= 0x8000000;
+	
+	// Message editor keystrokes
+	//
+	public static final int TOKEN_COMMAND			= 1001;
+	public static final int TOKEN_QUOTE				= 1002;
 }

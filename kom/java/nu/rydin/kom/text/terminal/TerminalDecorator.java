@@ -49,6 +49,10 @@ public class TerminalDecorator implements TerminalController
     {
         m_underlying.cancelScrollRegion();
     }
+    public void reverseVideo()
+    {
+        m_underlying.reverseVideo();
+    }
     public boolean canDown()
     {
         return m_underlying.canDown();

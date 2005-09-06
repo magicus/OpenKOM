@@ -412,6 +412,16 @@ public class LineEditor implements NewlineListener
 		
 	}
 	
+	public void setPageBreak(boolean flag)
+	{
+	    m_bypass = !flag;
+	}
+	
+	public boolean getPageBreak()
+	{
+	    return !m_bypass;
+	}
+	
 	public void setKeystrokeListener(KeystrokeListener listener)
 	{
 	    m_keystrokeListener = listener;
@@ -712,6 +722,32 @@ public class LineEditor implements NewlineListener
 	IOException, OperationInterruptedException, InterruptedException, LineEditingDoneException
 	{
 	    return this.editLine(defaultString, "", maxLength, pos, flags);
+	}
+	
+	public KeystrokeTokenizer.Token readToken(int flags)
+	throws EventDeliveredException, InterruptedException, IOException
+	{
+	    KeystrokeTokenizer tokenizer = (KeystrokeTokenizer) m_tokenizerStack.peek();
+	    KeystrokeTokenizer.Token token = null;
+	    while(token == null)
+	    {
+		    char ch;
+		    for(;;)
+	        {
+		        try
+		        {
+		            ch = this.innerReadCharacter(flags);
+		            break;
+		        }
+		        catch(EventDeliveredException e)
+		        {
+		            if((flags & FLAG_STOP_ONLY_WHEN_EMPTY) == 0)
+		                throw e;
+		        }
+	        }
+	        token = tokenizer.feedCharacter(ch);
+	    }
+	    return token;
 	}
 	
 	public String editLine(String defaultString, String stopChars, int maxLength, int pos, int flags)

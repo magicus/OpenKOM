@@ -41,7 +41,8 @@ public class PresentObject extends AbstractCommand
 		UnstoredMessage msg = context.getMessageEditor().
 			edit(-1, -1, -1, null, -1, null, nameAssociation.getName().getName());
 		MessageOccurrence occ = ss.storePresentation(msg, objectId);
-		context.getOut().println(context.getMessageFormatter().format(
-			"write.message.saved", new Integer(occ.getLocalnum())));
+        context.getOut().println(
+                context.getMessageFormatter().format("write.message.saved",
+                        new Object[] { new Integer(occ.getLocalnum()), new Long(occ.getGlobalId())} ));
 	}
 }

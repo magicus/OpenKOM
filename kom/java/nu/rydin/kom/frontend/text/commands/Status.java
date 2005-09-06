@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
@@ -127,6 +128,8 @@ public class Status extends AbstractCommand
 		int top = memberships.length;
 		for(int idx = 0; idx < top; ++idx)
 		{
+		    out.println(context.formatConferenceName(memberships[idx].getId(), memberships[idx].getName().toString()));
+		    /*
 		    if (memberships[idx].getId() == info.getId())
 		    {
 		        //The mailbox
@@ -135,7 +138,7 @@ public class Status extends AbstractCommand
 		    else
 		    {
 		        out.println(memberships[idx].getName());
-		    }
+		    } */
 		}
 	}
 	
@@ -144,11 +147,13 @@ public class Status extends AbstractCommand
 	{
 		PrintWriter out = context.getOut();
 		MessageFormatter formatter = context.getMessageFormatter();
+		String confType = (info.getPermissions() & ConferencePermissions.READ_PERMISSION) != 0 ? formatter.format("conference.public")
+                : formatter.format("conference.exclusive");
+		if(info.getVisibility() != Visibilities.PUBLIC)
+		    confType = formatter.format("conference.protected");
 		PrintUtils.printLabelled(out, formatter.format("status.conference.id"), LABEL_LENGTH, Long.toString(info.getId()));
 		PrintUtils.printLabelled(out, formatter.format("status.conference.name"), LABEL_LENGTH, info.getName());
-		PrintUtils.printLabelled(out, formatter.format("status.conference.type"), LABEL_LENGTH, 
-		        (info.getPermissions() & ConferencePermissions.READ_PERMISSION) != 0 ? formatter.format("conference.public")
-		                : formatter.format("conference.exclusive"));
+		PrintUtils.printLabelled(out, formatter.format("status.conference.type"), LABEL_LENGTH, confType);
 		if (info.getReplyConf() != -1)
 			PrintUtils.printLabelled(out, formatter.format("status.conference.commentconference"), LABEL_LENGTH, 
 			    context.getSession().getConference(info.getReplyConf()).getName());

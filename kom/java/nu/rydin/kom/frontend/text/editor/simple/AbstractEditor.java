@@ -34,18 +34,17 @@ import nu.rydin.kom.utils.PrintUtils;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
-public abstract class AbstractEditor
+public abstract class AbstractEditor extends EditorContext
 {	
     public final static String MESSAGE_EDITOR_STOP_CHARS = "\u000c\u001a\u0004";
 	private Parser m_parser;
-	private final String m_commandList;
-	protected final EditorContext m_context; 
+	private final String m_commandList; 
 	
 	public AbstractEditor(String commandList, Context context)
 	throws IOException, UnexpectedException
 	{
+	    super(context);
 		m_commandList = commandList;
-		m_context 	  = new EditorContext(context);
 	}
 	
 	public abstract UnstoredMessage edit()
@@ -53,12 +52,12 @@ public abstract class AbstractEditor
 	
 	public void fill(String content)
 	{
-	    m_context.getBuffer().fill(m_context.getWordWrapper(content));
+	    this.getBuffer().fill(this.getWordWrapper(content));
 	}
 	
 	public void fill(WordWrapper wrapper)
 	{
-	    m_context.getBuffer().fill(wrapper);
+	    this.getBuffer().fill(wrapper);
 	}
 	
 	protected abstract void refresh() throws KOMException;
@@ -87,9 +86,9 @@ public abstract class AbstractEditor
 		    {
 		        String answer = in.readLine();
 			    if (answer.equals(formatter.format("misc.y"))) 
-			    {
 			        throw e;
-			    }
+			    else
+			    	return;
 		    }
 		    catch(LineEditingDoneException e2)
 		    {
@@ -102,15 +101,15 @@ public abstract class AbstractEditor
 	throws InterruptedException, OperationInterruptedException, UnexpectedException, IOException
 	{
 	    if(m_parser == null)
-	        m_parser = Parser.load(m_commandList, m_context);
+	        m_parser = Parser.load(m_commandList, this);
 	    
 		// Set up some stuff
 		//
-		DisplayController dc = m_context.getDisplayController();
-		PrintWriter out = m_context.getOut();
-		LineEditor in = m_context.getIn();
-		Buffer buffer = m_context.getBuffer();
-		int width = m_context.getTerminalSettings().getWidth() - 5;
+		DisplayController dc = this.getDisplayController();
+		PrintWriter out = this.getOut();
+		LineEditor in = this.getIn();
+		Buffer buffer = this.getBuffer();
+		int width = this.getTerminalSettings().getWidth() - 5;
 		
 		// Mainloop
 		//
@@ -158,14 +157,14 @@ public abstract class AbstractEditor
 				 		    defaultLine = "";
 					 		line = line.substring(1);
 					 		Parser.ExecutableCommand executableCommand = null;
-					 		executableCommand = m_parser.parseCommandLine(m_context, line);
+					 		executableCommand = m_parser.parseCommandLine(this, line);
 					 		
 					 		if(executableCommand == null)
 					 			continue;
 					 			
 					 		// We have a command. Go run it! 
 					 		//
-				 			executableCommand.execute(m_context);
+				 			executableCommand.execute(this);
 				 		}
 				 		catch(OperationInterruptedException e) {
 				 		    // ignore it, it was just the command that was interrupted,
@@ -188,7 +187,7 @@ public abstract class AbstractEditor
 				 		{
 				 			// TODO: Is this the way we should handle this?
 				 			//
-				 			out.println(e.formatMessage(m_context));
+				 			out.println(e.formatMessage(this));
 				 		}
 				 		
 				 		// Don't include this in the buffer!
@@ -220,14 +219,14 @@ public abstract class AbstractEditor
 			        // Only add extra line in ctrl-c case. (Sorry för fulkoden. /Ihse)
 			        out.println();
 			    }
-			    handleLineEditingInterruptedException(m_context, e);
+			    handleLineEditingInterruptedException(this, e);
 			}
 			catch(LineOverflowException e)
 			{
 				// Overflow! We have to wrap the line
 				//
 				String original = e.getLine();
-				WordWrapper wrapper = m_context.getWordWrapper(original, width - 1);
+				WordWrapper wrapper = this.getWordWrapper(original, width - 1);
 				line = wrapper.nextLine();
 				buffer.add(line);
 				defaultLine = wrapper.nextLine();
@@ -274,7 +273,26 @@ public abstract class AbstractEditor
 							s = e.getLine();
 							defaultLine = s;
 							out.println();
-					        refresh();
+							try
+							{
+							    refresh();
+							}
+							catch(OutputInterruptedException e2)
+							{
+							    // We don't want people to be kicked out of
+							    // the editor just because they abort a listing.
+							    // Just ingore...
+							    //
+							    
+							}
+							catch(OperationInterruptedException e2)
+							{
+							    // We don't want people to be kicked out of
+							    // the editor just because they abort a listing.
+							    // Just ingore...
+							    //
+							    
+							}
 					    }
 					    catch(KOMException e1)
 					    {

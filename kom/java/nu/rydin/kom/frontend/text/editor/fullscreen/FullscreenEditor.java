@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.editor.fullscreen;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import nu.rydin.kom.exceptions.EscapeException;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMRuntimeException;
@@ -22,36 +23,61 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.KeystrokeTokenizer;
 import nu.rydin.kom.frontend.text.LineEditor;
-import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.TerminalSettings;
 import nu.rydin.kom.frontend.text.constants.Keystrokes;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
+import nu.rydin.kom.frontend.text.editor.simple.SaveEditorException;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.text.terminal.TerminalController;
 import nu.rydin.kom.text.terminal.ViewportOffset;
-import nu.rydin.kom.utils.PrintUtils;
+import nu.rydin.kom.utils.Logger;
 
 /**
  * @author Pontus Rydin
  */
-public class FullscreenEditor implements MessageEditor
+public class FullscreenEditor extends EditorContext
 {
-    private EditorContext m_context;
+    private static final class ViewportStackItem
+    {
+        private final ViewportStackItem m_previous;
+        private final TerminalController m_controller;
+        private final int m_maxY;
+        
+        public ViewportStackItem(final ViewportStackItem m_previous,
+                final TerminalController m_controller, final int m_maxy)
+        {
+            super();
+            this.m_previous = m_previous;
+            this.m_controller = m_controller;
+            m_maxY = m_maxy;
+        }
+        
+        
+        public TerminalController getController()
+        {
+            return m_controller;
+        }
+        public int getMaxY()
+        {
+            return m_maxY;
+        }
+        public ViewportStackItem getPrevious()
+        {
+            return m_previous;
+        }
+    }
     
-    private int m_cx = 0;
-    private int m_cy = 0;
-    private final int m_maxX;
-    private int m_maxY;
+    protected int m_cx = 0;
+    protected int m_cy = 0;
+    protected final int m_maxX;
+    protected int m_maxY;
     // private final int m_yOffset = 0;
-    private TerminalController m_tc;
-    private int m_viewportStart = 0;
-    private Buffer m_buffer;
-    
-    private final static int NUM_HEADER_ROWS = 3;
+    protected TerminalController m_tc;
+    protected int m_viewportStart = 0;
+    private ViewportStackItem m_viewportStack;
 
     /**
      * 
@@ -59,110 +85,81 @@ public class FullscreenEditor implements MessageEditor
     public FullscreenEditor(Context context)
     throws IOException, UnexpectedException
     {
-        m_context = new EditorContext(context);
+        super(context);
         m_tc = context.getTerminalController();
-        m_buffer = m_context.getBuffer();
         TerminalSettings ts = context.getTerminalSettings();
         m_maxX = ts.getWidth() - 1;
         m_maxY = ts.getHeight() - 1;
+        m_viewportStack = new ViewportStackItem(null, m_tc, m_maxY);
     }
     
 	public UnstoredMessage edit()
 	throws KOMException, InterruptedException
 	{
-	    return this.edit(-1, -1, -1, null, -1, null, null);
-	}
-    
-    public UnstoredMessage edit(long replyTo, long replyToLocal, long recipientId, 
-            String recipientName, long replyToAuthor, String replyToAuthorName, String oldSubject)
-		throws KOMException, InterruptedException
-    {
-        DisplayController dc = m_context.getDisplayController();
-		PrintWriter out = m_context.getOut();
-		LineEditor in = m_context.getIn();
-		MessageFormatter formatter = m_context.getMessageFormatter();	
-		try
-		{
-		    m_tc.eraseScreen();
-		    m_tc.setCursor(0, 0);
-			dc.messageHeader();
-			
-			// Print author
-			//
-			// out.println(formatter.format("simple.editor.author", m_context.getCachedUserInfo().getName()));
-
-			// FIXME EDITREFACTOR: This whole thing does very unneccessary lookups since the editor doesn't hold enough information about the message being replied to.
-			// Handle reply
-			//
-			if(replyTo != -1)
-			{
-				if(m_context.getRecipient().getId() == recipientId)
-				{
-					// Simple case: Original text is in same conference
-					//
-					out.println(formatter.format("CompactMessagePrinter.reply.to.same.conference", 
-						new Object[] { new Long(replyToLocal), 
-							m_context.formatObjectName(recipientName, recipientId) } ));		
-				}
-				else
-				{
-					// Complex case: Original text was in a different conference
-					//
-					out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
-						new Object[] { new Long(replyToLocal),
-					        m_context.formatObjectName(recipientName,
-					        recipientId), 
-					        m_context.formatObjectName(replyToAuthorName, replyToAuthor) }));
-				}
-			}
-			
-			// Print receiver
-			//
-			out.println(formatter.format("simple.editor.receiver", m_context.formatObjectName(m_context.getRecipient())));
-			
-			// Read subject
-			//
-			String subjLine = formatter.format("simple.editor.subject");
-			out.print(subjLine);
-			dc.input();
-			out.flush();
-			m_context.setSubject(in.readLine(oldSubject));
-			dc.messageHeader();
-			PrintUtils.printRepeated(out, '-', subjLine.length() + m_context.getSubject().length());
-			out.println();
-			
-			// Establish viewport
-			//
-			int headerRows = NUM_HEADER_ROWS;
-			if(replyTo != -1)
-			    ++headerRows;
-			m_tc = new ViewportOffset(m_tc, headerRows, 0);
-			m_maxY -= headerRows;
-						
-			// Enter the main editor loop
-			//
-			this.mainloop();
-			return new UnstoredMessage(m_context.getSubject(), m_context.getBuffer().toString());
-		}
+	    TerminalController tc = this.getTerminalController();
+	    MessageFormatter formatter = this.getMessageFormatter();
+	    //tc.eraseScreen();
+	    //tc.setCursor(0, 0);
+	    this.refresh();
+	    LineEditor in = this.getIn();
+	    boolean pageBreak = in.getPageBreak();
+	    in.setPageBreak(false);
+	    try
+	    {
+	        this.mainloop();
+	    }
 		catch(IOException e) 
 		{
 			throw new KOMRuntimeException(formatter.format("error.reading.user.input"), e);		
 		}
-    }
+		finally
+		{
+		    in.setPageBreak(pageBreak);
+		}
+		
+
+		return new UnstoredMessage(this.getSubject(), this.getBuffer().toString());
+	}    
+	
+	public void pushViewport(int top, int bottom)
+	{
+	    m_viewportStack = new ViewportStackItem(m_viewportStack, m_tc, m_maxY);
+	    m_tc = new ViewportOffset(m_tc, top, 0);
+		m_maxY = bottom - top;
+	}
+	
+	public void popViewport()
+	{
+	    m_tc = m_viewportStack.getController();
+	    m_maxY = m_viewportStack.getMaxY();
+	    m_viewportStack = m_viewportStack.getPrevious();
+	}
+	
+	protected KeystrokeTokenizer getKeystrokeTokenizer()
+	{
+	    return this.getTerminalController().getKeystrokeTokenizer();
+	}
+	
+	protected void unknownToken(KeystrokeTokenizer.Token token)
+	throws EscapeException
+	{
+	    Logger.warn(this, "Unknown token " + token.getKind());
+	}
     
     public void mainloop()
     throws InterruptedException, OperationInterruptedException, IOException
     {
-        TerminalController tc = m_context.getTerminalController();
-        DisplayController dc = m_context.getDisplayController();
+        Buffer buffer = this.getBuffer();
+        TerminalController tc = this.getTerminalController();
+        DisplayController dc = this.getDisplayController();
         dc.messageBody();
-        LineEditor in = m_context.getIn();
-        in.pushTokenizer(tc.getKeystrokeTokenizer());
+        LineEditor in = this.getIn();
+        in.pushTokenizer(this.getKeystrokeTokenizer());
         try
         {
 			// Set up some stuff
 			//
-			PrintWriter out = m_context.getOut();
+			PrintWriter out = this.getOut();
 			
 			// Go home
 			//
@@ -178,13 +175,13 @@ public class FullscreenEditor implements MessageEditor
 				{
 				    // Open up a new line if we've past end of buffer
 				    //
-				    if(m_cy >= m_buffer.size())
-				        m_buffer.add("");
+				    if(m_cy >= buffer.size())
+				        buffer.add("");
 				    
 				    // Retrieve line
 				    //
 				    // System.out.println("y: " + m_cy + ", viewport: " + m_viewportStart);
-				    defaultLine = m_buffer.get(m_cy + m_viewportStart).toString();
+				    defaultLine = buffer.get(m_cy + m_viewportStart).toString();
 				    int l = defaultLine.length();
 				    if(l == 0)
 				    {
@@ -214,11 +211,11 @@ public class FullscreenEditor implements MessageEditor
 				        switch(token.getKind() & ~Keystrokes.TOKEN_MOFIDIER_BREAK)
 				        {
 				        case Keystrokes.TOKEN_UP:
-				            m_buffer.set(m_cy + m_viewportStart, line);
+				            buffer.set(m_cy + m_viewportStart, line);
 				            this.moveUp();
 				        	break;
 				        case Keystrokes.TOKEN_DOWN:
-				            m_buffer.set(m_cy + m_viewportStart, line);
+				            buffer.set(m_cy + m_viewportStart, line);
 				            this.moveDown();
 				        	break;
 				        case Keystrokes.TOKEN_CR:
@@ -227,8 +224,8 @@ public class FullscreenEditor implements MessageEditor
 							//
 				            String left = line.substring(0, m_cx);
 				            String right = line.substring(m_cx);
-				        	m_buffer.set(m_cy + m_viewportStart, left);
-				        	m_buffer.setNewline(m_cy + m_viewportStart, true);
+				        	buffer.set(m_cy + m_viewportStart, left);
+				        	buffer.setNewline(m_cy + m_viewportStart, true);
 
 				        	// Insert the line
 				        	//
@@ -243,14 +240,31 @@ public class FullscreenEditor implements MessageEditor
 				            this.deleteLine(m_cy + m_viewportStart, false);
 				        	break;
 				        case Keystrokes.TOKEN_DONE:
-							m_buffer.set(m_cy + m_viewportStart, line);
+							buffer.set(m_cy + m_viewportStart, line);
 							return;
 						case Keystrokes.TOKEN_ABORT:
 						    throw new OperationInterruptedException();
 						case Keystrokes.TOKEN_REFRESH:
-						    m_buffer.set(m_cy + m_viewportStart, line);
+						    buffer.set(m_cy + m_viewportStart, line);
 						    this.refresh();
 						    break;
+						default:
+						    buffer.set(m_cy + m_viewportStart, line);
+							try
+							{
+							    this.unknownToken(token);
+							}
+						    catch(SaveEditorException e1)
+						    {
+						        return;
+						    }
+						    catch(EscapeException e1)
+						    {
+						        // All other escapes abort
+						        //
+						        throw new OperationInterruptedException();
+						    }
+
 				        }
 				    }
 					catch(LineOverflowException e)
@@ -259,14 +273,14 @@ public class FullscreenEditor implements MessageEditor
 						//
 						String original = e.getLine();
 						m_cx = e.getPos();
-						m_buffer.set(m_cy + m_viewportStart, original);
+						buffer.set(m_cy + m_viewportStart, original);
 						int bottom = this.wordWrap(m_cy + m_viewportStart);
 						this.refreshRegion(m_cy, bottom);
 						
 						// Is the cursor in the wrapped part of the line? Move
 						// down in that case
 						//
-						int ll = m_buffer.get(m_cy + m_viewportStart).length();
+						int ll = buffer.get(m_cy + m_viewportStart).length();
 						if(m_cx > ll)
 						{
 						    m_cx -= ll;
@@ -280,9 +294,9 @@ public class FullscreenEditor implements MessageEditor
 					    int bufPos = m_cy + m_viewportStart;
 					    if(bufPos <= 0)
 					        continue;
-					    // boolean newline = m_buffer.isNewline(bufPos);
-					    String left = m_buffer.get(bufPos - 1);
-					    m_buffer.set(bufPos - 1, left + e.getLine());
+					    // boolean newline = buffer.isNewline(bufPos);
+					    String left = buffer.get(bufPos - 1);
+					    buffer.set(bufPos - 1, left + e.getLine());
 					    this.deleteLine(bufPos, true);
 					    m_cx = left.length();
 					}
@@ -314,11 +328,12 @@ public class FullscreenEditor implements MessageEditor
     
     protected void deleteLine(int line, boolean moveUp)
     {
-	    m_buffer.remove(line);
+        Buffer buffer = this.getBuffer();
+	    buffer.remove(line);
 	    
 	    // Push line ending up
 	    //
-	    // m_buffer.setNewline(bufPos - 1)
+	    // buffer.setNewline(bufPos - 1)
 	    
 	    if(line > 0)
 	        this.wordWrap(line - 1);
@@ -332,32 +347,33 @@ public class FullscreenEditor implements MessageEditor
 	    
 	    // Refresh. There are probably more efficient ways of doing this!
 	    //
-	    int lastLine = m_buffer.size() - m_viewportStart;
+	    int lastLine = buffer.size() - m_viewportStart;
         m_tc.setCursor(lastLine, 0);
         m_tc.eraseLine();
-        this.refresh();        
+        this.refreshViewport();        
     }
     
     protected int wordWrap(int line)
     {
+        Buffer buffer = this.getBuffer();
         String left = "";
         boolean refreshAll = false;
         for(;;)
         {
             // Merge lines
             //
-            if(line >= m_buffer.size() - 1)
-        	    m_buffer.add("");
-            String merged = left + m_buffer.get(line);
+            if(line >= buffer.size() - 1)
+        	    buffer.add("");
+            String merged = left + buffer.get(line);
             int l = merged.length();
             
             // Word wrap if needed
             //
-			WordWrapper wrapper = m_context.getWordWrapper(merged, m_maxX - 1);
+			WordWrapper wrapper = this.getWordWrapper(merged, m_maxX - 1);
 			left = wrapper.nextLine();
 			if(left == null)
 			    break;
-			m_buffer.set(line++, left);
+			buffer.set(line++, left);
 			left = wrapper.nextLine();
 			if(left == null)
 			    break;
@@ -365,17 +381,17 @@ public class FullscreenEditor implements MessageEditor
 			// Did we wrap a line ending with a newline? Move the newline down
 			// one line!
 			//
-			if(m_buffer.isNewline(line - 1))
+			if(buffer.isNewline(line - 1))
 			{
-			    m_buffer.insertBefore(line, left);
+			    buffer.insertBefore(line, left);
 			    left = "";
-			    m_buffer.setNewline(line - 1, false);
-			    m_buffer.setNewline(line, true);
+			    buffer.setNewline(line - 1, false);
+			    buffer.setNewline(line, true);
 			    ++line;
 			    refreshAll = true;
 			}
         }
-        return refreshAll ? m_buffer.size() : line;
+        return refreshAll ? buffer.size() : line;
     }
     
     protected void insertLine(String line)
@@ -383,6 +399,7 @@ public class FullscreenEditor implements MessageEditor
     	// Scroll to open for new line. Scroll up if we're at 
     	// end of screen, otherwise scroll up.
     	//
+        Buffer buffer = this.getBuffer();
     	if(m_cy <= m_maxY - 1)
     	    this.scrollRegionDown(m_cy + 1, m_maxY, 1);
     	else
@@ -390,10 +407,10 @@ public class FullscreenEditor implements MessageEditor
     	m_tc.eraseToEndOfLine();
 
     	m_cx = 0;
-    	if(m_cy + m_viewportStart >= m_buffer.size() - 1)
-    	    m_buffer.add(line);
+    	if(m_cy + m_viewportStart >= buffer.size() - 1)
+    	    buffer.add(line);
     	else
-    	    m_buffer.insertBefore(m_cy + m_viewportStart + 1, line);
+    	    buffer.insertBefore(m_cy + m_viewportStart + 1, line);
     }
     
     protected void moveUp()
@@ -450,6 +467,7 @@ public class FullscreenEditor implements MessageEditor
         
     protected void scrollRegionDown(int start, int end, int n)
     {
+        Buffer buffer = this.getBuffer();
         if(m_tc.canSetScrollRegion())
         {
             // We can do scroll regions!
@@ -463,7 +481,7 @@ public class FullscreenEditor implements MessageEditor
         {
             // Can't do scroll regions. We need to redraw
             //
-            int top = m_buffer.size();
+            int top = buffer.size();
             for(int idx = start; idx < end - n; ++idx)
             {
                 m_tc.setCursor(idx + n, 0);
@@ -471,7 +489,7 @@ public class FullscreenEditor implements MessageEditor
                 int p = idx + m_viewportStart;
                 if(p >= top)
                     break;
-                m_context.getOut().print(m_buffer.get(p).toString());
+                this.getOut().print(buffer.get(p).toString());
             }
         }
         m_tc.setCursor(m_cy, m_cx);
@@ -496,10 +514,26 @@ public class FullscreenEditor implements MessageEditor
             {
                 m_tc.setCursor(idx - n, 0);
                 m_tc.eraseLine();
-                m_context.getOut().print(m_buffer.get(idx + m_viewportStart).toString());                
+                this.getOut().print(this.getBuffer().get(idx + m_viewportStart).toString());                
             }
         }
         m_tc.setCursor(m_cy, m_cx);
+    }
+    
+    public void revealCursor(boolean refresh)
+    {
+        // If cursor is outside visible area, move viewport and refresh
+        //
+        if(m_cy < m_maxY - 1)
+            return;
+        
+        // Adjust viewport to fit on screen
+        //
+        int d = m_cy - (m_maxY - 1);
+        m_cy -= d;
+        m_viewportStart += d;        
+        if(refresh)
+            this.refreshViewport();
     }
     
     protected boolean isAtEndOfScreen()
@@ -509,39 +543,38 @@ public class FullscreenEditor implements MessageEditor
     
     protected boolean isAtEndOfBuffer()
     {
-        return m_viewportStart + m_cy >= m_buffer.size() - 1;
+        return m_viewportStart + m_cy >= this.getBuffer().size() - 1;
     }
-        
-	public void setRecipient(NameAssociation recipient)
+    
+	protected void refreshViewport()
 	{
-	    m_context.setRecipient(recipient);
+	    this.refreshRegion(0, m_maxY);
 	}
-	
-	public NameAssociation getRecipient()
-	{
-	    return m_context.getRecipient();
-	}
-	
-	public void setReplyTo(long replyTo)
-	{
-	    m_context.setReplyTo(replyTo);
-	}
-	
+        	
 	protected void refresh()
 	{
 	    this.refreshRegion(0, m_maxY);
 	}
 	
+	protected void refreshCurrentLine()
+	{
+        m_tc.setCursor(m_cy, 0);
+        m_tc.eraseLine();
+        this.getOut().print(this.getBuffer().get(m_viewportStart + m_cy));
+	}
+	
 	protected void refreshRegion(int start, int end)
 	{
-	    PrintWriter out = m_context.getOut();
+	    Buffer buffer = this.getBuffer();
+	    PrintWriter out = this.getOut();
 	    // m_tc.eraseScreen();
-	    int top = Math.min(end, m_buffer.size() - m_viewportStart); 
+	    int top =  end; //Math.min(end, buffer.size() - m_viewportStart); 
 	    for(int idx = start; idx < top; ++idx)
 	    {
 	        m_tc.setCursor(idx, 0);
 	        m_tc.eraseLine();
-	        out.print(m_buffer.get(m_viewportStart + idx));
+	        if(idx < buffer.size() - m_viewportStart)
+	            out.print(buffer.get(m_viewportStart + idx));
 	    }
 	    m_tc.setCursor(m_cy, m_cx);
 	    out.flush();

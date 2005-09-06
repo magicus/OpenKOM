@@ -593,11 +593,11 @@ public interface ServerSession
 	/**
 	 * List the members in the specified conference.
 	 * @param confId Conference identifier.
-	 * @return An array of Strings containing the member names.
+	 * @return An array of NameAssociations containing the member names.
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
-	public Name[] listMemberNamesByConference(long confId)
+	public NameAssociation[] listMembersByConference(long confId)
 	throws ObjectNotFoundException, UnexpectedException;
 	
 	
@@ -1054,6 +1054,20 @@ public interface ServerSession
 	 */
 	public boolean canManipulateObject(long object)
 	throws ObjectNotFoundException, UnexpectedException;
+	
+	/**
+	 * Updates conference permissions and visibility
+	 * @param id Id of conference to change
+	 * @param permissions New permission mask
+	 * @param nonmemberpermissions New permission mask for non-members
+	 * @param visibility New visibility
+	 * @throws ObjectNotFoundException
+	 * @throws AuthorizationException
+	 * @throws UnexpectedException
+	 */
+	public void updateConferencePermissions(long id, int permissions, int nonmemberpermissions,
+	        short visibility)
+	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
 
 	/**
 	 * Changes the password of a user.

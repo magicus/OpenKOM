@@ -218,7 +218,7 @@ public class Parser
         // Trim the commandline
         commandLine = commandLine.trim();
 
-        List potentialTargets = getPotentialTargets(commandLine);
+        List potentialTargets = getPotentialTargets(commandLine, context);
 
         potentialTargets = checkForExactMatch(potentialTargets);
 
@@ -544,7 +544,8 @@ public class Parser
         return potentialTargets;
     }
 
-    private List getPotentialTargets(String commandLine)
+    private List getPotentialTargets(String commandLine, Context context)
+    throws UnexpectedException
     {
         int level = 0;
 
@@ -554,7 +555,9 @@ public class Parser
         // Build a copy of all commands first, to filter down later.
         for (int i = 0; i < m_commands.length; i++)
         {
-            potentialTargets.add(new CommandToMatches(m_commands[i]));
+            Command each = m_commands[i];
+            if(each.hasAccess(context))
+                potentialTargets.add(new CommandToMatches(each));
         }
 
         boolean remaindersExist = true;

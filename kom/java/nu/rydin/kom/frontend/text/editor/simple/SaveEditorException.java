@@ -3,12 +3,12 @@
  */
 package nu.rydin.kom.frontend.text.editor.simple;
 
-import nu.rydin.kom.exceptions.SystemException;
+import nu.rydin.kom.exceptions.EscapeException;
 
 /**
  * @author Magnus Ihse Bursie
  */
-public class SaveEditorException extends SystemException
+public class SaveEditorException extends EscapeException
 {
 
     public SaveEditorException()

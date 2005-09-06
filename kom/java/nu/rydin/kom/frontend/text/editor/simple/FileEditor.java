@@ -27,7 +27,7 @@ public class FileEditor extends AbstractEditor
 
 	protected void refresh() throws KOMException
 	{
-	    new ShowSimpleFile(m_context, "", 0).execute(m_context, new Object[0]);
+	    new ShowSimpleFile(this, "", 0).execute(this, new Object[0]);
 	}
     
 	//FIXME EDITREFACTOR: replyTo is completely irrelevant in this context.
@@ -35,7 +35,7 @@ public class FileEditor extends AbstractEditor
             throws KOMException, InterruptedException, IOException
     {
         this.mainloop(false);
-        return new UnstoredMessage("", m_context.getBuffer().toString());
+        return new UnstoredMessage("", this.getBuffer().toString());
     }
     
     protected String getAbortQuestionFormat()
