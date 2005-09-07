@@ -56,14 +56,13 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			if(replyTo != -1)
 			{
                 long replyToConferenceId = this.getSession().getMostRelevantOccurrence(this.getSession().getCurrentConferenceId(), replyTo).getConference(); 
-                
 				if(this.getRecipient().getId() == replyToConferenceId)
 				{
 					// Simple case: Original text is in same conference
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.same.conference", 
 						new Object[] { new Long(replyToLocal), 
-							this.formatObjectName(recipientName, recipientId) } ));		
+							this.formatObjectName(replyToAuthorName, replyToAuthor) } ));		
 				}
 				else
 				{

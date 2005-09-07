@@ -120,8 +120,8 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
                             new Object[]
                             {
                                     new Long(replyToLocal),
-                                    this.formatObjectName(recipientName,
-                                            recipientId) });
+                                    this.formatObjectName(replyToAuthorName,
+                                            replyToAuthor) });
                 } else
                 {
                     // Complex case: Original text was in a different conference
