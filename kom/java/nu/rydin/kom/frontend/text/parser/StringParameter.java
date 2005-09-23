@@ -13,7 +13,12 @@ public class StringParameter extends CommandLineParameter
 {
     public StringParameter(String missingObjectQuestionKey, boolean isRequired)
     {
-        super(missingObjectQuestionKey, isRequired);
+        super(missingObjectQuestionKey, isRequired, null);
+    }
+    
+    public StringParameter(String missingObjectQuestionKey, boolean isRequired, DefaultStrategy def)
+    {
+        super(missingObjectQuestionKey, isRequired, def);
     }
 
     protected String getUserDescriptionKey()

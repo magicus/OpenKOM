@@ -18,11 +18,11 @@ import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.*;
 import nu.rydin.kom.frontend.text.parser.Parser;
+import nu.rydin.kom.frontend.text.terminal.TerminalController;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
-import nu.rydin.kom.text.terminal.TerminalController;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>

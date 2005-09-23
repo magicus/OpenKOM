@@ -13,12 +13,22 @@ public class IntegerParameter extends CommandLineParameter {
 
     public IntegerParameter(String missingObjectQuestionKey,
             boolean isRequired) {
-        super(missingObjectQuestionKey, isRequired);
+        this(missingObjectQuestionKey, isRequired, null);
     }
 
     public IntegerParameter(boolean isRequired) {
-        super("parser.parameter.integer.ask", isRequired);
+        this(isRequired, null);
     }
+    
+    public IntegerParameter(String missingObjectQuestionKey,
+            boolean isRequired, DefaultStrategy def) {
+        super(missingObjectQuestionKey, isRequired, def);
+    }
+
+    public IntegerParameter(boolean isRequired, DefaultStrategy def) {
+        super("parser.parameter.integer.ask", isRequired, def);
+    }
+    
 
     protected String getUserDescriptionKey() {
         return "parser.parameter.integer.description";

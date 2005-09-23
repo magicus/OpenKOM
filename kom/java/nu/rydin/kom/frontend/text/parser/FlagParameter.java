@@ -21,6 +21,17 @@ public class FlagParameter extends EnumParameter
     {
         this("parser.parameter.flag.ask", flagLabels, isRequired);
     }
+    
+    public FlagParameter(String missingObjectQuestionKey, String[] flagLabels, boolean isRequired, DefaultStrategy def)
+    {
+        super(missingObjectQuestionKey, "parser.parameter.flag.header", missingObjectQuestionKey, flagLabels, false, null, isRequired, def);
+    }
+
+    public FlagParameter(boolean isRequired, String[] flagLabels, DefaultStrategy def)
+    {
+        this("parser.parameter.flag.ask", flagLabels, isRequired, def);
+    }
+
 
     protected String getUserDescriptionKey()
     {

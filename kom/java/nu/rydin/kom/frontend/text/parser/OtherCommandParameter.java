@@ -24,12 +24,22 @@ public class OtherCommandParameter extends CommandLineParameter
 {
     public OtherCommandParameter(String missingObjectQuestionKey, boolean isRequired)
     {
-        super(missingObjectQuestionKey, isRequired);
+        this(missingObjectQuestionKey, isRequired, null);
     }
 
     public OtherCommandParameter(boolean isRequired)
     {
-        super("parser.parameter.command.ask", isRequired);
+        this(isRequired, null);
+    }
+
+    public OtherCommandParameter(String missingObjectQuestionKey, boolean isRequired, DefaultStrategy def)
+    {
+        super(missingObjectQuestionKey, isRequired, def);
+    }
+
+    public OtherCommandParameter(boolean isRequired, DefaultStrategy def)
+    {
+        super("parser.parameter.command.ask", isRequired, def);
     }
 
     protected String getUserDescriptionKey()

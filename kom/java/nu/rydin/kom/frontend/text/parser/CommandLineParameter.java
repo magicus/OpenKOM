@@ -12,9 +12,11 @@ import java.io.PrintWriter;
 import nu.rydin.kom.exceptions.InvalidChoiceException;
 import nu.rydin.kom.exceptions.LineEditingDoneException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
+import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.utils.Logger;
 
 
 /**
@@ -23,13 +25,15 @@ import nu.rydin.kom.i18n.MessageFormatter;
 public abstract class CommandLineParameter extends CommandLinePart
 {
 
-	protected String m_missingObjectQuestionKey;
-    protected boolean m_isRequired;
+	protected final String m_missingObjectQuestionKey;
+    protected final boolean m_isRequired;
+    protected final DefaultStrategy m_default;
 	
-	public CommandLineParameter(String missingObjectQuestionKey, boolean isRequired)
+	public CommandLineParameter(String missingObjectQuestionKey, boolean isRequired, DefaultStrategy defaultS)
 	{
 		m_missingObjectQuestionKey = missingObjectQuestionKey;
 		m_isRequired = isRequired;
+		m_default = defaultS;
 	}
 	
 	public char getSeparator()
@@ -50,7 +54,23 @@ public abstract class CommandLineParameter extends CommandLinePart
 				out.println();
 				out.print(fmt.format(m_missingObjectQuestionKey));
 				out.flush();
-				String line = in.readLine();
+				String defaultString = "";
+				if(m_default != null)
+				{
+				    try
+				    {
+				        defaultString = m_default.getDefault(context);
+				    }
+				    catch(UnexpectedException e)
+				    {
+				        // Not being able to figure out the default is
+				        // not the end of the world, so we let this one slide.
+				        // However, we definately want to log it!
+				        //
+				        Logger.warn(this, e);
+				    }
+				}
+				String line = in.readLine(defaultString);
 				if(line.length() == 0)
 				    throw new OperationInterruptedException();
 				Match newMatch = innerMatch(line, "");

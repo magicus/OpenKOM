@@ -16,7 +16,11 @@ package nu.rydin.kom.frontend.text.parser;
 public class RawParameter extends CommandLineParameter {
 
     public RawParameter(String missingObjectQuestionKey, boolean isRequired) {
-        super(missingObjectQuestionKey, isRequired);
+        super(missingObjectQuestionKey, isRequired, null);
+    }
+    
+    public RawParameter(String missingObjectQuestionKey, boolean isRequired, DefaultStrategy def) {
+        super(missingObjectQuestionKey, isRequired, def);
     }
 
     protected Match innerMatch(String matchingPart, String remainder) {

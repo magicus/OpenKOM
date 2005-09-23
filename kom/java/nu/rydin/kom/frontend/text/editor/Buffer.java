@@ -55,8 +55,10 @@ public class Buffer
 			if(content.length() > 0)
 			{
 				buffer.append(content);
-				if(!Character.isWhitespace(content.charAt(content.length() - 1)))
-					buffer.append(line.m_newline ? '\n' : ' ');
+				if(line.m_newline)
+				    buffer.append('\n');
+				else if(!Character.isWhitespace(content.charAt(content.length() - 1)))
+					buffer.append(' ');
 			}
 			else if(line.m_newline)
 			    buffer.append('\n');

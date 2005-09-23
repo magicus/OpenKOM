@@ -20,13 +20,24 @@ public class TextNumberParameter extends CommandLineParameter
 {
 	public TextNumberParameter(String missingObjectQuestionKey, boolean isRequired)
 	{
-		super(missingObjectQuestionKey, isRequired);
+		this(missingObjectQuestionKey, isRequired, null);
 	}
 
 	public TextNumberParameter(boolean isRequired)
 	{
-		super("parser.parameter.textnumber.ask", isRequired);
+		this(isRequired, null);
 	}
+	
+	public TextNumberParameter(String missingObjectQuestionKey, boolean isRequired, DefaultStrategy def)
+	{
+		super(missingObjectQuestionKey, isRequired, def);
+	}
+
+	public TextNumberParameter(boolean isRequired, DefaultStrategy def)
+	{
+		super("parser.parameter.textnumber.ask", isRequired, def);
+	}
+	
 
 	protected Match innerMatch(String matchingPart, String remainder)
 	{

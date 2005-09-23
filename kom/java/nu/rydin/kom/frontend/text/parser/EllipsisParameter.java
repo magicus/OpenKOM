@@ -31,14 +31,24 @@ public class EllipsisParameter extends CommandLineParameter
     
     private final char separator;
     
+    public EllipsisParameter(String missingObjectQuestionKey, boolean isRequired, CommandLineParameter innerParameter, DefaultStrategy def)
+    {
+        this(missingObjectQuestionKey, isRequired, innerParameter, ':', def);
+    }
+    
     public EllipsisParameter(String missingObjectQuestionKey, boolean isRequired, CommandLineParameter innerParameter)
     {
-        this(missingObjectQuestionKey, isRequired, innerParameter, ':');
+        this(missingObjectQuestionKey, isRequired, innerParameter, ':', null);
     }
     
     public EllipsisParameter(String missingObjectQuestionKey, boolean isRequired, CommandLineParameter innerParameter, char separator)
     {
-        super(missingObjectQuestionKey, isRequired);
+        this(missingObjectQuestionKey, isRequired, innerParameter, separator, null);
+    }
+    
+    public EllipsisParameter(String missingObjectQuestionKey, boolean isRequired, CommandLineParameter innerParameter, char separator, DefaultStrategy def)
+    {
+        super(missingObjectQuestionKey, isRequired, def);
         this.separator = separator;
         this.innerParameter = innerParameter;
         if (!innerParameter.isRequired())

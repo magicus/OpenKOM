@@ -10,11 +10,14 @@ import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.MessageNotFoundException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
+import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
@@ -48,14 +51,36 @@ public class WriteMailReply extends AbstractCommand
 		{
 		    mh = session.getMessageHeader(session.getGlobalMessageId(textNumber));
 		}
+		
+		// Get original message and conference
+		//
+        MessageOccurrence originalMessage;
+        try
+        {
+            originalMessage = session.getMostRelevantOccurrence(session.getCurrentConferenceId(), mh.getId());
+        }
+        catch (ObjectNotFoundException e) 
+        {
+            throw new MessageNotFoundException();
+        }
+        ConferenceInfo originalConference = session.getConference(originalMessage.getConference());
 
 		// Get editor and execute it
 		//
         MessageEditor editor = context.getMessageEditor();
         editor.setRecipient(new NameAssociation(mh.getAuthor(), mh.getAuthorName()));
         editor.setReplyTo(mh.getId());
-        UnstoredMessage msg = editor.edit();
-		
+        
+        UnstoredMessage msg = editor.edit(
+                mh.getId(), 
+                originalMessage.getLocalnum(),
+                originalConference.getId(),
+                originalConference.getName(),
+                originalMessage.getUser().getId(), 
+                originalMessage.getUser().getName().getName(), 
+                mh.getSubject()
+                );
+
 		// Store the message
 		//
 		MessageOccurrence occ = session.storeReplyAsMail(editor.getRecipient().getId(), msg, mh.getId());

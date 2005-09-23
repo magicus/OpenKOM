@@ -45,6 +45,7 @@ public class UserFlags
 	public static long USE_FULL_SCREEN_EDITOR				= 0x00080000;
 	public static long READ_CROSS_CONF_REPLIES				= 0x00100000;
 	public static long READ_REPLY_TREE						= 0x00200000;
+	public static long REPLY_IN_CURRENT_CONF				= 0x00400000;
 
 	/**
 	 * Default value for flagword 1

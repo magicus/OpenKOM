@@ -8,7 +8,6 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.PrintWriter;
 
-import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -18,7 +17,6 @@ import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceListItem;
 import nu.rydin.kom.utils.HeaderPrinter;
 import nu.rydin.kom.utils.PrintUtils;
-import nu.rydin.kom.utils.StringUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>

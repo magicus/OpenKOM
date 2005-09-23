@@ -29,10 +29,10 @@ import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.simple.SaveEditorException;
+import nu.rydin.kom.frontend.text.terminal.TerminalController;
+import nu.rydin.kom.frontend.text.terminal.ViewportOffset;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
-import nu.rydin.kom.text.terminal.TerminalController;
-import nu.rydin.kom.text.terminal.ViewportOffset;
 import nu.rydin.kom.utils.Logger;
 
 /**
@@ -225,11 +225,13 @@ public class FullscreenEditor extends EditorContext
 				            String left = line.substring(0, m_cx);
 				            String right = line.substring(m_cx);
 				        	buffer.set(m_cy + m_viewportStart, left);
+				        	boolean hadNewline = buffer.isNewline(m_cy + m_viewportStart); 
 				        	buffer.setNewline(m_cy + m_viewportStart, true);
 
 				        	// Insert the line
 				        	//
 				        	this.insertLine(right);
+				        	buffer.setNewline(m_cy + m_viewportStart + 1, hadNewline);
 				        	
 				        	// ...and move cursor down.
 				        	//

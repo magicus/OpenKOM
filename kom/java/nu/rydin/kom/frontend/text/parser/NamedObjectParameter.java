@@ -27,13 +27,25 @@ public class NamedObjectParameter extends CommandLineParameter
     public NamedObjectParameter(String missingObjectQuestionKey,
             boolean isRequired)
     {
-        super(missingObjectQuestionKey, isRequired);
+        this(missingObjectQuestionKey, isRequired, null);
     }
 
     public NamedObjectParameter(boolean isRequired)
     {
-        super("parser.parameter.namedobject.ask", isRequired);
+        this(isRequired, null);
     }
+    
+    public NamedObjectParameter(String missingObjectQuestionKey,
+            boolean isRequired, DefaultStrategy def)
+    {
+        super(missingObjectQuestionKey, isRequired, def);
+    }
+
+    public NamedObjectParameter(boolean isRequired, DefaultStrategy def)
+    {
+        super("parser.parameter.namedobject.ask", isRequired, def);
+    }
+    
 
     protected Match innerMatch(String matchingPart, String remainder)
     {

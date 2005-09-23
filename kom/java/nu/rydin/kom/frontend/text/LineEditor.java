@@ -40,6 +40,8 @@ import nu.rydin.kom.utils.PrintUtils;
  */
 public class LineEditor implements NewlineListener
 {
+    public static final int TABSIZE						= 8;
+    
 	public static final int FLAG_STOP_ON_EVENT			= 0x01;
 	public static final int FLAG_ECHO					= 0x02;
 	public static final int FLAG_STOP_ON_BOL			= 0x04;
@@ -87,7 +89,7 @@ public class LineEditor implements NewlineListener
 			                "\u0010",			// Ctrl-P
 			                "\u000e"},			// Ctrl-N
 			        new int[] {
-			                Keystrokes.TOKEN_SKIP,			// Newline
+			                Keystrokes.TOKEN_CR,			// Newline
 			                Keystrokes.TOKEN_CR,			// CR
 			                Keystrokes.TOKEN_BS,			// BS
 			                Keystrokes.TOKEN_BS,			// DEL
@@ -1004,15 +1006,30 @@ public class LineEditor implements NewlineListener
 						break; 
 					}
 					
-					// Store the character. But only if it's printable
+					// Skip non printable characters
 					//
 					if(ch < 32 && ch != TAB)
 					    continue;
-					buffer.insert(cursorpos++, ch);
+					
+					// TAB needs special treatment. Insert enough spaces to get to
+					// the next position that's a multiple of TABSIZE
+					//
+					if(ch == TAB)
+					{
+						int spaces = TABSIZE - (cursorpos % TABSIZE);
+						for(int idx = 0; idx < spaces; ++idx)
+						{
+							buffer.insert(cursorpos++, ' ');
+							m_out.write(' ');
+						}
+					}
+					else
+					    buffer.insert(cursorpos++, ch);
 						
 					if((flags & FLAG_ECHO) != 0) 
 					{
-						m_out.write(ch);
+					    if(ch != TAB)
+					        m_out.write(ch);
 						if (cursorpos < buffer.length())
 						{
 							m_out.write(buffer.substring(cursorpos));

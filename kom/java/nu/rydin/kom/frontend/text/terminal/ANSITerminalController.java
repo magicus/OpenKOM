@@ -4,7 +4,7 @@
  * Distributed under the GPL license.
  * See http://www.gnu.org/ for details.
  */
-package nu.rydin.kom.text.terminal;
+package nu.rydin.kom.frontend.text.terminal;
 
 import java.io.PrintWriter;
 
@@ -50,7 +50,8 @@ public class ANSITerminalController extends ANSIDisplayController implements Ter
 			                "\u0019",			// Ctrl-Y
 			                "\u001a"},			// Ctrl-Z			
 			        new int[] {
-			                Keystrokes.TOKEN_SKIP,				// Newline
+			                Keystrokes.TOKEN_CR | 
+	                			Keystrokes.TOKEN_MOFIDIER_BREAK,// Newline
 			                Keystrokes.TOKEN_CR | 
 		                		Keystrokes.TOKEN_MOFIDIER_BREAK,// CR
 			                Keystrokes.TOKEN_BS,				// BS

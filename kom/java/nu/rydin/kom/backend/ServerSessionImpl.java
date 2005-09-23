@@ -2114,9 +2114,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 					    if(each == this.getLoggedInUserId())
 					        explicitToSelf = true;
 					    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(each);
-						if (m_sessions.hasSession(each) && ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES)
-						        && !sess.userMatchesFilter(this.getLoggedInUserId(),
-					                    FilterFlags.CHAT))
+						if (m_sessions.hasSession(each) && sess.allowsChat(this.getLoggedInUserId()))
 						{
 							s.add(new Long(each));
 							rec_names.add(ui.getName());
@@ -2141,9 +2139,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 							    
 							    // Does the receiver accept chat messages
 							    //
-							    if(ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES)
-							            && !sess.userMatchesFilter(this.getLoggedInUserId(),
-							                    FilterFlags.CHAT))
+							    if(sess.allowsChat(this.getLoggedInUserId()))
 							        s.add(new Long(uid));
 							    else
 							        refused.add(new NameAssociation(uid, 
@@ -2213,51 +2209,42 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 	    NameManager nm = m_da.getNameManager();
 	    UserManager um = m_da.getUserManager();
-	    try
-	    {
-	        int top = recipients.length;
-	        int[] answer = new int[top];
-	        for (int idx = 0; idx < top; idx++)
+        int top = recipients.length;
+        int[] answer = new int[top];
+        for (int idx = 0; idx < top; idx++)
+        {
+            long each = recipients[idx];
+            try
             {
-	            long each = recipients[idx];
-	            try
-	            {
-	                short kind = nm.getObjectKind(each);
-	                
-	                // Conferences are always considered ok recipients
-	                //
-	                if(kind == NameManager.CONFERENCE_KIND)
-	                    answer[idx] = ChatRecipientStatus.OK_CONFERENCE;
-	                else
-	                {
-	                    // User. Check if logged in.
-	                    //
-	                    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(each);
-	                    if(sess == null)
-	                        answer[idx] = ChatRecipientStatus.NOT_LOGGED_IN;
-	                    else
-	                    {
-	                        // Logged in. Do they receive chat messages?
-	                        //
-	                        answer[idx] = (um.loadUser(each).getFlags1() & UserFlags.ALLOW_CHAT_MESSAGES) != 0
-	                        	&& !sess.userMatchesFilter(this.getLoggedInUserId(),
-	                        	        FilterFlags.CHAT)
-	                        	? ChatRecipientStatus.OK_USER
-	                        	: ChatRecipientStatus.REFUSES_MESSAGES;
-	                    }
-	                }
-	            }
-	            catch(ObjectNotFoundException e)
-	            {
-	                answer[idx] = ChatRecipientStatus.NONEXISTENT;
-	            }
+                short kind = nm.getObjectKind(each);
+                
+                // Conferences are always considered ok recipients
+                //
+                if(kind == NameManager.CONFERENCE_KIND)
+                    answer[idx] = ChatRecipientStatus.OK_CONFERENCE;
+                else
+                {
+                    // User. Check if logged in.
+                    //
+                    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(each);
+                    if(sess == null)
+                        answer[idx] = ChatRecipientStatus.NOT_LOGGED_IN;
+                    else
+                    {
+                        // Logged in. Do they receive chat messages?
+                        //
+                        answer[idx] = sess.allowsChat(this.getLoggedInUserId())
+                        	? ChatRecipientStatus.OK_USER
+                        	: ChatRecipientStatus.REFUSES_MESSAGES;
+                    }
+                }
             }
-	        return answer;
-	    }
-		catch (SQLException e)
-		{
-			throw new UnexpectedException (this.getLoggedInUserId(), e);
-		}			    
+            catch(ObjectNotFoundException e)
+            {
+                answer[idx] = ChatRecipientStatus.NONEXISTENT;
+            }
+        }
+        return answer;
 	}
 	
 	public NameAssociation[] broadcastChatMessage(String message, short kind)
@@ -2295,13 +2282,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			ArrayList bounces = new ArrayList(top);
 			for(int idx = 0; idx < top; ++idx)
 			{
-			    long userId = sessions[idx].getLoggedInUserId();
+			    ServerSessionImpl sess = (ServerSessionImpl) sessions[idx];
+			    long userId = sess.getLoggedInUserId();
 			    try
 			    {
 			        // Find out if recipients allows broadcasts
 			        //
 				    UserInfo user = um.loadUser(userId);
-				    if((user.getFlags1() & UserFlags.ALLOW_BROADCAST_MESSAGES) != 0)
+				    if(sess.allowsBroadcast(this.getLoggedInUserId()))
 				        mlm.storeMessagePointer(logId, userId, false, kind);
 				    else
 				        bounces.add(new NameAssociation(userId, 
@@ -3072,6 +3060,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	protected void leaveConference()
+	
 	throws SQLException
 	{
 		// Save message markers
@@ -3630,25 +3619,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	
 	public void onEvent(ChatMessageEvent e)
 	{
-	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_CHAT_MESSAGES))
+	    if(this.allowsChat(e.getOriginatingUser()))
 	        this.postEvent(e);
 	}
 
 	public void onEvent(ChatAnonymousMessageEvent e)
 	{
-	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_CHAT_MESSAGES))
+	    if(this.allowsChat(e.getOriginatingUser()))
 	        this.postEvent(e);
 	}
 	
 	public void onEvent(BroadcastMessageEvent e)
 	{
-	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_BROADCAST_MESSAGES))
+	    if(this.allowsBroadcast(e.getOriginatingUser()))
 	        this.postEvent(e);
 	}
 	
 	public void onEvent(BroadcastAnonymousMessageEvent e)
 	{
-	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_BROADCAST_MESSAGES))
+	    if(this.allowsBroadcast(e.getOriginatingUser()))
 	        this.postEvent(e);
 	}
 
@@ -4114,5 +4103,17 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             return false;
         long flags = flagObj.longValue();
         return (flags & neededFlags) == neededFlags; 
+    }    
+    
+    protected boolean allowsChat(long sender)
+    {
+        boolean allowsChat = this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_CHAT_MESSAGES);
+		return allowsChat && !this.userMatchesFilter(sender, FilterFlags.CHAT);
+    }
+
+    protected boolean allowsBroadcast(long sender)
+    {
+        boolean allowsBroadcast = this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_BROADCAST_MESSAGES);
+		return allowsBroadcast && !this.userMatchesFilter(sender, FilterFlags.BROADCASTS);
     }    
 }

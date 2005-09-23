@@ -33,12 +33,21 @@ public abstract class EnumParameter extends CommandLineParameter
     private final String m_legendKeyPrefix;
 
     private boolean m_allowPrefixes;
-
+    
     public EnumParameter(String missingObjectQuestionKey, String headingKey,
             String promptKey, String[] alternatives, boolean allowPrefixes,
             String legendKeyPrefix, boolean isRequired)
     {
-        super(missingObjectQuestionKey, isRequired);
+        this(missingObjectQuestionKey, headingKey, promptKey, alternatives,
+                allowPrefixes, legendKeyPrefix, isRequired, null);
+    }
+
+
+    public EnumParameter(String missingObjectQuestionKey, String headingKey,
+            String promptKey, String[] alternatives, boolean allowPrefixes,
+            String legendKeyPrefix, boolean isRequired, DefaultStrategy def)
+    {
+        super(missingObjectQuestionKey, isRequired, def);
         m_headingKey = headingKey;
         m_promptKey = promptKey;
         m_legendKeyPrefix = legendKeyPrefix;

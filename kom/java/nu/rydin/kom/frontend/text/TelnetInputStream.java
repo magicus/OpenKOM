@@ -34,6 +34,7 @@ public class TelnetInputStream extends InputStream
 	private static final short STATE_SB				= 6;
 	private static final short STATE_DATA			= 7;
 	private static final short STATE_AFTER_COMMAND	= 8;
+	private static final short STATE_CR				= 9;
 	
 	private static final byte CHAR_SE		= -16;
 	private static final byte CHAR_SB		= -6;
@@ -68,6 +69,11 @@ public class TelnetInputStream extends InputStream
 	private static final int OPT_NAWS		= 31;
 	private static final int OPT_LINEMODE	= 34;
 	private static final int OPT_ENVIRON	= 39;
+	
+	// Other characters
+	//
+	private static final int LF				= 10;
+	private static final int CR				= 13;
 
 	
 	private short m_state = STATE_NORMAL;
@@ -240,20 +246,28 @@ public class TelnetInputStream extends InputStream
 	protected boolean stateMachine(int b)
 	throws IOException
 	{
-		//System.out.println("Char: "+ b);
+		System.out.println("Char: "+ b);
 		switch(m_state)
 		{
+			case STATE_CR:
+			    if(b == LF)
+			        return false; // Strip latter part of CRLF
+			    m_state = STATE_NORMAL;
+			    // FALL THRU
 			case STATE_NORMAL:
-				if(b == CHAR_IAC)
-				{
-					m_state = STATE_IAC;
-					break;
-				}
-				// Strip EOR
-				//
-				if(b == 0)
-					break;	
-				return true;								
+			    switch(b)
+			    {
+			    case 0:
+			        return false;
+			    case CHAR_IAC:
+			        m_state = STATE_IAC;
+			        return false;
+			    case CR:
+			        m_state = STATE_CR;
+			        return true;
+			    default:
+			        return true;
+			    }
 			case STATE_IAC:
 				switch(b)
 				{

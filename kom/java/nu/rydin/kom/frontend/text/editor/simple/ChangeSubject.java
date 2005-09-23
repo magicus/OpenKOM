@@ -21,9 +21,19 @@ import nu.rydin.kom.frontend.text.parser.RawParameter;
  */
 public class ChangeSubject extends AbstractCommand
 {
+    private static class DefaultStrategy implements nu.rydin.kom.frontend.text.parser.DefaultStrategy
+    {
+        public String getDefault(Context ctx)
+        {
+            return ((EditorContext) ctx).getSubject();
+        }
+    }
+    
+    private static DefaultStrategy s_default = new DefaultStrategy();
+    
     public ChangeSubject(Context context, String fullName, long permissions)
     {
-        super(fullName, new CommandLineParameter[] { new RawParameter("simple.editor.subject", true) }, permissions);
+        super(fullName, new CommandLineParameter[] { new RawParameter("simple.editor.subject", true, s_default) }, permissions);
     }
 
     public void execute(Context context, Object[] parameters)

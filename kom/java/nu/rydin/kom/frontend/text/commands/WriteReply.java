@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
@@ -105,31 +106,23 @@ public class WriteReply extends AbstractCommand
         }
         else
         {
-            // It's an ordinary reply for which we need to figure out what conference
-            // it should be stored in. This is very easy:
-            // (1) orig. conf = A, A's reply-conf = none, user is in A --> store in A
-            // (2) orig. conf = A, A's reply-conf = B, user is in A --> store in B
-            // (3) orig. conf = A, A's reply-conf = none, user is in C --> store in C
-            // (4) orig. conf = A, A's reply-conf = B, user is in C --> store in C
-            // (5) orig. conf = A, A's reply-conf = none, user is in C, C's reply conf is D --> store in D            
             ConferenceInfo recipient;
-            if (session.getCurrentConferenceId() == originalConference.getId())
+            if((context.getCachedUserInfo().getFlags1() & UserFlags.REPLY_IN_CURRENT_CONF) == 0
+                 || session.getCurrentConferenceId() == originalConference.getId())
             {
+                // In same conference or user always want replies in same conference
+                //
                 if (originalConference.getReplyConf() == -1)
-                {
-                    recipient = originalConference; //(1)
-                }
+                    recipient = originalConference; 
                 else
-                {
-                    recipient = session.getConference(originalConference.getReplyConf()); //(2)
-                }
-            }
+                    recipient = session.getConference(originalConference.getReplyConf()); 
+           }
             else
             {
-                recipient = session.getCurrentConference(); //(3,4)
+                recipient = session.getCurrentConference(); 
                 if(recipient.getReplyConf() != -1)
-                    recipient = session.getConference(recipient.getReplyConf()); // 5
-            }
+                    recipient = session.getConference(recipient.getReplyConf());
+            } 
             
             // Phew. NOW we can check if we actually have permission to reply here.
             //

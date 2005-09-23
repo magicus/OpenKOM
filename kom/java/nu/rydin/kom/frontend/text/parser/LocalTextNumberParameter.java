@@ -19,13 +19,25 @@ public class LocalTextNumberParameter extends CommandLineParameter
     public LocalTextNumberParameter(String missingObjectQuestionKey,
             boolean isRequired)
     {
-        super(missingObjectQuestionKey, isRequired);
+        this(missingObjectQuestionKey, isRequired, null);
     }
 
     public LocalTextNumberParameter(boolean isRequired)
     {
-        super("parser.parameter.localtextnumber.ask", isRequired);
+        this(isRequired, null);
     }
+    
+    public LocalTextNumberParameter(String missingObjectQuestionKey,
+            boolean isRequired, DefaultStrategy def)
+    {
+        super(missingObjectQuestionKey, isRequired, def);
+    }
+
+    public LocalTextNumberParameter(boolean isRequired, DefaultStrategy def)
+    {
+        super("parser.parameter.localtextnumber.ask", isRequired, def);
+    }
+
 
     protected String getUserDescriptionKey()
     {

@@ -25,9 +25,9 @@ import nu.rydin.kom.frontend.text.Shell;
 import nu.rydin.kom.frontend.text.constants.Keystrokes;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.parser.Parser;
+import nu.rydin.kom.frontend.text.terminal.TerminalController;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.UnstoredMessage;
-import nu.rydin.kom.text.terminal.TerminalController;
 import nu.rydin.kom.utils.Logger;
 import nu.rydin.kom.utils.PrintUtils;
 
