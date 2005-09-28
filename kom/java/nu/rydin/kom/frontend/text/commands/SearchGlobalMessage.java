@@ -6,6 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -29,5 +30,11 @@ public class SearchGlobalMessage extends SearchGlobalCommand
         String searchterm = ((String) parameterArray[0]).trim();
         return context.getSession().searchMessagesGlobally(searchterm,
                 offset, CHUNK_SIZE);
+    }
+
+    long count(Context context, Object[] parameterArray) throws KOMException
+    {
+        String searchterm = ((String) parameterArray[0]).trim();
+        return context.getSession().countSearchMessagesGlobally(searchterm);
     }
 }

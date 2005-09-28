@@ -6,6 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -33,5 +34,14 @@ public class SearchLocalMessage extends SearchLocalCommand
                         context.getSession().getCurrentConferenceId(),
                         searchterm, offset, CHUNK_SIZE);
         return lmsr;
+    }
+
+    long count(Context context, Object[] parameterArray) throws KOMException
+    {
+        String searchterm = ((String) parameterArray[0]).trim();
+        return context.getSession()
+                .countSearchMessagesLocally(
+                        context.getSession().getCurrentConferenceId(),
+                        searchterm);
     }
 }

@@ -10,6 +10,7 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.KOMWriter;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
@@ -32,6 +33,19 @@ public abstract class SearchCommand extends AbstractCommand
 	throws KOMException
 	{
 		KOMWriter out = context.getOut();
+		
+		// Get approximate count
+		//
+		long n = this.count(context, parameterArray);
+		if(n == 0)
+		{
+		    printNoSearchResultsMessage(context);
+		    return;
+		}
+		else
+		{
+		    printCount(context, n);
+		}
 
 		boolean hasPrintedHeader = false;
 		
@@ -71,7 +85,21 @@ public abstract class SearchCommand extends AbstractCommand
     abstract MessageSearchResult[] innerSearch(Context context, Object[] parameterArray, int offset)
     throws UnexpectedException;
     
+    abstract long count(Context context, Object[] parameterArray)
+    throws KOMException;
+    
     abstract void innerPrintSearchResultRow(Context context, KOMWriter out, MessageSearchResult msr);
     
     abstract void printSearchResultHeader(Context context);
+    
+    protected void printCount(Context context, long count)
+    {
+        KOMWriter out = context.getOut();
+        MessageFormatter formatter = context.getMessageFormatter();
+        DisplayController dc = context.getDisplayController();
+        dc.normal();
+        out.println(formatter.format("search.count", new Object[] { new Long(count) }));
+        out.println();
+    }
+
 }

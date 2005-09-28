@@ -6,6 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -30,5 +31,11 @@ public class ListGlobalMessage extends SearchGlobalCommand
         NameAssociation user = (NameAssociation) parameterArray[0];
         return context.getSession().listMessagesGloballyByAuthor(
                 user.getId(), offset, CHUNK_SIZE);
+    }
+
+    long count(Context context, Object[] parameterArray) throws KOMException
+    {
+        NameAssociation user = (NameAssociation) parameterArray[0];
+        return context.getSession().countMessagesGloballyByAuthor(user.getId());
     }
 }

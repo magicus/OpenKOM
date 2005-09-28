@@ -59,6 +59,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
     protected void printHeader()
     {
         TerminalController tc = this.getTerminalController();
+        int w = this.getTerminalSettings().getWidth();
         DisplayController dc = this.getDisplayController();
         PrintWriter out = this.getOut();
         LineEditor in = this.getIn();
@@ -68,15 +69,20 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
         dc.messageHeader();
 
         if (replyHeader != null)
-            out.println(replyHeader);
-        out.println(recipientHeader);
+        {
+            PrintUtils.printLeftJustified(out, replyHeader, w);
+            out.println();
+        }
+        PrintUtils.printLeftJustified(out, recipientHeader, w);
+        out.println();
         String subjLine = formatter.format("simple.editor.subject");
         out.print(subjLine);
         String subject = this.getSubject();
         if (subject == null)
             subject = "";
         dc.messageBody();
-        out.println(subject);
+        PrintUtils.printLeftJustified(out, subject, w - subjLine.length());
+        out.println();
         dc.messageHeader();
         PrintUtils
                 .printRepeated(out, '-', subjLine.length() + subject.length());

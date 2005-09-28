@@ -54,13 +54,13 @@ public abstract class SearchLocalCommand extends SearchCommand
         dc.normal();
         out.flush();
     }
-
+    
     protected void printSearchResultHeader(Context context)
     {
         KOMWriter out = context.getOut();
+        MessageFormatter formatter = context.getMessageFormatter();
         DisplayController dc = context.getDisplayController();
         dc.normal();
-        MessageFormatter formatter = context.getMessageFormatter();
         HeaderPrinter hp = new HeaderPrinter();
         hp.addHeader(formatter.format("search.heading.text"),
                 LOCALID_COL_WIDTH, true);

@@ -30,7 +30,6 @@ public class Logout extends AbstractCommand
 		// TODO: use argument string as a logout message 
 		//       "log ska sova" broadcasts "Kalle Kula har loggat ut (ska sova)"
 
-        context.getSession().updateLastlogin();
         ((ClientSession) context).logout();
     }
     

@@ -555,10 +555,23 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 				    // No login script. Not much to do
 				    //
 				}
-				if(profileScript != null)
-				    this.executeScript(profileScript);
-				if(loginScript != null)
-				    this.executeScript(loginScript);
+				try
+				{
+					if(profileScript != null)
+					    this.executeScript(profileScript);
+					if(loginScript != null)
+					    this.executeScript(loginScript);
+				}
+				catch(OutputInterruptedException e)
+				{
+				    m_out.println(e.formatMessage(this));
+				    m_out.println();
+				}				
+				catch(OperationInterruptedException e)
+				{
+				    m_out.println(e.formatMessage(this));
+				    m_out.println();
+				}
 			}
 			catch(KOMException e)
 			{

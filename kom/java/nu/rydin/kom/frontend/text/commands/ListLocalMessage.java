@@ -6,6 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
@@ -46,5 +47,23 @@ public class ListLocalMessage extends SearchLocalCommand
         }
 
         return lmsr;
+    }
+
+    long count(Context context, Object[] parameterArray) throws KOMException
+    {
+        if (parameterArray[0] == null)
+        {
+            // No parameter given, default to listing ALL messages in current conference.
+            return context.getSession().countAllMessagesLocally(
+                    context.getSession().getCurrentConferenceId());
+        } else
+        {
+            NameAssociation user = (NameAssociation) parameterArray[0];
+            // Author given, list all messages by that author in current conference
+            return context.getSession().countMessagesLocallyByAuthor(
+                    context.getSession().getCurrentConferenceId(),
+                    user.getId());
+        }
+
     }
 }

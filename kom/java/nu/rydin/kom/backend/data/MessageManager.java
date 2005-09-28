@@ -68,15 +68,21 @@ public class MessageManager
 	private final PreparedStatement m_findLastOccurrenceInConferenceWithAttrStmt;
 	private final PreparedStatement m_getLatestMagicMessageStmt;
 	private final PreparedStatement m_updateConferenceLasttext;
-	private final PreparedStatement m_searchMessagesLocally;
-    private final PreparedStatement m_grepMessagesLocally;
 	private final PreparedStatement m_listAllMessagesLocally;
     private final PreparedStatement m_listMessagesLocallyByAuthor;
     private final PreparedStatement m_listMessagesGloballyByAuthor;
     private final PreparedStatement m_searchMessagesGlobally;
+	private final PreparedStatement m_searchMessagesLocally;
+    private final PreparedStatement m_grepMessagesLocally;
+    private final PreparedStatement m_countMessagesLocallyByAuthor;
+    private final PreparedStatement m_countMessagesGloballyByAuthor;
+    private final PreparedStatement m_countSearchMessagesGlobally;
+	private final PreparedStatement m_countSearchMessagesLocally;
+    private final PreparedStatement m_countGrepMessagesLocally;    
     private final PreparedStatement m_countStmt;
     private final PreparedStatement m_setThreadIdStmt;
     private final PreparedStatement m_selectByThreadStmt;
+    private final PreparedStatement m_countAllMessagesLocally;
 	
 	private final Connection m_conn; 
 	
@@ -242,6 +248,27 @@ public class MessageManager
 		        "UPDATE messages SET thread = ? WHERE id = ?");
 		m_selectByThreadStmt = m_conn.prepareStatement(
 		        "SELECT id FROM messages WHERE thread = ?");
+	    m_countMessagesLocallyByAuthor = m_conn.prepareStatement(
+	    		"SELECT COUNT(*) FROM messages m, messageoccurrences mo WHERE " +
+	    		"mo.message = m.id AND mo.message = m.id AND mo.conference = ? AND m.author = ?"); 
+	    m_countMessagesGloballyByAuthor = m_conn.prepareStatement(
+	    		"SELECT COUNT(*) FROM messages m, messageoccurrences mo, memberships me WHERE " +
+	    		"mo.message = m.id AND mo.message = m.id AND m.author = ? " +
+	    		"AND me.user = ? AND me.conference = mo.conference"); 
+	    m_countSearchMessagesGlobally = m_conn.prepareStatement(
+	            "SELECT COUNT(*) FROM messagesearch m, messageoccurrences mo, memberships me WHERE " +
+	    		"mo.message = m.id AND mo.message = m.id " +
+	    		"AND me.user = ? AND me.conference = mo.conference AND MATCH(m.subject, m.body) AGAINST (? IN BOOLEAN MODE)"); 
+	    m_countSearchMessagesLocally = m_conn.prepareStatement(
+	            "SELECT COUNT(*) FROM messagesearch m, messageoccurrences mo WHERE " +
+				"mo.message = m.id AND mo.message = m.id AND mo.conference = ? " +
+				"AND MATCH(m.subject, m.body) AGAINST (? IN BOOLEAN MODE)"); 
+	    m_countGrepMessagesLocally = m_conn.prepareStatement(
+		        "SELECT COUNT(*) FROM messagesearch m, messageoccurrences mo WHERE " +
+				"mo.message = m.id AND mo.message = m.id AND mo.conference = ? " +
+				"AND (m.subject LIKE ? OR m.body LIKE ?)"); 
+	    m_countAllMessagesLocally = m_conn.prepareStatement(
+	            "SELECT COUNT(*) FROM messageoccurrences WHERE conference = ?");
 	}
 	
 	public void close()
@@ -301,6 +328,18 @@ public class MessageManager
 		    m_setThreadIdStmt.close();
 		if(m_selectByThreadStmt != null)
 		    m_selectByThreadStmt.close();
+		if(m_countMessagesLocallyByAuthor != null)
+		    m_countMessagesLocallyByAuthor.close();
+		if(m_countMessagesGloballyByAuthor != null)
+		    m_countMessagesGloballyByAuthor.close();
+		if(m_countSearchMessagesGlobally != null)
+		    m_countSearchMessagesGlobally.close();
+		if(m_countSearchMessagesLocally != null)
+		    m_countSearchMessagesLocally.close();
+		if(m_countGrepMessagesLocally != null)
+		    m_countGrepMessagesLocally.close();
+		if(m_countAllMessagesLocally != null)
+		    m_countAllMessagesLocally.close();
 	}
 	
 	public void finalize()
@@ -1167,6 +1206,77 @@ public class MessageManager
         this.m_searchMessagesLocally.setLong(4, offset);
         
         return innerLocalSearch(this.m_searchMessagesLocally);
+    }
+    
+    public long countSearchMessagesLocally(long conference, String searchterm)
+    throws SQLException
+    {
+        m_countSearchMessagesLocally.clearParameters();
+        this.m_countSearchMessagesLocally.setLong(1, conference);
+        this.m_countSearchMessagesLocally.setString(2, searchterm);
+        return this.innerCount(m_countSearchMessagesLocally);
+    }
+    
+    public long countGrepMessagesLocally(long conference, String searchterm)
+    throws SQLException
+    {
+        m_countGrepMessagesLocally.clearParameters();
+        this.m_countGrepMessagesLocally.setLong(1, conference);
+        this.m_countGrepMessagesLocally.setString(2, "%" + searchterm + "%");
+        this.m_countGrepMessagesLocally.setString(3, "%" + searchterm + "%");
+        return this.innerCount(m_countGrepMessagesLocally);
+    }
+    
+    public long countAllMessagesLocally(long conference)
+    throws SQLException
+    {
+	    m_countAllMessagesLocally.clearParameters();
+	    this.m_countAllMessagesLocally.setLong(1, conference);
+	    return this.innerCount(m_countAllMessagesLocally);
+    }
+    
+	public long countMessagesLocallyByAuthor(long conference, long user) 
+	throws SQLException
+    {
+	    m_countMessagesLocallyByAuthor.clearParameters();
+	    this.m_countMessagesLocallyByAuthor.setLong(1, conference);
+	    this.m_countMessagesLocallyByAuthor.setLong(2, user);
+	    return this.innerCount(m_countMessagesLocallyByAuthor);
+    }
+	
+	public long countMessagesGloballyByAuthor(long user, long requester) 
+	throws SQLException
+    {
+	    m_countMessagesGloballyByAuthor.clearParameters();
+	    this.m_countMessagesGloballyByAuthor.setLong(1, user);
+	    this.m_countMessagesGloballyByAuthor.setLong(2, requester);
+	    return this.innerCount(m_countMessagesGloballyByAuthor);
+    }
+	
+	public long countSearchMessagesGlobally(String searchterm, long requester) throws SQLException
+	{
+        m_countSearchMessagesGlobally.clearParameters();
+        this.m_countSearchMessagesGlobally.setLong(1, requester);
+        this.m_countSearchMessagesGlobally.setString(2, searchterm);
+        return this.innerCount(m_countSearchMessagesGlobally);
+	}
+    
+    public long innerCount(PreparedStatement stmt)
+    throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            rs = stmt.executeQuery();
+            if(!rs.next())
+                return 0; // Hmmm...
+            return rs.getLong(1);
+        }
+        finally
+        {
+            if(rs != null)
+                rs.close();
+        }
     }
 
     public LocalMessageSearchResult[] grepMessagesLocally(long conference, String searchterm, int offset, int length)

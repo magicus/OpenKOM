@@ -1107,6 +1107,16 @@ public interface ServerSession
 	 */
 	public LocalMessageSearchResult[] listAllMessagesLocally(long conference, int start, int length)
 	throws UnexpectedException;
+	
+	/**
+	 * Counts the number of messages in a conference
+	 * 
+	 * @param conference The conference
+	 * @return The number of messages
+	 * @throws UnexpectedException
+	 */
+	public long countAllMessagesLocally(long conference)
+	throws UnexpectedException, AuthorizationException, ObjectNotFoundException;
 
 	/**
 	 * Lists the messages in the given conference written by the given user.
@@ -1121,6 +1131,16 @@ public interface ServerSession
 	throws UnexpectedException;
 	
 	/**
+	 * Returns the approximate number of messages in the given conference written by the given user.
+	 * @param conference The conference
+	 * @param user The user 
+	 * @throws UnexpectedException
+	 * @throws ObjectNotFoundException
+	 */
+	public long countMessagesLocallyByAuthor(long conference, long user)
+	throws UnexpectedException, AuthorizationException, ObjectNotFoundException;
+	
+	/**
 	 * List all messages written by a given user.
 	 * 
 	 * @param user
@@ -1133,17 +1153,34 @@ public interface ServerSession
 	throws UnexpectedException;
     
     /**
+     * Returns the approximate number of messages written by a cerain user. Counts only messages in 
+     * conferences the caller is a member of.
+     * 
+     * @param user The user
+     * @throws UnexpectedException
+     */
+    public long countMessagesGloballyByAuthor(long user)
+	throws UnexpectedException;
+    
+    /**
      * Returns an array of results from doing a global search on the given searchterm.
      * 
      * @param searchterm
      * @param offset
      * @param length
-     * @return
      * @throws UnexpectedException
      */
     public GlobalMessageSearchResult[] searchMessagesGlobally(String searchterm, int offset, int length)
-	throws UnexpectedException;    
+	throws UnexpectedException;
     
+    /**
+     * Returns the approximate number of messages matching a given search term
+     * @param searchterm The search term
+     * @throws UnexpectedException
+     */
+    public long countSearchMessagesGlobally(String searchterm)
+	throws UnexpectedException;
+
 	/**
 	 * Returns the last message head.
 	 * 
@@ -1320,6 +1357,18 @@ public interface ServerSession
     public LocalMessageSearchResult[] grepMessagesLocally(long conference, String searchterm, int offset, int length)
     throws UnexpectedException;
     
+    /**
+     * Count approximate number of hits with a grep-like search
+     * @param conference
+     * @param searchterm
+     * @return
+     * @throws UnexpectedException
+     * @throws ObjectNotFoundException
+     */
+    public long countGrepMessagesLocally(long conference, String searchterm)
+    throws UnexpectedException, AuthorizationException, ObjectNotFoundException;
+
+    
 	/**
 	 * Returns an array of results from doing a search in the given conference
 	 * with the given searchterm.
@@ -1332,6 +1381,18 @@ public interface ServerSession
 	 */
     public abstract LocalMessageSearchResult[] searchMessagesLocally(long conference, String searchterm, int offset, int length)
     throws UnexpectedException;
+    
+    /**
+     * Counts the approximate number of hits for a search term in the current conference.
+     * 
+     * @param conference The conference to searh
+     * @param searchterm The search term
+     * @return
+     * @throws UnexpectedException
+     * @throws ObjectNotFoundException
+     */
+    public abstract long countSearchMessagesLocally(long conference, String searchterm)
+    throws UnexpectedException, AuthorizationException, ObjectNotFoundException;
     
     /**
      * Lists the user log for all users, sorted by date (descending)

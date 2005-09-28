@@ -59,8 +59,8 @@ public class ListFiles extends AbstractCommand
         // Print header
         //
         dc.normal();
-        hp.addHeader(formatter.format("list.files.created"), 17, false);
-        hp.addHeader(formatter.format("list.files.updated"), 17, false);
+        hp.addHeader(formatter.format("list.files.created"), 18, false);
+        hp.addHeader(formatter.format("list.files.updated"), 18, false);
         hp.addHeader(formatter.format("list.files.permissions"), 12, false);
         hp.addSpace(1);
         hp.addHeader(formatter.format("list.files.name"), 10, false);
@@ -72,8 +72,8 @@ public class ListFiles extends AbstractCommand
         {
             dc.normal();
             FileStatus each = files[idx];
-            PrintUtils.printLeftJustified(out, context.smartFormatDate(each.getCreated()), 17);
-            PrintUtils.printLeftJustified(out, context.smartFormatDate(each.getUpdated()), 17);
+            PrintUtils.printLeftJustified(out, context.smartFormatDate(each.getCreated()), 18);
+            PrintUtils.printLeftJustified(out, context.smartFormatDate(each.getUpdated()), 18);
             StringBuffer permissions = new StringBuffer(50);
             if((each.getProtection() & FileProtection.ALLOW_READ) != 0) 
             	permissions.append(formatter.format("list.files.permission.read"));

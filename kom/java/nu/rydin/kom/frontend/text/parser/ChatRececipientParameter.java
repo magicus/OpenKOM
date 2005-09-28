@@ -67,7 +67,7 @@ public class ChatRececipientParameter extends NamedObjectParameter
             UserListItem[] users = session.listLoggedInUsers();
             for (int idx = 0; idx < users.length; ++idx) {
                 NameAssociation name = users[idx].getUser();
-                if (NameUtils.match(pattern, name.getName().getName(), true)) {
+                if (NameUtils.match(pattern, name.getName().getName(), false)) {
                     list.add(name);
                 }
             }
