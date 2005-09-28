@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="var" path="WASP_HOME/lib/wasp.jar"/>
+	<classpathentry kind="var" path="WASP_HOME/lib/security-ng.jar"/>
+	<classpathentry kind="var" path="WASP_HOME/lib/security2-ng.jar"/>
+	<classpathentry kind="var" path="WASP_HOME/lib/security_providers_client.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
