@@ -6,7 +6,9 @@
  */
 package nu.rydin.kom.boot;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.TimeZone;
 
@@ -35,6 +37,13 @@ public class Bootstrap
 	    //	  We always run in UTC.
 	    //
 	    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+	}
+	
+	private String configFile;
+	
+	public Bootstrap(String configFile)
+	{
+	    this.configFile = configFile;
 	}
 	
 	// private Map m_modules;
@@ -106,7 +115,10 @@ public class Bootstrap
 	 
 	 public static void main(String[] args)
 	 {
-	     Bootstrap me = new Bootstrap();
+	     // First and only arg is path module config file, or null
+	     //
+	     String config = args.length > 0 ? args[0] : null;
+	     Bootstrap me = new Bootstrap(config);
 	     try
 	     {
 	         me.run();
@@ -124,8 +136,17 @@ public class Bootstrap
 		    
         XMLReader xr = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
         xr.setContentHandler(mh);
-        xr.parse (new InputSource (ClassLoader.getSystemClassLoader().
-                getResourceAsStream("modules.xml")));
+        InputStream configInput = configFile == null
+        	? ClassLoader.getSystemClassLoader().getResourceAsStream("modules.xml")
+        	: new FileInputStream(configFile);
+        try
+        {
+            xr.parse(new InputSource(configInput));    
+        }
+        finally
+        {
+            configInput.close();
+        }
         return mh.getModuleDefinitions();		   
 	 }
 }

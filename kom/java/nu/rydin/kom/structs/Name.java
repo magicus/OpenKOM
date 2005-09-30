@@ -15,9 +15,9 @@ import nu.rydin.kom.constants.Visibilities;
  */
 public class Name implements Serializable
 {
-    public String m_name;
+    private String m_name;
     
-    public short m_visibility;
+    private short m_visibility;
     
     public Name(String name, short visibility)
     {

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<modules>
+	<module name="Backend" class="nu.rydin.kom.backend.ServerSessionFactoryImpl">
+		<!-- Name of the JDBC driver class. -->
+		<parameter name="server.jdbc.driver.class" value="com.mysql.jdbc.Driver"/>
+		<!-- JDBC connection string. Change this to reflect your database configuration. -->
+		<parameter name="server.jdbc.connect" value="jdbc:mysql://localhost/kom?user=kom&amp;password=kom"/>
+		<!-- parameter name="server.jdbc.connect" value="jdbc:mysql://mozart/sklommon?user=sklommon&amp;password=sklommon"/ -->
+		<!-- Alternate connection string with trusted login -->
+		<!-- <parameter name="server.jdbc.connect" value="server.jdbc.connect=jdbc:mysql://localhost/kom"/> -->
+		<!-- Number of data access objects to create initially -->
+		<parameter name="server.initial.data.access" value="5"/>
+		<!-- Authentication ticket lifetime, milliseconds -->
+		<parameter name="server.ticket.lifetime" value="20000"/>
+		<!-- Delay and number of retries when waiting for a session to shut down gracefully -->
+		<parameter name="server.session.shutdown.retries" value="10"/>
+		<parameter name="server.session.shutdown.delay" value="1000"/>
+		<!-- Event poll interval. Determines how often the client polls
+			 for events from the server, in milliseconds. Typically, this
+			 value merely determines a timeout in a blocking poll, thus, 
+			 specifying a large value here doesn't neccessarily mean that
+			 events will arrive at a slower rate. However, be aware that
+			 some communication protocols have builtin timeouts. You
+			 should specify a lower value than the protocol timeout. -->
+		<parameter name="event.poll.interval" value="5000"/>
+		<!-- A comma-separated list of supported character sets. -->
+		<parameter name="supported.character.sets" value="ISO-8859-1,Cp850,Cp437,UTF-8,US-ASCII,MacRoman"/>
+	</module>
+	<module name="TelnetServer" class="nu.rydin.kom.modules.TelnetServer">
+		<parameter name="port" value="23"/>
+		<parameter name="authentication" value="password"/>
+		<parameter name="selfRegister" value="false"/>
+	</module>
+	<module name="TelnetServerTicketLogin" class="nu.rydin.kom.modules.TelnetServer">
+		<parameter name="port" value="2300"/>
+		<parameter name="authentication" value="ticket"/>
+	</module>
+		<module name="AuthenticationServer" class="nu.rydin.kom.modules.AuthenticationServer">
+		<parameter name="port" value="2301"/>
+		<parameter name="ticketLifetime" value="20000"/>
+	</module>
+	<module name="SSHModule" class="nu.rydin.kom.modules.ssh.SSHServer">
+		<parameter name="serverhostkeyfile" value="server_host_key"/>
+		<parameter name="port" value="22"/>
+		<parameter name="maxauthretry" value="3"/>
+		<parameter name="maxconn" value="1000"/>
+		<parameter name="selfRegister" value="false"/>		
+	</module>
+	<module name="ServletEngine" class="nu.rydin.kom.servlet.ServletModule">
+		<parameter name="jetty.home" value="c:/java/jetty-5.1.4"/>
+	</module>	
+</modules>
