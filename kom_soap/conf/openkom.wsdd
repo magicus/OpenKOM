@@ -1,0 +1,44 @@
+<!-- 
+ * Created on Sep 30, 2005
+ *
+ * Distributed under the GPL license.
+ * See http://www.gnu.org for details
+ *
+ * Author: Pontus Rydin
+-->
+
+<deployment xmlns="http://xml.apache.org/axis/wsdd/"
+            xmlns:java="http://xml.apache.org/axis/wsdd/providers/java">
+ <service name="Authenticator" provider="java:RPC" style="WRAPPED">
+  <parameter name="className" value="nu.rydin.kom.soap.services.AuthenticatorService"/>
+  <parameter name="allowedMethods" value="*"/>
+  <beanMapping 
+  	qname="myNS:SecurityToken" 
+  	xmlns:myNS="urn:Authenticator" 
+  	languageSpecificType="java:nu.rydin.kom.soap.structs.SecurityToken"/>  
+ </service>
+  <service name="MessagePoster" provider="java:RPC" style="WRAPPED">
+  <parameter name="className" value="nu.rydin.kom.soap.services.MessagePosterService"/>
+  <parameter name="allowedMethods" value="*"/>
+  <beanMapping 
+  	qname="myNS:SecurityToken" 
+  	xmlns:myNS="urn:MessagePoster" 
+  	languageSpecificType="java:nu.rydin.kom.soap.structs.SecurityToken"/>    
+  <beanMapping 
+  	qname="myNS:Name" 
+  	xmlns:myNS="urn:MessagePoster" 
+  	languageSpecificType="java:nu.rydin.kom.soap.structs.Name"/>    
+  <beanMapping 
+  	qname="myNS:SecurityToken" 
+  	xmlns:myNS="urn:NameAssociation" 
+  	languageSpecificType="java:nu.rydin.kom.soap.structs.NameAssociation"/>    
+  <beanMapping 
+  	qname="myNS:MessageOccurrence" 
+  	xmlns:myNS="urn:MessagePoster" 
+  	languageSpecificType="java:nu.rydin.kom.soap.structs.MessageOccurrence"/>    
+  <beanMapping 
+  	qname="myNS:UnstoredMessage" 
+  	xmlns:myNS="urn:MessagePoster" 
+  	languageSpecificType="java:nu.rydin.kom.soap.structs.UnstoredMessage"/>    
+ </service>
+</deployment>
