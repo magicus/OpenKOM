@@ -106,7 +106,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private KOMWriter m_out;
 	private final InputStream m_rawIn;
 	private final OutputStream m_rawOut; 
-	private MessageFormatter m_formatter = new MessageFormatter(Locale.getDefault());
+	private MessageFormatter m_formatter = new MessageFormatter(Locale.getDefault(), "messages");
 	private ServerSession m_session;
 	private long m_userId;
 	private LinkedList m_displayMessageQueue = new LinkedList();
@@ -443,7 +443,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			    m_locale = p != -1 
 			    	? new Locale(locale.substring(0, p), locale.substring(p + 1))
 			    	: new Locale(locale);
-			    m_formatter = new MessageFormatter(m_locale);
+			    m_formatter = new MessageFormatter(m_locale, "messages");
 			}
 			else
 			    m_locale = Locale.getDefault();

@@ -25,9 +25,9 @@ public class MessageFormatter
 	
 	private TimeZone m_timeZone = TimeZone.getDefault();
 	
-	public MessageFormatter(Locale locale)
+	public MessageFormatter(Locale locale, String bundleName)
 	{
-	    m_resource 	= ResourceBundle.getBundle("messages", locale);
+	    m_resource 	= ResourceBundle.getBundle(bundleName, locale);
 	    m_locale 	= locale;
 	}
 	
