@@ -86,6 +86,7 @@ import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageLogItem;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.MessageSearchResult;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.NamedObject;
@@ -4320,4 +4321,31 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        throw new UnexpectedException(this.getLoggedInUserId(), e);
 	    }	    
     }
+
+	public MessageSearchResult[] listCommentsGloballyToAuthor(long user, int offset, int length) throws UnexpectedException {
+		try
+		{
+			return this.censorMessages(m_da.getMessageManager().listCommentsGloballyToAuthor(user, offset, length));
+		}
+		catch (SQLException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+		catch (ObjectNotFoundException e)
+		{
+			throw new UnexpectedException (this.getLoggedInUserId(), e);
+		}
+	}
+
+	public long countCommentsGloballyToAuthor(long user) throws UnexpectedException {
+        try
+        {
+            MessageManager mm = m_da.getMessageManager();
+            return mm.countCommentsGloballyToAuthor(user, this.getLoggedInUserId());
+        }
+	    catch(SQLException e)
+	    {
+	        throw new UnexpectedException(this.getLoggedInUserId(), e);
+	    }
+	}
 }

@@ -1630,4 +1630,26 @@ public interface ServerSession
      */
     public void disableSelfRegistration()
     throws AuthorizationException, UnexpectedException;
+
+    /**
+     * Searches and returns the messages that are comments to messages written by the given user.
+     * 
+     * @param user
+     * @param offset
+     * @param length
+     * @return
+     * @throws UnexpectedException
+     */
+	public abstract MessageSearchResult[] listCommentsGloballyToAuthor(long user, int offset, int length)
+	throws UnexpectedException;
+
+	/**
+	 * Counts the number of messages that are comments to messages written by the given user.
+	 * 
+	 * @param user
+	 * @return
+	 * @throws UnexpectedException
+	 */
+	public abstract long countCommentsGloballyToAuthor(long user)
+	throws UnexpectedException;
 }

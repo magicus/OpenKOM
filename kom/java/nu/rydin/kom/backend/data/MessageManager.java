@@ -83,6 +83,8 @@ public class MessageManager
     private final PreparedStatement m_setThreadIdStmt;
     private final PreparedStatement m_selectByThreadStmt;
     private final PreparedStatement m_countAllMessagesLocally;
+    private final PreparedStatement m_listCommentsGloballyToAuthor;
+    private final PreparedStatement m_countCommentsGloballyToAuthor;
 	
 	private final Connection m_conn; 
 	
@@ -269,8 +271,17 @@ public class MessageManager
 				"AND (m.subject LIKE ? OR m.body LIKE ?)"); 
 	    m_countAllMessagesLocally = m_conn.prepareStatement(
 	            "SELECT COUNT(*) FROM messageoccurrences WHERE conference = ?");
+	    m_listCommentsGloballyToAuthor = m_conn.prepareStatement(
+	    		"SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, m.author_name, m.subject, m.reply_to " +
+	    		"FROM messages m, messages r, messageoccurrences mo, names n " +
+	    		"WHERE m.reply_to = r.id AND m.id = mo.message AND n.id = mo.conference AND r.author = ? " +
+	    		"ORDER BY mo.action_ts DESC LIMIT ? OFFSET ?");
+	    m_countCommentsGloballyToAuthor = m_conn.prepareStatement(
+	    		"SELECT COUNT(*) FROM messages m, messages r, messageoccurrences mo, memberships me " +
+	    		"WHERE m.reply_to = r.id AND mo.message = m.id AND mo.message = m.id AND r.author = ? " +
+	    		"AND me.user = ? AND me.conference = mo.conference");
 	}
-	
+
 	public void close()
 	throws SQLException
 	{
@@ -1423,4 +1434,20 @@ public class MessageManager
                 rs.close();
         }
     }
+
+	public GlobalMessageSearchResult[] listCommentsGloballyToAuthor(long user, int offset, int length) throws SQLException {
+        this.m_listCommentsGloballyToAuthor.clearParameters();
+        this.m_listCommentsGloballyToAuthor.setLong(1, user);
+        this.m_listCommentsGloballyToAuthor.setInt(2, length);
+        this.m_listCommentsGloballyToAuthor.setInt(3, offset);
+        
+        return innerGlobalSearch(this.m_listCommentsGloballyToAuthor); 
+	}
+
+	public long countCommentsGloballyToAuthor(long user, long requester) throws SQLException {
+	    m_countCommentsGloballyToAuthor.clearParameters();
+	    this.m_countCommentsGloballyToAuthor.setLong(1, user);
+	    this.m_countCommentsGloballyToAuthor.setLong(2, requester);
+	    return this.innerCount(m_countCommentsGloballyToAuthor);
+	}
 }

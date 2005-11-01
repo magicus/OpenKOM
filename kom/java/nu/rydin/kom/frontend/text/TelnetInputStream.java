@@ -246,7 +246,7 @@ public class TelnetInputStream extends InputStream
 	protected boolean stateMachine(int b)
 	throws IOException
 	{
-		System.out.println("Char: "+ b);
+		//System.out.println("Char: "+ b);
 		switch(m_state)
 		{
 			case STATE_CR:

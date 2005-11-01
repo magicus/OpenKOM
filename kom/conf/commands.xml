@@ -71,6 +71,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.SearchLocalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SearchGlobalMessage"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.GrepLocalMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ListComments"/>
 	</category>
 	<category id="conf.admin" i18n="command.category.conf.admin" order="90">
 		<command class="nu.rydin.kom.frontend.text.commands.CreateConference" permissions="0009"/>		
