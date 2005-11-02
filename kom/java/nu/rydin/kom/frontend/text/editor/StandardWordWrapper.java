@@ -14,7 +14,6 @@ import java.util.StringTokenizer;
 public class StandardWordWrapper implements WordWrapper
 {
 	private final StringTokenizer m_paraTokenizer;
-	private StringTokenizer m_wordTokenizer;
 	private final int m_width;
 	private int m_offset;
 	private String m_paragraph;

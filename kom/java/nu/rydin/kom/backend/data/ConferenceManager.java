@@ -225,7 +225,7 @@ public class ConferenceManager // extends NameManager
 			MessageRange r = this.getMessageRange(id);
 			ConferenceInfo answer = new ConferenceInfo(
 				id,							// Id
-				rs.getString(1),			// Name
+				new Name(rs.getString(1), rs.getShort(5), NameManager.CONFERENCE_KIND),	// Name
 				rs.getLong(2),				// Admin
 				rs.getInt(3),				// Permissions
 				rs.getInt(4),				// Nonmember permissions
@@ -327,7 +327,7 @@ public class ConferenceManager // extends NameManager
 	            list.add(new ConferenceListItem(
                     id,new Name(
                     rs.getString(2),
-                    rs.getShort(3)),
+                    rs.getShort(3), NameManager.CONFERENCE_KIND),
                     rs.getTimestamp(4),
                     rs.getTimestamp(5),
                     rs.getObject(6) != null,
@@ -378,7 +378,7 @@ public class ConferenceManager // extends NameManager
 	            list.add(new ConferenceListItem(
                     rs.getLong(1),new Name(
                     rs.getString(2),
-                    rs.getShort(3)),
+                    rs.getShort(3), NameManager.CONFERENCE_KIND),
                     rs.getTimestamp(4),
                     rs.getTimestamp(5),
                     rs.getObject(6) != null,

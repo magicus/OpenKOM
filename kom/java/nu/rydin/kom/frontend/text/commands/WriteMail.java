@@ -8,12 +8,13 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.UserParameter;
+import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UnstoredMessage;
@@ -25,7 +26,7 @@ public class WriteMail extends AbstractCommand
 {
     public WriteMail(Context context, String fullName, long permissions)
     {
-        super(fullName, new CommandLineParameter[] { new UserParameter(true) }, permissions);
+        super(fullName, new CommandLineParameter[] { new NamedObjectParameter(true) }, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)
@@ -44,6 +45,6 @@ public class WriteMail extends AbstractCommand
                 editor.getRecipient().getId(), msg);
 
         context.getOut().println(
-                context.getMessageFormatter().format("write.mail.saved", context.getSession().getUser(editor.getRecipient().getId()).getName()));
+                context.getMessageFormatter().format("write.mail.saved", context.formatObjectName(context.getSession().getName(recipient.getId()), recipient.getId())));
     }
 }

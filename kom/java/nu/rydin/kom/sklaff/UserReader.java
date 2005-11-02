@@ -12,8 +12,11 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.constants.UserPermissions;
+import nu.rydin.kom.constants.Visibilities;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.UserInfo;
 
 /**
@@ -62,7 +65,7 @@ public class UserReader
                 address2 += " " + city; 
             return new UserInfo(
                     -1, 
-                    name, 
+                    new Name(name, Visibilities.PUBLIC, NameManager.USER_KIND), 
                     userId,
                     (String) map.get("address"),
                     address2,

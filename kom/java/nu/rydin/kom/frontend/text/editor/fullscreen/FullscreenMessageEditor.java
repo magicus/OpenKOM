@@ -27,6 +27,7 @@ import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.terminal.TerminalController;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.Logger;
 import nu.rydin.kom.utils.PrintUtils;
@@ -53,7 +54,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
 
     public UnstoredMessage edit() throws KOMException, InterruptedException
     {
-        return this.edit(-1, -1, -1, "", -1, "", "");
+        return this.edit(-1, -1, -1, Name.emptyName(), -1, Name.emptyName(), "");
     }
 
     protected void printHeader()
@@ -98,8 +99,8 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
     }
 
     public UnstoredMessage edit(long replyTo, long replyToLocal,
-            long recipientId, String recipientName, long replyToAuthor,
-            String replyToAuthorName, String oldSubject) throws KOMException,
+            long recipientId, Name recipientName, long replyToAuthor,
+            Name replyToAuthorName, String oldSubject) throws KOMException,
             InterruptedException
     {
         TerminalController tc = this.getTerminalController();

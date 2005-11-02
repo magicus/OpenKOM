@@ -18,7 +18,6 @@ public class Emulator
 {
 	private String emulationName;
 	protected CompoundHashMap associations;
-	private TermInfoParser myParser;
 	
 	public static final String ACS_CHARS = "acsc";
 	public static final String BACK_TAB = "cbt";

@@ -20,11 +20,7 @@ import nu.rydin.kom.utils.Logger;
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class TelnetInputStream extends InputStream
-{
-	private static final short OFF 		= 0;
-	private static final short ON 		= 1;
-	private static final short HIDDEN 	= 2;
-	
+{	
 	private static final short STATE_NORMAL 		= 0;
 	private static final short STATE_IAC 			= 1;
 	private static final short STATE_WILL 			= 2;

@@ -6,12 +6,14 @@
  */
 package nu.rydin.kom.events;
 
+import nu.rydin.kom.structs.Name;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class BroadcastMessageEvent extends Event
 {
-	private final String m_userName;
+	private final Name m_userName;
 	
 	private final String m_message;
 	
@@ -19,7 +21,7 @@ public class BroadcastMessageEvent extends Event
 	
 	private final short m_kind;
 	
-	public BroadcastMessageEvent(long user, String userName, String message, long logId, short kind)
+	public BroadcastMessageEvent(long user, Name userName, String message, long logId, short kind)
 	{
 		super(user);
 		m_userName 	= userName;
@@ -33,7 +35,7 @@ public class BroadcastMessageEvent extends Event
 		target.onEvent(this);
 	}
 	
-	public String getUserName()
+	public Name getUserName()
 	{
 		return m_userName;
 	}

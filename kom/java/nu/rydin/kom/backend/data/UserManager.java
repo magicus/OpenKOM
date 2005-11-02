@@ -77,7 +77,7 @@ public class UserManager
 		    "UPDATE users SET address1 = ?, address2 = ?, address3 = ?, address4 = ?, " +
 		    "phoneno1 = ?, phoneno2 = ?, email1 = ?, email2 = ?, url = ? WHERE id = ?");
 		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, u.address1, u.address2, u.address3, u.address4, " +
-			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.timezone, u.created, u.lastlogin " +
+			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.timezone, u.created, u.lastlogin, n.visibility " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_updateCharsetStmt = conn.prepareStatement(
 			"UPDATE users SET charset = ? WHERE id = ?");
@@ -366,8 +366,8 @@ public class UserManager
 				throw new ObjectNotFoundException("id=" + id);
 			UserInfo answer = new UserInfo(
 				id,					// id
-				rs.getString(1),	// userid
-				rs.getString(2),	// name
+				new Name(rs.getString(1), rs.getShort(22), NameManager.USER_KIND),	// name
+				rs.getString(2),	// userid
 				rs.getString(3),	// address1
 				rs.getString(4),	// address2
 				rs.getString(5),	// address3

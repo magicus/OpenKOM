@@ -1242,7 +1242,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	throws UnexpectedException, AuthorizationException
 	{
 	    this.addMessageAttribute(message, MessageAttributes.NOCOMMENT, 
-	            MessageAttribute.constructUsernamePayload(this.getLoggedInUser().getId(), this.getLoggedInUser().getName()), true);
+	            MessageAttribute.constructUsernamePayload(this.getLoggedInUser().getId(), this.getLoggedInUser().getName().toString()), true);
 	}
 	
 	public void createUser(String userid, String password, String fullname, String address1,
@@ -1622,7 +1622,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}	
 	
-	public String signup(long conferenceId)
+	public Name signup(long conferenceId)
 	throws ObjectNotFoundException, AlreadyMemberException, UnexpectedException, AuthorizationException
 	{
 		try
@@ -1639,7 +1639,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			
 			// Return full name of conference
 			//
-			return this.getCensoredName(conferenceId).getName();
+			return this.getCensoredName(conferenceId);
 		}
 		catch (AlreadyMemberException e)
 		{
@@ -1651,7 +1651,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
-	public String signoff (long conferenceId)
+	public Name signoff (long conferenceId)
 	throws ObjectNotFoundException, UnexpectedException, NotMemberException
 	{
 		long userId = this.getLoggedInUserId();
@@ -1663,7 +1663,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			}
 			m_da.getMembershipManager().signoff(userId, conferenceId);
 			this.reloadMemberships();
-			return this.getCensoredName(conferenceId).getName();
+			return this.getCensoredName(conferenceId);
 		}
 		catch(SQLException e)
 		{
@@ -1772,7 +1772,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 					// Probably deleted while we were listing
 					//
 					answer[idx] = new NameAssociation(conf, 
-					        new Name("???", Visibilities.PUBLIC));
+					        new Name("???", Visibilities.PUBLIC, NameManager.CONFERENCE_KIND));
 				}
 			}
 			return this.censorNames(answer);
@@ -1994,7 +1994,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				// User deleted! Strange, but we allow it. User will be displayed as "???"
 				//
 			}
-			Name conferenceName = new Name("???", Visibilities.PUBLIC);
+			Name conferenceName = new Name("???", Visibilities.PUBLIC, NameManager.CONFERENCE_KIND);
 			try
 			{
 				conferenceName = this.getCensoredName(confId);
@@ -2009,7 +2009,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				// Conference deleted. Display as "???"
 			}
 			answer[idx] = new UserListItem(new NameAssociation(user, new Name(userName, 
-			        Visibilities.PUBLIC)), (short) 0, new NameAssociation(confId, conferenceName), inMailbox, session.getLoginTime(),
+			        Visibilities.PUBLIC, NameManager.USER_KIND)), (short) 0, new NameAssociation(confId, conferenceName), inMailbox, session.getLoginTime(),
 			        ((ServerSessionImpl) session).getLastHeartbeat()); 
 		}
 		return answer;
@@ -2099,7 +2099,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    //
 	        UserManager um = m_da.getUserManager();
 		    MessageLogManager mlm = m_da.getMessageLogManager();
-		    long logId = mlm.storeMessage(this.getLoggedInUserId(), this.getLoggedInUser().getName(), message);
+		    long logId = mlm.storeMessage(this.getLoggedInUserId(), this.getLoggedInUser().getName().getName(), message);
 		    
 		    // Create a link for the logged in user. Used for retrieving messages sent.
 		    //
@@ -2138,8 +2138,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 						}
 						else
 						{
-							refused.add(new NameAssociation(each, 
-							        new Name(ui.getName(), Visibilities.PUBLIC)));
+							refused.add(new NameAssociation(each, ui.getName()));
 						}
 					}
 					else // conference
@@ -2159,8 +2158,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 							    if(sess.allowsChat(this.getLoggedInUserId()))
 							        s.add(new Long(uid));
 							    else
-							        refused.add(new NameAssociation(uid, 
-							                new Name(ui.getName(), Visibilities.PUBLIC)));
+							        refused.add(new NameAssociation(uid, ui.getName()));
 							}
 						}
 					}
@@ -2274,7 +2272,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    //
 	        UserManager um = m_da.getUserManager();
 		    MessageLogManager mlm = m_da.getMessageLogManager();
-		    long logId = mlm.storeMessage(this.getLoggedInUserId(), this.getLoggedInUser().getName(), message);
+		    long logId = mlm.storeMessage(this.getLoggedInUserId(), this.getLoggedInUser().getName().getName(), message);
 		    	
 			if(message.substring(0,1).equals("!")) 
 			{
@@ -2309,8 +2307,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				    if(sess.allowsBroadcast(this.getLoggedInUserId()))
 				        mlm.storeMessagePointer(logId, userId, false, kind);
 				    else
-				        bounces.add(new NameAssociation(userId, 
-				                new Name(user.getName(), Visibilities.PUBLIC)));   
+				        bounces.add(new NameAssociation(userId, user.getName()));   
 			    }
 			    catch(ObjectNotFoundException e)
 			    {
@@ -3298,7 +3295,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			if((this.getLoggedInUser().getFlags1() & UserFlags.READ_CROSS_CONF_REPLIES) == 0)
 			{
 			    MessageManager mm = m_da.getMessageManager();
-			    ArrayList list = new ArrayList(replies.length);
 			    int p = 0;
 				for(int idx = 0; idx < replies.length; idx++)
 	            {
@@ -4033,7 +4029,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
     	    return this.isVisible(id)
     	    	? m_da.getNameManager().getNameById(id)
-    	    	: new Name("", Visibilities.PROTECTED);
+    	    	: new Name("", Visibilities.PROTECTED, NameManager.UNKNOWN_KIND);
     	    
     	}
     	catch (SQLException e)

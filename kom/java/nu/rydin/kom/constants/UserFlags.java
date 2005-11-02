@@ -46,6 +46,7 @@ public class UserFlags
 	public static long READ_CROSS_CONF_REPLIES				= 0x00100000;
 	public static long READ_REPLY_TREE						= 0x00200000;
 	public static long REPLY_IN_CURRENT_CONF				= 0x00400000;
+	public static long SHOW_SUFFIX							= 0x00800000;
 
 	/**
 	 * Default value for flagword 1
@@ -53,7 +54,7 @@ public class UserFlags
 	public static long DEFAULT_FLAGS1 = SHOW_ATTENDANCE_MESSAGES | ALLOW_BROADCAST_MESSAGES |
 		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT | BEEP_ON_CHAT
 		| PRIORITIZE_MAIL | BEEP_ON_NEW_MESSAGES | SHOW_NUM_UNREAD | READ_CROSS_CONF_REPLIES 
-		| READ_REPLY_TREE;
+		| READ_REPLY_TREE | SHOW_SUFFIX;
 	
 	/**
 	 * Default value for flagword 2

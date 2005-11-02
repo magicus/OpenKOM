@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
@@ -93,7 +94,7 @@ public class WriteReply extends AbstractCommand
                     originalConference.getId(),
                     originalConference.getName(),
                     originalMessage.getUser().getId(), 
-                    originalMessage.getUser().getName().getName(), 
+                    originalMessage.getUser().getName(), 
                     context.getSession().getMessageHeader(replyToId).getSubject()
                     );
             
@@ -139,7 +140,7 @@ public class WriteReply extends AbstractCommand
                     recipient.getId(),
                     recipient.getName(),
                     originalMessage.getUser().getId(), 
-                    originalMessage.getUser().getName().getName(), 
+                    originalMessage.getUser().getName(), 
                     context.getSession().getMessageHeader(replyToId).getSubject()
                     );
 

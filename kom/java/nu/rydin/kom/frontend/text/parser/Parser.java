@@ -614,9 +614,6 @@ public class Parser
         return m_categories;
     }
 
-    private static final Class[] s_commandCtorSignature = new Class[]
-    { Context.class, String.class };
-
     /**
      * 
      * @param filename

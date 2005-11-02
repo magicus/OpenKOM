@@ -26,7 +26,7 @@ import nu.rydin.kom.structs.UserListItem;
  */
 public class ChatRececipientParameter extends NamedObjectParameter
 {
-    public final static NameAssociation ALL_USERS = new NameAssociation(-1, "alla");
+    public final static NameAssociation ALL_USERS = new NameAssociation(-1, "alla", NameManager.UNKNOWN_KIND);
 
     public ChatRececipientParameter(String missingObjectQuestionKey,
             boolean isRequired)

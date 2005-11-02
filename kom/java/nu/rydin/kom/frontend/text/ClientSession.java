@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactory;
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.CommandSuggestions;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.SystemFiles;
@@ -84,6 +85,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.modules.Modules;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.FileStatus;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.SessionState;
 import nu.rydin.kom.structs.UserInfo;
@@ -121,7 +123,6 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private final boolean m_useTicket;
 	private SessionState m_state;
 	private String m_ticket;
-	private final boolean m_selfRegister;
 
 	private Parser m_parser;
     private boolean m_loggedIn;	
@@ -207,7 +208,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
 			String header = event.getKind() == MessageLogKinds.BROADCAST 
 			    ? m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() })
-			    : event.getUserName() + ' ';
+			    : event.getUserName().getName() + ' ';
 			getDisplayController().broadcastMessageHeader();
 			m_out.print(header);
 			if (event.getKind() == MessageLogKinds.BROADCAST)
@@ -292,11 +293,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		// Set up authentication method
 		//
 		m_useTicket = useTicket;
-		
-		// Do we allow self registration
-		//
-		m_selfRegister = selfRegister;
-				
+						
 		// Install commands and init parser
 		//
 		this.installCommands();
@@ -1107,40 +1104,36 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	{
 		return m_session;
 	}
-
-	public String formatConferenceName(long id, String name)
-	{
-		if (id == getLoggedInUserId())
-		{
-		    return getMessageFormatter().format("misc.mailboxtitle");
-		}
-		return formatObjectName(name, id);
-	}
-	
-    public String formatObjectName(nu.rydin.kom.structs.Name name, long id)
-    {
-        return this.formatObjectName(name.getName(), id);
-    }
-    
-    public String formatObjectName(String name, long id)
+	    
+    public String formatObjectName(Name name, long id)
     {
         try
         {
-	        StringBuffer sb = new StringBuffer(name.length() + 10);
-	        if(name.length() == 0)
+        	String nameStr = name.getKind() == NameManager.CONFERENCE_KIND 
+        	&& this.getLoggedInUserId() == id 
+        		? this.getMessageFormatter().format("misc.mailboxtitle")
+        		: name.getName();
+        		
+        	// Omit user suffixes if requested
+            //
+        	if(name.getKind() == NameManager.USER_KIND && (this.getCachedUserInfo().getFlags1() & UserFlags.SHOW_SUFFIX) ==0)
+        		nameStr = NameUtils.stripSuffix(nameStr);
+	        StringBuffer sb = new StringBuffer(nameStr.length() + 10);
+	        if(nameStr.length() == 0)
 	        {
-	            //Protected conference, only show hidden name.
-	            name = m_formatter.format("misc.protected.conference");
-	            sb.append(name);
+	            // Protected conference, just show hidden name.
+	        	//
+	        	nameStr = m_formatter.format("misc.protected.conference");
+	            sb.append(nameStr);
 	        }
 	        else
 	        {
-	            //Normal conference. Show name and maybe object id.
-	            sb.append(name);
+	            // Normal conference. Show name and maybe object id.
+	        	//
+	            sb.append(nameStr);
 		        if((this.getCachedUserInfo().getFlags1() & UserFlags.SHOW_OBJECT_IDS) != 0)
 		        {
-		            sb.append(' ');
-		            sb.append('<');
+		            sb.append(" <");
 		            sb.append(id);
 		            sb.append('>');
 		        }
@@ -1244,9 +1237,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	    this.getDisplayController().input();
 		ConferenceInfo conf = m_session.getCurrentConference();
 		long id = conf.getId();
-		String confName = id == m_session.getLoggedInUserId()
-			? m_formatter.format("misc.mailboxtitle")
-			: conf.getName();
+		String confName = this.formatObjectName(conf.getName(), id); 
 		
 		// Calculate number of messages and print greeting
 		//

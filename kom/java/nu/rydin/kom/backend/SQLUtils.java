@@ -46,7 +46,7 @@ public class SQLUtils
 	}
 
 
-	public static Name[] extractStrings(ResultSet rs, int nameIndex, int visibilityIndex, String pattern)
+	public static Name[] extractStrings(ResultSet rs, int nameIndex, int visibilityIndex, int kindIndex, String pattern)
 	throws SQLException
 	{
 		List l = new ArrayList();
@@ -54,7 +54,7 @@ public class SQLUtils
 		{
 		    String name = rs.getString(nameIndex);
 		    if(NameUtils.match(pattern, name, false))
-		        l.add(new Name(name, rs.getShort(visibilityIndex)));
+		        l.add(new Name(name, rs.getShort(visibilityIndex), rs.getShort(kindIndex)));
 		}
 		int top = l.size();
 		Name[] answer = new Name[top];
@@ -62,7 +62,7 @@ public class SQLUtils
 		return answer;
 	}
 	
-	public static NameAssociation[] extractNames(ResultSet rs, int idIndex, int nameIndex, int visibilityIndex, String pattern)
+	public static NameAssociation[] extractNames(ResultSet rs, int idIndex, int nameIndex, int visibilityIndex, int kindIndex, String pattern)
 	throws SQLException
 	{
 		List l = new ArrayList();
@@ -70,7 +70,7 @@ public class SQLUtils
 		{
 		    String name = rs.getString(nameIndex);
 		    if(NameUtils.match(pattern, name, false))
-		        l.add(new NameAssociation(rs.getLong(idIndex), new Name(name, rs.getShort(visibilityIndex))));
+		        l.add(new NameAssociation(rs.getLong(idIndex), new Name(name, rs.getShort(visibilityIndex), rs.getShort(kindIndex))));
 		}
 		int top = l.size();
 		NameAssociation[] answer = new NameAssociation[top];

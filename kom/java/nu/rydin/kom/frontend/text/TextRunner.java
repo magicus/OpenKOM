@@ -6,8 +6,6 @@
  */
 package nu.rydin.kom.frontend.text;
 
-import nu.rydin.kom.backend.CacheManager;
-
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
@@ -17,7 +15,6 @@ public class TextRunner
 	{
 		try
 		{
-			CacheManager cm = new CacheManager();
 			ClientSession server = new ClientSession(System.in, System.out, false, false);
 			server.run();
 		}

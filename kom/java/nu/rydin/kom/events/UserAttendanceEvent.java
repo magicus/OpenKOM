@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.events;
 
+import nu.rydin.kom.structs.Name;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
@@ -16,11 +18,11 @@ public class UserAttendanceEvent extends Event
 	public static final int FELL_ASLEEP		= 2;
 	public static final int AWOKE			= 3;
 	
-	private final String m_userName;
+	private final Name m_userName;
 	
 	private final int m_type;
 
-	public UserAttendanceEvent(long user, String userName, int type)
+	public UserAttendanceEvent(long user, Name userName, int type)
 	{
 		super(user);
 		m_userName 	= userName;
@@ -32,7 +34,7 @@ public class UserAttendanceEvent extends Event
 		target.onEvent(this);
 	}
 	
-	public String getUserName()
+	public Name getUserName()
 	{
 		return m_userName;
 	}

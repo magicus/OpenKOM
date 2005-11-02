@@ -124,7 +124,7 @@ public class BasicMessagePrinter implements MessagePrinter
 			        formatter.format("BasicMessagePrinter.reply.to.different.conference", 
 			            new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
 			            new Long(replyTo.getOccurrence().getGlobalId()),
-			            context.formatConferenceName(replyTo.getConference(), replyTo.getConferenceName().getName()),
+			            context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()),
 			            context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }),
 			            width, 0); 
 			                    
@@ -170,7 +170,7 @@ public class BasicMessagePrinter implements MessagePrinter
 			    }
 			    else
 			    {
-			        conferenceName = context.formatConferenceName(receivers[idx].getId(), receivers[idx].getName().getName()); 
+			        conferenceName = context.formatObjectName(receivers[idx].getName(), receivers[idx].getId()); 
 			    }
 				PrintUtils.printIndented(out, 
 				        formatter.format("BasicMessagePrinter.receiver", conferenceName), 

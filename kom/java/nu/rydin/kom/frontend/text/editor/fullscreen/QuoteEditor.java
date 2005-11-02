@@ -22,7 +22,6 @@ import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.constants.Keystrokes;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
-import nu.rydin.kom.i18n.MessageFormatter;
 
 /**
  * @author Pontus Rydin
@@ -40,15 +39,11 @@ public class QuoteEditor extends FullscreenEditor
         String body = session.readGlobalMessage(replyTo).getMessage().getBody();
         WordWrapper ww = context.getWordWrapper(body, 
                 QUOTE_WIDTH - 8); //8 = length of ">" + linenumber.
-        LineEditor in = context.getIn();
-        PrintWriter out = context.getOut();
-        MessageFormatter formatter = context.getMessageFormatter();
         Buffer buffer = this.getBuffer();
         
         // Let user pick lines to include
         //
         String line;
-        boolean goahead = false;
         while((line = ww.nextLine()) != null)
         {
             line = "> " + line;
@@ -59,11 +54,6 @@ public class QuoteEditor extends FullscreenEditor
     public void mainloop() throws InterruptedException,
             OperationInterruptedException, IOException
     {
-        MessageFormatter formatter = this.getMessageFormatter();
-        char yesChar = formatter.format("misc.y").toUpperCase().charAt(0);
-        char quitChar = formatter.format("misc.q").toUpperCase().charAt(0);
-        char goaheadChar = formatter.format("misc.goahead").toUpperCase().charAt(0);
-
         Buffer buffer = this.getBuffer();
         DisplayController dc = this.getDisplayController();
         dc.messageBody();

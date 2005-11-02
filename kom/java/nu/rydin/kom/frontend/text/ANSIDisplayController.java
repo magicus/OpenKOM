@@ -18,11 +18,6 @@ import nu.rydin.kom.frontend.text.ansi.ANSISequences;
 public class ANSIDisplayController implements DisplayController 
 {
     private static  Pattern PATTERN = Pattern.compile("(^[_*]|.*?\\s[_*])([^\\s^_^*]+)([_*]\\s.*|[_*]$)");
-    private static final String HILITE_CHARS 		= "_";
-    private static final short STATE_NORMAL 		= 0;
-    private static final short STATE_READY_FOR_ATTR	= 1;
-    private static final short STATE_AFTER_ATTR		= 2;
-    private static final short STATE_AFTER_HILITE	= 3;
     
     protected final PrintWriter m_writer;
     

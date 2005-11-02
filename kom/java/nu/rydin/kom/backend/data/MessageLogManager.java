@@ -152,7 +152,7 @@ public class MessageLogManager
 	            list.add(new NameAssociation(
 	                    rs.getLong(1),				// Id
 	                    new Name(rs.getString(2), 
-	                            rs.getShort(3))));	// Name
+	                            rs.getShort(3), NameManager.CONFERENCE_KIND)));	// Name
 	        }
 	        NameAssociation[] answer = new NameAssociation[list.size()];
 	        list.toArray(answer);

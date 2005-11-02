@@ -281,7 +281,7 @@ public class MessageManager
 	    		"WHERE m.reply_to = r.id AND mo.message = m.id AND mo.message = m.id AND r.author = ? " +
 	    		"AND me.user = ? AND me.conference = mo.conference");
 	}
-
+	
 	public void close()
 	throws SQLException
 	{
@@ -390,7 +390,7 @@ public class MessageManager
 				id,
 				rs.getTimestamp(1),		// created
 				rs.getLong(2), 			// author
-				new Name(rs.getString(3), Visibilities.PUBLIC),	// Author name
+				new Name(rs.getString(3), Visibilities.PUBLIC, NameManager.USER_KIND),	// Author name
 				rs.getObject(4) != null ? rs.getLong(4) : -1, 	// reply to
 				rs.getObject(5) != null ? rs.getLong(5) : -1, 	// thread
 				rs.getString(6),		// subject
@@ -429,7 +429,7 @@ public class MessageManager
 				id,
 				rs.getTimestamp(2),		// created
 				rs.getLong(3), 			// author
-				new Name(rs.getString(4), Visibilities.PUBLIC),	// author name				
+				new Name(rs.getString(4), Visibilities.PUBLIC, NameManager.USER_KIND),	// author name				
 				rs.getObject(5) != null ? rs.getLong(5) : -1, 	// reply to
 				rs.getObject(6) != null ? rs.getLong(6) : -1, 	// thread
 				rs.getString(7),		// subject
@@ -467,7 +467,7 @@ public class MessageManager
 		   		id,
 			   	rs.getTimestamp(1),		// created
 			   	rs.getLong(2), 			// author
-			   	new Name(rs.getString(3), Visibilities.PUBLIC),		// author name	
+			   	new Name(rs.getString(3), Visibilities.PUBLIC, NameManager.USER_KIND),		// author name	
 			   	rs.getObject(4) != null ? rs.getLong(4) : -1,		// reply to
 			    rs.getObject(5) != null ? rs.getLong(5) : -1,		// reply to
 			   	rs.getString(6)		
@@ -543,7 +543,7 @@ public class MessageManager
 			// 
 			CacheManager.instance().getConferenceCache().registerInvalidation(new Long(conference));
 			
-			return new MessageOccurrence(globalId, now, kind, new NameAssociation(user, userName), conference, num);
+			return new MessageOccurrence(globalId, now, kind, new NameAssociation(user, userName, NameManager.USER_KIND), conference, num);
    		}
    		finally
    		{
@@ -644,7 +644,7 @@ public class MessageManager
    					rs.getTimestamp(2),	// Timestamp
    					rs.getShort(3),		// Kind,
    					new NameAssociation(rs.getLong(4),		// User
-   					        rs.getString(5)),	// User name
+   					        rs.getString(5), NameManager.USER_KIND),	// User name
    					rs.getLong(6),		// Conference
    					rs.getInt(7)		// Localnum
    					));
@@ -685,7 +685,7 @@ public class MessageManager
 				rs.getTimestamp(2),	// Timestamp
 				rs.getShort(3),		// Kind,
 				new NameAssociation(rs.getLong(4),		// User
-				rs.getString(5)),	// User name
+				rs.getString(5), NameManager.USER_KIND),	// User name
 				rs.getLong(6),		// Conference
 				rs.getInt(7)		// Localnum
 				);
@@ -753,7 +753,7 @@ public class MessageManager
 				rs.getTimestamp(2),	// Timestamp
 				rs.getShort(3),		// Kind,
 				new NameAssociation(rs.getLong(4),		// User
-				rs.getString(5)),	// User name
+				rs.getString(5), NameManager.USER_KIND),	// User name
 				conference,
 				localnum
 				); 
@@ -792,7 +792,7 @@ public class MessageManager
 				rs.getTimestamp(2),	// Timestamp
 				rs.getShort(3),		// Kind,
 				new NameAssociation(rs.getLong(4),		// User
-				rs.getString(5)),	// User name
+				rs.getString(5), NameManager.USER_KIND),	// User name
 				rs.getLong(6),		// Conference
 				rs.getInt(7)		// Localnum
 				);
@@ -839,7 +839,7 @@ public class MessageManager
 							rs.getTimestamp(2),	// Timestamp
 							rs.getShort(3),		// Kind,
 							new NameAssociation(rs.getLong(4),		// User
-							rs.getString(5)),	// User name
+							rs.getString(5), NameManager.USER_KIND),	// User name
 							rs.getLong(6),		// Conference
 							rs.getInt(7)		// Localnum
 							);
@@ -912,7 +912,7 @@ public class MessageManager
 								rs.getTimestamp(2),	// Timestamp
 								rs.getShort(3),		// Kind
 								new NameAssociation(rs.getLong(4),		// User
-								rs.getString(5)),	// User name
+								rs.getString(5), NameManager.USER_KIND),	// User name
 								rs.getLong(6),		// Conference
 								rs.getInt(7)		// Localnum
 								));
@@ -951,7 +951,7 @@ public class MessageManager
 					 rs.getLong(1),
 					 rs.getTimestamp(2),	// created
 					 rs.getLong(3), 		// author
-					 new Name(rs.getString(4), Visibilities.PUBLIC),// author name	
+					 new Name(rs.getString(4), Visibilities.PUBLIC, NameManager.USER_KIND),// author name	
 					 rs.getObject(5) != null ? rs.getLong(5) : -1,	// reply to
 					 rs.getObject(6) != null ? rs.getLong(6) : -1,	// reply to
 					 rs.getString(7)		// subject	
@@ -1336,7 +1336,7 @@ public class MessageManager
                     rs.getLong(1), // globalid
                     rs.getInt(2), // localid
                     new NameAssociation(rs.getLong(3), // authorid
-                    new Name(rs.getString(4), Visibilities.PUBLIC)), // authorname
+                    new Name(rs.getString(4), Visibilities.PUBLIC, NameManager.USER_KIND)), // authorname
                     rs.getString(5), // subject
                     rs.getLong(6)) 	// Reply to
                     );
@@ -1378,9 +1378,9 @@ public class MessageManager
                     rs.getLong(1), // globalid
                     rs.getInt(2), // localid
                     new NameAssociation(rs.getLong(3), // conferenceid
-                            new Name(rs.getString(4), rs.getShort(5))),
+                            new Name(rs.getString(4), rs.getShort(5), NameManager.USER_KIND)),
                     new NameAssociation(rs.getLong(6), // authorid
-                            new Name(rs.getString(7), Visibilities.PUBLIC)), // authorname
+                            new Name(rs.getString(7), Visibilities.PUBLIC, NameManager.USER_KIND)), // authorname
                     rs.getString(8), // subject
                     rs.getLong(9)) // reply to
                     );

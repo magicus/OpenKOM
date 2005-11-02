@@ -14,6 +14,7 @@ import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -33,7 +34,7 @@ public class Signup extends AbstractCommand
 
 		// Call backend
 		//
-		String name = context.getSession().signup(conference);		
+		Name name = context.getSession().signup(conference);		
 		
 		// Print confirmation
 		//

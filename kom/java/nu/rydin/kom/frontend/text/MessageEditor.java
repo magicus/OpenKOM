@@ -20,7 +20,7 @@ public interface MessageEditor
 	throws KOMException, InterruptedException, IOException;
 	
 	public UnstoredMessage edit(long replyTo, long replyToLocal, long recipientId, 
-	        String recipientName, long replyToAuthor, String replyToAuthorName, 
+	        Name recipientName, long replyToAuthor, Name replyToAuthorName, 
 	        String oldSubject)
 		throws KOMException, InterruptedException;	
 	

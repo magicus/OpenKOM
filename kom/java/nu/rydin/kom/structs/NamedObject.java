@@ -14,9 +14,9 @@ import java.io.Serializable;
 public class NamedObject implements Serializable
 {
 	private final long m_id;
-	private final String m_name;
+	private final Name m_name;
 
-	protected NamedObject(long id, String name)
+	protected NamedObject(long id, Name name)
 	{
 		m_id 	= id;
 		m_name 	= name;
@@ -27,7 +27,7 @@ public class NamedObject implements Serializable
 		return m_id;
 	}	
 	
-	public String getName()
+	public Name getName()
 	{
 		return m_name;
 	}	

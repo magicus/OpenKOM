@@ -47,7 +47,7 @@ public class UserInfo extends NamedObject
 	
 	private int m_changeMask = 0;
 	
-	public UserInfo(long id, String name, String userid, String address1, String address2,
+	public UserInfo(long id, Name name, String userid, String address1, String address2,
 		String address3, String address4, String phoneno1, String phoneno2, String email1,
 		String email2, String url, String charset, long flags1, long flags2, long flags3, long flags4,
 		long rights, String locale, String timeZone, Timestamp created, Timestamp lastlogin)

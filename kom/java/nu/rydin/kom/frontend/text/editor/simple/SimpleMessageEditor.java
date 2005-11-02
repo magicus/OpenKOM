@@ -17,6 +17,7 @@ import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
@@ -38,7 +39,7 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 	}
 	
 	public UnstoredMessage edit(long replyTo, long replyToLocal, long recipientId, 
-	        String recipientName, long replyToAuthor, String replyToAuthorName, String oldSubject)
+	        Name recipientName, long replyToAuthor, Name replyToAuthorName, String oldSubject)
 		throws KOMException, InterruptedException
 	{
 		DisplayController dc = this.getDisplayController();
@@ -70,7 +71,7 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
 							new Object[] { new Long(replyToLocal),
-	                            this.formatConferenceName(replyToConferenceId, this.getSession().getConference(replyToConferenceId).getName()),
+	                            this.formatObjectName(this.getSession().getConference(replyToConferenceId).getName(), replyToConferenceId),
 						        this.formatObjectName(replyToAuthorName, replyToAuthor) }));
 				}
 			}

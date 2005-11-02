@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -18,6 +20,7 @@ import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -47,7 +50,7 @@ public class RenameObject extends AbstractCommand
 		if(!session.userCanChangeNameOf(id))
 			throw new AuthorizationException();
 		
-		String oldName = session.getName(id).getName();
+		Name oldName = session.getName(id);
 		
 		// Print prompt
 		//
@@ -56,17 +59,18 @@ public class RenameObject extends AbstractCommand
 		
 		// Read new name
 		//
-		String newName = in.readLine();
+		String newNameStr = in.readLine();
+		Name newName = new Name(newNameStr, Visibilities.PUBLIC, NameManager.UNKNOWN_KIND);
 		
 		// Empty name? User interrupted
 		//
-		if(newName.length() == 0)
+		if(newNameStr.length() == 0)
 			return;
 
 		
 		// Execute
 		//
-		session.renameObject(id, newName);
+		session.renameObject(id, newNameStr);
 		
 		// Print confirmation
 		//

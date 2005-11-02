@@ -25,10 +25,10 @@ public class NameAssociation implements Serializable
 		m_name 	= name;
 	}
 	
-	public NameAssociation(long id, String name)
+	public NameAssociation(long id, String name, short kind)
 	{
 		m_id 	= id;
-		m_name 	= new Name(name, Visibilities.PUBLIC);
+		m_name 	= new Name(name, Visibilities.PUBLIC, kind);
 	}
 	
 	public long getId()

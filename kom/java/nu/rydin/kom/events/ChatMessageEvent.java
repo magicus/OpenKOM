@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.events;
 
+import nu.rydin.kom.structs.Name;
+
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
@@ -13,11 +15,11 @@ public class ChatMessageEvent extends SingleUserEvent
 {
 	private final long m_userId;
 	
-	private final String m_user;
+	private final Name m_user;
 	
 	private final String m_message;
 	
-	public ChatMessageEvent(long targetUser, long userId, String user, String message)
+	public ChatMessageEvent(long targetUser, long userId, Name user, String message)
 	{
 		super(targetUser);
 		m_userId 	= userId;
@@ -36,7 +38,7 @@ public class ChatMessageEvent extends SingleUserEvent
 	/**
 	 * Returns the name of the originating user
 	 */
-	public String getUserName()
+	public Name getUserName()
 	{
 		return m_user;
 	}

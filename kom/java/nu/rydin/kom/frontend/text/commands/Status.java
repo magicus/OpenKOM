@@ -74,7 +74,7 @@ public class Status extends AbstractCommand
 		MessageFormatter formatter = context.getMessageFormatter();
 		PrintUtils.printLabelled(out, formatter.format("status.user.userid"), LABEL_LENGTH, info.getUserid());
 		PrintUtils.printLabelled(out, formatter.format("status.user.id"), LABEL_LENGTH, Long.toString(info.getId()));
-		PrintUtils.printLabelled(out, formatter.format("status.user.name"), LABEL_LENGTH, info.getName());
+		PrintUtils.printLabelled(out, formatter.format("status.user.name"), LABEL_LENGTH, context.formatObjectName(info.getName(), info.getId()));
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.address1"), 
 			LABEL_LENGTH, info.getAddress1());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.address2"), 
@@ -128,7 +128,7 @@ public class Status extends AbstractCommand
 		int top = memberships.length;
 		for(int idx = 0; idx < top; ++idx)
 		{
-		    out.println(context.formatConferenceName(memberships[idx].getId(), memberships[idx].getName().toString()));
+		    out.println(context.formatObjectName( memberships[idx].getName(), memberships[idx].getId()));
 		    /*
 		    if (memberships[idx].getId() == info.getId())
 		    {
@@ -152,13 +152,16 @@ public class Status extends AbstractCommand
 		if(info.getVisibility() != Visibilities.PUBLIC)
 		    confType = formatter.format("conference.protected");
 		PrintUtils.printLabelled(out, formatter.format("status.conference.id"), LABEL_LENGTH, Long.toString(info.getId()));
-		PrintUtils.printLabelled(out, formatter.format("status.conference.name"), LABEL_LENGTH, info.getName());
+		PrintUtils.printLabelled(out, formatter.format("status.conference.name"), LABEL_LENGTH, context.formatObjectName(info.getName(), info.getId()));
 		PrintUtils.printLabelled(out, formatter.format("status.conference.type"), LABEL_LENGTH, confType);
 		if (info.getReplyConf() != -1)
+		{
+			ConferenceInfo replyConf = context.getSession().getConference(info.getReplyConf());
 			PrintUtils.printLabelled(out, formatter.format("status.conference.commentconference"), LABEL_LENGTH, 
-			    context.getSession().getConference(info.getReplyConf()).getName());
+			    context.formatObjectName(replyConf.getName(), replyConf.getId()));
+		}
 		PrintUtils.printLabelled(out, formatter.format("status.conference.admin"), LABEL_LENGTH, 
-			context.getSession().getName(info.getAdministrator()).getName());
+			context.formatObjectName(context.getSession().getName(info.getAdministrator()), info.getAdministrator()));
 		PrintUtils.printLabelled(out, formatter.format("status.conference.messages"), LABEL_LENGTH, 
 					Integer.toString(info.getFirstMessage()) + " - " + 
 					Integer.toString(info.getLastMessage()));			
@@ -173,7 +176,7 @@ public class Status extends AbstractCommand
 		
 		// TODO: fulkod
 		ListMembers l = new ListMembers(context, "", this.getRequiredPermissions());
-		String [] args = {info.getName()};
+		String [] args = {info.getName().getName()};
 		try
 		{
 			l.execute(context, args);

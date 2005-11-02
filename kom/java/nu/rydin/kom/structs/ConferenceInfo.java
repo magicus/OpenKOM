@@ -23,7 +23,7 @@ public class ConferenceInfo extends NamedObject
 	private final Timestamp m_created;
 	private final Timestamp m_lasttext;
 	
-	public ConferenceInfo(long id, String name, long administrator, int permissions, 
+	public ConferenceInfo(long id, Name name, long administrator, int permissions, 
 	        int nonmemberPermissions, short visibility, long replyConf,
 			Timestamp created, Timestamp lasttext, int firstMessage, int lastMessage )
 	{

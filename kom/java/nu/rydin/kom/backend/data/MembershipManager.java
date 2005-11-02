@@ -218,9 +218,9 @@ public class MembershipManager
 			{
 				list.add(new ConferencePermission(
 					new NameAssociation(
-						rs.getLong(1), 		// Conf id
+						rs.getLong(1), 		// User id
 						new Name(rs.getString(2),
-						rs.getShort(3))), 	// Conf name
+						rs.getShort(3), NameManager.CONFERENCE_KIND)), 	// User name
 						rs.getInt(4), 		// Permissions
 						rs.getInt(5)		// Negations
 						));

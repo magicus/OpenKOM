@@ -77,7 +77,7 @@ public class WriteMailReply extends AbstractCommand
                 originalConference.getId(),
                 originalConference.getName(),
                 originalMessage.getUser().getId(), 
-                originalMessage.getUser().getName().getName(), 
+                originalMessage.getUser().getName(), 
                 mh.getSubject()
                 );
 

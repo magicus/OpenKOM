@@ -54,7 +54,7 @@ public class NamePicker
             NameAssociation[] newBuff = new NameAssociation[top + 1];
             System.arraycopy(assocs, 0, newBuff, 0, top);
             long me = ctx.getLoggedInUserId();
-            newBuff[top] = new NameAssociation(me, new Name(mailboxName, Visibilities.PUBLIC));
+            newBuff[top] = new NameAssociation(me, new Name(mailboxName, Visibilities.PUBLIC, NameManager.CONFERENCE_KIND));
             assocs = newBuff;
         }
         if (assocs.length == 0)

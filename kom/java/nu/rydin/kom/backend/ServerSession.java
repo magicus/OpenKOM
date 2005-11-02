@@ -509,7 +509,7 @@ public interface ServerSession
 	 * @throws AlreadyMemberException
 	 * @throws UnexpectedException
 	 */	
-	public String signup(long conferenceId)
+	public Name signup(long conferenceId)
 	throws ObjectNotFoundException, AlreadyMemberException, UnexpectedException, AuthorizationException;
 
 	/**
@@ -521,7 +521,7 @@ public interface ServerSession
 	 * @throws NotMemberException
 	 */
 
-	public String signoff(long conferenceId)
+	public Name signoff(long conferenceId)
 	throws ObjectNotFoundException, UnexpectedException, NotMemberException;
 	
 	/**

@@ -154,8 +154,16 @@ public interface Context extends TerminalSettingsProvider
 	 * @param name
 	 * @return
 	 */
-	public String formatConferenceName(long id, String name);
-	
+	// public String formatConferenceName(String name, long id);
+
+	/**
+	 * Formats a user according to current logged in user
+	 * @param id
+	 * @param name
+	 * @return
+	 */
+	// public String formatUserName(String name, long id);
+
 	/**
 	 * Formats an object name according to user settings
 	 * @param name Object name
@@ -168,7 +176,7 @@ public interface Context extends TerminalSettingsProvider
 	 * @param name Object name
 	 * @param id Object id
 	 */
-	public String formatObjectName(String name, long id);
+	// public String formatObjectName(String name, long id);
 	
 	/**
 	 * Formats an object name according to user settings

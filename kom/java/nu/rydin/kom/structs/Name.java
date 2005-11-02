@@ -8,6 +8,7 @@ package nu.rydin.kom.structs;
 
 import java.io.Serializable;
 
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.Visibilities;
 
 /**
@@ -15,14 +16,23 @@ import nu.rydin.kom.constants.Visibilities;
  */
 public class Name implements Serializable
 {
+	static private Name s_emptyName = new Name("", Visibilities.PUBLIC, NameManager.UNKNOWN_KIND);
     private String m_name;
     
     private short m_visibility;
     
-    public Name(String name, short visibility)
+    private short m_kind;
+    
+    public static Name emptyName()
+    {
+    	return s_emptyName;
+    }
+    
+    public Name(String name, short visibility, short kind)
     {
         m_name 			= name;
         m_visibility 	= visibility;
+        m_kind 			= kind;
     }
     
     public String getName()
@@ -33,6 +43,11 @@ public class Name implements Serializable
     public short getVisibility()
     {
         return m_visibility;
+    }
+    
+    public short getKind()
+    {
+    	return m_kind;
     }
     
     public void hideName()

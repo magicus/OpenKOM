@@ -136,7 +136,7 @@ public class SklaffConvert
 	            long id = um.addUser(
 	                    ui.getUserid(),
 	                    passwd,
-	                    ui.getName(),
+	                    ui.getName().getName(),
 	                    ui.getAddress1(),
 	                    ui.getAddress2(),
 	                    ui.getAddress3(),

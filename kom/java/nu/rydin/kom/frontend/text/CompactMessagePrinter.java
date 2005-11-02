@@ -103,7 +103,7 @@ public class CompactMessagePrinter implements MessagePrinter
 				//
 				out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
 					new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
-				        context.formatConferenceName(replyTo.getConference(), replyTo.getConferenceName().getName()),
+				        context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()),
 				        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }));
 			}
 		}
@@ -238,7 +238,7 @@ public class CompactMessagePrinter implements MessagePrinter
 				{
 					case MessageManager.ACTION_COPIED:
 						out.println(formatter.format("CompactMessagePrinter.copied", 
-							new Object[] { context.formatConferenceName(receivers[idx].getId(), receivers[idx].getName().getName()), 
+							new Object[] { context.formatObjectName(receivers[idx].getName(), receivers[idx].getId()), 
 						        context.formatObjectName(occ.getUser()) }));
 						break;					
 				}

@@ -53,24 +53,24 @@ public class NameManager
 	{
 		m_conn = conn;
 		m_getNameByIdStmt = conn.prepareStatement(
-			"SELECT fullname, visibility FROM names WHERE id = ?");		
+			"SELECT fullname, visibility, kind FROM names WHERE id = ?");		
 		m_getIdByNameStmt = conn.prepareStatement(
 			"SELECT id FROM names WHERE norm_name = ?");		
 		m_getIdsByPatternStmt = conn.prepareStatement(
 			"SELECT id FROM names WHERE norm_name LIKE ?");
 		m_getNamesByPatternStmt = conn.prepareStatement(
-			"SELECT fullname FROM names WHERE norm_name LIKE ? " +			"ORDER BY fullname");
+			"SELECT id, fullname, kind FROM names WHERE norm_name LIKE ? " +			"ORDER BY fullname");
 		m_getIdsByPatternAndKindStmt = conn.prepareStatement(
 			"SELECT id FROM names WHERE norm_name LIKE ? AND kind = ?");
 		m_getNamesByPatternAndKindStmt = conn.prepareStatement(
-			"SELECT fullname, visibility FROM names WHERE norm_name LIKE ? AND kind = ? " +			"ORDER BY fullname");
+			"SELECT fullname, visibility, kind FROM names WHERE norm_name LIKE ? AND kind = ? " +			"ORDER BY fullname");
 		m_addNameStmt  = conn.prepareStatement(
 			"INSERT INTO names(norm_name, fullname, kind, visibility) VALUES(?, ?, ?, ?)");
 		m_getAssociationsByPatternStmt = conn.prepareStatement(
-			"SELECT id, fullname, visibility FROM names WHERE norm_name LIKE ? " +
+			"SELECT id, fullname, visibility, kind FROM names WHERE norm_name LIKE ? " +
 			"ORDER BY fullname");			
 		m_getAssociationsByPatternAndKindStmt = conn.prepareStatement(
-			"SELECT id, fullname, visibility FROM names WHERE norm_name LIKE ? " +
+			"SELECT id, fullname, visibility, kind FROM names WHERE norm_name LIKE ? " +
 			"AND kind = ? ORDER BY fullname");
 		m_renameObjectStmt = conn.prepareStatement(
 			"UPDATE names SET fullname = ?, norm_name = ? WHERE id = ?");
@@ -146,7 +146,7 @@ public class NameManager
 			rs = m_getNameByIdStmt.executeQuery();
 			if(!rs.next())
 				throw new ObjectNotFoundException("id=" + id);
-			Name answer = new Name(rs.getString(1), rs.getShort(2));
+			Name answer = new Name(rs.getString(1), rs.getShort(2), rs.getShort(3));
 			cache.put(new Long(id), answer);
 			return answer;
 		}
@@ -190,7 +190,7 @@ public class NameManager
 		try
 		{
 			rs = m_getNamesByPatternStmt.executeQuery();
-			return SQLUtils.extractStrings(rs, 1, 2, pattern);
+			return SQLUtils.extractStrings(rs, 1, 2, 3, pattern);
 		}
 		finally
 		{
@@ -217,7 +217,7 @@ public class NameManager
 		try
 		{
 			rs = m_getAssociationsByPatternStmt.executeQuery();
-			return SQLUtils.extractNames(rs, 1, 2, 3, pattern);
+			return SQLUtils.extractNames(rs, 1, 2, 3, 4, pattern);
 		}
 		finally
 		{
@@ -245,7 +245,7 @@ public class NameManager
 		try
 		{
 			rs = m_getAssociationsByPatternAndKindStmt.executeQuery();
-			return SQLUtils.extractNames(rs, 1, 2, 3, pattern);
+			return SQLUtils.extractNames(rs, 1, 2, 3, 4, pattern);
 		}
 		finally
 		{
@@ -275,7 +275,7 @@ public class NameManager
 		try
 		{
 			rs = m_getNamesByPatternAndKindStmt.executeQuery();
-			return SQLUtils.extractStrings(rs, 1, 2, pattern);
+			return SQLUtils.extractStrings(rs, 1, 2, 3, pattern);
 		}
 		finally
 		{

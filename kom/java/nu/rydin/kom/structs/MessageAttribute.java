@@ -9,7 +9,9 @@ package nu.rydin.kom.structs;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.constants.MessageAttributes;
+import nu.rydin.kom.constants.Visibilities;
 
 /**
  * @author Henrik Schröder
@@ -62,15 +64,15 @@ public class MessageAttribute implements Serializable
 	    return userId + ":" + userName; 
 	}
 
-	public String getUsername()
+	public Name getUsername()
 	{
 	    if (m_kind == MessageAttributes.NOCOMMENT || m_kind == MessageAttributes.ORIGINAL_DELETED || m_kind == MessageAttributes.MAIL_RECIPIENT)
 	    {
 	        int i = m_value.indexOf(":");
 	        if (i > 0 && m_value.length() > i)
-	            return m_value.substring(i + 1);
+	            return new Name(m_value.substring(i + 1), Visibilities.PUBLIC, NameManager.USER_KIND);
 	    }
-        return "";
+	    return new Name("", Visibilities.PUBLIC, NameManager.USER_KIND);
 	}
 	
 	public long getUserId()
