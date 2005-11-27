@@ -137,7 +137,7 @@ public class MessageManager
 			"SELECT message, action_ts, kind, user, conference, localnum FROM messageoccurrences " +
 			"WHERE conference = ? AND localnum = ?");
 		m_getVisibleOccurrencesStmt = m_conn.prepareStatement(
-			"SELECT o.message, o.action_ts, o.kind, o.user, o.user_name, o.conference, o.localnum " +			"FROM messageoccurrences o, memberships m " +			"WHERE o.conference = m.conference AND m.user = ? AND o.message = ?");
+			"SELECT o.message, o.action_ts, o.kind, o.user, o.user_name, o.conference, o.localnum " +			"FROM messageoccurrences o, memberships m " +			"WHERE o.conference = m.conference AND m.active = 1 AND m.user = ? AND o.message = ?");
 		m_getMessageAttributesStmt = m_conn.prepareStatement(
 		    "SELECT id, message, kind, created, value " +
 		    "FROM messageattributes " +
@@ -274,12 +274,13 @@ public class MessageManager
 	    m_listCommentsGloballyToAuthor = m_conn.prepareStatement(
 	    		"SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, m.author_name, m.subject, m.reply_to " +
 	    		"FROM messages m, messages r, messageoccurrences mo, names n " +
-	    		"WHERE m.reply_to = r.id AND m.id = mo.message AND n.id = mo.conference AND r.author = ? " +
+	    		"WHERE m.reply_to = r.id AND m.id = mo.message AND n.id = mo.conference " +
+	    		"AND r.author = ? AND r.created > ? " +
 	    		"ORDER BY mo.action_ts DESC LIMIT ? OFFSET ?");
 	    m_countCommentsGloballyToAuthor = m_conn.prepareStatement(
 	    		"SELECT COUNT(*) FROM messages m, messages r, messageoccurrences mo, memberships me " +
 	    		"WHERE m.reply_to = r.id AND mo.message = m.id AND mo.message = m.id AND r.author = ? " +
-	    		"AND me.user = ? AND me.conference = mo.conference");
+	    		"AND me.user = ? AND me.conference = mo.conference AND r.created > ?");
 	}
 	
 	public void close()
@@ -1435,19 +1436,23 @@ public class MessageManager
         }
     }
 
-	public GlobalMessageSearchResult[] listCommentsGloballyToAuthor(long user, int offset, int length) throws SQLException {
+	public GlobalMessageSearchResult[] listCommentsGloballyToAuthor(long user, Timestamp startDate, int offset, int length) throws SQLException 
+	{
         this.m_listCommentsGloballyToAuthor.clearParameters();
         this.m_listCommentsGloballyToAuthor.setLong(1, user);
-        this.m_listCommentsGloballyToAuthor.setInt(2, length);
-        this.m_listCommentsGloballyToAuthor.setInt(3, offset);
+        this.m_listCommentsGloballyToAuthor.setTimestamp(2, startDate);
+        this.m_listCommentsGloballyToAuthor.setInt(3, length);
+        this.m_listCommentsGloballyToAuthor.setInt(4, offset);
         
         return innerGlobalSearch(this.m_listCommentsGloballyToAuthor); 
 	}
 
-	public long countCommentsGloballyToAuthor(long user, long requester) throws SQLException {
+	public long countCommentsGloballyToAuthor(long user, long requester, Timestamp startDate) throws SQLException 
+	{
 	    m_countCommentsGloballyToAuthor.clearParameters();
 	    this.m_countCommentsGloballyToAuthor.setLong(1, user);
 	    this.m_countCommentsGloballyToAuthor.setLong(2, requester);
+	    this.m_countCommentsGloballyToAuthor.setTimestamp(3, startDate);
 	    return this.innerCount(m_countCommentsGloballyToAuthor);
 	}
 }

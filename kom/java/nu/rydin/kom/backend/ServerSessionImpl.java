@@ -72,6 +72,7 @@ import nu.rydin.kom.exceptions.OriginalsNotAllowedException;
 import nu.rydin.kom.exceptions.RepliesNotAllowedException;
 import nu.rydin.kom.exceptions.SelectionOverflowException;
 import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.frontend.text.ClientSession;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferenceListItem;
 import nu.rydin.kom.structs.ConferencePermission;
@@ -114,7 +115,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     {
         public void heartbeat()
         {
-            ServerSessionImpl.this.m_lastHeartbeat = System.currentTimeMillis();
+            ServerSessionImpl that = ServerSessionImpl.this;
+            long now = System.currentTimeMillis();
+            if(now - that.m_lastHeartbeat > 60000)
+            {
+                UserInfo ui = that.getLoggedInUserInEventHandler();
+                if(ui != null)
+                    that.m_sessions.broadcastEvent(new UserAttendanceEvent(ui.getId(), ui.getName(), UserAttendanceEvent.AWOKE));
+            }
+            that.m_lastHeartbeat = System.currentTimeMillis();
         }
     }
     
@@ -165,24 +174,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         throws ObjectNotFoundException, UnexpectedException;
     }
     
-    private class MarkAsUnreadOperation implements MessageOperation
-    {
-    	public void perform(long messageId)
-    	throws ObjectNotFoundException, UnexpectedException
-    	{
-    	    ServerSessionImpl that = ServerSessionImpl.this;
-    	    try
-    	    {
-	    	    MessageOccurrence occ = m_da.getMessageManager().getMostRelevantOccurrence(
-	    	            that.getLoggedInUserId(), that.getCurrentConferenceId(), messageId);
-	    	    that.innerMarkAsUnreadAtLogout(messageId);
-    	    }
-    		catch (SQLException e)
-    		{
-    			throw new UnexpectedException (that.getLoggedInUserId(), e);
-    		}
-    	}
-    }
+	private class MarkAsUnreadOperation implements MessageOperation
+	{
+		public void perform(long messageId)
+		throws ObjectNotFoundException, UnexpectedException
+		{
+		    ServerSessionImpl.this.innerMarkAsUnreadAtLogout(messageId);
+		}
+	}
     
     private class MarkAsReadOperation implements MessageOperation 
     {
@@ -3656,7 +3655,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 
 	public void onEvent(UserAttendanceEvent e)
 	{
-	    if(this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.SHOW_ATTENDANCE_MESSAGES))
+        UserInfo ui = this.getLoggedInUserInEventHandler();
+	    if(ui.testFlags(0, UserFlags.SHOW_ATTENDANCE_MESSAGES)
+                && (e.getType() != UserAttendanceEvent.AWOKE || 
+                    ui.testFlags(0, UserFlags.SHOW_END_OF_IDLE_MESSAGE)))
 	        this.postEvent(e);
 	}
 	
@@ -3741,34 +3743,46 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			return;
 		}
 	}
+    
+    protected UserInfo getUserInEventHandler(long user)
+    {
+        // Borrow a UserManager from the pool
+        //
+        DataAccessPool pool = DataAccessPool.instance();
+        DataAccess da = null;
+        try
+        {
+            da = pool.getDataAccess();
+      
+            // Load user
+            //
+            return da.getUserManager().loadUser(user);
+        }
+        catch(Exception e)
+        {
+            // We're called from an event handler, so what can we do?
+            //
+            Logger.error(this, "Error in event handler", e);
+            return null;
+        }
+        finally
+        {
+            if(da != null)
+                pool.returnDataAccess(da);
+        }        
+    }
+    
+    protected UserInfo getLoggedInUserInEventHandler()
+    {
+        return this.getUserInEventHandler(this.getLoggedInUserId());
+    }
 	
 	protected boolean testUserFlagInEventHandler(long user, int flagword, long mask)
 	{
-	    // Borrow a UserManager from the pool
-	    //
-	    DataAccessPool pool = DataAccessPool.instance();
-	    DataAccess da = null;
-	    try
-	    {
-	        da = pool.getDataAccess();
-	  
-	        // Load user
-	        //
-	        UserInfo ui = da.getUserManager().loadUser(user);
-	        return ui.testFlags(flagword, mask);
-	    }
-	    catch(Exception e)
-	    {
-	        // We're called from an event handler, so what can we do?
-	        //
-	        e.printStackTrace();
-	        return false;
-	    }
-	    finally
-	    {
-	        if(da != null)
-	            pool.returnDataAccess(da);
-	    }
+	    UserInfo ui = this.getUserInEventHandler(user);
+        if(ui == null)
+            return false;
+	    return ui.testFlags(flagword, mask);
 	}
 
 	public LocalMessageSearchResult[] listAllMessagesLocally(long conference, int start, int length)
@@ -4318,10 +4332,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    }	    
     }
 
-	public MessageSearchResult[] listCommentsGloballyToAuthor(long user, int offset, int length) throws UnexpectedException {
+	public MessageSearchResult[] listCommentsGloballyToAuthor(long user, Timestamp startDate, int offset, int length) throws UnexpectedException {
 		try
 		{
-			return this.censorMessages(m_da.getMessageManager().listCommentsGloballyToAuthor(user, offset, length));
+			return this.censorMessages(m_da.getMessageManager().listCommentsGloballyToAuthor(user, startDate, offset, length));
 		}
 		catch (SQLException e)
 		{
@@ -4333,11 +4347,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 
-	public long countCommentsGloballyToAuthor(long user) throws UnexpectedException {
+	public long countCommentsGloballyToAuthor(long user, Timestamp startDate) throws UnexpectedException {
         try
         {
             MessageManager mm = m_da.getMessageManager();
-            return mm.countCommentsGloballyToAuthor(user, this.getLoggedInUserId());
+            return mm.countCommentsGloballyToAuthor(user, this.getLoggedInUserId(), startDate);
         }
 	    catch(SQLException e)
 	    {

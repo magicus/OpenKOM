@@ -47,6 +47,7 @@ public class UserFlags
 	public static long READ_REPLY_TREE						= 0x00200000;
 	public static long REPLY_IN_CURRENT_CONF				= 0x00400000;
 	public static long SHOW_SUFFIX							= 0x00800000;
+    public static long SHOW_END_OF_IDLE_MESSAGE             = 0x01000000;
 
 	/**
 	 * Default value for flagword 1

@@ -1640,7 +1640,7 @@ public interface ServerSession
      * @return
      * @throws UnexpectedException
      */
-	public abstract MessageSearchResult[] listCommentsGloballyToAuthor(long user, int offset, int length)
+	public abstract MessageSearchResult[] listCommentsGloballyToAuthor(long user, Timestamp startDate, int offset, int length)
 	throws UnexpectedException;
 
 	/**
@@ -1650,6 +1650,6 @@ public interface ServerSession
 	 * @return
 	 * @throws UnexpectedException
 	 */
-	public abstract long countCommentsGloballyToAuthor(long user)
+	public abstract long countCommentsGloballyToAuthor(long user, Timestamp startDate)
 	throws UnexpectedException;
 }
