@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="conf/" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="/kom"/>
+	<classpathentry kind="lib" path="conf"/>
+	<classpathentry kind="src" path="/kom_soapclient"/>
+	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/wsdl4j-1.5.1.jar"/>
+	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/axis.jar"/>
+	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/axis-ant.jar"/>
+	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/commons-discovery-0.2.jar"/>
+	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/saaj.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
