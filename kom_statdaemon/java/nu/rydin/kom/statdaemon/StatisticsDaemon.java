@@ -179,9 +179,9 @@ public class StatisticsDaemon
         // Print header
         //
         HeaderPrinter hp = new HeaderPrinter();
-        hp.addHeader(formatter.format("authorstat.author"), 50, false);
-        hp.addSpace(1);
         hp.addHeader(formatter.format("authorstat.messages"), 10, true);
+        hp.addSpace(1);
+        hp.addHeader(formatter.format("authorstat.author"), 50, false);
         hp.printOn(out);
         
         // Calculate start date
@@ -203,12 +203,11 @@ public class StatisticsDaemon
             rs = stmt.executeQuery();
             while(rs.next())
             {
-                PrintUtils.printLeftJustified(out, NameUtils.stripSuffix(rs.getString(1)), 50);
-                out.print(' ');
                 long n = rs.getLong(2);
                 total += n;
                 PrintUtils.printRightJustified(out, Long.toString(n), 10);
-                out.println();
+                out.print(' ');
+                out.println(NameUtils.stripSuffix(rs.getString(1)));   
             }
         }
         finally
@@ -219,14 +218,12 @@ public class StatisticsDaemon
         
         // Print total
         //
-        PrintUtils.printRepeated(out, ' ', 51);
         PrintUtils.printRepeated(out, '=', 10);
         out.println();
-        PrintUtils.printRepeated(out, ' ', 51);
         PrintUtils.printRightJustified(out, Long.toString(total), 10);
         out.println();
         
-        System.out.println(sw.getBuffer());
+        // System.out.println(sw.getBuffer());
         
         // Post as message
         //
@@ -249,9 +246,9 @@ public class StatisticsDaemon
         switch(unit)
         {
         case 'd':
-            return new Timestamp(now - 24 * 1000);
+            return new Timestamp(now - 24 * 60 * 60 * 1000);
         case 'w':
-            return new Timestamp(now - 7 * 24 * 1000);
+            return new Timestamp(now - 7 * 24 * 60 * 60 * 1000);
         case 'm':
             c.roll(Calendar.MONTH, -n);
             return new Timestamp(c.getTimeInMillis());

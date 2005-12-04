@@ -12,6 +12,7 @@ package nu.rydin.kom.soap.structs;
 public class Name
 {
     private String name;
+    private short kind;
     private short visibility;
 
     public Name()
@@ -21,6 +22,7 @@ public class Name
     public Name(nu.rydin.kom.structs.Name nativeType)
     {
         this.name = nativeType.getName();
+        this.kind = nativeType.getKind();
         this.visibility = nativeType.getVisibility();
     }
     
@@ -43,6 +45,14 @@ public class Name
     
     public nu.rydin.kom.structs.Name toNative()
     {
-        return new nu.rydin.kom.structs.Name(name, visibility);
+        return new nu.rydin.kom.structs.Name(name, kind, visibility);
+    }
+    public short getKind()
+    {
+        return kind;
+    }
+    public void setKind(short kind)
+    {
+        this.kind = kind;
     }
 }

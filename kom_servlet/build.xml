@@ -1,0 +1,37 @@
+<project name="kom_servlet" default="build-jar" basedir=".">
+	<property name="komLibPath" value="../kom/lib"/>
+	<property name="libPath" value="lib"/>
+	<property name="distrPath" value="distr"/>
+	<property name="confPath" value="conf"/>
+	<property name="sqlPath" value="sql"/>
+	<path id="kom.class.path">
+		<pathelement location="${confPath}" />
+		<pathelement location="${komLibPath}/kom.jar" />
+		<pathelement location="${distrPath}/org.mortbay.jetty.jar"/>
+	</path>
+	
+	<target name="clean">
+		<delete dir="classes"/>
+		<delete dir="lib"/>
+		<delete file="${libPath}/kom_servlet.jar"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="classes"/>
+		<javac srcdir="java" destdir="classes" classpathref="kom.class.path" debug="yes"/>
+	</target>
+
+	<target name="build-jar" depends="compile">
+		<mkdir dir="lib"/>
+		<jar destfile="lib/kom_servlet.jar" basedir="classes"/>
+	</target>
+
+	<target name="release" depends="build-jar">
+		<zip destfile="openkom_servlet.zip">
+			<zipfileset dir="." includes="OpenKOM.LICENSE, INSTALL, *.sh, *.bat"/>
+			<zipfileset dir="${libPath}/" prefix="${libPath}/" />
+			<zipfileset dir="${distrPath}/" prefix="${distrPath}/" />
+			<zipfileset dir="${confPath}/" prefix="${confPath}/" />
+		</zip>
+	</target>
+</project>

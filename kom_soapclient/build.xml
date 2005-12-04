@@ -1,0 +1,36 @@
+<project name="kom_soapclient" default="build-jar" basedir=".">
+	<property name="komLibPath" value="../kom/lib"/>
+	<property name="libPath" value="lib"/>
+	<property name="confPath" value="conf"/>
+	<property name="distrPath" value="distr"/>	
+	<path id="kom.class.path">
+		<pathelement location="${confPath}" />
+		<pathelement location="${komLibPath}/kom.jar" />
+		<pathelement location="${distrPath}/axis.jar" />
+		<pathelement location="${distrPath}/jaxrpc.jar" />
+	</path>
+	
+	<target name="clean">
+		<delete dir="classes"/>
+		<delete dir="lib"/>
+		<delete file="${libPath}/kom_soapclient.jar"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="classes"/>
+		<javac srcdir="java" destdir="classes" classpathref="kom.class.path" debug="yes"/>
+	</target>
+
+	<target name="build-jar" depends="compile">
+		<mkdir dir="lib"/>
+		<jar destfile="lib/kom_soapclient.jar" basedir="classes"/>
+	</target>
+
+	<target name="release" depends="build-jar">
+		<zip destfile="openkom_soapclient.zip">
+			<zipfileset dir="." includes="OpenKOM.LICENSE, INSTALL, *.sh, *.bat"/>
+			<zipfileset dir="${libPath}/" prefix="${libPath}/" />
+			<zipfileset dir="${confPath}/" prefix="${confPath}/" />
+		</zip>
+	</target>
+</project>

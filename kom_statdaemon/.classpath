@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="conf/" kind="src" path=""/>
+	<classpathentry kind="src" path="java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/kom"/>
 	<classpathentry kind="lib" path="conf"/>
@@ -13,5 +13,5 @@
 	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/jaxrpc.jar"/>
 	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="C:/java/axis-1_2_1/lib/saaj.jar"/>
-	<classpathentry kind="output" path=""/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,0 +1,10 @@
+*.class
+.project
+classes
+lib
+properties
+OpenKOM.htm
+openkom.log
+openkom.zip
+newpasswd.txt
+openkom-momo.zip

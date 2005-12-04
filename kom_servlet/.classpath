@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path=""/>
+	<classpathentry kind="src" path="java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/kom"/>
 	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/lib/javax.servlet.jar"/>
@@ -15,5 +15,5 @@
 	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/mx4j-remote.jar"/>
 	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/mx4j-tools.jar"/>
 	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/xmlParserAPIs-2.5.jar"/>
-	<classpathentry kind="output" path=""/>
+	<classpathentry kind="output" path="classes"/>
 </classpath>
