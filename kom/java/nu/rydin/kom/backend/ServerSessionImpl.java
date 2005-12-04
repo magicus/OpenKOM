@@ -117,7 +117,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         {
             ServerSessionImpl that = ServerSessionImpl.this;
             long now = System.currentTimeMillis();
-            if(now - that.m_lastHeartbeat > 60000)
+            if(now - that.m_lastHeartbeat > ServerSettings.getIdleNotificationThreashold())
             {
                 UserInfo ui = that.getLoggedInUserInEventHandler();
                 if(ui != null)

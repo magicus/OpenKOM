@@ -15,6 +15,8 @@
 		<!-- Delay and number of retries when waiting for a session to shut down gracefully -->
 		<parameter name="server.session.shutdown.retries" value="10"/>
 		<parameter name="server.session.shutdown.delay" value="1000"/>
+		<!-- Milliseconds a user must have been idle before an end-of-idle event is sent -->
+		<parameter name="server.idle.notification.threashold" value="600000"/>		
 		<!-- Event poll interval. Determines how often the client polls
 			 for events from the server, in milliseconds. Typically, this
 			 value merely determines a timeout in a blocking poll, thus, 
@@ -45,5 +47,19 @@
 		<parameter name="maxauthretry" value="3"/>
 		<parameter name="maxconn" value="1000"/>
 		<parameter name="selfRegister" value="false"/>		
+	</module>
+	<module name="ServletEngine" class="nu.rydin.kom.servlet.ServletModule">
+		<classpath>
+			<pathelement location="../kom_servlet/lib/kom_servlet.jar"/>		
+			<pathelement location="../kom_servlet/distr/jasper-compiler.jar"/>
+			<pathelement location="../kom_servlet/distr/jasper-runtime.jar"/>
+			<pathelement location="../kom_servlet/distr/javax.servlet.jar"/>
+			<pathelement location="../kom_servlet/distr/org.mortbay.jetty.jar"/>
+			<pathelement location="../kom_servlet/distr/commons-el.jar"/>			
+			<pathelement location="C:\Program Files\Java\jdk1.5.0_05\lib\tools.jar"/>
+			<pathelement location="C:\java\apache-ant-1.6.2\lib\ant.jar"/>
+			<pathelement location="../kom_soap/lib/kom_soap.jar"/>						
+		</classpath>
+		<parameter name="jetty.home" value="C:/java/jetty-5.1.4"/>
 	</module>
 </modules>

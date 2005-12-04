@@ -51,6 +51,11 @@ public class ServerSettings
 	{
 		return s_settings.getLong("server.ticket.lifetime");
 	}
+    
+    public static long getIdleNotificationThreashold()
+    {
+        return s_settings.getLong("server.idle.notification.threashold");
+    }
 
 	
 }

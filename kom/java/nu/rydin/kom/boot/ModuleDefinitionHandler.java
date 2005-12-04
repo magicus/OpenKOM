@@ -8,6 +8,7 @@ package nu.rydin.kom.boot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ public class ModuleDefinitionHandler extends DefaultHandler
     private static final int STATE_INITIAL		= 0;
     private static final int STATE_MODULE_LIST	= 1;
     private static final int STATE_MODULE		= 2;
+    private static final int STATE_CLASSPATH    = 3;
     
     private int m_state = STATE_INITIAL;
     
@@ -30,6 +32,7 @@ public class ModuleDefinitionHandler extends DefaultHandler
     private String m_className;
     private Map m_parameters;
     private List m_modules = new ArrayList();
+    private List m_classPath;
     
     public ModuleDefinition[] getModuleDefinitions()
     {
@@ -67,13 +70,21 @@ public class ModuleDefinitionHandler extends DefaultHandler
     	    m_state = STATE_MODULE;
     	    break;
         case STATE_MODULE:
-    	    // We're expecting a "parameter" element. Everything else 
-    	    // is an error
-    	    //
-    	    if(!"parameter".equals(qName))
-    	        throw new SAXException("Uexpected tag: " + qName);
-            m_parameters.put(attr.getValue("name"), attr.getValue("value"));
+            if("parameter".equals(qName))
+                m_parameters.put(attr.getValue("name"), attr.getValue("value"));
+            else if("classpath".equals(qName))
+            {
+                m_state = STATE_CLASSPATH;
+                m_classPath = new LinkedList();
+            }
+            else
+                throw new SAXException("Uexpected tag: " + qName);
             break;
+        case STATE_CLASSPATH:
+            if(!"pathelement".equals(qName))
+                throw new SAXException("Uexpected tag: " + qName);
+            m_classPath.add(attr.getValue("location"));
+            break;            
         }
     }
     
@@ -88,10 +99,13 @@ public class ModuleDefinitionHandler extends DefaultHandler
         case STATE_MODULE:
             if("module".equals(qName))
             {
-	            m_modules.add(new ModuleDefinition(m_moduleName, m_className, m_parameters));
+	            m_modules.add(new ModuleDefinition(m_moduleName, m_className, m_classPath, m_parameters));
 	            m_state = STATE_MODULE_LIST;
             }
             break;
+        case STATE_CLASSPATH:
+            if("classpath".equals(qName))
+                m_state = STATE_MODULE;
         }
     }
 }

@@ -8,6 +8,8 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
+import java.util.Calendar;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.MessageLogKinds;
@@ -61,12 +63,30 @@ public abstract class ViewMessageLog extends AbstractCommand
 
 		// Print data
 		//		
+        Calendar last = Calendar.getInstance();
+        last.setTimeInMillis(System.currentTimeMillis());
 		int top = messages.length;
 		for(int idx = top - 1; idx >= 0; --idx)
 		{
 		    StringBuffer sb = new StringBuffer(top * 100); 
 		    MessageLogItem each = messages[idx];
 		    short kind = each.getKind();
+            
+            // Add timestamp. Print date if needed
+            //
+            Timestamp created = each.getCreated();
+            Calendar createdCal = Calendar.getInstance();
+            createdCal.setTime(created);
+            if(createdCal.get(Calendar.DAY_OF_YEAR) != last.get(Calendar.DAY_OF_YEAR)
+                    || createdCal.get(Calendar.YEAR) != last.get(Calendar.YEAR))
+            {
+                out.print("--- ");
+                out.print(formatter.format("date.short", created));
+                out.println(" ---");
+                last = createdCal;
+            }
+            sb.append(formatter.format("time.short", created));
+            sb.append(' ');
 		    
 		    // Are we the sender? 
 		    //
