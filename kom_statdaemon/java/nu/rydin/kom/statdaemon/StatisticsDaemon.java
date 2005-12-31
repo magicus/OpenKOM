@@ -197,6 +197,7 @@ public class StatisticsDaemon
                 "ORDER BY c DESC");
         stmt.setTimestamp(1, start);
         ResultSet rs = null;
+        int idx = 0;
         long total = 0;
         try
         {            
@@ -205,6 +206,8 @@ public class StatisticsDaemon
             {
                 long n = rs.getLong(2);
                 total += n;
+                PrintUtils.printRightJustified(out, Long.toString(n), 4);
+                out.print(' ');
                 PrintUtils.printRightJustified(out, Long.toString(n), 10);
                 out.print(' ');
                 out.println(NameUtils.stripSuffix(rs.getString(1)));   
@@ -218,6 +221,7 @@ public class StatisticsDaemon
         
         // Print total
         //
+        PrintUtils.printRepeated(out, ' ', 5);
         PrintUtils.printRepeated(out, '=', 10);
         out.println();
         PrintUtils.printRightJustified(out, Long.toString(total), 10);
