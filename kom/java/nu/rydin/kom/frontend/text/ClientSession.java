@@ -117,7 +117,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private int m_windowHeight = -1;
 	private int m_windowWidth = -1;
 	private boolean m_ListenToTerminalSize = true;
-	private EventPrinter eventPrinter = new EventPrinter();
+	private EventPrinter eventPrinter;
 	private Locale m_locale;
 	private DateFormatSymbols m_dateSymbols;
 	private final boolean m_useTicket;
@@ -177,6 +177,13 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
     
 	private class EventPrinter implements EventTarget
 	{
+		private Context context;
+		
+		public EventPrinter (Context context)
+		{
+			this.context = context;
+		}
+		
 		private void printWrapped(String message, int offset)
 		{
 		    WordWrapper ww = getWordWrapper(message, getTerminalSettings().getWidth(), offset);
@@ -195,7 +202,8 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		public void onEvent(ChatMessageEvent event) 
 		{
 			this.beepMaybe(UserFlags.BEEP_ON_CHAT);
-			String header = m_formatter.format("event.chat", new Object[] { event.getUserName() }); 
+			// String header = m_formatter.format("event.chat", new Object[] { event.getUserName() });
+			String header = m_formatter.format ("event.chat", new Object[] { context.formatObjectName(event.getUserName(), event.getOriginatingUser()) });
 			getDisplayController().chatMessageHeader();
 			m_out.print(header);
 			getDisplayController().chatMessageBody();
@@ -207,8 +215,8 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		{
 			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
 			String header = event.getKind() == MessageLogKinds.BROADCAST 
-			    ? m_formatter.format("event.broadcast.default", new Object[] { event.getUserName() })
-			    : event.getUserName().getName() + ' ';
+			    ? m_formatter.format("event.broadcast.default", new Object[] { /* event.getUserName() */ context.formatObjectName(event.getUserName(), event.getOriginatingUser()) })
+			    : /* event.getUserName().getName() */ context.formatObjectName(event.getUserName(), event.getOriginatingUser()) + ' ';
 			getDisplayController().broadcastMessageHeader();
 			m_out.print(header);
 			if (event.getKind() == MessageLogKinds.BROADCAST)
@@ -250,7 +258,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		{
 			getDisplayController().broadcastMessageHeader();
 			this.beepMaybe(UserFlags.BEEP_ON_ATTENDANCE);			
-			m_out.println(m_formatter.format("event.attendance." + event.getType(), new Object[] { event.getUserName() }));
+			m_out.println(m_formatter.format("event.attendance." + event.getType(), new Object[] { context.formatObjectName(event.getUserName(), event.getOriginatingUser()) } ));
 			m_out.println();
 		}
 
@@ -289,6 +297,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		//
 		m_rawIn = in;
 		m_rawOut = out;
+		eventPrinter = new EventPrinter (this);
 		
 		// Set up authentication method
 		//
