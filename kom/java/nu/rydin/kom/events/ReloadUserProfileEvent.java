@@ -13,7 +13,7 @@ public class ReloadUserProfileEvent extends SingleUserEvent
 {
 	public ReloadUserProfileEvent(long targetUser)
 	{
-		super(targetUser);
+		super(-1, targetUser);
 	}
 	
 	public void dispatch(EventTarget target)

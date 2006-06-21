@@ -22,26 +22,26 @@ public class SQLUtils
 	public static long[] extractLongs(ResultSet rs, int index)
 	throws SQLException
 	{
-		List l = new ArrayList();
+		List<Long> l = new ArrayList<Long>();
 		while(rs.next())
-			l.add(new Long(rs.getLong(index)));
+			l.add(rs.getLong(index));
 		int top = l.size();
 		long[] answer = new long[top];
 		for(int idx = 0; idx < top; ++idx)
-			answer[idx] = ((Long) l.get(idx)).longValue();
+			answer[idx] = l.get(idx);
 		return answer;
 	}
 	
 	public static int[] extractInts(ResultSet rs, int index)
 	throws SQLException
 	{
-		List l = new ArrayList();
+		List<Integer> l = new ArrayList<Integer>();
 		while(rs.next())
-			l.add(new Integer(rs.getInt(index)));
+			l.add(rs.getInt(index));
 		int top = l.size();
 		int[] answer = new int[top];
 		for(int idx = 0; idx < top; ++idx)
-			answer[idx] = ((Integer) l.get(idx)).intValue();
+			answer[idx] = l.get(idx);
 		return answer;
 	}
 
@@ -49,7 +49,7 @@ public class SQLUtils
 	public static Name[] extractStrings(ResultSet rs, int nameIndex, int visibilityIndex, int kindIndex, String pattern)
 	throws SQLException
 	{
-		List l = new ArrayList();
+		List<Name> l = new ArrayList<Name>();
 		while(rs.next())
 		{
 		    String name = rs.getString(nameIndex);
@@ -65,7 +65,7 @@ public class SQLUtils
 	public static NameAssociation[] extractNames(ResultSet rs, int idIndex, int nameIndex, int visibilityIndex, int kindIndex, String pattern)
 	throws SQLException
 	{
-		List l = new ArrayList();
+		List<NameAssociation> l = new ArrayList<NameAssociation>();
 		while(rs.next())
 		{
 		    String name = rs.getString(nameIndex);

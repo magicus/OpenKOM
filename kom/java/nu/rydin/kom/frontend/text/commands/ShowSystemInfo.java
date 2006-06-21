@@ -92,6 +92,7 @@ public class ShowSystemInfo extends AbstractCommand
         this.printCacheInfo(out, formatter, formatter.format("system.info.names"), info.getNameCache());
         this.printCacheInfo(out, formatter, formatter.format("system.info.conferences"), info.getConferenceCache());
         this.printCacheInfo(out, formatter, formatter.format("system.info.users"), info.getUserCache());
+        this.printCacheInfo(out, formatter, formatter.format("system.info.permissions"), info.getPermissionCache());
         
         // Print uptime
         //

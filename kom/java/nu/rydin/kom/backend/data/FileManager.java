@@ -116,7 +116,7 @@ public class FileManager
     public FileStatus[] list(long parent, String pattern)
     throws SQLException
     {
-        ArrayList list = new ArrayList();
+        ArrayList<FileStatus> list = new ArrayList<FileStatus>();
         m_listStmt.clearParameters();
         m_listStmt.setLong(1, parent);
         m_listStmt.setString(2, pattern);

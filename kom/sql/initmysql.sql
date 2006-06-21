@@ -98,7 +98,8 @@ CREATE TABLE IF NOT EXISTS messages
 	FOREIGN KEY (author) REFERENCES users(id) ON DELETE SET NULL,
 	INDEX msgreply_ix(reply_to),
 	FOREIGN KEY (reply_to) REFERENCES messages(id) ON DELETE SET NULL,
-	INDEX thread_ix(thread)
+	INDEX thread_ix(thread),
+	INDEX msg_author_created(author, created)
 ) TYPE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messagesearch 

@@ -53,7 +53,6 @@ public abstract class AbstractCommand implements Command
 	throws UnexpectedException
 	{
 	    long rp = this.getRequiredPermissions();
-	    long x = rp & context.getCachedUserInfo().getRights();
 	    return (rp & context.getCachedUserInfo().getRights()) == rp;
 	}
 

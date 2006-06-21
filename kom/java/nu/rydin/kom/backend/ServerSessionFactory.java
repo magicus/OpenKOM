@@ -20,40 +20,44 @@ import nu.rydin.kom.exceptions.UnexpectedException;
 public interface ServerSessionFactory
 {
     /**
-     * Kills a session identified by a user id. Since we must allow this
+     * Kills a session identified by a session if. Since we must allow this
      * before a user has logged in, the password is needed.
      * 
+     * @param session The session id
      * @param user The login id
      * @param password The password
      * @throws AuthenticationException
      * @throws UnexpectedException
      * @throws InterruptedException
      */
-    public void killSession(String user, String password)
+    public void killSession(int sessionId, String user, String password)
     throws AuthenticationException, UnexpectedException, InterruptedException;
 
     /**
-     * Kills a session identified by a ticket.
+     * Kills a session identified by session id athenticated by a ticket.
      * 
+     * @param session The session id
      * @param ticket The ticket
      * @throws AuthenticationException
      * @throws UnexpectedException
      * @throws InterruptedException
      */
-	public void killSession(String ticket)
+	public void killSession(int session, String ticket)
 	throws AuthenticationException, UnexpectedException, InterruptedException;
     
 	/**
 	 * Logs in a user and returns a <tt>ServerSession</tt> based on a ticket.
 	 * 
 	 * @param ticket The ticket
+     * @param clientType The client type
+     * @param allowMulti Do we allow multiple sessions per user?
 	 * @return
 	 * @throws AuthenticationException
 	 * @throws LoginProhibitedException
 	 * @throws AlreadyLoggedInException
 	 * @throws UnexpectedException
 	 */
-    public ServerSession login(String ticket)
+    public ServerSession login(String ticket, short clientType, boolean allowMulti)
     throws AuthenticationException, LoginProhibitedException,
             AlreadyLoggedInException, UnexpectedException;
 
@@ -62,13 +66,15 @@ public interface ServerSessionFactory
      * 
      * @param user The login id
      * @param password The password
+     * @param clientType The client type
+     * @param allowMulti Do we allow multiple sessions per user?
      * @return A valid ServerSession
      * @throws AuthenticationException
      * @throws LoginProhibitedException
      * @throws AlreadyLoggedInException
      * @throws UnexpectedException
      */
-    public ServerSession login(String user, String password)
+    public ServerSession login(String user, String password, short clientType, boolean allowMulti)
     throws AuthenticationException, LoginProhibitedException,
             AlreadyLoggedInException, UnexpectedException;
 
@@ -85,7 +91,7 @@ public interface ServerSessionFactory
     throws AuthenticationException, UnexpectedException;
 
     /**
-     * Discards a login ticker
+     * Discards a login ticket
      * 
      * @param ticket The ticket
      * @throws AuthenticationException

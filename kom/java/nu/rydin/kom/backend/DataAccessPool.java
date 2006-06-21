@@ -32,7 +32,7 @@ public class DataAccessPool
 	    }
 	}
 	
-	private LinkedList m_pool = new LinkedList(); 
+	private LinkedList<DataAccess> m_pool = new LinkedList<DataAccess>(); 
 	
 	public DataAccessPool()
 	throws UnexpectedException

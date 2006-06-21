@@ -24,7 +24,7 @@ import nu.rydin.kom.i18n.MessageFormatter;
  */
 public abstract class EnumParameter extends CommandLineParameter
 {
-    private final List m_alternatives;
+    private final List<String> m_alternatives;
 
     private final String m_headingKey;
 
@@ -52,7 +52,7 @@ public abstract class EnumParameter extends CommandLineParameter
         m_promptKey = promptKey;
         m_legendKeyPrefix = legendKeyPrefix;
         m_allowPrefixes = allowPrefixes;
-        m_alternatives = new ArrayList(alternatives.length);
+        m_alternatives = new ArrayList<String>(alternatives.length);
         for (int i = 0; i < alternatives.length; i++)
         {
             String each = alternatives[i];

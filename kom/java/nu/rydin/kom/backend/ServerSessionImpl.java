@@ -13,7 +13,6 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -46,6 +45,7 @@ import nu.rydin.kom.events.BroadcastAnonymousMessageEvent;
 import nu.rydin.kom.events.BroadcastMessageEvent;
 import nu.rydin.kom.events.ChatAnonymousMessageEvent;
 import nu.rydin.kom.events.ChatMessageEvent;
+import nu.rydin.kom.events.DetachRequestEvent;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.MessageDeletedEvent;
@@ -72,7 +72,6 @@ import nu.rydin.kom.exceptions.OriginalsNotAllowedException;
 import nu.rydin.kom.exceptions.RepliesNotAllowedException;
 import nu.rydin.kom.exceptions.SelectionOverflowException;
 import nu.rydin.kom.exceptions.UnexpectedException;
-import nu.rydin.kom.frontend.text.ClientSession;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferenceListItem;
 import nu.rydin.kom.structs.ConferencePermission;
@@ -216,18 +215,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	 * Time of login
 	 */
 	private final long m_loginTime;
-	
-	/**
+    
+    /**
+     * The session id (assigned by factory)
+     */
+	private final int m_sessionId;
+    
+    private short m_clientType;
+    
+	/*
 	 * Id of last message read, or -1 if no message has been read yet.
 	 */
 	private long m_lastReadMessageId = -1;
-	
-	/**
-	 * A cached list of memberships. Don't forget to reload it
-	 * when things change, e.g. the user sign on or off from a conference.
-	 */
-	private MembershipList m_memberships;
-	
+		
 	/**
 	 * Reply stack.
 	 */
@@ -251,13 +251,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	/**
 	 * List of incoming events
 	 */
-	private final LinkedList m_incomingEvents = new LinkedList();
+	private final LinkedList<Event> m_incomingEvents = new LinkedList<Event>();
 	
 	/**
 	 * List of deferred events, i.e. events that will be sent once
 	 * the current transaction is committed.
 	 */
-	private final LinkedList m_deferredEvents = new LinkedList();
+	private final LinkedList<DeferredEvent> m_deferredEvents = new LinkedList<DeferredEvent>();
 	
 	/**
 	 * Last suggested command
@@ -300,13 +300,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	 * Messages to mark as unread at logout
 	 */
 	private ReadLogItem m_pendingUnreads;
-	
-	/**
-	 * Filters by user id
-	 */
-	private final Map m_filterCache = new HashMap();
-		
-	public ServerSessionImpl(DataAccess da, long userId, SessionManager sessions)
+    
+    /**
+     * User variables shared across sessions for the same user
+     */
+    protected final UserContext m_userContext;
+    
+    private final int FILTER_ADJUST_THREASHOLD = 10;
+			
+	public ServerSessionImpl(DataAccess da, long userId, int sessionId, short clientType, SessionManager sessions)
 	throws UnexpectedException
 	{
 		try
@@ -323,41 +325,44 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Set up member variables
 			//
 			m_userId 			= userId;
+            m_clientType        = clientType;
 			m_loginTime			= System.currentTimeMillis();
 			m_sessions			= sessions;
-						
-			// Load membership infos into cache
-			//
-			this.reloadMemberships();
-			
-			// Load filters into cache
-			//
-			this.loadFilters();
-			
-			// If we have saved unreads, load them and apply
-			//
-			try
-			{
-			    this.loadUnreadMarkers();
-			    this.applyUnreadMarkers();
-			    m_memberships.save(this.getLoggedInUserId(), m_da.getMembershipManager());
-			}
-			catch(ObjectNotFoundException e)
-			{
-			    // No file, just ignore
-			}
-				
-			// Go to first conference with unread messages
-			//
-			long firstConf = m_memberships.getFirstConferenceWithUnreadMessages(
-				da.getConferenceManager());
-			this.setCurrentConferenceId(firstConf != -1 ? firstConf : userId);
-			
-			// Commit. We have to do this manually here, since we're not called through
-			// a TransactionalInvocationHandler.
-			//
-			m_da.commit();
-			m_da = null;
+            m_sessionId         = sessionId;
+						            
+            // Create user context
+            //
+            m_userContext = UserContextFactory.getInstance().getOrCreateContext(userId, m_da.getMembershipManager(), m_da.getRelationshipManager());
+            
+            // Let's lock the user context while we're manipulating it!
+            //
+            synchronized(m_userContext)
+            {
+    			// If we have saved unreads, load them and apply
+    			//
+    			try
+    			{
+    			    this.loadUnreadMarkers();
+    			    this.applyUnreadMarkers();
+                    m_userContext.saveMemberships(m_da.getMembershipManager());
+    			}
+    			catch(ObjectNotFoundException e)
+    			{
+    			    // No file, just ignore
+    			}
+    				
+    			// Go to first conference with unread messages
+    			//
+    			long firstConf = m_userContext.getMemberships().getFirstConferenceWithUnreadMessages(
+    				da.getConferenceManager());
+    			this.setCurrentConferenceId(firstConf != -1 ? firstConf : userId);
+    			
+    			// Commit. We have to do this manually here, since we're not called through
+    			// a TransactionalInvocationHandler.
+    			//
+    			m_da.commit();
+    			m_da = null;
+            }
 		}
 		catch(SQLException e)
 		{
@@ -399,7 +404,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public void setCurrentConferenceId(long id)
-	throws SQLException, ObjectNotFoundException
+	throws UnexpectedException, ObjectNotFoundException
 	{
 		// We might need to save some membership stuff. 
 		//
@@ -429,6 +434,21 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new RuntimeException(e);
 		}				
 	}
+    
+    public int getSessionId()
+    {
+        return m_sessionId;
+    }
+    
+    public short getClientType()
+    {
+        return m_clientType;
+    }
+    
+    public void setClientType(short clientType)
+    {
+        m_clientType = clientType;
+    }
 	
 	public long getCurrentConferenceId()
 	{
@@ -469,10 +489,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
+            Map<Long, Long> filterCache = m_userContext.getFilterCache();
+            MembershipList memberships = m_userContext.getMemberships();
 		    long conf = this.getCurrentConferenceId();
 		    long user = this.getLoggedInUserId();
 		    ConferenceManager cm = m_da.getConferenceManager();
-		    boolean hasFilters = m_filterCache.size() > 0;
+		    boolean hasFilters = filterCache.size() > 0;
 		    
 		    // While what we found matches a filter...
 		    //
@@ -484,7 +506,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			    {
 			        try
 			        {
-			            int nextMail = m_memberships.getNextMessageInConference(user, cm);
+			            int nextMail = memberships.getNextMessageInConference(user, cm);
 			            try
 			            {
 					        if(nextMail != -1)
@@ -501,7 +523,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				        {
 				            // Message is probably deleted. Skip it!
 				            //
-				            m_memberships.markAsRead(user, nextMail);
+				            memberships.markAsRead(user, nextMail);
 				            continue;
 				        }
 			        }
@@ -552,7 +574,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			    int nextMessage = -1;
 		        try
 		        {
-			        nextMessage = m_memberships.getNextMessageInConference(conf, cm);
+			        nextMessage = memberships.getNextMessageInConference(conf, cm);
 		        }
 				catch(ObjectNotFoundException e)
 				{
@@ -591,7 +613,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				    {
 				        // Probably deleted. Skip!
 				        //
-				        m_memberships.markAsRead(conf, nextMessage);
+				        memberships.markAsRead(conf, nextMessage);
 				        continue;
 				    }
 				}
@@ -605,26 +627,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 									
 				// Get next conference with unread messages
 				//	
-				long confId = m_memberships.getNextConferenceWithUnreadMessages(conf,
+				long confId = memberships.getNextConferenceWithUnreadMessages(conf,
 						m_da.getConferenceManager());
 		
 				// Do we have any unread messages?
 				//
 				if(confId == -1)
 					return new SessionState(m_lastSuggestedCommand = CommandSuggestions.NO_ACTION,
-					        conf, 0);
-						
-					/*
-					 * TODO: What's the purpose of this? The current conference
-					 * should already have been checked!
-					
-					// Do we have messages in our current conference?
-					//
-					if(confId == m_currentConferenceId)
-						return new SessionState(m_lastSuggestedCommand = NEXT_MESSAGE,
-						        this.getCurrentConferenceId(), unread);
-						        */
-						        
+					        conf, 0);    						        
 					return new SessionState(m_lastSuggestedCommand = CommandSuggestions.NEXT_CONFERENCE,
 					        this.getCurrentConferenceId(), 0);
 		    }
@@ -653,7 +663,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    try
 	        {
 	            mh = mm.loadMessageHeader(message);
-	            skip = this.userMatchesFilter(mh.getAuthor(), filter);
+	            skip = m_userContext.userMatchesFilter(mh.getAuthor(), filter);
 	        }
 	        catch(ObjectNotFoundException e)
 	        {
@@ -671,7 +681,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        //
 	        try
 	        {
-	            m_memberships.markAsRead(conference, localnum);
+	            m_userContext.getMemberships().markAsRead(conference, localnum);
 	        }
 	        catch(ObjectNotFoundException e)
 	        {
@@ -805,13 +815,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public Envelope readNextMessage(long confId)
 	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
 	{
+        MembershipList memberships = m_userContext.getMemberships();
 		try
 		{
 			// Keep on trying until we've skipped all deleted messages
 			//
 			for(;;)
 			{ 
-				int next = m_memberships.getNextMessageInConference(confId, m_da.getConferenceManager());
+				int next = memberships.getNextMessageInConference(confId, m_da.getConferenceManager());
 				if(next == -1)
 					throw new NoMoreMessagesException();
 				try
@@ -824,7 +835,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 					// We hit a deleted message. Mark it as read
 					// and continue.
 					//
-					m_memberships.markAsRead(confId, next);
+					memberships.markAsRead(confId, next);
 				}
 			}
 		}
@@ -965,7 +976,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			long nextId = m_memberships.getNextConferenceWithUnreadMessages(
+			long nextId = m_userContext.getMemberships().getNextConferenceWithUnreadMessages(
 				this.getCurrentConferenceId(), m_da.getConferenceManager());
 		
 			// Going nowhere or going to the same conference? We're outta here!
@@ -1283,8 +1294,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+    
+    public void detach()
+    {
+        // Tell frontends to detach (hopefully they will)
+        // TODO: Do we need to check that they actually do?
+        //
+        this.postEvent(new DetachRequestEvent(m_userId, m_userId));
+    }
 	
-		
 	public void close()
 	throws UnexpectedException
 	{
@@ -1314,6 +1332,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			
 			// Unregister and kiss the world goodbye
 			//
+            UserContextFactory.getInstance().release(m_userId);
 			m_sessions.unRegisterSession(this);
 			m_closed = true;			
 		}
@@ -1332,7 +1351,36 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			return m_memberships.countUnread(conference, m_da.getConferenceManager());
+            MembershipList ml = m_userContext.getMemberships();
+			int n = ml.countUnread(conference, m_da.getConferenceManager());
+            
+            // If we're filtering users, and the conference has a reasonable
+            // number of unreads, we adjust for any filtered users. We only 
+            // adjust as long as we find filtered messages. 
+            // This will not always yield an accurate result, but it will at
+            // least prevent us from going into conferences where all messages
+            // are posted by Måns^h^h^h^hfiltered users.
+            //
+            if(n > 0 && n <= FILTER_ADJUST_THREASHOLD)
+            {
+                int localnum;
+                for(;;)
+                {
+                    localnum = ml.getNextMessageInConference(conference, m_da.getConferenceManager());
+                    if(localnum == -1)
+                        break;
+                    boolean mailbox = conference == this.getLoggedInUserId();
+                    if(this.applyFiltersForMessage(this.localToGlobal(conference, localnum), conference, localnum, 
+                            mailbox ? FilterFlags.MAILS : FilterFlags.MESSAGES))
+                    {
+                        --n;
+                        ml.markAsRead(conference, localnum);
+                    }
+                    else
+                        break;
+                } 
+            }
+            return n;
 		}
 		catch(SQLException e)
 		{
@@ -1824,7 +1872,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public String getDebugString()
 	{
 		ByteArrayOutputStream s = new ByteArrayOutputStream();
-		m_memberships.printDebugInfo(new PrintStream(s));
+		m_userContext.getMemberships().printDebugInfo(new PrintStream(s));
 		return s.toString();	
 	}
 	
@@ -1872,7 +1920,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			ConferenceInfo ci = cm.loadConference(this.getCurrentConferenceId());
 			int high = ci.getLastMessage();
 			high = Math.max(0, high - nUnread);
-			m_memberships.changeRead(ci.getId(), ci.getFirstMessage(), high);
+			m_userContext.getMemberships().changeRead(ci.getId(), ci.getFirstMessage(), high);
 			
 			// Discard reply stack
 			//
@@ -1895,7 +1943,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        MembershipInfo[] m = mm.listMembershipsByUser(userId);
 	        MembershipList ml = new MembershipList(m);
 	        int top = m.length;
-	        List list = new ArrayList (top);
+	        List<MembershipListItem> list = new ArrayList<MembershipListItem>(top);
 	        for (int i = 0; i < top; ++i)
 	        {
 	            try
@@ -1934,51 +1982,46 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public MembershipListItem[] listNews()
 	throws UnexpectedException
 	{
-		try
+        MembershipList memberships = m_userContext.getMemberships();
+		ConferenceManager cm = m_da.getConferenceManager();
+		MembershipInfo[] m = memberships.getMemberships();
+		int top = m.length;
+		List<MembershipListItem> list = new ArrayList<MembershipListItem>(top);
+		for(int idx = 0; idx < top; ++idx)
 		{
-			ConferenceManager cm = m_da.getConferenceManager();
-			MembershipInfo[] m = m_memberships.getMemberships();
-			int top = m.length;
-			List list = new ArrayList(top);
-			for(int idx = 0; idx < top; ++idx)
+			try
 			{
-				try
-				{
-					MembershipInfo each = m[idx];
-					long conf = each.getConference();
-					
-					// Don't include invisible conferences
-					//
+				MembershipInfo each = m[idx];
+				long conf = each.getConference();
+				
+				// Don't include invisible conferences
+				//
 					if(!this.isVisible(conf))
 					    continue;
-					int n = m_memberships.countUnread(conf, cm); 
+					int n = this.countUnread(conf);
+ 
 					if(n > 0)
 						list.add(new MembershipListItem(new NameAssociation(conf, this.getCensoredName(conf)), n));
 				}
 				catch(ObjectNotFoundException e)
 				{
 					// Probably deleted. Just skip!
-				}
 			}
-			MembershipListItem[] answer = new MembershipListItem[list.size()];
-			list.toArray(answer);
-			return answer;
 		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
+		MembershipListItem[] answer = new MembershipListItem[list.size()];
+		list.toArray(answer);
+		return answer;
 	}
 	
 	public UserListItem[] listLoggedInUsers()
 	throws UnexpectedException
 	{
-		ServerSession[] sessions = m_sessions.listSessions();
-		int top = sessions.length;
-		UserListItem[] answer = new UserListItem[top];
-		for(int idx = 0; idx < top; ++idx)
+		List<ServerSession> sessions = m_sessions.listSessions();
+		UserListItem[] answer = new UserListItem[sessions.size()];
+        int idx = 0;
+		for(Iterator<ServerSession> itor = sessions.iterator(); itor.hasNext(); ++idx)
 		{
-			ServerSession session = sessions[idx];
+			ServerSession session = itor.next();
 			long confId = session.getCurrentConferenceId();
 			long user = session.getLoggedInUserId();
 			String userName = "???";
@@ -2007,8 +2050,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			{
 				// Conference deleted. Display as "???"
 			}
-			answer[idx] = new UserListItem(new NameAssociation(user, new Name(userName, 
-			        Visibilities.PUBLIC, NameManager.USER_KIND)), (short) 0, new NameAssociation(confId, conferenceName), inMailbox, session.getLoginTime(),
+          
+			answer[idx] = new UserListItem(session.getSessionId(), new NameAssociation(user, new Name(userName, 
+			        Visibilities.PUBLIC, NameManager.USER_KIND)), session.getClientType(), (short) 0, 
+                    new NameAssociation(confId, conferenceName), inMailbox, session.getLoginTime(),
 			        ((ServerSessionImpl) session).getLastHeartbeat()); 
 		}
 		return answer;
@@ -2016,7 +2061,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		
 	public boolean hasSession (long userId)
 	{
-		return m_sessions.hasSession(userId);
+		return m_sessions.userHasSession(userId);
 	}
 	
 	public synchronized void postEvent(Event e)
@@ -2071,7 +2116,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		
 	private void sendChatMessageHelper(long userId, String message)
 	{
-		if (m_sessions.hasSession(userId))
+		if (m_sessions.userHasSession(userId))
 		{
 			if(message.substring(0,1).equals("!")) 
 			{
@@ -2105,14 +2150,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    mlm.storeMessagePointer(logId, this.getLoggedInUserId(), true, 
 		            logAsMulticast ? MessageLogKinds.MULTICAST : MessageLogKinds.CHAT);
 		    
-		    ArrayList refused = new ArrayList(destinations.length);
+		    ArrayList<NameAssociation> refused = new ArrayList<NameAssociation>(destinations.length);
 		    boolean explicitToSelf = false;
 		    
 		    
 			// Set to make sure we don't send the message to the same user more than once.
 			//
-			HashSet s = new HashSet();
-			HashSet rec_names = new HashSet();
+			HashSet<Long> s = new HashSet<Long>();
+			HashSet<Name> rec_names = new HashSet<Name>();
 			for (int i = 0; i < destinations.length; ++i)
 			{
 			    long each = destinations[i];
@@ -2129,10 +2174,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 					    UserInfo ui = um.loadUser(each);
 					    if(each == this.getLoggedInUserId())
 					        explicitToSelf = true;
-					    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(each);
-						if (m_sessions.hasSession(each) && sess.allowsChat(this.getLoggedInUserId()))
+                        UserContext uc = UserContextFactory.getInstance().getContextOrNull(each);
+						if (uc != null && uc.allowsChat(um, this.getLoggedInUserId()))
 						{
-							s.add(new Long(each));
+							s.add(each);
 							rec_names.add(ui.getName());
 						}
 						else
@@ -2147,14 +2192,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 						for (int j = 0; j < mi.length; ++j)
 						{
 						    long uid = mi[j].getUser();
-						    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(uid);
-							if (sess != null)
+                            UserContext uc = UserContextFactory.getInstance().getContextOrNull(uid);
+							if (uc != null)
 							{
 							    UserInfo ui = um.loadUser(uid);
 							    
 							    // Does the receiver accept chat messages
 							    //
-							    if(sess.allowsChat(this.getLoggedInUserId()))
+							    if(uc.allowsChat(um, this.getLoggedInUserId()))
 							        s.add(new Long(uid));
 							    else
 							        refused.add(new NameAssociation(uid, ui.getName()));
@@ -2240,14 +2285,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
                 {
                     // User. Check if logged in.
                     //
-                    ServerSessionImpl sess = (ServerSessionImpl) m_sessions.getSession(each);
-                    if(sess == null)
+                    UserContext uc = UserContextFactory.getInstance().getContextOrNull(each);
+                    if(uc == null)
                         answer[idx] = ChatRecipientStatus.NOT_LOGGED_IN;
                     else
                     {
                         // Logged in. Do they receive chat messages?
                         //
-                        answer[idx] = sess.allowsChat(this.getLoggedInUserId())
+                        answer[idx] = uc.allowsChat(um, this.getLoggedInUserId())
                         	? ChatRecipientStatus.OK_USER
                         	: ChatRecipientStatus.REFUSES_MESSAGES;
                     }
@@ -2291,19 +2336,16 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// while doing this and that the log won't be 100% correct, but that's
 			// a tradeoff we're willing to make at this point.
 			//
-			ServerSession[] sessions = m_sessions.listSessions();
-			int top = sessions.length;
-			ArrayList bounces = new ArrayList(top);
-			for(int idx = 0; idx < top; ++idx)
-			{
-			    ServerSessionImpl sess = (ServerSessionImpl) sessions[idx];
-			    long userId = sess.getLoggedInUserId();
+			ArrayList<NameAssociation> bounces = new ArrayList<NameAssociation>();
+			for(UserContext uc : UserContextFactory.getInstance().listContexts())
+            {
+			    long userId = uc.getUserId();
 			    try
 			    {
 			        // Find out if recipients allows broadcasts
 			        //
 				    UserInfo user = um.loadUser(userId);
-				    if(sess.allowsBroadcast(this.getLoggedInUserId()))
+				    if(uc.allowsBroadcast(um, this.getLoggedInUserId()))
 				        mlm.storeMessagePointer(logId, userId, false, kind);
 				    else
 				        bounces.add(new NameAssociation(userId, user.getName()));   
@@ -2782,18 +2824,18 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    return new HeartbeatListenerImpl();
 	}
 	
-    public void killSession(long userId)
+    public void killSession(int sessionId)
     throws AuthorizationException, ObjectNotFoundException, UnexpectedException
     {
         // We have to be sysops to do this!
         //
         this.checkRights(UserPermissions.ADMIN);
         
-        // SET THEM UP THE BOMB! FOR GREAT FREEDOM!
+        // SET THEM UP THE BOMB! FOR GREAT JUSTICE!
         //
         try
         {
-            m_sessions.killSession(userId);
+            m_sessions.killSessionById(sessionId);
         }
         catch(InterruptedException e)
         {
@@ -2815,13 +2857,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         // SET UP US THE BIG BOMB!! 
         // Kill all sessions (except this one)
         //
-        ServerSession[] sessions = m_sessions.listSessions();
-        int top = sessions.length;
-        for(int idx = 0; idx < top; ++idx)
+        List<ServerSession> sessions = m_sessions.listSessions();
+        for (ServerSession each : sessions)
         {
-            ServerSession each = sessions[idx];
             if(each != this)
-                this.killSession(each.getLoggedInUserId());
+                this.killSession(each.getSessionId());
         }
     }
     
@@ -3020,7 +3060,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             
             // Update cache
             //
-            m_filterCache.put(new Long(jinge), new Long(flags));
+            m_userContext.getFilterCache().put(new Long(jinge), new Long(flags));
         }
 	    catch(SQLException e)
 	    {
@@ -3040,7 +3080,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             
             // Update cache
             //
-            m_filterCache.remove(new Long(user));
+            m_userContext.getFilterCache().remove(new Long(user));
         }
 	    catch(SQLException e)
 	    {
@@ -3073,28 +3113,17 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	protected void leaveConference()
-	
-	throws SQLException
+	throws UnexpectedException
 	{
 		// Save message markers
 		//
-		m_memberships.save(m_userId, m_da.getMembershipManager());
+		m_userContext.saveMemberships(m_da.getMembershipManager());
 	}
-	
-	protected void reloadMemberships()
-	throws ObjectNotFoundException, SQLException
-	{
-		// Load membership infos into cache
-		//
-		if(m_memberships != null)
-			m_memberships.save(m_userId, m_da.getMembershipManager());
-		m_memberships = new MembershipList(m_da.getMembershipManager().listMembershipsByUser(m_userId));
-	}
-	
+		
 	protected boolean markMessageAsReadEx(long conference, int localnum)
 	throws ObjectNotFoundException
 	{
-		return m_memberships.markAsReadEx(conference, localnum);
+		return m_userContext.getMemberships().markAsReadEx(conference, localnum);
 	}
 	
 	protected int performThreadOperation(long thread, int max, MessageOperation op)
@@ -3120,21 +3149,21 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    try
 	    {
 		    MessageManager mm = m_da.getMessageManager();
-		    Stack stack = new Stack();
-		    stack.add(new Long(root));
+		    Stack<Long> stack = new Stack<Long>();
+		    stack.add(root);
 		    int n = 0;
 		    for(;!stack.isEmpty(); ++n)
 		    {
 		        // Perform operation
 		        //
-		        long id = ((Long) stack.pop()).longValue();
+		        long id = stack.pop();
 		        op.perform(id);
 		        
 		        // Push replies
 		        //
 		        MessageHeader[] mh = mm.getReplies(id);
 		        for (int idx = 0; idx < mh.length; idx++)
-		            stack.push(new Long(mh[idx].getId()));
+		            stack.push(mh[idx].getId());
 		    }
 		    return n;
 	    }
@@ -3186,7 +3215,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			// Mark it as read in the membership list
 			//
-			m_memberships.markAsRead(conference, localnum);
+		    m_userContext.getMemberships().markAsRead(conference, localnum);
 			
 			// Update last read message
 			//
@@ -3210,7 +3239,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        conf = m_readLog.getConference();
 	        try
 	        {
-	            m_memberships.markAsUnread(conf, m_readLog.getLocalNum());
+	            m_userContext.getMemberships().markAsUnread(conf, m_readLog.getLocalNum());
 	            ++count;
 	        }
 	        catch(ObjectNotFoundException e)
@@ -3364,7 +3393,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			//
 			MessageHeader[] replyHeaders = mm.getReplies(message.getId());
 			top = replyHeaders.length;
-			ArrayList list = new ArrayList(top);
+			ArrayList<Envelope.RelatedMessage> list = new ArrayList<Envelope.RelatedMessage>(top);
 			
 			for(int idx = 0; idx < top; ++idx)
 			{
@@ -3374,7 +3403,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				
 				// Don't show replies written by filtered users
 				//
-				if(this.userMatchesFilter(each.getAuthor(), FilterFlags.MESSAGES))
+				if(m_userContext.userMatchesFilter(each.getAuthor(), FilterFlags.MESSAGES))
 				    continue;
 				
 				// Don't show personal replies
@@ -3523,7 +3552,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				
 				// If it's unread, we're done
 				//
-				if(m_memberships.isUnread(occ.getConference(), occ.getLocalnum()))
+				if(m_userContext.getMemberships().isUnread(occ.getConference(), occ.getLocalnum()))
 					break;
 			}
 			catch(ObjectNotFoundException e)
@@ -3587,6 +3616,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        m_deferredEvents.add(new DeferredSend(userId, e));
 	    }
 	}
+    
+    protected void reloadMemberships()
+    throws SQLException, ObjectNotFoundException
+    {
+        m_userContext.reloadMemberships(m_da.getMembershipManager());
+    }
 	
 	protected void flushEvents()
 	{
@@ -3631,25 +3666,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	
 	public void onEvent(ChatMessageEvent e)
 	{
-	    if(this.allowsChat(e.getOriginatingUser()))
+	    if(this.allowsChatInEventHandler(e.getOriginatingUser()))
 	        this.postEvent(e);
 	}
 
 	public void onEvent(ChatAnonymousMessageEvent e)
 	{
-	    if(this.allowsChat(e.getOriginatingUser()))
+	    if(this.allowsChatInEventHandler(e.getOriginatingUser()))
 	        this.postEvent(e);
 	}
 	
 	public void onEvent(BroadcastMessageEvent e)
 	{
-	    if(this.allowsBroadcast(e.getOriginatingUser()))
+	    if(this.allowsBroadcastInEventHandler(e.getOriginatingUser()))
 	        this.postEvent(e);
 	}
 	
 	public void onEvent(BroadcastAnonymousMessageEvent e)
 	{
-	    if(this.allowsBroadcast(e.getOriginatingUser()))
+	    if(this.allowsBroadcastInEventHandler(e.getOriginatingUser()))
 	        this.postEvent(e);
 	}
 
@@ -3674,7 +3709,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		long conf = e.getConference();
 		try
 		{
-			m_memberships.get(conf);
+		    m_userContext.getMemberships().get(conf);
 			this.postEvent(e);
 		}
 		catch(ObjectNotFoundException ex)
@@ -3729,7 +3764,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		        
 		    // Try to load the membership to see if we should care.
 		    //
-			m_memberships.get(conf);
+			m_userContext.getMemberships().get(conf);
 			if(debug)
 			    Logger.debug(this, "Passing event to client");
 			this.postEvent(e);
@@ -3962,6 +3997,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		    CacheManager cm = CacheManager.instance();
 		    return new SystemInformation(m_sessions.canLogin(), cm.getNameCache().getStatistics(),
 		            cm.getUserCache().getStatistics(), cm.getConferenceCache().getStatistics(),
+                    cm.getPermissionCache().getStatistics(),
 		            m_da.getUserManager().countUsers(), m_da.getConferenceManager().countConferences(),
 		            m_da.getMessageManager().countMessages());
 	    }
@@ -4019,7 +4055,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     {
     	try
 		{
-    		return m_memberships.getOrNull(conferenceId) != null 
+    		return m_userContext.getMemberships().getOrNull(conferenceId) != null 
     			|| m_da.getNameManager().getNameById(conferenceId).getVisibility() == Visibilities.PUBLIC
     			|| m_da.getMembershipManager().hasPermission(userId, conferenceId, 
     			        ConferencePermissions.READ_PERMISSION);
@@ -4065,7 +4101,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    		    {
 	    		        GlobalMessageSearchResult gms = (GlobalMessageSearchResult) obj;
 	    		        return ServerSessionImpl.this.hasMessageReadPermissions(gms.getGlobalId())
-	    		        	&& !ServerSessionImpl.this.userMatchesFilter(
+	    		        	&& !ServerSessionImpl.this.m_userContext.userMatchesFilter(
 	    		        	        gms.getAuthor().getId(), FilterFlags.MESSAGES);
 	    		    }
 	    		    catch(ObjectNotFoundException e)
@@ -4102,47 +4138,63 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             		}
                 });
     }
+     
     
-    protected void loadFilters()
-    throws UnexpectedException
+    protected boolean allowsChatInEventHandler(long sender)
     {
         try
         {
-            Relationship[] rels = m_da.getRelationshipManager().listByRefererAndKind(
-                    this.getLoggedInUserId(), 
-                    RelationshipKinds.FILTER);
-            for (int idx = 0; idx < rels.length; idx++)
+            DataAccess da = DataAccessPool.instance().getDataAccess();
+            try
             {
-                Relationship jinge = rels[idx];
-                m_filterCache.put(new Long(jinge.getReferee()), new Long(jinge.getFlags()));
+                return m_userContext.allowsChat(da.getUserManager(), sender);
+            }
+            finally
+            {
+                try
+                {
+                    da.rollback();   
+                }
+                finally
+                {
+                    DataAccessPool.instance().returnDataAccess(da);
+                }
             }
         }
-        catch(SQLException e)
+        catch(Exception e)
         {
-            throw new UnexpectedException(this.getLoggedInUserId(), e);
+            Logger.error(this, "Error in event handler", e);
+            return false;
         }
     }
-    
-    protected boolean userMatchesFilter(long user, long neededFlags)
-    {
-        Long flagObj = (Long) m_filterCache.get(new Long(user));
-        if(flagObj == null)
-            return false;
-        long flags = flagObj.longValue();
-        return (flags & neededFlags) == neededFlags; 
-    }    
-    
-    protected boolean allowsChat(long sender)
-    {
-        boolean allowsChat = this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_CHAT_MESSAGES);
-		return allowsChat && !this.userMatchesFilter(sender, FilterFlags.CHAT);
-    }
 
-    protected boolean allowsBroadcast(long sender)
+    protected boolean allowsBroadcastInEventHandler(long sender)
     {
-        boolean allowsBroadcast = this.testUserFlagInEventHandler(this.getLoggedInUserId(), 0, UserFlags.ALLOW_BROADCAST_MESSAGES);
-		return allowsBroadcast && !this.userMatchesFilter(sender, FilterFlags.BROADCASTS);
-    }    
+        try
+        {
+            DataAccess da = DataAccessPool.instance().getDataAccess();
+            try
+            {
+                return m_userContext.allowsBroadcast(da.getUserManager(), sender);
+            }
+            finally
+            {
+                try
+                {
+                    da.rollback();   
+                }
+                finally
+                {
+                    DataAccessPool.instance().returnDataAccess(da);
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            Logger.error(this, "Error in event handler", e);
+            return false;
+        }
+    }
     
 	protected void innerMarkAsUnreadAtLogoutInCurrentConference(int localnum)
 	throws UnexpectedException
@@ -4220,7 +4272,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 		    try
 		    {
-		        m_memberships.markAsUnread(m_pendingUnreads.getConference(), m_pendingUnreads.getLocalNum());
+		        m_userContext.getMemberships().markAsUnread(m_pendingUnreads.getConference(), m_pendingUnreads.getLocalNum());
 		    }
 		    catch(ObjectNotFoundException e)
 		    {

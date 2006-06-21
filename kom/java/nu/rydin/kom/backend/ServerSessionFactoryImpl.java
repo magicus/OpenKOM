@@ -17,8 +17,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Timer;
@@ -42,6 +46,7 @@ import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.ClientSettings;
 import nu.rydin.kom.modules.Module;
+import nu.rydin.kom.structs.SessionListItem;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Base64;
 import nu.rydin.kom.utils.FileUtils;
@@ -52,26 +57,14 @@ import nu.rydin.kom.utils.Logger;
  */
 public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 {
+    private int m_nextSessionId = 0;
+    
 	private SessionManager m_sessionManager;
-
-	private static final ServerSessionFactory s_instance;
-	
-	static
-	{
-	    try
-	    {
-	        s_instance = new ServerSessionFactoryImpl();
-	    }
-	    catch(UnexpectedException e)
-	    {
-	        throw new ExceptionInInitializerError(e);
-	    }
-	}
 	
 	/**
 	 * Valid tickets
 	 */
-	private Map m_validTickets = Collections.synchronizedMap(new HashMap());
+	private Map<String, Long> m_validTickets = Collections.synchronizedMap(new HashMap<String, Long>());
 
 	/**
 	 * Ticket expiration timer
@@ -93,12 +86,40 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	            Logger.info(this, "Discarded unused ticket");
 	    }
 	}
-	
-/*	public static ServerSessionFactory instance()
-	{
-		return s_instance;
-	}*/
-	
+    
+    private class ContextCleaner extends Thread
+    {
+        public void run()
+        {
+            try
+            {
+                UserContextFactory ucf = UserContextFactory.getInstance();
+                for(;;)
+                {
+                    Thread.sleep(60000);
+                    synchronized(ucf)
+                    {
+                        List<UserContext> list = ucf.listContexts();
+                        for (UserContext each : list)
+                        {
+                            if(!ServerSessionFactoryImpl.this.m_sessionManager.userHasSession(each.getUserId()))
+                            {
+                                ucf.release(each.getUserId());
+                                Logger.info(this, "Released rogue context for user " + each.getUserId());
+                            }
+                        }
+                    }
+                }
+            }
+            catch(InterruptedException e)
+            {
+                Logger.info(this, "ContextCleaner shutting down...");
+            }
+        }
+    }
+    
+    private ContextCleaner m_contextCleaner;
+		
 	public void start(Map properties) throws ModuleException
 	{
 	    // Initialize the static global server settings class.
@@ -110,6 +131,12 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	    // the module system can't handle a separated client-side anyway,
 	    // we can safely ignore this for now.
 	    ClientSettings.initialize(properties);
+        
+        // Start context cleaner thread
+        //
+        m_contextCleaner = new ContextCleaner();
+        m_contextCleaner.setName("ContextCleaner");
+        m_contextCleaner.start();
 	    
 	    // Since we just loaded the client settings, we can perform this check:
 	    //
@@ -175,6 +202,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 		catch (UnexpectedException e)
         {
             // Noone expects ths Spanish Inquisition!
+            //
 		    throw new ModuleException(e);
         }
 		finally
@@ -204,12 +232,14 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	public void stop()
 	{
 	    m_sessionManager.stop();
+        m_contextCleaner.interrupt();
 	}
 	
 	public void join()
 	throws InterruptedException
 	{
 	    m_sessionManager.join();
+        m_contextCleaner.join();
 	}
 	
 	public ServerSessionFactoryImpl()
@@ -217,20 +247,10 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	{
 
 	}	
+    
+    
 	
-	public void killSession(String user, String password)
-	throws AuthenticationException, UnexpectedException, InterruptedException
-	{
-	    m_sessionManager.killSession(this.authenticate(user, password));
-	}
-	
-	public void killSession(String ticket)
-	throws AuthenticationException, UnexpectedException, InterruptedException
-	{
-	    m_sessionManager.killSession(this.authenticate(ticket));
-	}	
-	
-	public ServerSession login(String ticket)
+	public ServerSession login(String ticket, short clientType, boolean allowMulti)
 	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
 	{
 	    // Log us in!
@@ -239,7 +259,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	    try
 	    {
 	        long id = this.authenticate(ticket);
-	        ServerSession session = this.innerLogin(id, da);
+	        ServerSession session = this.innerLogin(id, clientType, da, allowMulti);
 	        this.consumeTicket(ticket);
 	        return session;
 	    }
@@ -249,7 +269,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	    }
 	}
 	
-	private ServerSession innerLogin(long id, DataAccess da)
+	private ServerSession innerLogin(long id, short clientType, DataAccess da, boolean allowMulti)
 	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
 	{
 		try
@@ -266,13 +286,25 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 			
 			// Was the user already logged in?
 			//
-			if(m_sessionManager.getSession(id) != null)
-				throw new AlreadyLoggedInException();
+            List<ServerSession> userSessions = m_sessionManager.getSessionsByUser(id);
+            int top = userSessions.size();
+			if(!allowMulti && top > 0)
+            {
+                ArrayList<SessionListItem> list = new ArrayList<SessionListItem>(top);
+                for(Iterator<ServerSession> itor = userSessions.iterator(); itor.hasNext();)
+                {
+                    ServerSession each = itor.next();
+                    list.add(new SessionListItem(each.getSessionId(), each.getClientType(), each.getLoginTime(),
+                            each.getLastHeartbeat()));
+                }
+				throw new AlreadyLoggedInException(list);
+            }
 			
 			// Create a ServerSessionImpl, wrapped in a dynamic proxy and an InvocationHandler
 			// keeping track of connections and transactions.
 			//
-			ServerSessionImpl session = new ServerSessionImpl(da, id, m_sessionManager);
+			ServerSessionImpl session = new ServerSessionImpl(da, id, m_nextSessionId++, 
+                    clientType, m_sessionManager);
 			m_sessionManager.registerSession(session);
 			
 			// Successfully logged in!
@@ -300,7 +332,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 		}
 	}
 	
-	public ServerSession login(String user, String password)
+	public ServerSession login(String user, String password, short clientType, boolean allowMulti)
 	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
 	{
 		DataAccess da = DataAccessPool.instance().getDataAccess();
@@ -311,7 +343,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 			// Authenticate user
 			//
 			long id = um.authenticate(user, password);
-			return this.innerLogin(id, da);
+			return this.innerLogin(id, clientType, da, allowMulti);
 		}
 		catch(SQLException e)
 		{
@@ -356,7 +388,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	        
 	        // Have a valid ticket! Now register it.
 	        //
-            m_validTickets.put(ticket, new Long(userId));
+            m_validTickets.put(ticket, userId);
             m_ticketExpirations.schedule(new TicketKiller(ticket), ServerSettings.getTicketLifetime()); 
             return ticket;
 	    }
@@ -492,8 +524,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 				UserFlags.DEFAULT_FLAGS3, UserFlags.DEFAULT_FLAGS4, UserPermissions.SELF_REGISTERED_USER);
             
             // Create a login-script to help this user set stuff up
-            //
-            InputStream is = null; 
+            // 
             try
             {
                 String content = FileUtils.loadTextFromResource("selfregistered.login"); 
@@ -529,5 +560,32 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
                 da.rollback();
             dap.returnDataAccess(da);
         }                
+    }
+
+    public void killSession(int sessionId, String user, String password) throws AuthenticationException, UnexpectedException, InterruptedException
+    {
+        // Authenticate
+        //
+        long id = this.authenticate(user, password);
+        this.innerKillSession(sessionId, id);
+    }
+    
+    public void killSession(int session, String ticket) throws AuthenticationException, UnexpectedException, InterruptedException
+    {
+        // Authenticate
+        //
+        long id = this.authenticate(ticket);
+        this.innerKillSession(session, id);
+    }
+    
+    protected void innerKillSession(int sessionId, long userId)
+    throws AuthenticationException, UnexpectedException, InterruptedException
+    {
+        // We can only kill our own sessions
+        //
+        ServerSession sess = m_sessionManager.getSessionById(sessionId);
+        if(sess.getLoggedInUserId() != userId)
+           throw new AuthenticationException();
+        m_sessionManager.killSessionById(sessionId);
     }
 }

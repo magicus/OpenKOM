@@ -105,7 +105,7 @@ public class NamePicker
 
     public static NameAssociation pickName(NameAssociation[] assocs, Context ctx) throws IOException, InterruptedException, KOMException 
     {
-        List candidates = new ArrayList(assocs.length);
+        List<Name> candidates = new ArrayList<Name>(assocs.length);
         for (int i = 0; i < assocs.length; i++)
             candidates.add(assocs[i].getName());
         

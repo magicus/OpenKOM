@@ -7,7 +7,8 @@
 package nu.rydin.kom.frontend.text.parser;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
@@ -26,90 +27,111 @@ import nu.rydin.kom.structs.UserListItem;
  */
 public class ChatRececipientParameter extends NamedObjectParameter
 {
-    public final static NameAssociation ALL_USERS = new NameAssociation(-1, "alla", NameManager.UNKNOWN_KIND);
+    public final static NameAssociation ALL_USERS = new NameAssociation(-1,
+            "alla", NameManager.UNKNOWN_KIND);
 
     public ChatRececipientParameter(String missingObjectQuestionKey,
             boolean isRequired)
     {
         super(missingObjectQuestionKey, isRequired);
     }
-    
+
     public ChatRececipientParameter(boolean isRequired)
     {
         super(isRequired);
     }
 
     public Object resolveFoundObject(Context context, Match match)
-    throws KOMException, IOException, InterruptedException
+            throws KOMException, IOException, InterruptedException
     {
         // First, get the list of logged in users and extract the names
         //
         String pattern = match.getMatchedString();
-        
-        if (pattern.equals("*")) {
+
+        if (pattern.equals("*"))
+        {
             return ALL_USERS;
         }
-        
+
         ServerSession session = context.getSession();
-        ArrayList list = new ArrayList();
-        if (pattern.startsWith("*")) {
+        
+        // Use a set since we want each name only once, even if the
+        // user is logged in multiple times
+        //
+        Set<NameAssociation> set = new HashSet<NameAssociation>();
+        if (pattern.startsWith("*"))
+        {
             // Argument was prefixed by "*". That means, we want to select
             // recipient from the list of conferences.
             pattern = pattern.substring(1); // Remove "*".
-            
-            NameAssociation[] conferences = session.getAssociationsForPatternAndKind(
-                    pattern, NameManager.CONFERENCE_KIND);
-            for (int idx = 0; idx < conferences.length; ++idx) {
-                list.add(conferences[idx]);
+
+            NameAssociation[] conferences = session
+                    .getAssociationsForPatternAndKind(pattern,
+                            NameManager.CONFERENCE_KIND);
+            for (int idx = 0; idx < conferences.length; ++idx)
+            {
+                set.add(conferences[idx]);
             }
-        } else {
+        } else
+        {
             // Otherwise, we select it from the list of logged in users.
             UserListItem[] users = session.listLoggedInUsers();
-            for (int idx = 0; idx < users.length; ++idx) {
+            for (int idx = 0; idx < users.length; ++idx)
+            {
                 NameAssociation name = users[idx].getUser();
-                if (NameUtils.match(pattern, name.getName().getName(), false)) {
-                    list.add(name);
+                if (NameUtils.match(pattern, name.getName().getName(), false))
+                {
+                    set.add(name);
                 }
             }
         }
-        
+
         // What did we get?
         //
-        switch(list.size())
+        switch (set.size())
         {
-        	case 0:
-        	{
-        	    // Either the object doesn't exist, or the it represents
-        	    // a user the wasn't logged in. Find out what the problem
-        	    // is!
-                if (pattern.startsWith("*")) {
-                    pattern = pattern.substring(1); // Remove "*".
+        case 0:
+        {
+            // Either the object doesn't exist, or the it represents
+            // a user the wasn't logged in. Find out what the problem
+            // is!
+            if (pattern.startsWith("*"))
+            {
+                pattern = pattern.substring(1); // Remove "*".
+                throw new ObjectNotFoundException(pattern);
+            } else
+            {
+                NameAssociation[] names = session
+                        .getAssociationsForPatternAndKind(pattern,
+                                NameManager.USER_KIND);
+                if (names.length == 0)
+                {
                     throw new ObjectNotFoundException(pattern);
-                } else {
-                    NameAssociation[] names = session.getAssociationsForPatternAndKind(pattern, NameManager.USER_KIND);
-                    if (names.length == 0) {
-                        throw new ObjectNotFoundException(pattern);
-                    } else if (names.length == 1) {
-                        throw new NotLoggedInException(names[0].getName().toString());
-                    } else {
-                        throw new AmbigiousAndNotLoggedInException(pattern);
-                    }
+                } else if (names.length == 1)
+                {
+                    throw new NotLoggedInException(names[0].getName()
+                            .toString());
+                } else
+                {
+                    throw new AmbigiousAndNotLoggedInException(pattern);
                 }
-        	    //
-        	}
-        	case 1:
-        	    return ((NameAssociation) list.get(0));
-        	default:
-        	{
-        	    NameAssociation[] names = new NameAssociation[list.size()];
-        	    list.toArray(names);
-        	    return NamePicker.pickName(names, context);
-        	}
+            }
+            //
+        }
+        case 1:
+            return ((NameAssociation) set.iterator().next());
+        default:
+        {
+            NameAssociation[] names = new NameAssociation[set.size()];
+            set.toArray(names);
+            return NamePicker.pickName(names, context);
+        }
         }
     }
 
     protected boolean isValidName(String name)
     {
-        return (super.isValidName(name) || name.equals("*") || (name.startsWith("*") && super.isValidName(name.substring(1))));
+        return (super.isValidName(name) || name.equals("*") || (name
+                .startsWith("*") && super.isValidName(name.substring(1))));
     }
 }

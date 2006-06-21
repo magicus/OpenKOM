@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import nu.rydin.kom.backend.CacheManager;
+import nu.rydin.kom.backend.KOMCache;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.exceptions.AlreadyMemberException;
 import nu.rydin.kom.exceptions.AuthorizationException;
@@ -24,6 +26,7 @@ import nu.rydin.kom.structs.MessageRange;
 import nu.rydin.kom.structs.MessageRangeList;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
+import nu.rydin.kom.structs.PermissionKey;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -209,7 +212,7 @@ public class MembershipManager
 	{
 		m_listPermissionsStmt.clearParameters();
 		m_listPermissionsStmt.setLong(1, conf);
-		List list = new ArrayList();
+		List<ConferencePermission> list = new ArrayList<ConferencePermission>();
 		ResultSet rs = null;
 		try
 		{
@@ -295,7 +298,7 @@ public class MembershipManager
 	 */
 	public void signup(long user, long conference, long flags, int permissions, int negationMask)
 	throws ObjectNotFoundException, AlreadyMemberException, AuthorizationException, SQLException
-	{
+	{ 
 		// Check if already member
 		//
 		try
@@ -560,10 +563,13 @@ public class MembershipManager
 				m_addMembershipStmt.setLong(5, 0);
 				m_addMembershipStmt.setInt(6, permissions);
 				m_addMembershipStmt.setInt(7, negations);
-				m_addMembershipStmt.executeUpdate();
+				m_addMembershipStmt.executeUpdate();                
 			}
 			finally
 			{
+                // Invalidate cache
+                //
+                CacheManager.instance().getPermissionCache().registerInvalidation(new PermissionKey(conference, user));
 				if(rs != null)
 					rs.close();
 			}
@@ -582,6 +588,16 @@ public class MembershipManager
 	public int getPermissions(long user, long conference)
 	throws ObjectNotFoundException, SQLException
 	{
+        // First try cache
+        //
+        PermissionKey pKey = new PermissionKey(conference, user);
+        KOMCache pCache = CacheManager.instance().getPermissionCache();
+        Integer iPerm = (Integer) pCache.get(pKey);
+        if(iPerm != null)
+            return iPerm;
+        
+        // Not found in cache, check database
+        //
 		m_getPermissionsStmt.clearParameters();
 		m_getPermissionsStmt.setLong(1, user);
 		m_getPermissionsStmt.setLong(2, conference);
@@ -600,7 +616,12 @@ public class MembershipManager
 				rs = m_getNonmemberPermissionsStmt.executeQuery();
 				if(!rs.next())
 				    throw new ObjectNotFoundException("conf id=" + conference);
-				return rs.getInt(1);
+                int perm = rs.getInt(1);
+                
+                // Update cache and return 
+                //
+                pCache.put(pKey, new Integer(perm));
+				return perm;
 			}
 			
 			// Get user permission, negation mask and conference permissions
@@ -613,7 +634,9 @@ public class MembershipManager
 			// or set user permission is granted, unless the negation bit is 
 			// set.
 			//
-			return ((u | c) & ~m); 			
+            int perm = ((u | c) & ~m);
+            pCache.put(pKey, new Integer(perm));
+			return perm;	
 		}
 		finally
 		{
@@ -640,7 +663,7 @@ public class MembershipManager
 	protected MembershipInfo[] extractMemberships(ResultSet rs)
 	throws SQLException
 	{
-		List list = new ArrayList();
+		List<MembershipInfo> list = new ArrayList<MembershipInfo>();
 		while(rs.next())
 		{
 		 	list.add(this.extractMembership(rs));

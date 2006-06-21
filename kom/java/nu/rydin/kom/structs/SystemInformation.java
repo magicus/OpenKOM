@@ -21,6 +21,8 @@ public class SystemInformation implements Serializable
     
     private final CacheInformation conferenceCache;
     
+    private final CacheInformation permissionCache;
+    
     private final long numConferences;
     
     private final long numUsers;
@@ -28,12 +30,13 @@ public class SystemInformation implements Serializable
     private final long numMessages;
     
     public SystemInformation(boolean allowLogins, CacheInformation nameCache, CacheInformation userCache,
-            CacheInformation conferenceCache, long numUser, long numConferences, long numMessages)
+            CacheInformation conferenceCache, CacheInformation permissionCache, long numUser, long numConferences, long numMessages)
     {
         this.allowLogins 		= allowLogins;
         this.nameCache 			= nameCache;
         this.userCache 			= userCache;
         this.conferenceCache 	= conferenceCache;
+        this.permissionCache    = permissionCache;
         this.numUsers			= numUser;
         this.numConferences		= numConferences;
         this.numMessages		= numMessages;
@@ -47,6 +50,11 @@ public class SystemInformation implements Serializable
     public CacheInformation getConferenceCache()
     {
         return conferenceCache;
+    }
+    
+    public CacheInformation getPermissionCache()
+    {
+        return permissionCache;
     }
     
     public CacheInformation getNameCache()

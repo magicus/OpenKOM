@@ -42,7 +42,7 @@ public class ChangeCharacterset extends AbstractCommand
     public static String[] getCharacterSets()
     {
         StringTokenizer st = new StringTokenizer(ClientSettings.getCharsets(), ",");
-        ArrayList list = new ArrayList();
+        ArrayList<String> list = new ArrayList<String>();
         
         while(st.hasMoreTokens())
         {

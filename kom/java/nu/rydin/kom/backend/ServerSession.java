@@ -6,7 +6,6 @@
  */
 package nu.rydin.kom.backend;
 
-import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import nu.rydin.kom.events.Event;
@@ -19,15 +18,25 @@ import nu.rydin.kom.structs.*;
  */
 public interface ServerSession 
 {
+    /**
+     * Returns the unique session id
+     */
+    public int getSessionId();
+    
+    /**
+     * Returns the type of client that created us
+     */
+    public short getClientType();
+    
 	/**
 	 * Changes the current conference.
 	 * 
 	 * @param id The id of the new conference
-	 * @throws SQLException
+	 * @throws UnexpectedException
 	 * @throws ObjectNotFoundException
 	 */
 	public abstract void setCurrentConferenceId(long id)
-		throws SQLException, ObjectNotFoundException;
+		throws UnexpectedException, ObjectNotFoundException;
 
 	/**
 	 * Returns information about the current conference
@@ -764,6 +773,15 @@ public interface ServerSession
 	 */
 	public abstract void close() 
 	throws UnexpectedException;
+    
+    /**
+     * Detaches a server session from any frontends it may be attached to,
+     * but keeps the session alive.
+     * 
+     * @throws UnexpectedException
+     */
+    public abstract void detach()
+    throws UnexpectedException;
 
 	/**
 	 * Persistently updates the character set setting for the current user
@@ -881,7 +899,7 @@ public interface ServerSession
 	 * 
 	 * @param conferenceId The id of the conference
 	 * @param mask The permission mask
-	 * @throws SQLException
+	 * @throws UnexpectedException
 	 * @throws AuthorizationException
 	 * @throws ObjectNotFoundException
 	 */	
@@ -893,7 +911,7 @@ public interface ServerSession
 	 * current conference.
 	 * 
 	 * @param mask The permission mask
-	 * @throws SQLException
+	 * @throws UnexpectedException
 	 * @throws AuthorizationException
 	 * @throws ObjectNotFoundException
 	 */
@@ -1514,17 +1532,22 @@ public interface ServerSession
      * Returns the HeartbeatListener associated with this session.
      */
     public HeartbeatListener getHeartbeatListener();
+    
+    /**
+     * Returns the date and time of the last heartbeat received
+     */
+    public long getLastHeartbeat();
 
     /**
      * Kills a user session. Tries to request the frontend to shut down
      * the connection to the user.
      * 
-     * @param userId The user who's session we want to shutdown
+     * @param sessionId The session we want to shutdown
      * @throws AuthenticationException
      * @throws ObjectNotFoundException
      * @throws UnexpectedException
      */
-    public void killSession(long userId)
+    public void killSession(int sessionId)
     throws AuthorizationException, ObjectNotFoundException, UnexpectedException;
     
     /**

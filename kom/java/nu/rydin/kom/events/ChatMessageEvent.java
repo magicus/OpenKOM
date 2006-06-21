@@ -13,28 +13,17 @@ import nu.rydin.kom.structs.Name;
  */
 public class ChatMessageEvent extends SingleUserEvent
 {
-	private final long m_userId;
-	
 	private final Name m_user;
 	
 	private final String m_message;
 	
 	public ChatMessageEvent(long targetUser, long userId, Name user, String message)
 	{
-		super(targetUser);
-		m_userId 	= userId;
+		super(userId, targetUser);
 		m_user		= user;
 		m_message 	= message;
 	}
-	
-	/**
-	 * Returns the id of the originating user
-	 */
-	public long getUserId()
-	{
-		return m_userId;
-	}
-	
+		
 	/**
 	 * Returns the name of the originating user
 	 */

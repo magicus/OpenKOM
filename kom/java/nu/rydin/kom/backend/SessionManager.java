@@ -6,8 +6,13 @@
  */
 package nu.rydin.kom.backend;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
@@ -23,19 +28,19 @@ import nu.rydin.kom.utils.Logger;
 public class SessionManager
 {
 	/**
-	 * Currently active sessions keyed by user id
+	 * Currently active sessions keyed by session id
 	 */
-	private HashMap m_sessions = new HashMap();
+	private Map<Integer, ServerSession> m_sessionsById = Collections.synchronizedMap(new HashMap<Integer, ServerSession>());
 	
 	/**
 	 * Currently active sessions as an ordered list.
 	 */
-	private LinkedList m_orderedList = new LinkedList();
+	private List<ServerSession> m_orderedList = Collections.synchronizedList(new LinkedList<ServerSession>());
 	
 	/**
 	 * Queue of events to be broadcasted
 	 */
-	private LinkedList m_broadcastQueue = new LinkedList();
+	private LinkedList<Event> m_broadcastQueue = new LinkedList<Event>();
 	
 	private class Broadcaster extends Thread
 	{
@@ -56,13 +61,13 @@ public class SessionManager
 				for(;;)
 				{
 					SessionManager sm = SessionManager.this;
-					ServerSession[] sessions = null;
+					List<ServerSession> sessions = null;
 					Event e = null; 
 					synchronized(sm)
 					{
 						while(sm.m_broadcastQueue.isEmpty())
 							sm.wait();
-						e = (Event) sm.m_broadcastQueue.removeFirst();
+						e = sm.m_broadcastQueue.removeFirst();
 						sessions = sm.listSessions();
 					}
 					
@@ -76,8 +81,10 @@ public class SessionManager
 					// deterministic time), we accept that trade-off.
 					//
 					int retryWait = INITIAL_RETRY_WAIT;
-					int top = sessions.length;
-					for(int idx = 0; idx < top; ++idx)
+                    
+                    // Create snapshot to iterate over
+                    //
+					for(Iterator<ServerSession> itor = sessions.iterator(); itor.hasNext();)
 					{
 					    for(;;)
 					    {
@@ -86,18 +93,18 @@ public class SessionManager
 						    //
 						    try
 						    {
-								ServerSession each = sessions[idx];
+								ServerSession each = itor.next();
 								
 								// Don't send to originator unless the event explicitly ask
 								// for it.
 								//
 								if(!e.sendToSelf() && each.getLoggedInUserId() == e.getOriginatingUser())
 									break;
-								ServerSessionImpl sess = (ServerSessionImpl) sessions[idx];
+								ServerSessionImpl sess = (ServerSessionImpl) each;
 								sess.acquireMutex();
 								try
 								{
-								    e.dispatch((EventTarget) sessions[idx]);
+								    e.dispatch((EventTarget) each);
 								}
 								finally
 								{
@@ -129,6 +136,7 @@ public class SessionManager
 						            // We've exceeded the max retry time. Skip this session!
 						            //
 						            Logger.warn(this, "Giving up!");
+                                    retryWait = INITIAL_RETRY_WAIT;
 						            break;
 						        }
 						        
@@ -190,10 +198,10 @@ public class SessionManager
 	    m_allowLogin = false;
 	}
 	
-	public void killSession(long sessionId)
+	public void killSessionById(int sessionId)
 	throws UnexpectedException, InterruptedException
 	{
-		ServerSession session = this.getSession(sessionId);
+		ServerSession session = this.getSessionById(sessionId);
 		
 		// Not logged in? Nothing to shut down. Fail silently.
 		//
@@ -212,7 +220,7 @@ public class SessionManager
 		{
 			// Has it disappeared yet?
 			//
-			if(this.getSession(sessionId) == null)
+			if(this.getSessionById(sessionId) == null)
 				return;
 			Thread.sleep(delay);
 		}
@@ -221,7 +229,7 @@ public class SessionManager
 		// it nicely. Mark it as invalid so that the next request
 		// to the server is guaranteed to fail.
 		//
-		ServerSessionImpl ssi = (ServerSessionImpl) this.getSession(sessionId);
+		ServerSessionImpl ssi = (ServerSessionImpl) this.getSessionById(sessionId);
 		this.unRegisterSession(ssi);
 		
 		// Did it dissapear while we were fiddling around? 
@@ -241,8 +249,8 @@ public class SessionManager
 	 */
 	public synchronized void registerSession(ServerSession session)
 	{
-		m_sessions.put(new Long(session.getLoggedInUserId()), session);
-		m_orderedList.addLast(session);
+		m_sessionsById.put(session.getSessionId(), session);
+		m_orderedList.add(session);
 	}
 	
 	/**
@@ -251,37 +259,46 @@ public class SessionManager
 	 */
 	public synchronized void unRegisterSession(ServerSession session)
 	{
-		m_sessions.remove(new Long(session.getLoggedInUserId()));
+		m_sessionsById.remove(session.getSessionId());
 		m_orderedList.remove(session);
 	}
 
 	/**
 	 * Returns a session based on its user id
-	 * @param userId The user id
+	 * @param sessionId The session id
 	 */
-	public synchronized ServerSession getSession(long userId)
+	public synchronized ServerSession getSessionById(int sessionId)
 	{
-		return (ServerSession) m_sessions.get(new Long(userId));
+		return (ServerSession) m_sessionsById.get(sessionId);
 	}
 	
 	/**
 	 * Lists the sessions in the order they were created.
 	 */
-	public synchronized ServerSession[] listSessions()
+	public synchronized List<ServerSession> listSessions()
 	{
-		ServerSession[] answer = new ServerSession[m_orderedList.size()];
-		m_orderedList.toArray(answer);
-		return answer;
+        return new LinkedList<ServerSession>(m_orderedList);
 	}
+    
+    public List<ServerSession> getSessionsByUser(long u)
+    {
+        ArrayList<ServerSession> list = new ArrayList<ServerSession>();
+        for(Iterator<ServerSession> itor = m_orderedList.iterator(); itor.hasNext();)
+        {
+            ServerSession each = itor.next();
+            if(each.getLoggedInUserId() == u)
+                list.add(each);
+        }
+        return list;
+    }
 	
 	/**
 	 * Checks if the given user currently has an open session.
 	 * @param u The user ID.
 	 */
-	
-	public synchronized boolean hasSession(long u)
+	public synchronized boolean userHasSession(long u)
 	{
-		return m_sessions.containsKey(new Long(u));
+        return this.getSessionsByUser(u).size() > 0;
 	}
 	
 	/**
@@ -301,15 +318,17 @@ public class SessionManager
 	 */
 	public void sendEvent(long user, Event e)
 	{
-		ServerSession s;
+		List<ServerSession> s;
 		synchronized(this)
 		{
-			s = this.getSession(user);
+			s = this.getSessionsByUser(user);
 		}
 		
-		// Fail silently if we couldn't find the session
+		// Fail silently if we couldn't find any sessions for the user
 		//
-		if(s != null)
-			e.dispatch((EventTarget) s);
+        for(Iterator<ServerSession> itor = s.iterator(); itor.hasNext();)
+        {
+			e.dispatch((EventTarget) itor.next());
+        }
 	}
 }

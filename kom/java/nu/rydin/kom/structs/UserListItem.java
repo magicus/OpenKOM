@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class UserListItem implements Serializable
 {
+    private final int m_session;
+    
     public final NameAssociation m_user;
 	
 	public final short m_action;
@@ -24,11 +26,15 @@ public class UserListItem implements Serializable
 	public final long m_loginTime;
 	
 	public final long m_lastHeartbeat;
+    
+    public final short m_clientType;
 	
-	public UserListItem(NameAssociation user, short action, NameAssociation conference, boolean inMailbox,
+	public UserListItem(int session, NameAssociation user, short clientType, short action, NameAssociation conference, boolean inMailbox,
 	        long loginTime, long lastHeartbeat)
 	{
+        m_session           = session;
 		m_user 				= user;
+        m_clientType        = clientType;
 		m_action 			= action;
 		m_conference 		= conference;
 		m_inMailbox			= inMailbox;
@@ -36,6 +42,11 @@ public class UserListItem implements Serializable
 		m_lastHeartbeat		= lastHeartbeat;
 	}
 	
+    public int getSessionId()
+    {
+        return m_session;
+    }
+    
 	public short getAction()
 	{
 		return m_action;
@@ -65,4 +76,9 @@ public class UserListItem implements Serializable
 	{
 	    return m_lastHeartbeat;
 	}
+    
+    public short getClientType()
+    {
+        return m_clientType;
+    }
 }

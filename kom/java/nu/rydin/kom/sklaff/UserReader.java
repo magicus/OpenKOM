@@ -31,7 +31,7 @@ public class UserReader
         try
         {
             StringBuffer buffer = new StringBuffer();
-            HashMap map = new HashMap();
+            HashMap<String, String> map = new HashMap<String, String>();
             String tag = null;
             boolean data = false;
             for(String line = null; (line = rdr.readLine()) != null;)

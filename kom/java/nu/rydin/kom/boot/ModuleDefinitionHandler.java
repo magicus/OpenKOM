@@ -30,9 +30,9 @@ public class ModuleDefinitionHandler extends DefaultHandler
     
     private String m_moduleName;
     private String m_className;
-    private Map m_parameters;
-    private List m_modules = new ArrayList();
-    private List m_classPath;
+    private Map<String, String> m_parameters;
+    private List<ModuleDefinition> m_modules = new ArrayList<ModuleDefinition>();
+    private List<String> m_classPath;
     
     public ModuleDefinition[] getModuleDefinitions()
     {
@@ -66,7 +66,7 @@ public class ModuleDefinitionHandler extends DefaultHandler
     	    //
     	    m_moduleName = attr.getValue("name");
     	    m_className = attr.getValue("class");
-    	    m_parameters = new HashMap();
+    	    m_parameters = new HashMap<String, String>();
     	    m_state = STATE_MODULE;
     	    break;
         case STATE_MODULE:
@@ -75,7 +75,7 @@ public class ModuleDefinitionHandler extends DefaultHandler
             else if("classpath".equals(qName))
             {
                 m_state = STATE_CLASSPATH;
-                m_classPath = new LinkedList();
+                m_classPath = new LinkedList<String>();
             }
             else
                 throw new SAXException("Uexpected tag: " + qName);

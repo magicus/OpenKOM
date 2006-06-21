@@ -174,9 +174,12 @@ public class ConferenceManager // extends NameManager
         //
         m_nameManager.changeVisibility(id, visibility);
         
-        // Update cache
+        // Update cache.
+        // Scrap the entire permission cache, since changing the conference permission would
+        // have consequences all over the place.
         //
         CacheManager.instance().getConferenceCache().registerInvalidation(new Long(id));
+        CacheManager.instance().getPermissionCache().clear();
     }
 	
 	/**
@@ -319,7 +322,7 @@ public class ConferenceManager // extends NameManager
 	    ResultSet rs = null;
 	    try
 	    {
-	        ArrayList list = new ArrayList();
+	        ArrayList<ConferenceListItem> list = new ArrayList<ConferenceListItem>();
 	        rs = m_listByDateStmt.executeQuery();
 	        while(rs.next())
 	        {
@@ -371,7 +374,7 @@ public class ConferenceManager // extends NameManager
 	    ResultSet rs = null;
 	    try
 	    {
-	        ArrayList list = new ArrayList();
+	        ArrayList<ConferenceListItem> list = new ArrayList<ConferenceListItem>();
 	        rs = m_listByNameStmt.executeQuery();
 	        while(rs.next())
 	        {

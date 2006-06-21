@@ -113,7 +113,7 @@ public class MRUCache implements Map
 	/**
 	 * The cached data
 	 */
-	private HashMap  m_map;
+	private HashMap<Object, Object>  m_map;
 
 	/**
 	 * Head of eviction queue
@@ -149,7 +149,7 @@ public class MRUCache implements Map
 	 */
 	public MRUCache(int maxSize, EvictionPolicy evictionPolicy)
 		{
-		m_map  = new HashMap(maxSize);
+		m_map  = new HashMap<Object, Object>(maxSize);
 		m_maxSize = maxSize;
 		m_head = new ListAtom();
 		m_evictionPolicy = evictionPolicy;
@@ -320,7 +320,7 @@ public class MRUCache implements Map
 	public synchronized Collection values()
 		{
 		Collection v = m_map.values();
-		ArrayList answer = new ArrayList(v.size());
+		ArrayList<Object> answer = new ArrayList<Object>(v.size());
 		for(Iterator itor = v.iterator(); itor.hasNext();)
 			{
 			CacheItem each = (CacheItem) itor.next();

@@ -63,7 +63,7 @@ public class EllipsisParameter extends CommandLineParameter
     {
         String innerCommandLine = matchingPart;
         
-        ArrayList innerMatches = new ArrayList();
+        ArrayList<Match> innerMatches = new ArrayList<Match>();
         Match innerMatch;
         
         // As long as the last innerCommandLine matched, keep trying.

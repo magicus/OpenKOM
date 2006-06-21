@@ -114,7 +114,7 @@ public class LineEditor implements NewlineListener
 	    }
 	}
 	
-	private final Stack m_tokenizerStack = new Stack();
+	private final Stack<KeystrokeTokenizer> m_tokenizerStack = new Stack<KeystrokeTokenizer>();
 	
 	private final ReaderProxy m_in;
 	
@@ -333,7 +333,7 @@ public class LineEditor implements NewlineListener
 	 * Incoming events. Low priority events that can't be handled 
 	 * immediately are moved to the low priority queue.
 	 */
-	private final LinkedList m_eventQueue = new LinkedList();
+	private final LinkedList<Event> m_eventQueue = new LinkedList<Event>();
 	
 	private final TerminalSettingsProvider m_tsProvider;
 	
@@ -342,7 +342,7 @@ public class LineEditor implements NewlineListener
 	/**
 	 * Command history
 	 */
-	private ArrayList m_history = new ArrayList();
+	private ArrayList<String> m_history = new ArrayList<String>();
 		
 	public LineEditor(InputStream in, KOMWriter out, EventTarget target, TerminalSettingsProvider tsProvider, 
 	        ServerSession session, MessageFormatter formatter, String charset)

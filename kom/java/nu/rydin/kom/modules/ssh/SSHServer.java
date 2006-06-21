@@ -52,7 +52,7 @@ public class SSHServer implements Module
                 new OpenKOMSessionChannelFactory(this));
     }
 
-    protected List activeConnections = new Vector();
+    protected List<TransportProtocolServer> activeConnections = new Vector<TransportProtocolServer>();
     
     public boolean allowsSelfRegister()
     {

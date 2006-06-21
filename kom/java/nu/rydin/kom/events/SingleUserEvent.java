@@ -22,8 +22,9 @@ public abstract class SingleUserEvent extends Event
 	 * Creates an event
 	 * @param targetUser The user this event is intended for
 	 */
-	public SingleUserEvent(long targetUser)
+	public SingleUserEvent(long originatingUser, long targetUser)
 	{
+        super(originatingUser);
 		m_targetUser = targetUser;
 	}
 	

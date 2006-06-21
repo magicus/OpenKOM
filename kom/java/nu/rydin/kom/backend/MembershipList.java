@@ -31,7 +31,7 @@ public class MembershipList
 	/**
 	 * Memberships keyed by conference
 	 */
-	private Map m_conferenceTable = new HashMap();
+	private Map<Long, MembershipInfo> m_conferenceTable = new HashMap<Long, MembershipInfo>();
 	
 	/**
 	 * Memberships in the order they are prioritized
@@ -41,7 +41,7 @@ public class MembershipList
 	/**
 	 * Memberships where the list of read messages has to be saved
 	 */
-	private Set m_dirty = new HashSet(); 
+	private Set<MembershipInfo> m_dirty = new HashSet<MembershipInfo>(); 
 	
 	/**
 	 * Creates a <tt>MembershipList</tt> based on an array or <tt>MembershipInfo</rr>
@@ -56,7 +56,7 @@ public class MembershipList
 			MembershipInfo each = memberships[idx];
 			long conf = each.getConference();
 			m_order[idx] = each;
-			m_conferenceTable.put(new Long(conf), each);
+			m_conferenceTable.put(conf, each);
 		}
 	}
 	
@@ -153,7 +153,7 @@ public class MembershipList
 		int min = ci.getFirstMessage();
 		return mr == null ? (min != 0 ? min : -1) : mr.getFirstUnread(min, ci.getLastMessage());
 	}
-	
+   
 	public boolean isUnread(long confId, int num)
 	throws ObjectNotFoundException
 	{

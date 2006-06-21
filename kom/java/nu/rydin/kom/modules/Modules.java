@@ -18,7 +18,7 @@ import nu.rydin.kom.exceptions.NoSuchModuleException;
  */
 public class Modules
 {
-    private static final Map s_modules = Collections.synchronizedMap(new HashMap());
+    private static final Map<String, Module> s_modules = Collections.synchronizedMap(new HashMap<String, Module>());
     
     public static void registerModule(String name, Module module)
     {

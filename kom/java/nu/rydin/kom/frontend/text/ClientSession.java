@@ -17,7 +17,9 @@ import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
@@ -25,6 +27,7 @@ import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactory;
 import nu.rydin.kom.backend.data.NameManager;
+import nu.rydin.kom.constants.ClientTypes;
 import nu.rydin.kom.constants.CommandSuggestions;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.SystemFiles;
@@ -35,6 +38,7 @@ import nu.rydin.kom.events.BroadcastMessageEvent;
 import nu.rydin.kom.events.ChatAnonymousMessageEvent;
 import nu.rydin.kom.events.ChatMessageEvent;
 import nu.rydin.kom.events.ClientEventTarget;
+import nu.rydin.kom.events.DetachRequestEvent;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.MessageDeletedEvent;
@@ -87,11 +91,14 @@ import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.FileStatus;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
+import nu.rydin.kom.structs.SessionListItem;
 import nu.rydin.kom.structs.SessionState;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.FileUtils;
+import nu.rydin.kom.utils.HeaderPrinter;
 import nu.rydin.kom.utils.Logger;
 import nu.rydin.kom.utils.PrintUtils;
+import nu.rydin.kom.utils.StringUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -111,7 +118,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private MessageFormatter m_formatter = new MessageFormatter(Locale.getDefault(), "messages");
 	private ServerSession m_session;
 	private long m_userId;
-	private LinkedList m_displayMessageQueue = new LinkedList();
+	private LinkedList<Event> m_displayMessageQueue = new LinkedList<Event>();
 	private UserInfo m_thisUserCache;
 	private WordWrapperFactory m_wordWrapperFactory = new StandardWordWrapper.Factory();
 	private int m_windowHeight = -1;
@@ -202,8 +209,8 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		public void onEvent(ChatMessageEvent event) 
 		{
 			this.beepMaybe(UserFlags.BEEP_ON_CHAT);
-			// String header = m_formatter.format("event.chat", new Object[] { event.getUserName() });
-			String header = m_formatter.format ("event.chat", new Object[] { context.formatObjectName(event.getUserName(), event.getOriginatingUser()) });
+			String header = m_formatter.format("event.chat", 
+                    new Object[] { formatObjectName(event.getUserName(), event.getOriginatingUser()) }); 
 			getDisplayController().chatMessageHeader();
 			m_out.print(header);
 			getDisplayController().chatMessageBody();
@@ -214,9 +221,11 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		public void onEvent(BroadcastMessageEvent event) 
 		{
 			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
+            String name = formatObjectName(event.getUserName(), event.getOriginatingUser());
 			String header = event.getKind() == MessageLogKinds.BROADCAST 
-			    ? m_formatter.format("event.broadcast.default", new Object[] { /* event.getUserName() */ context.formatObjectName(event.getUserName(), event.getOriginatingUser()) })
-			    : /* event.getUserName().getName() */ context.formatObjectName(event.getUserName(), event.getOriginatingUser()) + ' ';
+			    ? m_formatter.format("event.broadcast.default", 
+                        new Object[] { name }) 
+			    : name + ' ';
 			getDisplayController().broadcastMessageHeader();
 			m_out.print(header);
 			if (event.getKind() == MessageLogKinds.BROADCAST)
@@ -704,65 +713,112 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	        }
 	    }
 		
-		for(;;)
+		// Authenticate
+		//
+		try
 		{
-			// Authenticate
+			m_session = m_useTicket
+                ? ssf.login(ticket, ClientTypes.TTY, false) 
+                : ssf.login(userid, password, ClientTypes.TTY, false);
+		}
+		catch(AlreadyLoggedInException e)
+		{
+			// Already logged in. Ask if they want to create another session
 			//
+			m_out.println(m_formatter.format("login.multiple.session"));
+            m_out.println();
+
+            // Print headers
+            //
+            HeaderPrinter hp = new HeaderPrinter();
+            hp.addHeader(m_formatter.format("list.sessions.session"), 7, true);
+            hp.addHeader(m_formatter.format("list.sessions.login"), 7, true);
+            hp.addHeader(m_formatter.format("list.sessions.idle"), 7, true);
+            hp.addHeader(m_formatter.format("list.sessions.client"), 7, true);
+            hp.addSpace(1);
+            int termWidth = this.getTerminalSettings().getWidth();
+            int firstColsWidth = 7 + 7 + 7 + 7+ 1;
+            int lastColWidth = termWidth - firstColsWidth - 1 ; 
+            hp.printOn(m_out);
+            
+            // Print list
+            List<SessionListItem> list = e.getSessions();
+            for(Iterator<SessionListItem> itor = list.iterator(); itor.hasNext();)
+            {
+                SessionListItem each = itor.next();
+                PrintUtils.printRightJustified(m_out, Integer.toString(each.getSessionId()), 7);
+                long now = System.currentTimeMillis();
+                PrintUtils.printRightJustified(m_out, StringUtils.formatElapsedTime(now - each.getLoginTime()), 7);
+                long idle = now - each.getLastHeartbeat();
+                PrintUtils.printRightJustified(m_out, idle >= 60000 ? StringUtils.formatElapsedTime(now - each.getLastHeartbeat()) : "", 7);
+                m_out.print(' ');
+                PrintUtils.printLeftJustified(m_out, m_formatter.format("clienttypes." + Integer.toString(each.getSessionType())), 7);
+                m_out.println();
+            }
+
+            m_out.println();
+            m_out.println(m_formatter.format("login.multiple.session.question.1"));
+            m_out.println(m_formatter.format("login.multiple.session.question.2"));
+            m_out.println(m_formatter.format("login.multiple.session.question.3"));
+            m_out.println();
+			m_out.flush();
 			try
 			{
-				m_session = m_useTicket? ssf.login(ticket) : ssf.login(userid, password);
+                int choice = m_in.getChoice(m_formatter.format("login.multiple.session.question"), new String[] { "1", "2", "3"}, 0, m_formatter.format("misc.invalid.choice"));
+                switch(choice)
+                {
+                case 0:
+                    // Kill this session
+                    //
+                    throw new InterruptedException();
+                case 2:
+                    // Kill all other sessions
+                    //
+                    for(Iterator<SessionListItem> itor = list.iterator(); itor.hasNext();)
+                    {
+                        if(m_useTicket)
+                            ssf.killSession(itor.next().getSessionId(), m_ticket);
+                        else
+                            ssf.killSession(itor.next().getSessionId(), userid, password);
+                    }
+                    
+                    // FALL THRU
+                case 1: 
+                    // Create new session
+                    //
+                    try
+                    {
+                        m_session = m_useTicket
+                            ? ssf.login(ticket, ClientTypes.TTY, true) 
+                            : ssf.login(userid, password, ClientTypes.TTY, true);
+                    }
+                    catch(AlreadyLoggedInException e1)
+                    {
+                        // Huh? We DID allow this!
+                        //
+                        Logger.error(this, "This cannot happen!", e);
+                    }
+                    Logger.info(this, "Allowed multiple login.");
+                }			
 			}
-			catch(AlreadyLoggedInException e)
+			catch(LineEditingDoneException e1)
 			{
-				// Already logged in. Ask user if they want to kill the previous
-				// session.
-				//
-				m_out.print(m_formatter.format("login.terminate.session"));
-				m_out.flush();
-				try
-				{
-				    String answer = m_in.readLine().toUpperCase();
-				
-					// If the user didn't let us kill the other session, we're
-					// out of here!
-					//
-					if(answer.length() == 0 || !m_formatter.format("misc.yes").toUpperCase().startsWith(answer))
-						throw new InterruptedException();
-						
-					// Ask server to shut down the other session
-					//
-					if (m_useTicket)
-	                {
-	                    ssf.killSession(ticket);
-	                } else
-	                {
-	                    ssf.killSession(userid, password);
-	                }
-					Logger.info(this, "Successfully killed old session.");
-					
-					// Try to login again
-					//
-					continue;
-				}
-				catch(LineEditingDoneException e1)
-				{
-				    throw new RuntimeException("This should not happen", e1);
-				}
-
+			    throw new RuntimeException("This should not happen", e1);
 			}
-			// User was authenticated! Now check if they are allowed to log in.
-			//
-			UserInfo user = m_session.getLoggedInUser();
-			if(!user.hasRights(UserPermissions.LOGIN))
-				throw new LoginNotAllowedException();
-				
-			// Everything seems fine! We're in!
-			//
-			m_in.setSession(m_session);
-			m_loggedIn = true;		
-			Logger.info(this, "Successfully logged in as: " + m_session.getLoggedInUser().getUserid());
-			return user;
+
 		}
+		// User was authenticated! Now check if they are allowed to log in.
+		//
+		UserInfo user = m_session.getLoggedInUser();
+		if(!user.hasRights(UserPermissions.LOGIN))
+			throw new LoginNotAllowedException();
+			
+		// Everything seems fine! We're in!
+		//
+		m_in.setSession(m_session);
+		m_loggedIn = true;		
+		Logger.info(this, "Successfully logged in as: " + m_session.getLoggedInUser().getUserid());
+		return user;
 	}
 	
 	public String[] selfRegister() 
@@ -778,7 +834,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	    // Ask for character set
 	    //
 	    String charSet = "ISO-8859-1";
-        ArrayList list = new ArrayList();
+        ArrayList<String> list = new ArrayList<String>();
         for(StringTokenizer st = new StringTokenizer(ClientSettings.getCharsets(), ",");
         	st.hasMoreTokens();)
         	list.add(st.nextToken());        	
@@ -1459,6 +1515,11 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	{
 	    // TODO: Implement
 	}
+    
+    public void onEvent(DetachRequestEvent event)
+    {
+        this.detach();
+    }
 	
 	// Implementation of TerminalSizeListener
 	//
@@ -1584,7 +1645,13 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	public void setTicket(String ticket)
 	{
 	    m_ticket = ticket;
-	}
+    }
+    
+    public void detach() 
+    {
+        m_session = null;
+        m_loggedIn = false;
+    }
 	
     public void logout() 
     {

@@ -15,11 +15,11 @@ import nu.rydin.kom.exceptions.GenericException;
 
 public class EmulationFactory 
 {
-	private static final HashMap knownEmulators;
+	private static final HashMap<String, Emulator> knownEmulators;
 
 	static
 	{
-		knownEmulators = new HashMap();
+		knownEmulators = new HashMap<String, Emulator>();
 	}
 
 	public static Emulator getEmulator(String name) throws GenericException

@@ -234,9 +234,9 @@ public class MessageManager
 		
 		m_listMessagesGloballyByAuthor = m_conn.prepareStatement(
 		        "SELECT m.id, mo.localnum, mo.conference, n.fullname, n.visibility, mo.user, m.author_name, m.subject, m.reply_to " +
-		        "FROM messages m, messageoccurrences mo, names n " +
+		        "FROM messages m force index(msg_author_created), messageoccurrences mo, names n " +
 		        "WHERE m.id = mo.message AND n.id = mo.conference AND m.author = ? " +
-		        "ORDER BY mo.action_ts DESC " +
+		        "ORDER BY m.created DESC " +
 		        "LIMIT ? OFFSET ?");
 		
 		m_searchMessagesGlobally = m_conn.prepareStatement(
@@ -636,7 +636,7 @@ public class MessageManager
    		ResultSet rs = null;
    		try
    		{
-   			List list = new ArrayList();
+   			List<MessageOccurrence> list = new ArrayList<MessageOccurrence>();
    			rs = m_listOccurrencesStmt.executeQuery();
    			while(rs.next())
    			{
@@ -898,7 +898,7 @@ public class MessageManager
 	public MessageOccurrence[] getVisibleOccurrences(long userId, long globalId)
 	throws MessageNotFoundException, SQLException
 	{
-		List list = new ArrayList();
+		List<MessageOccurrence> list = new ArrayList<MessageOccurrence>();
 		m_getVisibleOccurrencesStmt.clearParameters();
 		m_getVisibleOccurrencesStmt.setLong(1, userId);
 		m_getVisibleOccurrencesStmt.setLong(2, globalId);
@@ -939,7 +939,7 @@ public class MessageManager
 	public MessageHeader[] getReplies(long originalId)
 	throws SQLException
 	{
-		List list = new ArrayList();
+		List<MessageHeader> list = new ArrayList<MessageHeader>();
 		m_getRepliesStmt.clearParameters();
 		m_getRepliesStmt.setLong(1, originalId);
 		ResultSet rs = null;
@@ -1003,7 +1003,7 @@ public class MessageManager
 	public MessageAttribute[] getMessageAttributes(long messageId)
 	throws SQLException
 	{
-	    List list = new ArrayList();
+	    List<MessageAttribute> list = new ArrayList<MessageAttribute>();
 	    m_getMessageAttributesStmt.clearParameters();
 	    m_getMessageAttributesStmt.setLong(1, messageId);
 	    ResultSet rs = null;
@@ -1330,7 +1330,7 @@ public class MessageManager
 	private LocalMessageSearchResult[] innerLocalSearch(PreparedStatement localSearchStatement) throws SQLException
 	{
         ResultSet rs = localSearchStatement.executeQuery();
-        List l = new ArrayList();
+        List<LocalMessageSearchResult> l = new ArrayList<LocalMessageSearchResult>();
         while (rs.next())
         {
             l.add(new LocalMessageSearchResult(
@@ -1372,7 +1372,7 @@ public class MessageManager
     private GlobalMessageSearchResult[] innerGlobalSearch(PreparedStatement globalSearchStatement) throws SQLException
 	{
         ResultSet rs = globalSearchStatement.executeQuery();
-        List l = new ArrayList();
+        List<GlobalMessageSearchResult> l = new ArrayList<GlobalMessageSearchResult>();
         while (rs.next())
         {
             l.add(new GlobalMessageSearchResult(

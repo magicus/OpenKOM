@@ -44,12 +44,12 @@ public class PasswdReader
         }
     }    
 
-    public static Map read(String userFile, String passwdFile)
+    public static Map<Integer, PasswdEntry> read(String userFile, String passwdFile)
     throws IOException
     {
         // First, read user file
         //
-        HashMap userDetails = new HashMap();
+        HashMap<String, UserDetails> userDetails = new HashMap<String, UserDetails>();
         BufferedReader rdr = new BufferedReader(new FileReader(userFile));
         try
         {
@@ -69,8 +69,8 @@ public class PasswdReader
             rdr.close();
         }
         
-        // The read passwd file...
-        Map answer = new TreeMap();
+        // Then read passwd file...
+        Map<Integer, PasswdEntry> answer = new TreeMap<Integer, PasswdEntry>();
         rdr = new BufferedReader(new FileReader(passwdFile));
         try
         {

@@ -17,13 +17,13 @@ import nu.rydin.kom.exceptions.KOMRuntimeException;
 
 public class TermInfoParser
 {
-	private HashMap keyValueMap;
+	private HashMap<String, String> keyValueMap;
 	public TermInfoParser(String input) throws KOMRuntimeException 
 	{
 		try
 		{
 			BufferedReader br = new BufferedReader(new FileReader(input));
-			keyValueMap = new HashMap();
+			keyValueMap = new HashMap<String, String>();
 			String data;
 			while (null != (data = br.readLine()))
 			{

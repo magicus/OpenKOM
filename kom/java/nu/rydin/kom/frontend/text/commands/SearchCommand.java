@@ -21,7 +21,7 @@ import nu.rydin.kom.structs.MessageSearchResult;
  */
 public abstract class SearchCommand extends AbstractCommand
 {
-    protected static final int CHUNK_SIZE = 500;
+    protected static final int CHUNK_SIZE = 100;
     
     public SearchCommand(String fullName,
             CommandLineParameter[] signature, long permissions)

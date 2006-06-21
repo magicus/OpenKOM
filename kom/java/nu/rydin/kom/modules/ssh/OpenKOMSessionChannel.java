@@ -55,7 +55,7 @@ public class OpenKOMSessionChannel extends IOChannel
     public final static String SESSION_CHANNEL_TYPE = "session";
     
     private ChannelOutputStream stderrOut;
-    private final List m_sizeListeners = new LinkedList();
+    private final List<TerminalSizeListener> m_sizeListeners = new LinkedList<TerminalSizeListener>();
     
     private int ptyColumns = 80;
     private int ptyRows = 25;

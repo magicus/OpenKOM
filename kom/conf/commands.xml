@@ -9,6 +9,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ListUserLog"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListUsers"/>
 		<command class="nu.rydin.kom.frontend.text.commands.Who"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ListSessions"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.WhoAmI"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.DisplayCurrentConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.Status" permissions="0008"/>				

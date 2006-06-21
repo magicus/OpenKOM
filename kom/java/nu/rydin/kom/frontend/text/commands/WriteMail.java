@@ -8,7 +8,6 @@ package nu.rydin.kom.frontend.text.commands;
 
 import java.io.IOException;
 
-import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;

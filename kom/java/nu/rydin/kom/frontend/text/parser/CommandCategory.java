@@ -22,7 +22,7 @@ public class CommandCategory implements Comparable
     
     private int order;
     
-    private LinkedList commands = new LinkedList();
+    private LinkedList<Command> commands = new LinkedList<Command>();
         
     public CommandCategory(String id, String key, int order)
     {

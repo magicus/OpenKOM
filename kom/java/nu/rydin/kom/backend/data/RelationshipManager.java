@@ -124,7 +124,7 @@ public class RelationshipManager
         try
         {
             rs = m_findStmt.executeQuery();
-            ArrayList list = new ArrayList();
+            ArrayList<Relationship> list = new ArrayList<Relationship>();
             while(rs.next())
             {
                 list.add(new Relationship(
@@ -156,7 +156,7 @@ public class RelationshipManager
         try
         {
             rs = m_listByRefererAndKindStmt.executeQuery();
-            ArrayList list = new ArrayList();
+            ArrayList<Relationship> list = new ArrayList<Relationship>();
             while(rs.next())
             {
                 list.add(new Relationship(

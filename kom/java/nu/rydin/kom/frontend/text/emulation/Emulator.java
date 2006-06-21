@@ -432,7 +432,7 @@ public class Emulator
 		// any of these characters, we short-circuit and ignore the rest. By terminfo convention, all key identifiers start with a lower-case k, so we
 		// just walk the compound hash and pull out anything that matches.
 		//
-		HashSet v = new HashSet();
+		HashSet<String> v = new HashSet<String>();
 		Iterator it = associations.keySet().iterator();
 		String key;
 		String value;

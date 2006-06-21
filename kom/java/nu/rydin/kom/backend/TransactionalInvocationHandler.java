@@ -37,23 +37,26 @@ public class TransactionalInvocationHandler implements InvocationHandler
 		boolean committed = false;
 		try
 		{
-		    // Make sure we're the only ones fiddling with this session
-		    //
-		    m_session.acquireMutex();
-		    m_session.setDataAccess(da);
-		    
-		    // Invoke the method
-		    //
-			Object result = method.invoke(m_session, args);
-			m_session.setDataAccess(null);
-			
-			// TODO: Synch the two commits
-			//
-			da.commit();
-			m_cacheManager.commit();
-			m_session.flushEvents();
-			committed = true;
-			return result;
+            synchronized(m_session.m_userContext)
+            {
+    		    // Make sure we're the only ones fiddling with this session
+    		    //
+    		    m_session.acquireMutex();
+    		    m_session.setDataAccess(da);
+    		    
+    		    // Invoke the method
+    		    //
+    			Object result = method.invoke(m_session, args);
+    			m_session.setDataAccess(null);
+    			
+    			// TODO: Synch the two commits
+    			//
+    			da.commit();
+    			m_cacheManager.commit();
+    			m_session.flushEvents();
+    			committed = true;
+    			return result;
+            }
 		}
 		catch(InvocationTargetException e)
 		{

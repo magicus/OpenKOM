@@ -34,9 +34,9 @@ public class CommandListParser extends DefaultHandler
     private static final Class[] s_commandCtorSignature = new Class[]
           { Context.class, String.class, long.class };
 
-    private final Map m_categories 	= new HashMap();
+    private final Map<String, CommandCategory> m_categories = new HashMap<String, CommandCategory>();
     
-    private final List m_commands	= new ArrayList();
+    private final List<Command> m_commands	                = new ArrayList<Command>();
     
     private final Context m_context;
     
@@ -162,12 +162,12 @@ public class CommandListParser extends DefaultHandler
         }
     }
     
-    public List getCommands()
+    public List<Command> getCommands()
     {
         return m_commands;
     }
     
-    public Map getCategories()
+    public Map<String, CommandCategory> getCategories()
     {
         return m_categories;
     }

@@ -86,9 +86,9 @@ public class TelnetInputStream extends InputStream
 	
 	private int m_dataIdx;
 	
-	private final List m_sizeListeners = new LinkedList();
+	private final List<TerminalSizeListener> m_sizeListeners = new LinkedList<TerminalSizeListener>();
 	
-	private final List m_environmentListeners = new LinkedList(); 
+	private final List<EnvironmentListener> m_environmentListeners = new LinkedList<EnvironmentListener>(); 
 	
 	public TelnetInputStream(InputStream input, OutputStream output)
 	throws IOException

@@ -26,7 +26,7 @@ public class Buffer
         }
     }
     
-	private ArrayList m_lines = new ArrayList();
+	private ArrayList<Line> m_lines = new ArrayList<Line>();
 	
 	public Buffer()
 	{
@@ -100,7 +100,7 @@ public class Buffer
 		{
 			// We're adding before the end. A little tricker.
 			//
-			ArrayList newList = new ArrayList(top + top / 2);
+			ArrayList<Line> newList = new ArrayList<Line>(top + top / 2);
 			int idx;
 			where = Math.min(where, m_lines.size());
 			for(idx = 0; idx < where; ++idx)
@@ -116,7 +116,7 @@ public class Buffer
 	{
 		int idx;
 		int top = m_lines.size();
-		ArrayList newList = new ArrayList(m_lines.size());
+		ArrayList<Line> newList = new ArrayList<Line>(m_lines.size());
 		for(idx = 0; idx < where; ++idx)
 			newList.add(m_lines.get(idx));
 		++idx;

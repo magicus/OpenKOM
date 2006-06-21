@@ -21,9 +21,9 @@ import com.frameworx.util.MRUCache;
  */
 public class KOMCache extends MRUCache
 {
-	private Set m_deferredInvalidations = new HashSet();
+	private Set<Object> m_deferredInvalidations = new HashSet<Object>();
 	
-	private Map m_dirtyData = new HashMap();
+	private Map<Object, Object> m_dirtyData = new HashMap<Object, Object>();
 	
 	private long m_numAccesses = 0;
 	

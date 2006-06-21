@@ -23,7 +23,7 @@ public class KeystrokeTokenizerDefinition implements Cloneable
     {
         private final int m_tokenKind;
         
-        private Map m_nextStates = new HashMap();
+        private Map<Character, State> m_nextStates = new HashMap<Character, State>();
         
         public State()
         {
@@ -58,11 +58,11 @@ public class KeystrokeTokenizerDefinition implements Cloneable
         public State deepCopy()
         {
             State copy = new State(m_tokenKind);
-            HashMap map = new HashMap(m_nextStates.size());
+            HashMap<Character, State> map = new HashMap<Character, State>(m_nextStates.size());
             for(Iterator itor = m_nextStates.entrySet().iterator(); itor.hasNext();)
             {
                 Map.Entry each = (Map.Entry) itor.next();
-                map.put(each.getKey(), ((State) each.getValue()).deepCopy());
+                map.put((Character) each.getKey(), ((State) each.getValue()).deepCopy());
             }
             copy.m_nextStates = map;
             return copy;

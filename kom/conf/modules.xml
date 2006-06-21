@@ -11,7 +11,7 @@
 		<!-- Number of data access objects to create initially -->
 		<parameter name="server.initial.data.access" value="5"/>
 		<!-- Authentication ticket lifetime, milliseconds -->
-		<parameter name="server.ticket.lifetime" value="20000"/>
+		<parameter name="server.ticket.lifetime" value="60000"/>
 		<!-- Delay and number of retries when waiting for a session to shut down gracefully -->
 		<parameter name="server.session.shutdown.retries" value="10"/>
 		<parameter name="server.session.shutdown.delay" value="1000"/>

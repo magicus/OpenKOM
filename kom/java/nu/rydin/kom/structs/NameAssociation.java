@@ -41,7 +41,20 @@ public class NameAssociation implements Serializable
 		return m_name;
 	}
 	
-    public String toString() {
+    public String toString() 
+    {
         return getName() + "<" + getId() + ">";
+    }
+    
+    public boolean equals(Object o)
+    {
+        if(!(o instanceof NameAssociation))
+            return false;
+        return ((NameAssociation) o).m_id == m_id;
+    }
+    
+    public int hashCode()
+    {
+        return (int) m_id & 0xffffffff;
     }
 }

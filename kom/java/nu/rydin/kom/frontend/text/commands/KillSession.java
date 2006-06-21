@@ -14,6 +14,7 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.IntegerParameter;
 import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.structs.NameAssociation;
 
@@ -24,7 +25,7 @@ public class KillSession extends AbstractCommand
 {
 	public KillSession(Context context, String fullName, long permissions)
 	{
-		super(fullName, new CommandLineParameter[] { new UserParameter(true) }, permissions);	
+		super(fullName, new CommandLineParameter[] { new IntegerParameter(true) }, permissions);	
 	}
 
     public void checkAccess(Context context) throws AuthorizationException
@@ -35,6 +36,6 @@ public class KillSession extends AbstractCommand
     public void execute(Context context, Object[] parameters)
     throws KOMException, IOException, InterruptedException
     {
-        context.getSession().killSession(((NameAssociation) parameters[0]).getId());
+        context.getSession().killSession((Integer) parameters[0]);
     }
 }

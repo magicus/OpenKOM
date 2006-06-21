@@ -57,9 +57,8 @@ public class SklaffConvert
     private static Statement stmt;
     private static MessageManager mm;
     private static NameManager nm;
-    private static ConferenceManager cm;
-    private static Map confXref = new TreeMap();
-    private static Map userXref = new TreeMap();
+    private static Map<Integer, Long> confXref = new TreeMap<Integer, Long>();
+    private static Map<Integer, Long> userXref = new TreeMap<Integer, Long>();
 
     public static void main(String[] args)
     throws Exception
@@ -85,7 +84,6 @@ public class SklaffConvert
         stmt = conn.createStatement();
         mm = new MessageManager(conn);
         nm = new NameManager(conn);
-        cm = new ConferenceManager(conn, nm);
 		convert(conn, args[1], args[2]);
         conn.commit();
         conn.close();
@@ -96,7 +94,6 @@ public class SklaffConvert
     {
         boolean sklommon = true;
 		UserManager um = new UserManager(conn, CacheManager.instance(), nm);
-		MessageManager mm = new MessageManager(conn);
 		ConferenceManager cm = new ConferenceManager(conn, nm);
         convertUsers(passwdFile, sklaffRoot, um);
         convertConferences(sklaffRoot, sklommon, cm, conn);
@@ -114,7 +111,7 @@ public class SklaffConvert
         PasswordGenerator pg = new PasswordGenerator();
         System.out.println("Converting users...");
         PrintWriter pw = new PrintWriter(new FileWriter("newpasswd.txt"));
-        Map m = PasswdReader.read(sklaffRoot + "/etc/user", passwdFile);
+        Map<Integer, PasswdEntry> m = PasswdReader.read(sklaffRoot + "/etc/user", passwdFile);
         for(Iterator itor = m.entrySet().iterator(); itor.hasNext();)
         {
             Map.Entry entry = (Map.Entry) itor.next();
@@ -155,7 +152,7 @@ public class SklaffConvert
 	                    ui.getRights());
 	            System.out.println("Added!");
 	            System.out.flush();
-	            userXref.put(n, new Long(id));
+	            userXref.put(n, id);
 	            pw.print(ui.getUserid());
 	            pw.print(':');
 	            pw.print(ui.getEmail1());
@@ -177,7 +174,7 @@ public class SklaffConvert
     {
         PreparedStatement updateCreated = conn.prepareStatement(
                 "UPDATE conferences SET created = ? WHERE id = ?");
-        ArrayList fixups = new ArrayList();
+        ArrayList<Integer> fixups = new ArrayList<Integer>();
         Map m = ConferenceReader.read(sklaffRoot + "/etc/conf", sklommon);
         for(Iterator itor = m.entrySet().iterator(); itor.hasNext();)
         {
@@ -298,7 +295,7 @@ public class SklaffConvert
         
         // Load messages
         //
-        ArrayList fixups = new ArrayList();
+        ArrayList<long[]> fixups = new ArrayList<long[]>();
         for(Iterator itor = confXref.keySet().iterator(); itor.hasNext();)
         {
             int sklaffConf = ((Integer) itor.next()).intValue();
@@ -313,7 +310,7 @@ public class SklaffConvert
         // Load messages
         //
         System.out.println("Converting inbound mail...");
-        ArrayList fixups = new ArrayList();
+        ArrayList<long[]> fixups = new ArrayList<long[]>();
         for(Iterator itor = userXref.keySet().iterator(); itor.hasNext();)
         {
             int sklaffConf = ((Integer) itor.next()).intValue();
@@ -358,7 +355,7 @@ public class SklaffConvert
         }
     }
     
-    protected static void convertMessagesInConference(String sklaffRoot, int sklaffConf, ArrayList replyFixups, Connection conn)
+    protected static void convertMessagesInConference(String sklaffRoot, int sklaffConf, ArrayList<long[]> replyFixups, Connection conn)
     throws Exception
     {
         long conf = sklaffConf2openkom(sklaffConf);
@@ -382,7 +379,7 @@ public class SklaffConvert
         }
     }
     
-    protected static void convertIncomingMail(String sklaffRoot, int sklaffUser, ArrayList replyFixups, Connection conn)
+    protected static void convertIncomingMail(String sklaffRoot, int sklaffUser, ArrayList<long[]> replyFixups, Connection conn)
     throws Exception
     {
         long user = ((Long) userXref.get(new Integer(sklaffUser))).longValue();
@@ -414,7 +411,7 @@ public class SklaffConvert
     }    
     
 
-    protected static void convertOutgoingMail(String sklaffRoot, int sklaffUser, ArrayList replyFixups, Connection conn)
+    protected static void convertOutgoingMail(String sklaffRoot, int sklaffUser, ArrayList<long[]> replyFixups, Connection conn)
     throws Exception
     {
         long user = ((Long) userXref.get(new Integer(sklaffUser))).longValue();
@@ -508,7 +505,7 @@ public class SklaffConvert
 	    getLatest.close();
     }
     
-    protected static long convertMessage(MessageEntry me, int sklaffConf, long conf, boolean mail, ArrayList replyFixups, Connection conn)
+    protected static long convertMessage(MessageEntry me, int sklaffConf, long conf, boolean mail, ArrayList<long[]> replyFixups, Connection conn)
     throws Exception
     {     
         if(me == null)

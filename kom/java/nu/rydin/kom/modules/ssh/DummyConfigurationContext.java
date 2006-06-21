@@ -41,7 +41,7 @@ import com.sshtools.j2ssh.transport.publickey.SshPrivateKeyFile;
  */
 class DummyConfigurationContext implements ConfigurationContext
 {
-    private HashMap configurations = new HashMap();
+    private HashMap<Class, Object> configurations = new HashMap<Class, Object>();
 
     private String serverHostKeyFile;
 
@@ -148,7 +148,7 @@ class DummyConfigurationContext implements ConfigurationContext
 
     private static class DummyServerConfiguration extends ServerConfiguration
     {
-        private Map serverHostKeys = new HashMap();
+        private Map<String, SshPrivateKey> serverHostKeys = new HashMap<String, SshPrivateKey>();
 
         private int port;
 
@@ -207,7 +207,7 @@ class DummyConfigurationContext implements ConfigurationContext
 
         public List getAllowedAuthentications()
         {
-            List result = new ArrayList();
+            List<String> result = new ArrayList<String>();
             result.add("password");
             return result;
         }

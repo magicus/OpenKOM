@@ -31,7 +31,7 @@ import com.sshtools.j2ssh.SshThread;
  */
 public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 {
-    private static final HashMap s_tickets = new HashMap();
+    private static final HashMap<String, String> s_tickets = new HashMap<String, String>();
     
     public OpenKOMAuthenticationProvider()
     {

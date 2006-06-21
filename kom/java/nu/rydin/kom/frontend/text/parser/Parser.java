@@ -46,7 +46,7 @@ public class Parser
 {
     private Command[] m_commands;
     
-    private final TreeSet m_categories = new TreeSet();
+    private final TreeSet<CommandCategory> m_categories = new TreeSet<CommandCategory>();
 
     /** Map[Command->CommandLinePart[]] */
     //	private Map m_commandToPartsMap = new HashMap();
@@ -95,7 +95,7 @@ public class Parser
         private Command m_command;
 
         /** List[CommandLinePart.Match] */
-        private List m_matches = new LinkedList();
+        private List<Match> m_matches = new LinkedList<Match>();
 
         public CommandToMatches(Command command)
         {
@@ -173,14 +173,14 @@ public class Parser
         }
     }
 
-    private Parser(List commands, Map categories)
+    private Parser(List<Command> commands, Map<String, CommandCategory> categories)
     {
         m_commands = new Command[commands.size()];
         commands.toArray(m_commands);
 	    for(Iterator itor = categories.entrySet().iterator(); itor.hasNext();)
 	    {
 	        Map.Entry each = (Map.Entry) itor.next();
-	        m_categories.add(each.getValue());
+	        m_categories.add((CommandCategory) each.getValue());
 	    }
     }
     
@@ -218,15 +218,14 @@ public class Parser
         // Trim the commandline
         commandLine = commandLine.trim();
 
-        List potentialTargets = getPotentialTargets(commandLine, context);
+        List<CommandToMatches> potentialTargets = getPotentialTargets(commandLine, context);
 
         potentialTargets = checkForExactMatch(potentialTargets);
 
         if (potentialTargets.size() > 1)
         {
             // Ambiguous matching command found. Try to resolve it.
-            potentialTargets = resolveAmbiguousCommand(context,
-                    potentialTargets);
+            potentialTargets = resolveAmbiguousCommand(context, potentialTargets);
         }
 
         // Now we either have one target candidate, or none.
@@ -329,8 +328,8 @@ public class Parser
     {
         // Nope. Assume it is a name to be matched against the list.
         String cookedInput = NameUtils.normalizeName(input);
-        List originalNumbers = new LinkedList();
-        List matchingCandidates = new LinkedList();
+        List<Integer> originalNumbers = new LinkedList<Integer>();
+        List<String> matchingCandidates = new LinkedList<String>();
         int i = 0;
         for (Iterator iter = candidates.iterator(); iter.hasNext();)
         {
@@ -338,7 +337,7 @@ public class Parser
             String cookedCandidate = NameUtils.normalizeName(candidate);
             if (NameUtils.match(cookedInput, cookedCandidate, allowPrefixes))
             {
-                originalNumbers.add(new Integer(i));
+                originalNumbers.add(i);
                 matchingCandidates.add(candidate);
             }
             i++;
@@ -350,7 +349,7 @@ public class Parser
         else if (matchingCandidates.size() == 1)
         {
             // Yeah! We got it!
-            Integer index = (Integer) originalNumbers.get(0);
+            Integer index = originalNumbers.get(0);
             return index.intValue();
         } 
         else
@@ -362,15 +361,15 @@ public class Parser
             // but we need to
             // return the index of the original list. Good thing we saved that
             // number! :-)
-            Integer oldIndex = (Integer) originalNumbers.get(newIndex);
+            Integer oldIndex = originalNumbers.get(newIndex);
             return oldIndex.intValue();
         }
     }
 
-    private List resolveAmbiguousCommand(Context context, List potentialTargets)
+    private List<CommandToMatches> resolveAmbiguousCommand(Context context, List<CommandToMatches> potentialTargets)
             throws IOException, InterruptedException, KOMException
     {
-        List commandNames = new ArrayList();
+        List<String> commandNames = new ArrayList<String>();
         for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
         {
             CommandToMatches potentialTarget = (CommandToMatches) iter.next();
@@ -380,11 +379,10 @@ public class Parser
         int selection = askForResolution(context, commandNames, "parser.choose",
                 true, "parser.ambiguous", false, null);
 
-        CommandToMatches potentialTarget = (CommandToMatches) potentialTargets
-                .get(selection);
+        CommandToMatches potentialTarget = potentialTargets.get(selection);
 
         // Just save the chosen one in our list for later processing
-        potentialTargets = new LinkedList();
+        potentialTargets = new LinkedList<CommandToMatches>();
         potentialTargets.add(potentialTarget);
         return potentialTargets;
     }
@@ -437,7 +435,7 @@ public class Parser
         }
 
         // Now, resolve the entered parts.
-        List resolvedParameters = new LinkedList();
+        List<Object> resolvedParameters = new LinkedList<Object>();
         for (int i = 0; i < target.getMatches().size(); i++)
         {
             // If this is a command name part, then it is part of the
@@ -495,16 +493,16 @@ public class Parser
         return new ExecutableCommand(command, parameterArray);
     }
 
-    private List checkForExactMatch(List potentialTargets)
+    private List<CommandToMatches> checkForExactMatch(List<CommandToMatches> potentialTargets)
     {
         // Check if there is one and only one potential command that the user
         // wrote all parts of. If so, choose it.
         if (potentialTargets.size() > 1)
         {
-            List newPotentialTargets = new LinkedList();
-            for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
+            List<CommandToMatches> newPotentialTargets = new LinkedList<CommandToMatches>();
+            for (Iterator<CommandToMatches> iter = potentialTargets.iterator(); iter.hasNext();)
             {
-                CommandToMatches each = (CommandToMatches) iter.next();
+                CommandToMatches each = iter.next();
                 List matches = each.getMatches();
                 CommandNamePart[] words = each.getCommand().getNameSignature();
                 boolean failedAtLeastOnce = false;
@@ -544,13 +542,13 @@ public class Parser
         return potentialTargets;
     }
 
-    private List getPotentialTargets(String commandLine, Context context)
+    private List<CommandToMatches> getPotentialTargets(String commandLine, Context context)
     throws UnexpectedException
     {
         int level = 0;
 
         // List[CommandToMatches]
-        List potentialTargets = new LinkedList();
+        List<CommandToMatches> potentialTargets = new LinkedList<CommandToMatches>();
 
         // Build a copy of all commands first, to filter down later.
         for (int i = 0; i < m_commands.length; i++)
@@ -564,12 +562,10 @@ public class Parser
         while (remaindersExist && potentialTargets.size() > 1)
         {
             remaindersExist = false;
-            for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
+            for (Iterator<CommandToMatches> iter = potentialTargets.iterator(); iter.hasNext();)
             {
-                CommandToMatches potentialTarget = (CommandToMatches) iter
-                        .next();
-                CommandLinePart part = potentialTarget
-                        .getCommandLinePart(level);
+                CommandToMatches potentialTarget = iter.next();
+                CommandLinePart part = potentialTarget.getCommandLinePart(level);
                 if (part == null)
                 {
                     if (potentialTarget.getLastMatch().getRemainder().length() > 0)

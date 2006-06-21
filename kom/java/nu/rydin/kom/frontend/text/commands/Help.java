@@ -36,16 +36,16 @@ public class Help extends AbstractCommand
     private class HelpTextContainer
 	{
 		 private String[] paramDescriptions; 
-		 private ArrayList description;
-		 private ArrayList exceptions;
-		 private ArrayList seeAlso;
+		 private ArrayList<String> description;
+		 private ArrayList<String> exceptions;
+		 private ArrayList<String[]> seeAlso;
 		 
 		 public HelpTextContainer ()
 		 {
 		     paramDescriptions = new String[10];
-		     description = new ArrayList();
-		     exceptions = new ArrayList();
-		     seeAlso = new ArrayList();
+		     description = new ArrayList<String>();
+		     exceptions = new ArrayList<String>();
+		     seeAlso = new ArrayList<String[]>();
 		 }
 		 
 		 public void addParameterDescription (int n, String s)
@@ -60,7 +60,7 @@ public class Help extends AbstractCommand
 		 
 		 public void addDescriptionBlock (String s)
 		 {
-		     description.add (s.trim());
+		     description.add(s.trim());
 		 }
 		 
 		 public ArrayList getDescription()
@@ -80,7 +80,7 @@ public class Help extends AbstractCommand
 		 
 		 public void addReference(String s, String t)
 		 {
-		     seeAlso.add (new String[] {s, t});
+		     seeAlso.add(new String[] {s, t});
 		 }
 		 
 		 public ArrayList getReferences()

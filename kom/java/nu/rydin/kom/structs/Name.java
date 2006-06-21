@@ -60,4 +60,21 @@ public class Name implements Serializable
     {
         return m_name.length() > 0 ? m_name : "(PROTECTED)"; 
     }
+    
+    public boolean equals(Object o)
+    {
+        if(!(o instanceof Name))
+            return false;
+        Name n = (Name) o;
+        if(n.m_name == m_name)
+            return true;
+        if(n.m_name == null)
+            return false;
+        return ((Name) o).m_name.equals(m_name);
+    }
+    
+    public int hashCode()
+    {
+        return m_name != null ? m_name.hashCode() : 0;
+    }
 }

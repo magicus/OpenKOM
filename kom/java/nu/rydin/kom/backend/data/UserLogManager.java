@@ -97,7 +97,7 @@ public class UserLogManager
         m_getByDateStmt.setTimestamp(2, end);
         m_getByDateStmt.setInt(3, limit);
         m_getByDateStmt.setInt(4, offset);
-        ArrayList list = new ArrayList(limit);
+        ArrayList<UserLogItem> list = new ArrayList<UserLogItem>(limit);
         ResultSet rs = null;
         try
         {
@@ -124,7 +124,7 @@ public class UserLogManager
         m_getByUserStmt.setTimestamp(3, end);
         m_getByUserStmt.setInt(4, limit);
         m_getByUserStmt.setInt(5, offset);
-        ArrayList list = new ArrayList(limit);
+        ArrayList<UserLogItem> list = new ArrayList<UserLogItem>(limit);
         ResultSet rs = null;
         try
         {

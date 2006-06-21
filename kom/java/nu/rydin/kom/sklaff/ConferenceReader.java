@@ -24,7 +24,7 @@ public class ConferenceReader
     public static Map read(String confFile, boolean sklommon)
     throws IOException
     {
-        Map answer = new TreeMap();
+        Map<Integer, ConfEntry> answer = new TreeMap<Integer, ConfEntry>();
         BufferedReader rdr = new BufferedReader(new FileReader(confFile));
         try
         {

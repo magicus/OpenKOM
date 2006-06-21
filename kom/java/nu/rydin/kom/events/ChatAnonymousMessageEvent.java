@@ -15,11 +15,10 @@ public class ChatAnonymousMessageEvent extends SingleUserEvent
 	
 	public ChatAnonymousMessageEvent(long targetUser, String message)
 	{
-		super(targetUser);
+		super(-1, targetUser);
 		m_message 	= message;
 	}
 	
-		
 	/**
 	 * Return the message body
 	 */

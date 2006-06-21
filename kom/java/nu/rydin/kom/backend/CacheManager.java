@@ -20,6 +20,8 @@ public class CacheManager
 	private KOMCache m_messageCache = new KOMCache(100); // TODO: Read from config
 	
 	private KOMCache m_nameCache = new KOMCache(1000); // TODO: Read from config
+    
+    private KOMCache m_permissionCache = new KOMCache(1000); // TODO: Read from config
 	
 	public static CacheManager instance()
 	{
@@ -32,6 +34,7 @@ public class CacheManager
 		m_conferenceCache.performDeferredOperations();
 		m_messageCache.performDeferredOperations();
 		m_nameCache.performDeferredOperations();
+        m_permissionCache.performDeferredOperations();
 	}
 	
 	public void rollback()
@@ -40,6 +43,7 @@ public class CacheManager
 		m_conferenceCache.discardDeferredInvalidations();
 		m_messageCache.discardDeferredInvalidations();
 		m_nameCache.discardDeferredInvalidations();
+        m_permissionCache.discardDeferredInvalidations();
 	}
 	
 	public void clear()
@@ -48,6 +52,7 @@ public class CacheManager
 		m_conferenceCache.clear();
 		m_messageCache.clear();
 		m_nameCache.clear();
+        m_permissionCache.clear();
 	}
 	 
 	public KOMCache getUserCache()
@@ -69,4 +74,9 @@ public class CacheManager
 	{
 	    return m_nameCache;
 	}
+    
+    public KOMCache getPermissionCache()
+    {
+        return m_permissionCache;
+    }
 }

@@ -26,7 +26,7 @@ public class KOMWriter extends PrintWriter
 	private String m_charSet;
 	//private int m_lineNo = 0;
 	private static final String s_lineSeparator = "\r\n";
-	private final List m_newlineListeners = new LinkedList();
+	private final List<NewlineListener> m_newlineListeners = new LinkedList<NewlineListener>();
 
 	public KOMWriter(OutputStream out, String charSet)
 	throws UnsupportedEncodingException

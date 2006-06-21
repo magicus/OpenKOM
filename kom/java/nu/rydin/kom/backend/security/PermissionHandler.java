@@ -26,7 +26,7 @@ public class PermissionHandler extends DefaultHandler
         
     private short m_state = INITIAL_STATE;
     private Class m_class;
-    private Map m_methods = new HashMap();
+    private Map<Method, Long> m_methods = new HashMap<Method, Long>();
     
     public void startElement(String namespaceURI, String localName,
             		String qName, Attributes atts) 
@@ -86,7 +86,7 @@ public class PermissionHandler extends DefaultHandler
         //
         int p2 = s.indexOf(')', p1);
         String pStr = s.substring(p1 + 1, p2);
-        ArrayList list = new ArrayList(10);
+        ArrayList<Class> list = new ArrayList<Class>(10);
         for(StringTokenizer st = new StringTokenizer(pStr); st.hasMoreTokens();)
         {
             String each = st.nextToken().trim();
