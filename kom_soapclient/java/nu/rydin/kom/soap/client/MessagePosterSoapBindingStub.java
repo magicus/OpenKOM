@@ -38,25 +38,25 @@ public class MessagePosterSoapBindingStub extends org.apache.axis.client.Stub im
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault"),
-                      "nu.rydin.kom.soap.client.messageposter.ObjectNotFoundException",
+                      "nu.rydin.kom.soap.client.ObjectNotFoundException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "ObjectNotFoundException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault2"),
-                      "nu.rydin.kom.soap.client.messageposter.UnexpectedException",
+                      "nu.rydin.kom.soap.client.UnexpectedException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "UnexpectedException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault3"),
-                      "nu.rydin.kom.soap.client.messageposter.SessionExpiredException",
+                      "nu.rydin.kom.soap.client.SessionExpiredException",
                       new javax.xml.namespace.QName("http://exceptions.soap.kom.rydin.nu", "SessionExpiredException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault1"),
-                      "nu.rydin.kom.soap.client.messageposter.AuthorizationException",
+                      "nu.rydin.kom.soap.client.AuthorizationException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "AuthorizationException"), 
                       true
                      ));
@@ -77,19 +77,19 @@ public class MessagePosterSoapBindingStub extends org.apache.axis.client.Stub im
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault"),
-                      "nu.rydin.kom.soap.client.messageposter.ObjectNotFoundException",
+                      "nu.rydin.kom.soap.client.ObjectNotFoundException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "ObjectNotFoundException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault2"),
-                      "nu.rydin.kom.soap.client.messageposter.UnexpectedException",
+                      "nu.rydin.kom.soap.client.UnexpectedException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "UnexpectedException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault3"),
-                      "nu.rydin.kom.soap.client.messageposter.SessionExpiredException",
+                      "nu.rydin.kom.soap.client.SessionExpiredException",
                       new javax.xml.namespace.QName("http://exceptions.soap.kom.rydin.nu", "SessionExpiredException"), 
                       true
                      ));
@@ -112,25 +112,25 @@ public class MessagePosterSoapBindingStub extends org.apache.axis.client.Stub im
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault"),
-                      "nu.rydin.kom.soap.client.messageposter.ObjectNotFoundException",
+                      "nu.rydin.kom.soap.client.ObjectNotFoundException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "ObjectNotFoundException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault2"),
-                      "nu.rydin.kom.soap.client.messageposter.UnexpectedException",
+                      "nu.rydin.kom.soap.client.UnexpectedException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "UnexpectedException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault3"),
-                      "nu.rydin.kom.soap.client.messageposter.SessionExpiredException",
+                      "nu.rydin.kom.soap.client.SessionExpiredException",
                       new javax.xml.namespace.QName("http://exceptions.soap.kom.rydin.nu", "SessionExpiredException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault1"),
-                      "nu.rydin.kom.soap.client.messageposter.AuthorizationException",
+                      "nu.rydin.kom.soap.client.AuthorizationException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "AuthorizationException"), 
                       true
                      ));
@@ -153,19 +153,19 @@ public class MessagePosterSoapBindingStub extends org.apache.axis.client.Stub im
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault"),
-                      "nu.rydin.kom.soap.client.messageposter.ObjectNotFoundException",
+                      "nu.rydin.kom.soap.client.ObjectNotFoundException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "ObjectNotFoundException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault2"),
-                      "nu.rydin.kom.soap.client.messageposter.UnexpectedException",
+                      "nu.rydin.kom.soap.client.UnexpectedException",
                       new javax.xml.namespace.QName("http://exceptions.kom.rydin.nu", "UnexpectedException"), 
                       true
                      ));
         oper.addFault(new org.apache.axis.description.FaultDesc(
                       new javax.xml.namespace.QName("http://localhost:8080/axis/services/MessagePoster", "fault3"),
-                      "nu.rydin.kom.soap.client.messageposter.SessionExpiredException",
+                      "nu.rydin.kom.soap.client.SessionExpiredException",
                       new javax.xml.namespace.QName("http://exceptions.soap.kom.rydin.nu", "SessionExpiredException"), 
                       true
                      ));

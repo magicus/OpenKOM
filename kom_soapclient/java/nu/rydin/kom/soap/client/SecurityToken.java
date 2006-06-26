@@ -76,10 +76,10 @@ public class SecurityToken  implements java.io.Serializable {
         new org.apache.axis.description.TypeDesc(SecurityToken.class, true);
 
     static {
-        typeDesc.setXmlType(new javax.xml.namespace.QName("urn:Authenticator", "SecurityToken"));
+        typeDesc.setXmlType(new javax.xml.namespace.QName("urn:MessagePoster", "SecurityToken"));
         org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("payload");
-        elemField.setXmlName(new javax.xml.namespace.QName("urn:Authenticator", "payload"));
+        elemField.setXmlName(new javax.xml.namespace.QName("urn:MessagePoster", "payload"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);

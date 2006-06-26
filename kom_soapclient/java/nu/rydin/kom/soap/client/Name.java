@@ -8,6 +8,7 @@
 package nu.rydin.kom.soap.client;
 
 public class Name  implements java.io.Serializable {
+    private short kind;
     private java.lang.String name;
     private short visibility;
 
@@ -15,10 +16,32 @@ public class Name  implements java.io.Serializable {
     }
 
     public Name(
+           short kind,
            java.lang.String name,
            short visibility) {
+           this.kind = kind;
            this.name = name;
            this.visibility = visibility;
+    }
+
+
+    /**
+     * Gets the kind value for this Name.
+     * 
+     * @return kind
+     */
+    public short getKind() {
+        return kind;
+    }
+
+
+    /**
+     * Sets the kind value for this Name.
+     * 
+     * @param kind
+     */
+    public void setKind(short kind) {
+        this.kind = kind;
     }
 
 
@@ -73,6 +96,7 @@ public class Name  implements java.io.Serializable {
         __equalsCalc = obj;
         boolean _equals;
         _equals = true && 
+            this.kind == other.getKind() &&
             ((this.name==null && other.getName()==null) || 
              (this.name!=null &&
               this.name.equals(other.getName()))) &&
@@ -88,6 +112,7 @@ public class Name  implements java.io.Serializable {
         }
         __hashCodeCalc = true;
         int _hashCode = 1;
+        _hashCode += getKind();
         if (getName() != null) {
             _hashCode += getName().hashCode();
         }
@@ -103,6 +128,12 @@ public class Name  implements java.io.Serializable {
     static {
         typeDesc.setXmlType(new javax.xml.namespace.QName("urn:MessagePoster", "Name"));
         org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("kind");
+        elemField.setXmlName(new javax.xml.namespace.QName("urn:MessagePoster", "kind"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "short"));
+        elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("name");
         elemField.setXmlName(new javax.xml.namespace.QName("urn:MessagePoster", "name"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
