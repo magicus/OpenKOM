@@ -1361,7 +1361,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             // least prevent us from going into conferences where all messages
             // are posted by Måns^h^h^h^hfiltered users.
             //
-            if(n > 0 && n <= FILTER_ADJUST_THREASHOLD)
+            if(n > 0 && n <= FILTER_ADJUST_THREASHOLD && m_userContext.getFilterCache().size() > 0)
             {
                 int localnum;
                 for(;;)

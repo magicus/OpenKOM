@@ -18,7 +18,7 @@ import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.utils.Logger;
 
 /**
- * Hands out user context. Only one context is kept per user, even though
+ * Hands out user contexts. Only one context is kept per user, even though
  * it may be used from several different sessions.
  * 
  * @author Pontus Rydin
@@ -74,7 +74,8 @@ public class UserContextFactory
     
     public synchronized UserContext getContextOrNull(long user)
     {
-        return contexts.get(user).context;
+        UserContextWrapper cw = contexts.get(user); 
+        return cw != null ? cw.context : null;
     }
     
     public synchronized void release(long user)
