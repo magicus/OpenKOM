@@ -1,0 +1,103 @@
+html,
+select,
+textarea
+{
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 8pt;
+}
+
+.panel-left {
+	width: 5%;
+	text-align: left;
+	border-color: #000000;
+	border-width: 0px;
+	border-style: solid;
+	border-right-width: 1px	
+}
+
+.app-header {
+	text-align: left;
+	border-color: #000000;
+	border-width: 0px;
+	border-style: solid;
+	border-bottom-width: 1px
+	
+}
+
+.app-status {
+	text-align: right;
+}
+
+
+.list-header {
+	color: #ffffff;
+	background: #5555ff;
+	text-align: left;
+}
+
+.panel-right {
+	border: 1px;
+}
+
+
+.list-background {
+	width: 100%
+}
+
+.list-row {
+	background: #f0f0ff;
+	border-color: #000000;
+	border-width: 0px;
+	border-style: solid;
+	border-bottom-width: 1px	
+	font-size: 2pt;
+	font-family: Arial;
+}
+
+.number-column {
+	width: 5%;
+	text-align: right;
+}
+
+.conf-name-column {
+	width: 8000px;
+}
+
+.global-textid-column {
+	width: 5%;
+	text-align: right;
+}
+
+.local-textid-column {
+	width: 5%;
+	text-align: right;
+}
+
+.author-column {
+	width: 20%;
+	text-align: left;
+	border-color: #000000;
+	border-width: 0px;
+	border-style: solid;
+	border-left-width: 1px		
+}
+
+.time-column {
+	width: 20%;
+	text-align: left;
+	border-color: #000000;
+	border-width: 0px;
+	border-style: solid;
+	border-left-width: 1px		
+}
+
+.subject-column {
+	width: 80%;
+	text-align: left;
+	border-color: #000000;
+	border-width: 0px;
+	border-style: solid;
+	border-left-width: 1px		
+}
+
+

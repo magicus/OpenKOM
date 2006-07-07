@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app 
+   xmlns="http://java.sun.com/xml/ns/j2ee" 
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
+   version="2.4"> 
+
+  <display-name>OpenKOM WebUI</display-name>
+
+  <error-page>
+    <error-code>404</error-code>
+    <location>/errors/404.html</location>
+  </error-page>
+  
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>KOM</web-resource-name>
+        <url-pattern>/*</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+            <role-name>KomInteractiveUser</role-name>
+    </auth-constraint>
+    </security-constraint>
+
+  
+    <login-config>
+      <auth-method>FORM</auth-method>
+      <realm-name>OpenKOM Realm</realm-name>
+      <form-login-config>
+         <form-login-page>/login.jsp?param=test</form-login-page>
+         <form-error-page>/loginError.jsp?param=test</form-error-page>
+      </form-login-config>
+    </login-config>
+    
+    <!-- Faces Servlet -->
+   <servlet>
+       <servlet-name>Faces Servlet</servlet-name>
+       <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+       <load-on-startup>1</load-on-startup>
+   </servlet>
+    
+   <servlet-mapping>
+  		<servlet-name>Faces Servlet</servlet-name> 
+  		<url-pattern>*.faces</url-pattern> 
+  </servlet-mapping>
+  
+      <!-- Welcome files -->
+    <welcome-file-list>
+        <welcome-file>listNews.faces</welcome-file>
+    </welcome-file-list>    
+</web-app>
+
+
