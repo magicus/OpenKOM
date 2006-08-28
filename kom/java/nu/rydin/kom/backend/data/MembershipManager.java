@@ -384,6 +384,12 @@ public class MembershipManager
 					rs.close();
 			}
 		}
+        finally
+        {
+            // Invalidate permission cache
+            //
+            CacheManager.instance().getPermissionCache().registerInvalidation(new PermissionKey(conference, user));
+        }
 	}
 	
 	public long prioritizeConference(long user, long conference, long targetconference)

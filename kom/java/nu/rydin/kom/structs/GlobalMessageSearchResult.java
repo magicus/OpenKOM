@@ -6,6 +6,8 @@
  */
 package nu.rydin.kom.structs;
 
+import java.sql.Timestamp;
+
 /**
  * @author Henrik
  */
@@ -14,9 +16,9 @@ public class GlobalMessageSearchResult extends MessageSearchResult
     private final NameAssociation m_conference;
 
     public GlobalMessageSearchResult(long globalid, int localid, NameAssociation conference, 
-            NameAssociation author, String subject, long replyTo)
+            NameAssociation author, String subject, long replyTo, Timestamp timestamp)
     {
-        super(globalid, localid, author, subject, replyTo);
+        super(globalid, localid, author, subject, replyTo, timestamp);
         m_conference = conference;
     }
     

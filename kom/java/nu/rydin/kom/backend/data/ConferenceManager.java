@@ -59,14 +59,14 @@ public class ConferenceManager // extends NameManager
 		m_isMailboxStmt = conn.prepareStatement(
 		     "SELECT COUNT(*) FROM users WHERE id = ?");
 		m_listByDateStmt = conn.prepareStatement(
-		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext, m.permissions,  c.administrator " +
+		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext, m.permissions,  c.administrator, m.priority " +
 		     "FROM conferences c " +
 		     "LEFT OUTER JOIN memberships m ON c.id = m.conference AND m.user = ? " +
 		     "JOIN names n ON n.id = c.id " +
 		     "WHERE n.kind = " + NameManager.CONFERENCE_KIND + ' '+
 		     "ORDER BY c.lasttext DESC");
 		m_listByNameStmt = conn.prepareStatement(
-		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext, m.permissions, c.administrator " +
+		     "SELECT c.id, n.fullname, n.visibility, c.created, c.lasttext, m.permissions, c.administrator, m.priority " +
 		     "FROM conferences c " +
 		     "LEFT OUTER JOIN memberships m ON c.id = m.conference AND m.user = ? " +
 		     "JOIN names n ON n.id = c.id " +
@@ -334,7 +334,8 @@ public class ConferenceManager // extends NameManager
                     rs.getTimestamp(4),
                     rs.getTimestamp(5),
                     rs.getObject(6) != null,
-                    rs.getLong(7) == user));
+                    rs.getLong(7) == user,
+                    rs.getInt(8)));
 	        }
 	        ConferenceListItem[] answer = new ConferenceListItem[list.size()];
 	        list.toArray(answer);
@@ -385,7 +386,8 @@ public class ConferenceManager // extends NameManager
                     rs.getTimestamp(4),
                     rs.getTimestamp(5),
                     rs.getObject(6) != null,
-                    rs.getLong(7) == user));
+                    rs.getLong(7) == user,
+                    rs.getInt(8)));
 	        }
 	        ConferenceListItem[] answer = new ConferenceListItem[list.size()];
 	        list.toArray(answer);

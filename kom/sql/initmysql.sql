@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS messageoccurrences
 (
 	localnum INT NOT NULL,
 	conference BIGINT NOT NULL,
-	message BIGINT NOT NULL,
+	message BIGINT,
 	action_ts DATETIME NOT NULL,
 	kind SMALLINT NOT NULL,
 	user BIGINT,

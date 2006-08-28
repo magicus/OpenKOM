@@ -100,14 +100,14 @@ public class UserContext
         }            
     }
     
-    public boolean allowsChat(UserManager um, long originator)
+    public boolean allowsChat(UserManager um, long sender)
     throws ObjectNotFoundException, UnexpectedException
     {
         try
         {
-            UserInfo ui = um.loadUser(originator);
+            UserInfo ui = um.loadUser(this.user);
             return ui.testFlags(0, UserFlags.ALLOW_CHAT_MESSAGES)
-                && !this.userMatchesFilter(originator, FilterFlags.CHAT);
+                && !this.userMatchesFilter(sender, FilterFlags.CHAT);
         }
         catch(SQLException e)
         {
@@ -115,14 +115,14 @@ public class UserContext
         }            
     }
 
-    public boolean allowsBroadcast(UserManager um, long originator)
+    public boolean allowsBroadcast(UserManager um, long sender)
     throws ObjectNotFoundException, UnexpectedException
     {
         try
         {
-            UserInfo ui = um.loadUser(originator);
+            UserInfo ui = um.loadUser(this.user);
             return ui.testFlags(0, UserFlags.ALLOW_BROADCAST_MESSAGES)
-                && !this.userMatchesFilter(originator, FilterFlags.BROADCASTS);
+                && !this.userMatchesFilter(sender, FilterFlags.BROADCASTS);
         }
         catch(SQLException e)
         {
@@ -148,5 +148,4 @@ public class UserContext
             memberships.save(user, mm);
         memberships = new MembershipList(mm.listMembershipsByUser(user));
     }
-
 }

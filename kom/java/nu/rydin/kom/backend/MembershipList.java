@@ -125,6 +125,8 @@ public class MembershipList
 		ConferenceInfo ci = cm.loadConference(conference);
 		MessageRange total = new MessageRange(ci.getFirstMessage(), ci.getLastMessage());
 		MembershipInfo mi = (MembershipInfo) m_conferenceTable.get(new Long(conference));
+        if(mi == null)
+            return 0;
 		
 		// Check that the list of unread messages is fully contained 
 		// in the list of existing messages. If not, adjust!

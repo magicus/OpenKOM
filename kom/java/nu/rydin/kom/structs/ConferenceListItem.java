@@ -22,14 +22,17 @@ public class ConferenceListItem extends NameAssociation implements Serializable
     
     private final boolean owner;
     
+    private final int order;
+    
     public ConferenceListItem(long id, Name name, Timestamp created, Timestamp lastActive, 
-            boolean member, boolean owner)
+            boolean member, boolean owner, int order)
     {
         super(id, name);
         this.created 	= created;
         this.lastActive	= lastActive;
         this.member		= member;
         this.owner		= owner;
+        this.order      = order;
     }
     public Timestamp getCreated()
     {
@@ -47,5 +50,9 @@ public class ConferenceListItem extends NameAssociation implements Serializable
     public boolean isOwner()
     {
         return owner;
+    }
+    public int getOrder()
+    {
+        return order;
     }
 }

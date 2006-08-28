@@ -6,13 +6,15 @@
  */
 package nu.rydin.kom.structs;
 
+import java.sql.Timestamp;
+
 /**
  * @author Henrik
  */
 public class LocalMessageSearchResult extends MessageSearchResult
 {
-    public LocalMessageSearchResult(long globalid, int localid, NameAssociation author, String subject, long replyTo)
+    public LocalMessageSearchResult(long globalid, int localid, NameAssociation author, String subject, long replyTo, Timestamp timestamp)
     {
-        super(globalid, localid, author, subject, replyTo);
+        super(globalid, localid, author, subject, replyTo, timestamp);
     }
 }

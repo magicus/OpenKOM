@@ -24,6 +24,11 @@ public interface ServerSession
     public int getSessionId();
     
     /**
+     * Returns <tt>true</tt> if this session is valid
+     */
+    public boolean isValid();
+    
+    /**
      * Returns the type of client that created us
      */
     public short getClientType();

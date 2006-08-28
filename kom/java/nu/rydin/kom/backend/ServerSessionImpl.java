@@ -2199,7 +2199,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 							    
 							    // Does the receiver accept chat messages
 							    //
-							    if(uc.allowsChat(um, this.getLoggedInUserId()))
+							    if(uc.allowsChat(um, uid))
 							        s.add(new Long(uid));
 							    else
 							        refused.add(new NameAssociation(uid, ui.getName()));
@@ -2330,9 +2330,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			}
 			
 			// Log to chat log. This could be done in the event handlers, but
-			// that would give all kinds of concurrence and transactional problems,
+			// that would give all kinds of concurrency and transactional problems,
 			// since they are executing asynchronously. 
-			// There is, of course, a slight chance that someone logs in out out
+			// There is, of course, a slight chance that someone logs in out
 			// while doing this and that the log won't be 100% correct, but that's
 			// a tradeoff we're willing to make at this point.
 			//
@@ -2345,9 +2345,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			        // Find out if recipients allows broadcasts
 			        //
 				    UserInfo user = um.loadUser(userId);
-				    if(uc.allowsBroadcast(um, this.getLoggedInUserId()))
+
+                    if(uc.allowsBroadcast(um, this.getLoggedInUserId()))
 				        mlm.storeMessagePointer(logId, userId, false, kind);
-				    else
+				    else 
 				        bounces.add(new NameAssociation(userId, user.getName()));   
 			    }
 			    catch(ObjectNotFoundException e)
@@ -3107,7 +3108,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		m_valid = false;
 	}
 	
-	protected boolean isValid()
+	public boolean isValid()
 	{
 		return m_valid;
 	}
