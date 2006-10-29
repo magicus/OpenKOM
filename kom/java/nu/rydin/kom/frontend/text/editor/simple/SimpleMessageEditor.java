@@ -17,6 +17,7 @@ import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.PrintUtils;
@@ -35,10 +36,10 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 	public UnstoredMessage edit()
 	throws KOMException, InterruptedException
 	{
-	    return this.edit(-1, -1, -1, null, -1, null, null);
+	    return this.edit(MessageLocator.NO_MESSAGE, -1, null, -1, null, null);
 	}
 	
-	public UnstoredMessage edit(long replyTo, long replyToLocal, long recipientId, 
+	public UnstoredMessage edit(MessageLocator replyTo, long recipientId, 
 	        Name recipientName, long replyToAuthor, Name replyToAuthorName, String oldSubject)
 		throws KOMException, InterruptedException
 	{
@@ -54,15 +55,15 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			//
 			out.println(formatter.format("simple.editor.author", this.getCachedUserInfo().getName()));
 			
-			if(replyTo != -1)
+			if(replyTo.isValid())
 			{
-                long replyToConferenceId = this.getSession().getMostRelevantOccurrence(this.getSession().getCurrentConferenceId(), replyTo).getConference(); 
-				if(this.getRecipient().getId() == replyToConferenceId)
+                replyTo = this.getSession().resolveLocator(replyTo); 
+				if(this.getRecipient().getId() == replyTo.getConference())
 				{
 					// Simple case: Original text is in same conference
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.same.conference", 
-						new Object[] { new Long(replyToLocal), 
+						new Object[] { replyTo.getLocalnum(), 
 							this.formatObjectName(replyToAuthorName, replyToAuthor) } ));		
 				}
 				else
@@ -70,8 +71,8 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 					// Complex case: Original text was in a different conference
 					//
 					out.println(formatter.format("CompactMessagePrinter.reply.to.different.conference", 
-							new Object[] { new Long(replyToLocal),
-	                            this.formatObjectName(this.getSession().getConference(replyToConferenceId).getName(), replyToConferenceId),
+							new Object[] { replyTo.getLocalnum(),
+	                            this.formatObjectName(this.getSession().getName(replyTo.getConference()), replyTo.getConference()),
 						        this.formatObjectName(replyToAuthorName, replyToAuthor) }));
 				}
 			}

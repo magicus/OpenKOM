@@ -47,6 +47,9 @@ public class NameManager
 	private final PreparedStatement m_getKindStmt;
 	private final PreparedStatement m_dropNamedObjectStmt;
 	private final PreparedStatement m_changeVisibilityStmt;
+    private final PreparedStatement m_searchObjectStmt;
+    private final PreparedStatement m_changeKeywordsStmt;
+    private final PreparedStatement m_changeEmailAliasStmt;
 	
 	public NameManager(Connection conn)
 	throws SQLException
@@ -65,7 +68,7 @@ public class NameManager
 		m_getNamesByPatternAndKindStmt = conn.prepareStatement(
 			"SELECT fullname, visibility, kind FROM names WHERE norm_name LIKE ? AND kind = ? " +			"ORDER BY fullname");
 		m_addNameStmt  = conn.prepareStatement(
-			"INSERT INTO names(norm_name, fullname, kind, visibility) VALUES(?, ?, ?, ?)");
+			"INSERT INTO names(norm_name, fullname, kind, visibility, keywords) VALUES(?, ?, ?, ?, ?)");
 		m_getAssociationsByPatternStmt = conn.prepareStatement(
 			"SELECT id, fullname, visibility, kind FROM names WHERE norm_name LIKE ? " +
 			"ORDER BY fullname");			
@@ -80,6 +83,12 @@ public class NameManager
 			"delete from names where id = ?");
 		m_changeVisibilityStmt = conn.prepareStatement(
 		    "UPDATE names SET visibility = ? WHERE id = ?");
+        m_searchObjectStmt = conn.prepareStatement(
+            "SELECT id, fullname, visibility, kind FROM names WHERE fullname like ? OR keywords LIKE ?");
+        m_changeKeywordsStmt = conn.prepareStatement(
+            "UPDATE names SET keywords = ? WHERE id = ?");
+        m_changeEmailAliasStmt = conn.prepareStatement(
+            "UPDATE names SET emailalias = ? WHERE id = ?");        
 	}
 	
 	public void finalize()
@@ -124,6 +133,12 @@ public class NameManager
 			m_dropNamedObjectStmt.close();
 		if(m_changeVisibilityStmt != null)
 		    m_changeVisibilityStmt.close();
+        if(m_searchObjectStmt != null)
+            m_searchObjectStmt.close();
+        if(m_changeKeywordsStmt != null)
+            m_changeKeywordsStmt.close();
+        if(m_changeEmailAliasStmt != null)
+            m_changeEmailAliasStmt.close();                        
 	}
 	
 	/**
@@ -283,6 +298,33 @@ public class NameManager
 				rs.close();
 		}
 	}
+    
+    /**
+     * Searches objects based on partial match of either name or keyword
+     * 
+     * @param pattern The pattern to search for
+     * @return An array of matching <tt>NameAssociations</tt>
+     * @throws SQLException
+     */
+    public NameAssociation[] findObjects(String pattern)
+    throws SQLException
+    {
+        pattern = '%' + pattern + '%';
+        m_searchObjectStmt.clearParameters();
+        m_searchObjectStmt.setString(1, pattern);
+        m_searchObjectStmt.setString(2, pattern);
+        ResultSet rs = null;
+        try
+        {
+            rs = m_searchObjectStmt.executeQuery();
+            return SQLUtils.extractNames(rs, 1, 2, 3, 4, null);
+        }
+        finally
+        {
+            if(rs != null)
+                rs.close();
+        }        
+    }
 	
 	
 	/**
@@ -406,13 +448,13 @@ public class NameManager
 		}
 	}
 	
-	public long addName(String name, short kind, short visibility)
+	public long addName(String name, short kind, short visibility, String keywords)
 	throws SQLException, DuplicateNameException, AmbiguousNameException
 	{
-		return this.addName(NameUtils.normalizeName(name), name, kind, visibility); 
+		return this.addName(NameUtils.normalizeName(name), name, kind, visibility, keywords); 
 	}
 	
-	public long addName(String normName, String fullName, short kind, short visibility)
+	public long addName(String normName, String fullName, short kind, short visibility, String keywords)
 	throws SQLException, DuplicateNameException, AmbiguousNameException
 	{
 		// Check to see if we already have the name
@@ -427,6 +469,7 @@ public class NameManager
 		m_addNameStmt.setString(2, fullName);
 		m_addNameStmt.setShort(3, kind);
 		m_addNameStmt.setShort(4, visibility);
+        m_addNameStmt.setString(5, keywords);
 		m_addNameStmt.executeUpdate();
 		
 		// Now, read it back to obtain the id
@@ -466,7 +509,47 @@ public class NameManager
 		invalidateCache(id);
 	}
 	
-	
+    /**
+     * Changes object keywords
+     * 
+     * @param id The id of the object to change
+     * @param keywords The new set of keywords (comma separated)
+     * @throws SQLException
+     */
+    public void changeKeywords(long id, String keywords)
+    throws SQLException
+    {
+        m_changeKeywordsStmt.clearParameters();
+        m_changeKeywordsStmt.setString(1, keywords);
+        m_changeKeywordsStmt.setLong(2, id);
+        m_changeKeywordsStmt.executeUpdate();
+        
+        // Invalidate caches
+        //      
+        this.invalidateCache(id);
+    }
+
+    /**
+     * Changes object email alias
+     * 
+     * @param id The id of the object to change
+     * @param emailAlias The new email alias
+     * @throws SQLException
+     */
+    public void changeEmailAlias(long id, String emailAlias)
+    throws SQLException
+    {
+        m_changeEmailAliasStmt.clearParameters();
+        m_changeEmailAliasStmt.setString(1, emailAlias);
+        m_changeEmailAliasStmt.setLong(2, id);
+        m_changeEmailAliasStmt.executeUpdate();
+        
+        // Invalidate caches
+        //      
+        this.invalidateCache(id);
+    }
+    
+    
 	protected String createKey(String name)
 	{
 		String s = NameUtils.normalizeName(name).toUpperCase().replaceAll(" ", "% ");

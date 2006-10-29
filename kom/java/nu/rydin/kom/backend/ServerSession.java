@@ -135,16 +135,6 @@ public interface ServerSession
 	throws ObjectNotFoundException, UnexpectedException;
 
 	/**
-	 * Retrievs a message and marks it as unread
-	 * 
-	 * @param messageId The gloval message id
-	 * @throws ObjectNotFoundException
-	 * @throws UnexpectedException
-	 */	
-	public Envelope innerReadMessage(long messageId)
-	throws ObjectNotFoundException, UnexpectedException;
-
-	/**
 	 * Re-read the last read message.
 	 * 
 	 * @throws ObjectNotFoundException
@@ -155,6 +145,15 @@ public interface ServerSession
 	public Envelope readLastMessage()
 	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException;
 
+    /**
+     * Retrievs a message and marks it as unread
+     * 
+     * @param message
+     * @return
+     */
+    public Envelope readMessage(MessageLocator message)
+    throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException;
+
 	/**
 	 * Retrievs a message and marks it as unread
 	 * 
@@ -163,8 +162,8 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
-	public Envelope readLocalMessage(int localnum)
-	throws ObjectNotFoundException, UnexpectedException;
+//	public Envelope readLocalMessage(int localnum)
+//	throws ObjectNotFoundException, UnexpectedException;
 	
 
 	/**
@@ -175,8 +174,8 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */	
-	public Envelope readLocalMessage(long conf, int localnum)
-	throws ObjectNotFoundException, UnexpectedException;
+//	public Envelope readLocalMessage(long conf, int localnum)
+//	throws ObjectNotFoundException, UnexpectedException;
 	
 	/**
 	 * Retrieves the next unread message in the specified conference and marks it as read
@@ -214,6 +213,7 @@ public interface ServerSession
 	 * Creates a conference and makes the current user a member and the administrator of it.
 	 *  
 	 * @param fullname The full name of the conference
+     * @param keywords Keywords for finding the conference
 	 * @param permissions Default permissions
 	 * @param nonmemberPermissions Default permissions for non-members
 	 * @param visibility Visibility level.
@@ -223,7 +223,7 @@ public interface ServerSession
 	 * @throws AmbiguousNameException
 	 * @throws DuplicateNameException
 	 */	
-	public long createConference(String fullname, int permissions, int nonmemberPermissions, short visibility, long replyConf)
+	public long createConference(String fullname, String keywords, int permissions, int nonmemberPermissions, short visibility, long replyConf)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException;
 	
 	/**
@@ -246,6 +246,7 @@ public interface ServerSession
 	 * @param userid The login id
 	 * @param password The password
 	 * @param fullname Full name of user
+     * @param keywords Keywords aiding in finding a user
 	 * @param address1 First address line
 	 * @param address2 Second address line
 	 * @param address3 Third address line
@@ -266,7 +267,7 @@ public interface ServerSession
 	 * @throws DuplicateNameException
 	 * @throws AuthorizationException
 	 */	
-	public void createUser(String userid, String password, String fullname, String address1,
+	public void createUser(String userid, String password, String fullname, String keywords, String address1,
 		String address2, String address3, String address4, String phoneno1, 
 		String phoneno2, String email1, String email2, String url, String charset, 
 		long flags1, long flags2, long flags3, long flags4, long rights)
@@ -340,8 +341,8 @@ public interface ServerSession
 	 * @throws UnexpectedException
 	 * @throws AuthorizationException
 	 */
-	public MessageOccurrence storeReplyAsMessage(long conference, UnstoredMessage msg, long replyTo)
-	throws ObjectNotFoundException, UnexpectedException, AuthorizationException;
+	public MessageOccurrence storeReplyAsMessage(long conference, UnstoredMessage msg, MessageLocator replyTo)
+	throws ObjectNotFoundException, UnexpectedException, AuthorizationException, NoCurrentMessageException;
 	
 	/**
 	 * Stores a message as a personal mail to a user. May store a copy in the
@@ -354,8 +355,8 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
-	public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg, long replyTo)
-	throws ObjectNotFoundException, UnexpectedException;
+	public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg, MessageLocator replyTo)
+	throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException;
 
 	/**
 	 * Stores a presentation of an object
@@ -386,8 +387,8 @@ public interface ServerSession
      * @param message Global message id of the message not commented
      * @return
      */
-    public void storeNoComment(long message)
-    throws AuthorizationException, NoCurrentMessageException, UnexpectedException;
+    public void storeNoComment(MessageLocator message)
+    throws AuthorizationException, NoCurrentMessageException, ObjectNotFoundException, UnexpectedException;
 
     /**
      * Reads a message identified by a global message id.
@@ -398,8 +399,8 @@ public interface ServerSession
      * @throws AuthorizationException
      * @throws UnexpectedException
      */
-	public Envelope readGlobalMessage(long globalId)
-	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
+	// public Envelope readGlobalMessage(long globalId)
+	// throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
     
 	/**
 	 * Reads the "original message" of the current message, i.e. the message
@@ -446,6 +447,18 @@ public interface ServerSession
 	 */
 	public long localToGlobal(long conference, int localNum)
 	throws ObjectNotFoundException, UnexpectedException;
+
+    /**
+     * Resolves a locator and makes sure all fields are set. Useful to get a fully 
+     * qualified message locator.
+     * @param message The locator
+     * @return A fully qualified locator
+     * @throws ObjectNotFoundException
+     * @throws NoCurrentMessageException
+     * @throws UnexpectedException
+     */
+    public MessageLocator resolveLocator(MessageLocator message)
+    throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException;
 	
 	/**
 	 * Returns the global message id given a local number in the current conference.
@@ -467,8 +480,8 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 */
-	public long getGlobalMessageId(TextNumber textnumber)
-	throws ObjectNotFoundException, UnexpectedException;
+	public long getGlobalMessageId(MessageLocator textnumber)
+	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException;
 	
 	/**
 	 * Returns the global id of the last read message.
@@ -582,7 +595,38 @@ public interface ServerSession
 	 */
 	public NamedObject getNamedObject(long id)
 	throws ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Finds objects based on partial match on name or keywords.
+     * @param pattern The search pattern
+     */
+    public NameAssociation[] findObjects(String pattern)
+    throws UnexpectedException;
+    
+    /**
+     * Changes keywords of an object
+     * 
+     * @param id The id of the object to change
+     * @param keywords The new keywords
+     * @throws UnexpectedException
+     * @throws ObjectNotFoundException
+     * @throws AuthorizationException
+     */
+    public void changeKeywords(long id, String keywords)
+    throws UnexpectedException, ObjectNotFoundException, AuthorizationException;
 
+    /**
+     * Changes email alias of an object
+     * 
+     * @param id The id of the object to change
+     * @param keywords The new email alias
+     * @throws UnexpectedException
+     * @throws ObjectNotFoundException
+     * @throws AuthorizationException
+     */
+    public void changeEmailAlias(long id, String emailAlias)
+    throws UnexpectedException, ObjectNotFoundException, AuthorizationException;
+    
 	/**
 	 * List the conferences the specified user is a member of in 
 	 * order of prioritization
@@ -658,21 +702,12 @@ public interface ServerSession
 	/**
 	 * Queues up a message to be marked as unread at logout.
 	 * 
-	 * @param messageId The message id
+	 * @param The message (null for current message)
 	 * @throws UnexpectedException
 	 */
-	public void markAsUnreadAtLogout(long messageId)
-	throws UnexpectedException;
-	
-	/**
-	 * Queues up a message to be marked as unread at logout.
-	 * 
-	 * @param localNum The local id
-	 * @throws UnexpectedException
-	 */
-	public void markAsUnreadAtLogoutInCurrentConference(int localnum)
-	throws UnexpectedException;
-	
+	public void markAsUnreadAtLogout(MessageLocator message)
+	throws UnexpectedException, NoCurrentMessageException, ObjectNotFoundException;
+		
 	/**
 	 * Changes the number of unread messages in the current conference. Destroys
 	 * any previous read-message-markers.
@@ -1311,36 +1346,14 @@ public interface ServerSession
 	/** 
 	 * Returns the message header for a message identified by a global id.
 	 * 
-	 * @param globalId The global id
+	 * @param locator The message locator
 	 * @throws ObjectNotFoundException
 	 * @throws AuthorizationException
 	 * @throws UnexpectedException
 	 */
-	public MessageHeader getMessageHeader(long globalId)
-	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
-	
-	/**
-	 * Returns a message header for a message identified by a conference and a local number.
-	 * @param conference The conference id
-	 * @param localNum Local message number in conference
-	 *
-	 * @throws ObjectNotFoundException
-	 * @throws AuthorizationException
-	 * @throws UnexpectedException
-	 */
-	public MessageHeader getMessageHeaderInConference(long conference, int localNum)
-	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
-	
-	/**
-	 * Returns a message header of a message with the specified local number in the
-	 * current conference.
-	 * 
-	 * @param localNum The local message number
-	 * @return
-	 */
-	public MessageHeader getMessageHeaderInCurrentConference(int localNum)
-	throws ObjectNotFoundException, AuthorizationException, UnexpectedException;
-	
+	public MessageHeader getMessageHeader(MessageLocator locator)
+	throws ObjectNotFoundException, AuthorizationException, NoCurrentMessageException, UnexpectedException;
+		
 	/**
 	 * Returns an array of chat messages from the message log
 	 *
@@ -1675,9 +1688,34 @@ public interface ServerSession
 	 * Counts the number of messages that are comments to messages written by the given user.
 	 * 
 	 * @param user
-	 * @return
+	 * @retur
 	 * @throws UnexpectedException
 	 */
 	public abstract long countCommentsGloballyToAuthor(long user, Timestamp startDate)
 	throws UnexpectedException;
+    
+    /**
+     * Bookmarks a message
+     * 
+     * @param message The message to bookmark
+     * @param annotation A textual annotation
+     * @throws UnexpectedException
+     */
+    public void addBookmark(MessageLocator message, String annotation)
+    throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException;
+        
+    /**
+     * Removes a bookmark
+     * 
+     * @param message The message id of the bookmark
+     * @throws UnexpectedException
+     */
+    public void deleteBookmark(MessageLocator message)
+    throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException;
+    
+    /**
+     * Returns bookmarks for the current user
+     */
+    public Bookmark[] listBookmarks()
+    throws UnexpectedException;
 }

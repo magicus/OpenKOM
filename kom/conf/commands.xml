@@ -73,6 +73,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.SearchGlobalMessage"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.GrepLocalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListComments"/>
+		<command class="nu.rydin.kom.frontend.text.commands.FindObject"/>
 	</category>
 	<category id="conf.admin" i18n="command.category.conf.admin" order="90">
 		<command class="nu.rydin.kom.frontend.text.commands.CreateConference" permissions="0009"/>		
@@ -80,6 +81,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.DeleteConference"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeReplyToConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ChangePermissions"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeKeywords"/>		
 	</category>	
 	<category id="profile" i18n="command.category.profile" order="100">
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeSuffix" permissions="4008"/>
@@ -120,7 +122,7 @@
 	</category>
 	<category id="admin" i18n="command.category.admin" order="300">
 		<command class="nu.rydin.kom.frontend.text.commands.CreateUser" permissions="000a"/>		
-		<command class="nu.rydin.kom.frontend.text.commands.RenameObject" permissions="0048"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.RenameObject" permissions="0008"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ListPrivileges"/>
 		<command class="nu.rydin.kom.frontend.text.commands.AddPrivilege" permissions="000a"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SubtractPrivilege" permissions="000a"/>

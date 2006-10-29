@@ -56,6 +56,12 @@ public class CreateConference extends AbstractCommand
 		// Check name validity
 		//
 		context.checkName(fullname);
+        
+        // Get keywords
+        //
+        out.print(fmt.format("create.conference.keywords"));
+        out.flush();
+        String keywords = in.readLine();
 		
 		// Get conference permissions and visibility
 		//
@@ -64,7 +70,7 @@ public class CreateConference extends AbstractCommand
 		        ConferencePermissions.NORMAL_PERMISSIONS,
 		        ConferencePermissions.READ_PERMISSION,
 		        Visibilities.PUBLIC);
-			
+        			
 		// Ask for reply conference
 		//
 		long replyConf = -1;
@@ -91,7 +97,7 @@ public class CreateConference extends AbstractCommand
 		//			
 		try
 		{
-			context.getSession().createConference(fullname, ct.getPermissions(), ct.getNonMemberPermissions(), ct.getVisibility(), replyConf);
+			context.getSession().createConference(fullname, keywords, ct.getPermissions(), ct.getNonMemberPermissions(), ct.getVisibility(), replyConf);
 		}
 		catch(DuplicateNameException e)
 		{

@@ -19,9 +19,9 @@ import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
-import nu.rydin.kom.structs.TextNumber;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -40,17 +40,10 @@ public class WriteMailReply extends AbstractCommand
 		// Parse parameters. No parameters means we're replying to the
 		// last text read.
 		//
-		TextNumber textNumber = (TextNumber) parameterArray[0];
-		MessageHeader mh;
-		ServerSession session = context.getSession();
-		if (textNumber == null)
-		{
-		    mh = session.getMessageHeader(session.getCurrentMessage());
-		}
-		else
-		{
-		    mh = session.getMessageHeader(session.getGlobalMessageId(textNumber));
-		}
+        ServerSession session = context.getSession();
+		MessageLocator textNumber = session.resolveLocator((MessageLocator) parameterArray[0]);
+		
+        MessageHeader mh = session.getMessageHeader(textNumber);
 		
 		// Get original message and conference
 		//
@@ -69,11 +62,10 @@ public class WriteMailReply extends AbstractCommand
 		//
         MessageEditor editor = context.getMessageEditor();
         editor.setRecipient(new NameAssociation(mh.getAuthor(), mh.getAuthorName()));
-        editor.setReplyTo(mh.getId());
+        editor.setReplyTo(textNumber);
         
         UnstoredMessage msg = editor.edit(
-                mh.getId(), 
-                originalMessage.getLocalnum(),
+                textNumber,
                 originalConference.getId(),
                 originalConference.getName(),
                 originalMessage.getUser().getId(), 
@@ -83,7 +75,7 @@ public class WriteMailReply extends AbstractCommand
 
 		// Store the message
 		//
-		MessageOccurrence occ = session.storeReplyAsMail(editor.getRecipient().getId(), msg, mh.getId());
+		MessageOccurrence occ = session.storeReplyAsMail(editor.getRecipient().getId(), msg, textNumber);
 		
         context.getOut().println(
                 context.getMessageFormatter().format("write.mail.saved", session.getUser(editor.getRecipient().getId()).getName()));

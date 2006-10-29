@@ -13,22 +13,29 @@ import java.io.Serializable;
  */
 public class NamedObject implements Serializable
 {
-	private final long m_id;
-	private final Name m_name;
+	private final long id;
+	private final Name name;
+    private final String keywords;
 
-	protected NamedObject(long id, Name name)
+	protected NamedObject(long id, Name name, String keywords)
 	{
-		m_id 	= id;
-		m_name 	= name;
+		this.id 	  = id;
+		this.name     = name;
+        this.keywords = keywords;
 	}
 	
 	public long getId()
 	{
-		return m_id;
+		return id;
 	}	
 	
 	public Name getName()
 	{
-		return m_name;
-	}	
+		return name;
+	}
+    
+    public String getKeywords()
+    {
+        return keywords;
+    }
 }

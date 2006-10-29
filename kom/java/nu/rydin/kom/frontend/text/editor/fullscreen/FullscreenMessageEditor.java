@@ -27,6 +27,7 @@ import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.terminal.TerminalController;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.Logger;
@@ -54,7 +55,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
 
     public UnstoredMessage edit() throws KOMException, InterruptedException
     {
-        return this.edit(-1, -1, -1, Name.emptyName(), -1, Name.emptyName(), "");
+        return this.edit(MessageLocator.NO_MESSAGE, -1, Name.emptyName(), -1, Name.emptyName(), "");
     }
 
     protected void printHeader()
@@ -98,7 +99,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
         super.refresh();
     }
 
-    public UnstoredMessage edit(long replyTo, long replyToLocal,
+    public UnstoredMessage edit(MessageLocator replyTo, 
             long recipientId, Name recipientName, long replyToAuthor,
             Name replyToAuthorName, String oldSubject) throws KOMException,
             InterruptedException
@@ -116,7 +117,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
 
             // Handle reply
             //
-            if (replyTo != -1)
+            if (replyTo.isValid())
             {
                 if (this.getRecipient().getId() == recipientId)
                 {
@@ -126,7 +127,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
                             "CompactMessagePrinter.reply.to.same.conference",
                             new Object[]
                             {
-                                    new Long(replyToLocal),
+                                    replyTo.getLocalnum(),
                                     this.formatObjectName(replyToAuthorName,
                                             replyToAuthor) });
                 } else
@@ -138,7 +139,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
                                     "CompactMessagePrinter.reply.to.different.conference",
                                     new Object[]
                                     {
-                                            new Long(replyToLocal),
+                                            new Long(replyTo.getLocalnum()),
                                             this.formatObjectName(
                                                     recipientName, recipientId),
                                             this.formatObjectName(
@@ -163,7 +164,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
             // Establish viewport
             //
             headerRows = NUM_HEADER_ROWS;
-            if (replyTo != -1)
+            if (replyTo.isValid())
                 ++headerRows;
             this.pushViewport(headerRows, this.getTerminalSettings()
                     .getHeight() - 1);
@@ -279,8 +280,8 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
     public void quote() throws KOMException, IOException
     {
         KOMWriter out = this.getOut();
-        long replyTo = this.getReplyTo();
-        if(replyTo == -1)
+        MessageLocator replyTo = this.getReplyTo();
+        if(!replyTo.isValid())
             return;
         try
         {

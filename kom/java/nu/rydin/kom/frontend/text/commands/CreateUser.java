@@ -66,7 +66,7 @@ public class CreateUser extends AbstractCommand
 		{
 			// TODO: Ask for rights!
 			//
-			context.getSession().createUser(login, password, fullname, "", "", "", "", "", "", "", "", "", 
+			context.getSession().createUser(login, password, fullname, null, "", "", "", "", "", "", "", "", "", 
 				"ISO-8859-1", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, UserFlags.DEFAULT_FLAGS3, 
 				UserFlags.DEFAULT_FLAGS4, UserPermissions.NORMAL);
 		}

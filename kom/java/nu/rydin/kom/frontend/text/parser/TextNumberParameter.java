@@ -6,7 +6,7 @@
  */
 package nu.rydin.kom.frontend.text.parser;
 
-import nu.rydin.kom.structs.TextNumber;
+import nu.rydin.kom.structs.MessageLocator;
 
 /**
  * TextNumberParameter represents a parameter that accepts either a local or
@@ -71,7 +71,8 @@ public class TextNumberParameter extends CommandLineParameter
 			int number = Integer.parseInt(cooked);
 			if (number > 0)
 			{
-			    return new Match(true, matchingPart, remainder, new TextNumber(number, global));
+			    return new Match(true, matchingPart, remainder, 
+                        global ? new MessageLocator(number) : new MessageLocator(-1, number));
 			}
 			else
 			{

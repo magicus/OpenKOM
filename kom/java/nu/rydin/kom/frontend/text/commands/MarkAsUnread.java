@@ -15,7 +15,7 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
-import nu.rydin.kom.structs.TextNumber;
+import nu.rydin.kom.structs.MessageLocator;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -30,18 +30,8 @@ public class MarkAsUnread extends AbstractCommand
             throws KOMException, IOException, InterruptedException
     {
         ServerSession session = context.getSession();
-	    TextNumber textNum = (TextNumber) parameters[0];
-	    if(textNum == null)
-	        session.markAsUnreadAtLogout(session.getCurrentMessage());
-	    else
-	    {
-			// Retreive message
-			//
-			if(textNum.isGlobal())
-				session.markAsUnreadAtLogout(textNum.getNumber());
-			else
-			    session.markAsUnreadAtLogoutInCurrentConference((int) textNum.getNumber());			
-		}
+	    MessageLocator textNum = (MessageLocator) parameters[0];
+        session.markAsUnreadAtLogout(textNum);
 	    PrintWriter out = context.getOut();
 	    out.println();
 	    out.println(context.getMessageFormatter().format("mark.as.unread.confirmation"));

@@ -170,7 +170,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 			//
 			if(!um.userExists("sysop"))
 			{
-				um.addUser("sysop", "sysop", "Sysop", "", "", "", "", "", "", "", "", "", 
+				um.addUser("sysop", "sysop", "Sysop", null, "", "", "", "", "", "", "", "", "", 
 					"ISO-8859-1", "sv_SE", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, 
 				UserFlags.DEFAULT_FLAGS3, UserFlags.DEFAULT_FLAGS4, UserPermissions.EVERYTHING);
 				da.commit();
@@ -519,7 +519,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
             
             // Create user
             //
-            long id = da.getUserManager().addUser(login, password, fullName, "", "", "", "", "", "", "", "", "", 
+            long id = da.getUserManager().addUser(login, password, fullName, null, "", "", "", "", "", "", "", "", "", 
 					charset, "sv_SE", UserFlags.DEFAULT_FLAGS1, UserFlags.DEFAULT_FLAGS2, 
 				UserFlags.DEFAULT_FLAGS3, UserFlags.DEFAULT_FLAGS4, UserPermissions.SELF_REGISTERED_USER);
             

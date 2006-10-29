@@ -72,6 +72,7 @@ import nu.rydin.kom.exceptions.OriginalsNotAllowedException;
 import nu.rydin.kom.exceptions.RepliesNotAllowedException;
 import nu.rydin.kom.exceptions.SelectionOverflowException;
 import nu.rydin.kom.exceptions.UnexpectedException;
+import nu.rydin.kom.structs.Bookmark;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferenceListItem;
 import nu.rydin.kom.structs.ConferencePermission;
@@ -84,6 +85,7 @@ import nu.rydin.kom.structs.MembershipListItem;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageHeader;
+import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.MessageLogItem;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.MessageSearchResult;
@@ -94,7 +96,6 @@ import nu.rydin.kom.structs.ReadLogItem;
 import nu.rydin.kom.structs.Relationship;
 import nu.rydin.kom.structs.SessionState;
 import nu.rydin.kom.structs.SystemInformation;
-import nu.rydin.kom.structs.TextNumber;
 import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.structs.UserListItem;
@@ -706,27 +707,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public Envelope readLastMessage()
 	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
 	{
-	    if(m_lastReadMessageId == -1)
-	        throw new NoCurrentMessageException();
-		return this.innerReadMessage(this.m_lastReadMessageId);
+		return this.innerReadMessage(null);
 	}
-	
-	public Envelope innerReadMessage(long messageId)
-	throws ObjectNotFoundException, UnexpectedException
-	{
-		try
-		{
-			long conf = this.getCurrentConferenceId(); 
-			Envelope env = this.innerReadMessage(m_da.getMessageManager().getMostRelevantOccurrence(
-				this.getLoggedInUserId(), conf, messageId));
-			return env;
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
-	
+		
 	public MessageHeader getLastMessageHeader()
 	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
 	{
@@ -772,39 +755,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 		
 	}
-	
-	public Envelope readGlobalMessage(long globalId)
-	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
-	{
-	    // Check that we have the right to read this message
-	    //
-	    this.assertMessageReadPermissions(globalId);
-
-	    // Read it
-	    // 
-	    return this.innerReadMessage(globalId);
-	}
-	
-		
-	public Envelope readLocalMessage(int localnum)
-	throws ObjectNotFoundException, UnexpectedException
-	{
-		return this.readLocalMessage(this.getCurrentConferenceId(), localnum);
-	}
-	
-	
-	public Envelope readLocalMessage(long conf, int localnum)
-	throws ObjectNotFoundException, UnexpectedException
-	{
-		try
-		{
-			return this.innerReadMessage(m_da.getMessageManager().loadMessageOccurrence(conf, localnum));
-		}
-		catch(SQLException e)
-		{
-			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-	}
+		    
+    public Envelope readMessage(MessageLocator message)
+    throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
+    {
+        return this.innerReadMessage(this.resolveLocator(message));
+    }
 	
 	public Envelope readNextMessageInCurrentConference()
 	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
@@ -828,7 +784,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				try
 				{
 					this.pushReplies(confId, next);
-					return this.readLocalMessage(confId, next);
+					return this.readMessage(new MessageLocator(confId, next));
 				}
 				catch(ObjectNotFoundException e)
 				{
@@ -843,6 +799,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
+        catch(NoCurrentMessageException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        
 	}
 	
 	public Envelope readNextReply()
@@ -856,20 +816,24 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			this.pushReplies(next);				
 			return this.innerReadMessage(next);
 		}
+        catch(NoCurrentMessageException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }
 		catch(SQLException e)
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}			
 		
-	public long createConference(String fullname, int permissions, int nonmemberPermissions, short visibility, long replyConf)
+	public long createConference(String fullname, String keywords, int permissions, int nonmemberPermissions, short visibility, long replyConf)
 	throws UnexpectedException, AmbiguousNameException, DuplicateNameException, AuthorizationException
 	{
 		this.checkRights(UserPermissions.CREATE_CONFERENCE);
 		try
 		{
 			long userId = this.getLoggedInUserId();
-			long confId = m_da.getConferenceManager().addConference(fullname, userId, permissions, nonmemberPermissions, visibility, replyConf);
+			long confId = m_da.getConferenceManager().addConference(fullname, keywords, userId, permissions, nonmemberPermissions, visibility, replyConf);
 
 			// Add membership for administrator
 			//
@@ -1034,8 +998,16 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
         return storeReplyAsMail(recipient, msg, -1L);
 	}
-
+    
     public MessageOccurrence storeReplyAsMessage(long conference,
+            UnstoredMessage msg, MessageLocator replyTo) throws ObjectNotFoundException,
+            UnexpectedException, AuthorizationException, NoCurrentMessageException
+    {
+        return storeReplyAsMessage(conference, msg, this.resolveLocator(replyTo).getGlobalId());
+    }
+
+
+    protected MessageOccurrence storeReplyAsMessage(long conference,
             UnstoredMessage msg, long replyTo) throws ObjectNotFoundException,
             UnexpectedException, AuthorizationException
 	{
@@ -1082,9 +1054,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
-	}	
-	
+	}
+    
     public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg,
+            MessageLocator replyTo) throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException
+    {
+        return storeReplyAsMail(recipient, msg, this.resolveLocator(replyTo).getGlobalId());
+    }
+	
+    protected MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg,
             long replyTo) throws ObjectNotFoundException, UnexpectedException
     {
 		try
@@ -1193,6 +1171,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			}
 			return this.innerReadMessage(m_da.getMessageManager().getTaggedMessage(object, tag));
 		}
+        catch(NoCurrentMessageException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }
 		catch(SQLException e)
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
@@ -1248,14 +1230,14 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}	    
 	}
 	
-	public void storeNoComment(long message)
-	throws UnexpectedException, AuthorizationException
+	public void storeNoComment(MessageLocator message)
+	throws UnexpectedException, ObjectNotFoundException, NoCurrentMessageException, AuthorizationException
 	{
-	    this.addMessageAttribute(message, MessageAttributes.NOCOMMENT, 
+	    this.addMessageAttribute(this.resolveLocator(message).getGlobalId(), MessageAttributes.NOCOMMENT, 
 	            MessageAttribute.constructUsernamePayload(this.getLoggedInUser().getId(), this.getLoggedInUser().getName().toString()), true);
 	}
 	
-	public void createUser(String userid, String password, String fullname, String address1,
+	public void createUser(String userid, String password, String fullname, String keywords, String address1,
 		String address2, String address3, String address4, String phoneno1, 
 		String phoneno2, String email1, String email2, String url, String charset, long flags1, 
 		long flags2, long flags3, long flags4, long rights)
@@ -1266,7 +1248,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		{
 		    // Create the user
 		    //
-			long id = m_da.getUserManager().addUser(userid, password, fullname, address1, address2, address3, address4, 
+			long id = m_da.getUserManager().addUser(userid, password, fullname, keywords, address1, address2, address3, address4, 
 				phoneno1, phoneno2, email1, email2, url, charset, "sv_SE", flags1, flags2, flags3, flags4, rights);
 			
 			// Add default login script if requested
@@ -1472,17 +1454,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    return localToGlobal(this.getCurrentConferenceId(), localId);
 	}
 
-    public long getGlobalMessageId(TextNumber textNumber)
-            throws ObjectNotFoundException, UnexpectedException
+    public long getGlobalMessageId(MessageLocator textNumber)
+            throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
     {
-        if (textNumber.isGlobal())
-        {
-            return textNumber.getNumber();
-        }
-        else
-        {
-            return localToGlobalInCurrentConference((int)textNumber.getNumber());
-        }
+        return this.resolveLocator(textNumber).getGlobalId();
     }
 	
 	public void copyMessage(long globalNum, long conferenceId)
@@ -1883,10 +1858,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    this.saveUnreadMarkers();
 	}
 	
-	public void markAsUnreadAtLogout(long messageId)
-	throws UnexpectedException
+	public void markAsUnreadAtLogout(MessageLocator message)
+	throws UnexpectedException, NoCurrentMessageException, ObjectNotFoundException
 	{
-	    this.innerMarkAsUnreadAtLogout(messageId);
+	    this.innerMarkAsUnreadAtLogout(this.resolveLocator(message).getGlobalId());
 	    this.saveUnreadMarkers();
 	}
 		
@@ -2635,8 +2610,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			//
 			return false;
 		}
-	}
-	
+    }
+
 	public void changePassword(long userId, String oldPassword, String password)
 	throws ObjectNotFoundException, AuthorizationException, UnexpectedException, BadPasswordException	
 	{
@@ -3353,18 +3328,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);	
 		}
 	}
+    
+    protected Envelope innerReadMessage(long globalId)
+    throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException
+    {
+        return this.innerReadMessage(new MessageLocator(globalId));
+    }
 		
-	protected Envelope innerReadMessage(MessageOccurrence primaryOcc)
-	throws ObjectNotFoundException, UnexpectedException
+	protected Envelope innerReadMessage(MessageLocator locator)
+	throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException
 	{
 		try
 		{
 			// Resolve reply to (if any)
 			//
+            locator = this.resolveLocator(locator); 
 			long conf = this.getCurrentConferenceId();
 			MessageManager mm = m_da.getMessageManager();
 			ConferenceManager cm = m_da.getConferenceManager();
-			Message message = mm.loadMessage(primaryOcc.getConference(), primaryOcc.getLocalnum());
+			Message message = mm.loadMessage(locator.getConference(), locator.getLocalnum());
 			long replyToId = message.getReplyTo();
 			Envelope.RelatedMessage replyTo = null;
 			if(replyToId > 0)
@@ -3430,7 +3412,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// conferences where it appears and we are members.
 			//
 			MessageOccurrence[] occs = mm.getVisibleOccurrences(this.getLoggedInUserId(), 
-				primaryOcc.getGlobalId());
+				locator.getGlobalId());
 			top = occs.length;
 			for(int idx = 0; idx < top; ++idx)
 			{
@@ -3446,12 +3428,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			
 			// Make this the "current" message
 			//
-			m_lastReadMessageId = primaryOcc.getGlobalId();
+			m_lastReadMessageId = locator.getGlobalId();
 			
 			// Create Envelope and return
 			//
 			m_stats.incNumRead();
-			return new Envelope(message, primaryOcc, replyTo, receivers, occ, attr, replies);
+			return new Envelope(message, this.toOccurrence(locator), replyTo, receivers, occ, attr, replies);
 		}
 		catch(SQLException e)
 		{
@@ -3865,9 +3847,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}		
     }
 	
-	public MessageHeader getMessageHeader(long globalId)
-	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
+	public MessageHeader getMessageHeader(MessageLocator locator)
+	throws ObjectNotFoundException, AuthorizationException, NoCurrentMessageException, UnexpectedException
 	{
+        long globalId = this.resolveLocator(locator).getGlobalId();
 	    this.assertMessageReadPermissions(globalId);
 	    try
 	    {
@@ -3879,18 +3862,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 	
-	public MessageHeader getMessageHeaderInConference(long conference, int localNum)
-	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
-	{
-	    return this.getMessageHeader(this.localToGlobal(conference, localNum));
-	}
-	
-	public MessageHeader getMessageHeaderInCurrentConference(int localNum)
-	throws ObjectNotFoundException, AuthorizationException, UnexpectedException
-	{
-	    return this.getMessageHeaderInConference(this.getCurrentConferenceId(), localNum);
-	}
-
 	public void deleteConference (long conference)
 	throws AuthorizationException, UnexpectedException
 	{
@@ -3920,8 +3891,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			return this.readLocalMessage(conference, m_da.getMessageManager().findLastOccurrenceInConferenceWithAttrStmt(MessageAttributes.RULEPOST, conference));
+			return this.readMessage(
+                    new MessageLocator(conference, m_da.getMessageManager().findLastOccurrenceInConferenceWithAttrStmt(MessageAttributes.RULEPOST, conference)));
 		}
+        catch(NoCurrentMessageException e)
+        {
+            throw new UnexpectedException (this.getLoggedInUserId(), e);
+        }
 		catch (SQLException e)
 		{
 			throw new NoRulesException();
@@ -4400,7 +4376,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
 
-	public long countCommentsGloballyToAuthor(long user, Timestamp startDate) throws UnexpectedException {
+	public long countCommentsGloballyToAuthor(long user, Timestamp startDate) throws UnexpectedException 
+    {
         try
         {
             MessageManager mm = m_da.getMessageManager();
@@ -4411,4 +4388,128 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        throw new UnexpectedException(this.getLoggedInUserId(), e);
 	    }
 	}
+
+    public NameAssociation[] findObjects(String pattern) throws UnexpectedException
+    {
+        try
+        {
+            return this.censorNames(m_da.getNameManager().findObjects(pattern));
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }
+        catch(ObjectNotFoundException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        
+    }
+
+    public void changeKeywords(long id, String keywords) 
+    throws UnexpectedException, ObjectNotFoundException, AuthorizationException
+    {
+        try
+        {
+            if(!this.canManipulateObject(id))
+                throw new AuthorizationException();
+            m_da.getNameManager().changeKeywords(id, keywords);
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        
+    }
+
+    public void changeEmailAlias(long id, String emailAlias) 
+    throws UnexpectedException, ObjectNotFoundException, AuthorizationException
+    {
+        try
+        {
+            if(!this.canManipulateObject(id))
+                throw new AuthorizationException();
+            m_da.getNameManager().changeEmailAlias(id, emailAlias);
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        
+    }
+    
+    
+    public MessageLocator resolveLocator(MessageLocator message)
+    throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
+    {
+        if(message == null)
+            return this.getMostRelevantOccurrence(this.getCurrentConferenceId(), this.getCurrentMessage());
+        if(!message.isValid())
+            throw new ObjectNotFoundException("Invalid message locator"); // Should not happen...
+        if(message.getGlobalId() == -1)
+        {
+            long conference = message.getConference() != -1 ?  message.getConference() : this.getCurrentConferenceId();
+            return new MessageLocator(this.localToGlobal(conference, message.getLocalnum()), conference, message.getLocalnum());
+        }
+        else if(message.getLocalnum() == -1)
+        {
+            return this.getMostRelevantOccurrence(
+                    message.getConference() == -1 ? this.getCurrentConferenceId() : message.getConference(),
+                    message.getGlobalId());
+        } 
+        else
+            return message;
+    }
+    
+    private MessageOccurrence toOccurrence(MessageLocator message)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        if(message instanceof MessageOccurrence)
+            return (MessageOccurrence) message;
+        try
+        {
+            return m_da.getMessageManager().loadMessageOccurrence(message.getConference(), message.getLocalnum());
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }
+    }
+
+    public void addBookmark(MessageLocator message, String annotation) 
+    throws UnexpectedException, ObjectNotFoundException, NoCurrentMessageException
+    {
+        try
+        {
+            message = this.resolveLocator(message);
+            m_da.getMessageManager().addBookmark(this.getLoggedInUserId(), message.getGlobalId(), annotation);
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        
+    }
+
+    public void deleteBookmark(MessageLocator message) 
+    throws UnexpectedException, ObjectNotFoundException, NoCurrentMessageException
+    {
+        try
+        {
+            message = this.resolveLocator(message);
+            m_da.getMessageManager().deleteBookmark(this.getLoggedInUserId(), message.getGlobalId());
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        
+    }
+
+    public Bookmark[] listBookmarks() throws UnexpectedException
+    {
+        try
+        {
+            return m_da.getMessageManager().listBookmarks(this.getLoggedInUserId());
+        }
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        
+    }
 }

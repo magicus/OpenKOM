@@ -18,6 +18,7 @@ import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**
@@ -35,7 +36,7 @@ public class Move extends AbstractCommand
     {
         NameAssociation recipient = (NameAssociation) parameters[0];
         context.getSession().assertConferencePermission(recipient.getId(),
-                ((EditorContext) context).getReplyTo() != -1
+                ((EditorContext) context).getReplyTo().isValid()
                 	? ConferencePermissions.REPLY_PERMISSION
                 	: ConferencePermissions.WRITE_PERMISSION);
         ((EditorContext) context).setRecipient(recipient);

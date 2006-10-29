@@ -16,8 +16,8 @@ import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.Envelope;
+import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.NameAssociation;
-import nu.rydin.kom.structs.TextNumber;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -32,28 +32,16 @@ public class ReadMessage extends AbstractCommand
 	public void execute(Context context, Object[] parameterArray) 
 	throws KOMException
 	{
-	    TextNumber textNum = (TextNumber) parameterArray[0];
-	    NameAssociation conf = parameterArray.length > 1 
-	    	? (NameAssociation) parameterArray[1]
-	    	: null;
+	    MessageLocator textNum = (MessageLocator) parameterArray[0];
+	    if(parameterArray.length > 1 && parameterArray[1] != null)
+            textNum.setConference(((NameAssociation) parameterArray[1]).getId());
 		
 		try
 		{
 			// Retreive message
 			//
 		    ServerSession session = context.getSession();
-		    
-		    Envelope env;
-		    if (conf == null)
-		    {
-				env = textNum.isGlobal()
-					? session.readGlobalMessage(textNum.getNumber())
-					: session.readLocalMessage((int)textNum.getNumber());
-		    }
-		    else
-		    {
-		        env = session.readGlobalMessage(textNum.isGlobal()?textNum.getNumber():session.localToGlobal(conf.getId(), (int)textNum.getNumber()));
-		    }
+		    Envelope env = session.readMessage(textNum);
 				
 			// Print it using the default MessagePrinter
 			//

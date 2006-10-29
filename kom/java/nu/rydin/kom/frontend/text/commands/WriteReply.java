@@ -20,9 +20,9 @@ import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.ConferenceInfo;
+import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.NameAssociation;
-import nu.rydin.kom.structs.TextNumber;
 import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
@@ -45,21 +45,14 @@ public class WriteReply extends AbstractCommand
         // parameter was given, that means we're replying to the last read message.
         //
         long replyToId = -1;
-        TextNumber replyTo = (TextNumber) parameterArray[0];
-        if (replyTo == null)
+        MessageLocator replyTo = session.resolveLocator((MessageLocator) parameterArray[0]);
+        try
         {
-            replyToId = session.getCurrentMessage();
-        } 
-        else
+            replyToId = session.getGlobalMessageId(replyTo);
+        }
+        catch (ObjectNotFoundException e) 
         {
-            try
-            {
-                replyToId = session.getGlobalMessageId(replyTo);
-            }
-            catch (ObjectNotFoundException e) 
-            {
-                throw new MessageNotFoundException();
-            }
+            throw new MessageNotFoundException();
         }
 
         // Second, we need to figure out which conference the original message was in.
@@ -86,18 +79,17 @@ public class WriteReply extends AbstractCommand
             //
             MessageEditor editor = context.getMessageEditor();
             editor.setRecipient(originalMessage.getUser());
-            editor.setReplyTo(replyToId);
+            editor.setReplyTo(replyTo);
             UnstoredMessage msg = editor.edit(
-                    replyToId, 
-                    originalMessage.getLocalnum(),
+                    replyTo, 
                     originalConference.getId(),
                     originalConference.getName(),
                     originalMessage.getUser().getId(), 
                     originalMessage.getUser().getName(), 
-                    context.getSession().getMessageHeader(replyToId).getSubject()
+                    context.getSession().getMessageHeader(replyTo).getSubject()
                     );
             
-            MessageOccurrence newMessage = session.storeReplyAsMail(editor.getRecipient().getId(), msg, replyToId);
+            MessageOccurrence newMessage = session.storeReplyAsMail(editor.getRecipient().getId(), msg, replyTo);
 
             // Print confirmation
             //
@@ -132,19 +124,18 @@ public class WriteReply extends AbstractCommand
             
             MessageEditor editor = context.getMessageEditor();
             editor.setRecipient(new NameAssociation(recipient.getId(), recipient.getName()));
-            editor.setReplyTo(replyToId);
+            editor.setReplyTo(replyTo);
             UnstoredMessage msg = editor.edit(
-                    replyToId, 
-                    originalMessage.getLocalnum(),
+                    replyTo, 
                     recipient.getId(),
                     recipient.getName(),
                     originalMessage.getUser().getId(), 
                     originalMessage.getUser().getName(), 
-                    context.getSession().getMessageHeader(replyToId).getSubject()
+                    context.getSession().getMessageHeader(replyTo).getSubject()
                     );
 
 
-            MessageOccurrence newMessage = session.storeReplyAsMessage(editor.getRecipient().getId(), msg, replyToId);            
+            MessageOccurrence newMessage = session.storeReplyAsMessage(editor.getRecipient().getId(), msg, replyTo);            
 
             // Print confirmation
             //

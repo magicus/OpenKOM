@@ -69,7 +69,7 @@ public class SQLUtils
 		while(rs.next())
 		{
 		    String name = rs.getString(nameIndex);
-		    if(NameUtils.match(pattern, name, false))
+		    if(pattern == null || NameUtils.match(pattern, name, false))
 		        l.add(new NameAssociation(rs.getLong(idIndex), new Name(name, rs.getShort(visibilityIndex), rs.getShort(kindIndex))));
 		}
 		int top = l.size();

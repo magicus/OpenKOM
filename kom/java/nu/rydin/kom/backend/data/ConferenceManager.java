@@ -51,7 +51,7 @@ public class ConferenceManager // extends NameManager
 		m_changeReplyToConfStmt = conn.prepareStatement(
 		    "UPDATE conferences SET replyConf = ? WHERE id = ?");
 		m_loadConfStmt = conn.prepareStatement(
-			"SELECT n.fullname, c.administrator, c.permissions, c.nonmember_permissions, n.visibility, c.replyConf, c.created, c.lasttext " +
+			"SELECT n.fullname, n.keywords, c.administrator, c.permissions, c.nonmember_permissions, n.visibility, c.replyConf, c.created, c.lasttext " +
 			"FROM names n, conferences c " +
 			"WHERE c.id = ? AND n.id = c.id");
 		m_loadRangeStmt = conn.prepareStatement(	
@@ -113,7 +113,7 @@ public class ConferenceManager // extends NameManager
 	 * @throws SQLException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public long addConference(String fullname, long administrator, int permissions, int nonmemberPermissions, short visibility, long replyConf)
+	public long addConference(String fullname, String keywords, long administrator, int permissions, int nonmemberPermissions, short visibility, long replyConf)
 		throws DuplicateNameException, SQLException, AmbiguousNameException
 	{
 		if(m_nameManager.nameExists(fullname))
@@ -121,7 +121,7 @@ public class ConferenceManager // extends NameManager
 			
 		// First, add the name
 		//
-		long nameId = m_nameManager.addName(fullname, NameManager.CONFERENCE_KIND, visibility);
+		long nameId = m_nameManager.addName(fullname, NameManager.CONFERENCE_KIND, visibility, keywords);
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		
 		// Now, add the conference
@@ -228,14 +228,15 @@ public class ConferenceManager // extends NameManager
 			MessageRange r = this.getMessageRange(id);
 			ConferenceInfo answer = new ConferenceInfo(
 				id,							// Id
-				new Name(rs.getString(1), rs.getShort(5), NameManager.CONFERENCE_KIND),	// Name
-				rs.getLong(2),				// Admin
-				rs.getInt(3),				// Permissions
-				rs.getInt(4),				// Nonmember permissions
-				rs.getShort(5),				// Visibility
-				rs.getObject(6) != null ? rs.getLong(6) : -1, // Reply conference
-				rs.getTimestamp(7),
+				new Name(rs.getString(1), rs.getShort(6), NameManager.CONFERENCE_KIND),	// Name
+                rs.getString(2),
+				rs.getLong(3),				// Admin
+				rs.getInt(4),				// Permissions
+				rs.getInt(5),				// Nonmember permissions
+				rs.getShort(6),				// Visibility
+				rs.getObject(7) != null ? rs.getLong(7) : -1, // Reply conference
 				rs.getTimestamp(8),
+				rs.getTimestamp(9),
 				r.getMin(),					// First text
 				r.getMax()					// Last text
 				);

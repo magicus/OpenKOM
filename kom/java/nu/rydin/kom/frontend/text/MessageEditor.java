@@ -19,7 +19,7 @@ public interface MessageEditor
 	public UnstoredMessage edit()
 	throws KOMException, InterruptedException, IOException;
 	
-	public UnstoredMessage edit(long replyTo, long replyToLocal, long recipientId, 
+	public UnstoredMessage edit(MessageLocator replyTo, long recipientId, 
 	        Name recipientName, long replyToAuthor, Name replyToAuthorName, 
 	        String oldSubject)
 		throws KOMException, InterruptedException;	
@@ -28,5 +28,5 @@ public interface MessageEditor
 	
 	public void setRecipient(NameAssociation recipient);
 	
-	public void setReplyTo(long replyTo);
+	public void setReplyTo(MessageLocator replyTo);
 }

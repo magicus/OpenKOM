@@ -20,6 +20,7 @@ import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.MessageLocator;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -39,14 +40,14 @@ public class Quote extends AbstractCommand
         // Check if this is a reply
         //
         EditorContext ec = (EditorContext) context;
-        long replyTo = ec.getReplyTo();
-        if(replyTo == -1)
+        MessageLocator replyTo = ec.getReplyTo();
+        if(!replyTo.isValid())
             throw new NotAReplyException();
         
         // Load original message
         //
         ServerSession session = context.getSession();
-        String body = session.readGlobalMessage(replyTo).getMessage().getBody();
+        String body = session.readMessage(replyTo).getMessage().getBody();
         WordWrapper ww = context.getWordWrapper(body, 
                 QUOTE_WIDTH - 8); //8 = length of ">" + linenumber.
         LineEditor in = context.getIn();

@@ -20,6 +20,7 @@ import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.constants.Visibilities;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.SelectionOverflowException;
+import nu.rydin.kom.structs.Bookmark;
 import nu.rydin.kom.structs.GlobalMessageSearchResult;
 import nu.rydin.kom.structs.LocalMessageSearchResult;
 import nu.rydin.kom.structs.Message;
@@ -85,6 +86,9 @@ public class MessageManager
     private final PreparedStatement m_countAllMessagesLocally;
     private final PreparedStatement m_listCommentsGloballyToAuthor;
     private final PreparedStatement m_countCommentsGloballyToAuthor;
+    private final PreparedStatement m_addBookmarkStmt;
+    private final PreparedStatement m_deleteBookmarkStmt;
+    private final PreparedStatement m_listBookmarksStmt;
 	
 	private final Connection m_conn; 
 	
@@ -284,6 +288,13 @@ public class MessageManager
 	    		"SELECT COUNT(*) FROM messages m, messages r, messageoccurrences mo, memberships me " +
 	    		"WHERE m.reply_to = r.id AND mo.message = m.id AND mo.message = m.id AND r.author = ? " +
 	    		"AND me.user = ? AND me.conference = mo.conference AND r.created > ?");
+        m_addBookmarkStmt = m_conn.prepareStatement(
+                "INSERT INTO bookmarks(user, message, created, annotation) VALUES(?, ?, ?, ?)");
+        m_deleteBookmarkStmt = m_conn.prepareStatement(
+                "DELETE FROM bookmarks WHERE user = ? AND message = ?");
+        m_listBookmarksStmt = m_conn.prepareStatement(
+                "SELECT message, annotation FROM bookmarks WHERE user = ? ORDER BY created DESC");
+
 	}
 	
 	public void close()
@@ -355,6 +366,12 @@ public class MessageManager
 		    m_countGrepMessagesLocally.close();
 		if(m_countAllMessagesLocally != null)
 		    m_countAllMessagesLocally.close();
+        if(m_addBookmarkStmt != null)
+            m_addBookmarkStmt.close();
+        if(m_deleteBookmarkStmt != null)
+            m_deleteBookmarkStmt.close();
+        if(m_listBookmarksStmt != null)
+            m_listBookmarksStmt.close();
 	}
 	
 	public void finalize()
@@ -1460,4 +1477,49 @@ public class MessageManager
 	    this.m_countCommentsGloballyToAuthor.setTimestamp(3, startDate);
 	    return this.innerCount(m_countCommentsGloballyToAuthor);
 	}
+    
+    public void addBookmark(long user, long message, String annotation) throws SQLException
+    {
+        m_addBookmarkStmt.clearParameters();
+        m_addBookmarkStmt.setLong(1, user);
+        m_addBookmarkStmt.setLong(2, message);
+        m_addBookmarkStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+        m_addBookmarkStmt.setString(4, annotation);
+        m_addBookmarkStmt.executeUpdate();
+    }
+    
+    public void deleteBookmark(long user, long message) throws SQLException
+    {
+        m_deleteBookmarkStmt.clearParameters();
+        m_deleteBookmarkStmt.setLong(1, user);
+        m_deleteBookmarkStmt.setLong(2, message);
+        m_deleteBookmarkStmt.executeUpdate();
+    }
+    
+    public Bookmark[] listBookmarks(long user) throws SQLException
+    {
+        m_listBookmarksStmt.clearParameters();
+        m_listBookmarksStmt.setLong(1, user);
+        ResultSet rs = null;
+        try
+        {
+            List<Bookmark> list = new ArrayList<Bookmark>();
+            rs = m_listBookmarksStmt.executeQuery();
+            while(rs.next())
+            {
+                list.add(new Bookmark(
+                        rs.getLong(1),      // User
+                        rs.getLong(2),      // Message
+                        rs.getString(3)));  // Annotation
+            }
+            Bookmark[] answer = new Bookmark[list.size()];
+            list.toArray(answer);
+            return answer;
+        }
+        finally
+        {
+            if(rs != null)
+                rs.close();
+        }
+    }
 }

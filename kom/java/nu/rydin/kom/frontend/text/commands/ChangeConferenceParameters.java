@@ -13,8 +13,11 @@ import nu.rydin.kom.exceptions.DuplicateNameException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.KOMWriter;
+import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
+import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.ConferenceType;
 import nu.rydin.kom.structs.NameAssociation;
@@ -34,12 +37,15 @@ public class ChangeConferenceParameters extends AbstractCommand
 	throws KOMException, IOException, InterruptedException, DuplicateNameException
 	{
         ServerSession session = context.getSession();
+        KOMWriter out = context.getOut();
+        LineEditor in = context.getIn();
+        MessageFormatter fmt = context.getMessageFormatter();
         
         // Load conference
         //
         NameAssociation conference = (NameAssociation) parameterArray[0];
         ConferenceInfo ci = session.getConference(conference.getId());
-        
+                
         // Go ask user for changed parameters
         //
         ConferenceType ct = ConferenceUtils.askForConferenceType(context,
@@ -53,7 +59,7 @@ public class ChangeConferenceParameters extends AbstractCommand
         
         // Print confirmation
         //
-        context.getOut().println(context.getMessageFormatter().format("change.conference.parameters.confirm", 
+        context.getOut().println(fmt.format("change.conference.parameters.confirm", 
                 conference.getName().toString()));
 	}
 }

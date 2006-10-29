@@ -20,6 +20,7 @@ import nu.rydin.kom.frontend.text.*;
 import nu.rydin.kom.frontend.text.parser.Parser;
 import nu.rydin.kom.frontend.text.terminal.TerminalController;
 import nu.rydin.kom.i18n.MessageFormatter;
+import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
 import nu.rydin.kom.structs.UserInfo;
@@ -37,7 +38,7 @@ public class EditorContext implements Context
 	
 	private NameAssociation m_recipient;
 	
-	private long m_replyTo = -1;
+	private MessageLocator m_replyTo = MessageLocator.NO_MESSAGE;
 	
 	public EditorContext(Context underlying)
 	{
@@ -228,11 +229,11 @@ public class EditorContext implements Context
         return m_underlying.getParser();
     }
     
-    public long getReplyTo()
+    public MessageLocator getReplyTo()
     {
         return m_replyTo;
     }
-    public void setReplyTo(long replyTo)
+    public void setReplyTo(MessageLocator replyTo)
     {
         m_replyTo = replyTo;
     }

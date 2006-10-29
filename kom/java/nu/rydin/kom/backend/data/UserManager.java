@@ -72,7 +72,7 @@ public class UserManager
 		m_updateContactInfoStmt = conn.prepareStatement(
 		    "UPDATE users SET address1 = ?, address2 = ?, address3 = ?, address4 = ?, " +
 		    "phoneno1 = ?, phoneno2 = ?, email1 = ?, email2 = ?, url = ? WHERE id = ?");
-		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, u.address1, u.address2, u.address3, u.address4, " +
+		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, n.keywords, u.address1, u.address2, u.address3, u.address4, " +
 			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.timezone, u.created, u.lastlogin, n.visibility " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_updateCharsetStmt = conn.prepareStatement(
@@ -187,7 +187,7 @@ public class UserManager
 	 * @throws SQLException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public long addUser(String userid, String password, String fullname, String address1,
+	public long addUser(String userid, String password, String fullname, String keywords, String address1,
 		String address2, String address3, String address4, String phoneno1, 
 		String phoneno2, String email1, String email2, String url, String charset, String locale, long flags1, 
 		long flags2, long flags3, long flags4, long rights)
@@ -200,7 +200,7 @@ public class UserManager
 				throw new DuplicateNameException(fullname);
 			// First, add the name
 			//
-			long nameId = m_nameManager.addName(fullname, NameManager.USER_KIND, Visibilities.PUBLIC);
+			long nameId = m_nameManager.addName(fullname, NameManager.USER_KIND, Visibilities.PUBLIC, keywords);
 			Timestamp now = new Timestamp(System.currentTimeMillis());
 
 			// Now, add the user
@@ -362,27 +362,28 @@ public class UserManager
 				throw new ObjectNotFoundException("id=" + id);
 			UserInfo answer = new UserInfo(
 				id,					// id
-				new Name(rs.getString(1), rs.getShort(22), NameManager.USER_KIND),	// name
+				new Name(rs.getString(1), rs.getShort(23), NameManager.USER_KIND),	// name
 				rs.getString(2),	// userid
-				rs.getString(3),	// address1
-				rs.getString(4),	// address2
-				rs.getString(5),	// address3
-				rs.getString(6),	// address4
-				rs.getString(7),	// phoneno1 
-				rs.getString(8),	// phoneno2
-				rs.getString(9),	// email1
-				rs.getString(10),	// email2
-				rs.getString(11),	// url,
-				rs.getString(12),	// charset
-				rs.getLong(13),		// flags1,
-				rs.getLong(14),		// flags2,
-				rs.getLong(15),		// flags3,
-				rs.getLong(16),		// flags4,
-				rs.getLong(17),		// rights
-				rs.getString(18),	// locale
-				rs.getString(19),	// time zone
-				rs.getTimestamp(20),// created
-				rs.getTimestamp(21) // last login
+                rs.getString(3),    // keywords
+				rs.getString(4),	// address1
+				rs.getString(5),	// address2
+				rs.getString(6),	// address3
+				rs.getString(7),	// address4
+				rs.getString(8),	// phoneno1 
+				rs.getString(9),	// phoneno2
+				rs.getString(10),	// email1
+				rs.getString(11),	// email2
+				rs.getString(12),	// url,
+				rs.getString(13),	// charset
+				rs.getLong(14),		// flags1,
+				rs.getLong(15),		// flags2,
+				rs.getLong(16),		// flags3,
+				rs.getLong(17),		// flags4,
+				rs.getLong(18),		// rights
+				rs.getString(19),	// locale
+				rs.getString(20),	// time zone
+				rs.getTimestamp(21),// created
+				rs.getTimestamp(22) // last login
 			);
 			cache.deferredPut(key, answer);
 			return answer;

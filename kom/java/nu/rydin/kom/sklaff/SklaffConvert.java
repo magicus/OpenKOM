@@ -134,6 +134,7 @@ public class SklaffConvert
 	                    ui.getUserid(),
 	                    passwd,
 	                    ui.getName().getName(),
+                        null,
 	                    ui.getAddress1(),
 	                    ui.getAddress2(),
 	                    ui.getAddress3(),
@@ -202,6 +203,7 @@ public class SklaffConvert
             long admin = ((Long) userXref.get(new Integer(ce.getOwner()))).longValue();
             long id = cm.addConference(
                     ce.getName(),
+                    null, // No keywords
                     admin,
                     prot ? 0: ConferencePermissions.NORMAL_PERMISSIONS,
                     0, 

@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.EventDeliveredException;
+import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.exceptions.UnexpectedException;
@@ -22,6 +23,7 @@ import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.constants.Keystrokes;
 import nu.rydin.kom.frontend.text.editor.Buffer;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
+import nu.rydin.kom.structs.MessageLocator;
 
 /**
  * @author Pontus Rydin
@@ -31,12 +33,12 @@ public class QuoteEditor extends FullscreenEditor
     private static final int QUOTE_WIDTH = 76;
     private final FullscreenMessageEditor mainEditor;
     
-    public QuoteEditor(Context context, long replyTo, FullscreenMessageEditor mainEditor) throws IOException, ObjectNotFoundException, AuthorizationException, UnexpectedException
+    public QuoteEditor(Context context, MessageLocator replyTo, FullscreenMessageEditor mainEditor) throws IOException, ObjectNotFoundException, AuthorizationException, UnexpectedException, NoCurrentMessageException
     {
         super(context);
         this.mainEditor = mainEditor;
         ServerSession session = context.getSession();
-        String body = session.readGlobalMessage(replyTo).getMessage().getBody();
+        String body = session.readMessage(replyTo).getMessage().getBody();
         WordWrapper ww = context.getWordWrapper(body, 
                 QUOTE_WIDTH - 8); //8 = length of ">" + linenumber.
         Buffer buffer = this.getBuffer();

@@ -67,6 +67,7 @@ public class UserReader
                     -1, 
                     new Name(name, Visibilities.PUBLIC, NameManager.USER_KIND), 
                     userId,
+                    null, 
                     (String) map.get("address"),
                     address2,
                     null,

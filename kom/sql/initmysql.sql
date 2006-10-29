@@ -11,9 +11,10 @@ CREATE TABLE IF NOT EXISTS names
 	id BIGINT NOT NULL AUTO_INCREMENT,
 	norm_name VARCHAR(80) NOT NULL,
 	fullname VARCHAR(80) NOT NULL,
-	nickname VARCHAR(80),
+	mailalias VARCHAR(80),
 	kind SMALLINT,
 	visibility SMALLINT NOT NULL,
+	keywords VARCHAR(100),	
 	PRIMARY KEY(id),
 	UNIQUE INDEX norm_name_ix(norm_name)
 ) TYPE=INNODB;
@@ -142,12 +143,24 @@ CREATE TABLE IF NOT EXISTS messageattributes
 	INDEX messagekind_ix(message, kind)
 ) TYPE=INNODB;
 
+CREATE TABLE IF NOT EXISTS bookmarks
+(
+	user BIGINT NOT NULL,
+	message BIGINT NOT NULL,
+	created DATETIME NOT NULL,
+	annotation VARCHAR(100),
+	PRIMARY KEY(user, message),
+	FOREGIN KEY(message) REFERENCES message(id) ON DELETE CASCADE,
+	INDEX(user, created)
+) TYPE=INNODB;
+
 CREATE TABLE IF NOT EXISTS magicconferences
 (
 	conference BIGINT NOT NULL,
 	kind SMALLINT NOT NULL,
 	PRIMARY KEY(conference, kind),
-	FOREIGN KEY (conference) REFERENCES conferences(id) ON DELETE CASCADE
+	FOREIGN KEY(conference) REFERENCES conferences(id) ON DELETE CASCADE,
+	FOREIGN KEY(user) REFERENCES users(id) ON DELETE CASCADE
 ) TYPE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messagelog
