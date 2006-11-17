@@ -2,8 +2,7 @@ html,
 select,
 textarea
 {
-  font-family: Verdana, Helvetica, Arial, sans-serif;
-  font-size: 8pt;
+  	font-family: Verdana, Helvetica, Arial, sans-serif;
 }
 
 .panel-left {
@@ -12,7 +11,11 @@ textarea
 	border-color: #000000;
 	border-width: 0px;
 	border-style: solid;
-	border-right-width: 1px	
+	border-right-width: 1px;
+}
+
+.panel-left-row {
+	margin-top: 1.0em;
 }
 
 .app-header {
@@ -44,13 +47,22 @@ textarea
 	width: 100%
 }
 
+.content-table {
+	width: 100%
+}
+
 .list-row {
 	background: #f0f0ff;
 	border-color: #000000;
 	border-width: 0px;
 	border-style: solid;
 	border-bottom-width: 1px	
-	font-size: 2pt;
+	font-size: 9pt;
+	font-family: Arial;
+}
+
+.list-content {
+	font-size: 11pt;
 	font-family: Arial;
 }
 
@@ -64,17 +76,22 @@ textarea
 }
 
 .global-textid-column {
-	width: 5%;
+	width: 5em;
 	text-align: right;
 }
 
 .local-textid-column {
-	width: 5%;
+	width: 5em;
+	text-align: right;
+}
+
+.order-textid-column {
+	width: 5em;
 	text-align: right;
 }
 
 .author-column {
-	width: 20%;
+	/*	width: 30%; */
 	text-align: left;
 	border-color: #000000;
 	border-width: 0px;
@@ -83,7 +100,7 @@ textarea
 }
 
 .time-column {
-	width: 20%;
+	width: 10em; 
 	text-align: left;
 	border-color: #000000;
 	border-width: 0px;
@@ -92,12 +109,29 @@ textarea
 }
 
 .subject-column {
-	width: 80%;
+	width: 40%; 
 	text-align: left;
 	border-color: #000000;
 	border-width: 0px;
 	border-style: solid;
 	border-left-width: 1px		
 }
+
+.navigation-table {
+	width: 100%;
+}
+
+.navigation-back {
+	text-align: left;
+}
+
+.navigation-forward {
+	text-align: right;
+}
+
+.navigation-status {
+	text-align: center;
+}
+
 
 

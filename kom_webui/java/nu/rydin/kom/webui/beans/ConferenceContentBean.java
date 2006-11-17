@@ -1,6 +1,8 @@
 package nu.rydin.kom.webui.beans;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.servlet.KOMContext;
 import nu.rydin.kom.structs.LocalMessageSearchResult;
@@ -13,6 +15,8 @@ public class ConferenceContentBean
     
     private int length;
     
+    private long count;
+    
     private MessageHeaderBean[] messages;
 
     public long getConferenceId()
@@ -21,13 +25,14 @@ public class ConferenceContentBean
     }
 
     public void setConferenceId(long conferenceId)
-    throws UnexpectedException
+    throws UnexpectedException, AuthorizationException, ObjectNotFoundException
     {
         this.conferenceId = conferenceId;
         
         // Load message list
         //
         ServerSession session = KOMContext.getSession();
+        count = session.countAllMessagesLocally(conferenceId);
         LocalMessageSearchResult[] result = session.listAllMessagesLocally(conferenceId, start, length);
         int top = result.length;
         messages = new MessageHeaderBean[top];
@@ -74,5 +79,15 @@ public class ConferenceContentBean
     public void setStart(int start)
     {
         this.start = start;
+    }
+
+    public long getCount()
+    {
+        return count;
+    }
+
+    public void setCount(long count)
+    {
+        this.count = count;
     }
 }

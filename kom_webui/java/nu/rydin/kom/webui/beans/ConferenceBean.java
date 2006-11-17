@@ -7,12 +7,15 @@ public class ConferenceBean
     private String name;
     
     private int unread;
+    
+    private int order;
 
-    public ConferenceBean(long id, String name, int unread)
+    public ConferenceBean(long id, String name, int unread, int order)
     {
         this.id = id;
         this.name = name;
         this.unread = unread;
+        this.order = order;
     }
 
     public String getName()
@@ -43,5 +46,15 @@ public class ConferenceBean
     public void setId(long id)
     {
         this.id = id;
+    }
+
+    public int getOrder()
+    {
+        return order;
+    }
+
+    public void setOrder(int order)
+    {
+        this.order = order;
     }    
 }

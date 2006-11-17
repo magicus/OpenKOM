@@ -1,4 +1,4 @@
-<project name="kom_servlet" default="deploy" basedir=".">
+<project name="kom_servlet" default="build-war" basedir=".">
 	<property name="komLibPath" value="../kom/lib"/>
 	<property name="servletLibPath" value="../kom_servlet/lib"/>
 	<property name="libPath" value="lib"/>
@@ -17,15 +17,14 @@
 	<target name="compile">
 		<mkdir dir="${classes}"/>
 		<javac srcdir="java" destdir="${classes}" classpathref="kom.class.path" debug="yes"/>
+		<copy todir="web/WEB-INF/classes">
+			<fileset dir="web/WEB-INF/conf" includes="*.properties"/>
+		</copy>
 	</target>
 
 	<target name="build-war" depends="compile">
 		<mkdir dir="lib"/>
-		<war destfile="kom.war" webxml="web/WEB-INF/web.xml" basedir="web"/>
-	</target>
-	
-	<target name="deploy" depends="build-war">
-		<!-- copy file="kom.war" todir="c:\java\jetty-5.1.4\webapps"/ -->
+		<war destfile="kom.war" webxml="web/WEB-INF/web.xml" basedir="web" excludes="WEB-INF/web.xml"/>
 	</target>
 </project>
  

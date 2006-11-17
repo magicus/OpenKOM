@@ -3,13 +3,12 @@ package nu.rydin.kom.webui.beans;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.servlet.KOMContext;
+import nu.rydin.kom.structs.MembershipListItem;
 import nu.rydin.kom.structs.UserInfo;
 
 public class SessionStatusBean
 {
-    private String username;
-    
-    private long userId;
+    private UserInfoBean user;
     
     private int totalUnread;
     
@@ -19,10 +18,12 @@ public class SessionStatusBean
     throws UnexpectedException
     {
         ServerSession session = KOMContext.getSession();
-        UserInfo ui = session.getLoggedInUser();
-        username = ui.getName().getName();
-        userId = ui.getId();
-        totalUnread = session.listNews().length;
+        user = new UserInfoBean();
+        MembershipListItem[] news = session.listNews();
+        int total = 0;
+        for (int idx = 0; idx < news.length; idx++)
+            total += news[idx].getUnread();
+        totalUnread = total;
         loggedInUsers = session.listLoggedInUsers().length;
     }
 
@@ -46,27 +47,15 @@ public class SessionStatusBean
         this.totalUnread = totalUnread;
     }
 
-    public long getUserId()
+    public UserInfoBean getUser()
     {
-        return userId;
+        return user;
     }
 
-    public void setUserId(long userId)
+    public void setUser(UserInfoBean user)
     {
-        this.userId = userId;
-    }
-
-    public String getUsername()
-    {
-        return username;
-    }
-
-    public void setUsername(String username)
-    {
-        this.username = username;
-    }
-    
-    
+        this.user = user;
+    }    
 }
 
 
