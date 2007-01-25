@@ -60,6 +60,6 @@
 			<pathelement location="C:\java\apache-ant-1.6.2\lib\ant.jar"/>
 			<pathelement location="../kom_soap/lib/kom_soap.jar"/>						
 		</classpath>
-		<parameter name="jetty.home" value="C:/java/jetty-5.1.4"/>
+		<parameter name="jetty.home" value="/usr/local/javatools/jetty-5.1.4"/>
 	</module>
 </modules>
