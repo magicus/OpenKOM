@@ -238,6 +238,83 @@ public class StatisticsDaemon
         messagePoster.storeMessage(token, Long.parseLong(resources.getString("conferenceid")), msg);
     }
     
+    
+    public void conferenceStatistics(String arg)
+    throws SQLException, ObjectNotFoundException, nu.rydin.kom.soap.client.UnexpectedException, AuthorizationException, SessionExpiredException, NumberFormatException, RemoteException
+    {        
+        // Get subject and date range
+        //
+        int p = arg.indexOf(' ');
+        if(p == -1)
+            throw new IllegalArgumentException(arg);
+        String range = arg.substring(0, p).trim();
+        String subject = arg.substring(p + 1).trim();
+        StringWriter sw = new StringWriter();
+        PrintWriter out = new PrintWriter(sw);
+        
+        // Print header
+        //
+        HeaderPrinter hp = new HeaderPrinter();
+        hp.addHeader(formatter.format("confstat.position"), 10, true);
+        hp.addSpace(1);
+        hp.addHeader(formatter.format("confstat.messages"), 10, true);
+        hp.addSpace(1);
+        hp.addHeader(formatter.format("confstat.conference"), 50, false);
+        hp.printOn(out);
+        
+        // Calculate start date
+        //
+        Timestamp start = this.translateDate(range);
+        
+        // Create statement
+        //
+        PreparedStatement stmt = conn.prepareStatement(
+                "SELECT n.fullname, COUNT(*) c FROM messageoccurrences m, names n " +
+                "WHERE n.id = m.conference AND n.visibility = 0 AND m.action_ts > ? " +
+                "GROUP BY m.conference " +
+                "ORDER BY c DESC");
+        stmt.setTimestamp(1, start);
+        ResultSet rs = null;
+        long total = 0;
+        int idx = 0;
+        try
+        {            
+            rs = stmt.executeQuery();
+            while(rs.next())
+            {
+                long n = rs.getLong(2);
+                total += n;
+                PrintUtils.printRightJustified(out, Long.toString(++idx), 10);
+                out.print(' ');
+                PrintUtils.printRightJustified(out, Long.toString(n), 10);
+                out.print(' ');
+                out.println(NameUtils.stripSuffix(rs.getString(1)));   
+            }
+        }
+        finally
+        {
+            if(rs != null)
+                rs.close();
+        }
+        
+        // Print total
+        //
+        
+        PrintUtils.printRepeated(out, ' ', 15);
+        PrintUtils.printRepeated(out, '=', 6);
+        out.println();
+        PrintUtils.printRightJustified(out, Long.toString(total), 21);
+        out.println();
+        
+        // System.out.println(sw.getBuffer());
+        
+        // Post as message
+        //
+        UnstoredMessage msg = new UnstoredMessage(sw.getBuffer().toString(), subject);
+        messagePoster.storeMessage(token, Long.parseLong(resources.getString("conferenceid")), msg);
+    }
+
+    
     protected Timestamp translateDate(String arg)
     {
         // Arg is on the form "<n><u>" where n is a number and
@@ -250,6 +327,7 @@ public class StatisticsDaemon
         int n = Integer.parseInt(arg.substring(0, len - 1));
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(now);
+        int m = c.get(Calendar.MONTH);
         switch(unit)
         {
         case 'd':
@@ -257,7 +335,10 @@ public class StatisticsDaemon
         case 'w':
             return new Timestamp(now - 7 * 24 * 60 * 60 * 1000);
         case 'm':
-            c.roll(Calendar.MONTH, -n);
+            c.roll(Calendar.MONTH, -(n % 12));
+            c.roll(Calendar.YEAR, -(n / 12));
+            if(m - n < 0)
+            	c.roll(Calendar.YEAR, -1);
             return new Timestamp(c.getTimeInMillis());
         case 'y':
             c.roll(Calendar.YEAR, -n);
