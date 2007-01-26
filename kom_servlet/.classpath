@@ -3,17 +3,10 @@
 	<classpathentry kind="src" path="java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/kom"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/lib/javax.servlet.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/lib/org.mortbay.jetty.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/lib/org.mortbay.jmx.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/ant.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/commons-el.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/commons-logging.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/jasper-compiler.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/jasper-runtime.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/mx4j.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/mx4j-remote.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/mx4j-tools.jar"/>
-	<classpathentry kind="lib" path="C:/java/jetty-5.1.4/ext/xmlParserAPIs-2.5.jar"/>
+	<classpathentry kind="lib" path="distr/org.mortbay.jetty.jar"/>
+	<classpathentry kind="lib" path="distr/javax.servlet.jar"/>
+	<classpathentry kind="lib" path="distr/jasper-runtime.jar"/>
+	<classpathentry kind="lib" path="distr/jasper-compiler.jar"/>
+	<classpathentry kind="lib" path="distr/commons-el.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
