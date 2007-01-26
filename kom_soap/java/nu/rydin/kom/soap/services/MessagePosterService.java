@@ -8,6 +8,7 @@ package nu.rydin.kom.soap.services;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.soap.exceptions.SessionExpiredException;
@@ -16,6 +17,7 @@ import nu.rydin.kom.soap.structs.MessageOccurrence;
 import nu.rydin.kom.soap.structs.SecurityToken;
 import nu.rydin.kom.soap.structs.UnstoredMessage;
 import nu.rydin.kom.soap.support.SessionRegistry;
+import nu.rydin.kom.structs.MessageLocator;
 
 /**
  * @author Pontus Rydin
@@ -34,15 +36,15 @@ public class MessagePosterService implements MessagePoster
         return new MessageOccurrence(ss.storeMail(recipient, msg.toNative()));
     }
 
-    public MessageOccurrence storeReplyAsMessage(SecurityToken token, long conference, UnstoredMessage msg, long replyTo) throws ObjectNotFoundException, UnexpectedException, AuthorizationException, SessionExpiredException
+    public MessageOccurrence storeReplyAsMessage(SecurityToken token, long conference, UnstoredMessage msg, long replyTo) throws ObjectNotFoundException, UnexpectedException, AuthorizationException, SessionExpiredException, NoCurrentMessageException
     {
         ServerSession ss = SessionRegistry.instance().get(token);
-        return new MessageOccurrence(ss.storeReplyAsMessage(conference, msg.toNative(), replyTo));
+        return new MessageOccurrence(ss.storeReplyAsMessage(conference, msg.toNative(), new MessageLocator(replyTo)));
     }
 
-    public MessageOccurrence storeReplyAsMail(SecurityToken token, long recipient, UnstoredMessage msg, long replyTo) throws ObjectNotFoundException, UnexpectedException, SessionExpiredException
+    public MessageOccurrence storeReplyAsMail(SecurityToken token, long recipient, UnstoredMessage msg, long replyTo) throws ObjectNotFoundException, UnexpectedException, SessionExpiredException, NoCurrentMessageException
     {
         ServerSession ss = SessionRegistry.instance().get(token);
-        return new MessageOccurrence(ss.storeReplyAsMail(recipient, msg.toNative(), replyTo));
+        return new MessageOccurrence(ss.storeReplyAsMail(recipient, msg.toNative(), new MessageLocator(replyTo)));
     }
 }

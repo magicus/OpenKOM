@@ -8,6 +8,7 @@
 package nu.rydin.kom.soap.interfaces;
 
 import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.soap.exceptions.SessionExpiredException;
@@ -59,9 +60,10 @@ public interface MessagePoster
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 * @throws AuthorizationException
+	 * @throws NoCurrentMessageException 
 	 */
 	public MessageOccurrence storeReplyAsMessage(SecurityToken token, long conference, UnstoredMessage msg, long replyTo)
-	throws ObjectNotFoundException, UnexpectedException, AuthorizationException, SessionExpiredException;
+	throws ObjectNotFoundException, UnexpectedException, AuthorizationException, SessionExpiredException, NoCurrentMessageException;
 	
 	/**
 	 * Stores a message as a personal mail to a user. May store a copy in the
@@ -74,7 +76,8 @@ public interface MessagePoster
 	 * @return Newly created message occurrence
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws NoCurrentMessageException 
 	 */
 	public MessageOccurrence storeReplyAsMail(SecurityToken token, long recipient, UnstoredMessage msg, long replyTo)
-	throws ObjectNotFoundException, UnexpectedException, SessionExpiredException;
+	throws ObjectNotFoundException, UnexpectedException, SessionExpiredException, NoCurrentMessageException;
 }

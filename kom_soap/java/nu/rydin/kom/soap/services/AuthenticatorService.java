@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactory;
+import nu.rydin.kom.constants.ClientTypes;
 import nu.rydin.kom.exceptions.AlreadyLoggedInException;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.LoginProhibitedException;
@@ -37,7 +38,7 @@ public class AuthenticatorService implements Authenticator
             // Create a session
             //
             ServerSessionFactory ssf = (ServerSessionFactory) Modules.getModule("Backend");
-            ServerSession ss = ssf.login(username, password);
+            ServerSession ss = ssf.login(username, password, ClientTypes.SOAP, true);
             
             // Create a token and register. 32 bytes of random junk is probably
             // enough as a token.
