@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.AuthorizationException;
+import nu.rydin.kom.exceptions.EmptyMessageException;
 import nu.rydin.kom.exceptions.EventDeliveredException;
 import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
@@ -33,7 +34,8 @@ public class QuoteEditor extends FullscreenEditor
     private static final int QUOTE_WIDTH = 76;
     private final FullscreenMessageEditor mainEditor;
     
-    public QuoteEditor(Context context, MessageLocator replyTo, FullscreenMessageEditor mainEditor) throws IOException, ObjectNotFoundException, AuthorizationException, UnexpectedException, NoCurrentMessageException
+    public QuoteEditor(Context context, MessageLocator replyTo, FullscreenMessageEditor mainEditor) 
+    throws IOException, ObjectNotFoundException, AuthorizationException, UnexpectedException, NoCurrentMessageException, EmptyMessageException
     {
         super(context);
         this.mainEditor = mainEditor;
@@ -42,6 +44,8 @@ public class QuoteEditor extends FullscreenEditor
         WordWrapper ww = context.getWordWrapper(body, 
                 QUOTE_WIDTH - 8); //8 = length of ">" + linenumber.
         Buffer buffer = this.getBuffer();
+        if(buffer.size() == 0)
+        	throw new EmptyMessageException();
         
         // Let user pick lines to include
         //

@@ -4077,7 +4077,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    		    try
 	    		    {
 	    		        GlobalMessageSearchResult gms = (GlobalMessageSearchResult) obj;
-	    		        return ServerSessionImpl.this.hasMessageReadPermissions(gms.getGlobalId())
+	    		        return  ServerSessionImpl.this.hasPermissionInConference(gms.getConference().getId(), ConferencePermissions.READ_PERMISSION)
 	    		        	&& !ServerSessionImpl.this.m_userContext.userMatchesFilter(
 	    		        	        gms.getAuthor().getId(), FilterFlags.MESSAGES);
 	    		    }

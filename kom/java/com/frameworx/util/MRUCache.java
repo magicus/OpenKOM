@@ -409,7 +409,7 @@ public class MRUCache implements Map
 			{
 			// We have to kick something out. Find the victim and remove it
 			//
-			CacheItem victim = victim = (CacheItem) m_head.previous();
+			CacheItem victim = (CacheItem) m_head.previous();
 
 			// Now we have determined the victim. Yank it from the MRU list
 			//

@@ -48,6 +48,7 @@ public class UserFlags
 	public static long REPLY_IN_CURRENT_CONF				= 0x00400000;
 	public static long SHOW_SUFFIX							= 0x00800000;
     public static long SHOW_END_OF_IDLE_MESSAGE             = 0x01000000;
+    public static long COMPACT_WHO			             	= 0x02000000;
 
 	/**
 	 * Default value for flagword 1
@@ -55,7 +56,7 @@ public class UserFlags
 	public static long DEFAULT_FLAGS1 = SHOW_ATTENDANCE_MESSAGES | ALLOW_BROADCAST_MESSAGES |
 		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT | BEEP_ON_CHAT
 		| PRIORITIZE_MAIL | BEEP_ON_NEW_MESSAGES | SHOW_NUM_UNREAD | READ_CROSS_CONF_REPLIES 
-		| READ_REPLY_TREE | SHOW_SUFFIX;
+		| READ_REPLY_TREE | SHOW_SUFFIX | COMPACT_WHO;
 	
 	/**
 	 * Default value for flagword 2

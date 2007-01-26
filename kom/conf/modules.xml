@@ -29,21 +29,22 @@
 		<parameter name="supported.character.sets" value="ISO-8859-1,Cp850,Cp437,UTF-8,US-ASCII,MacRoman"/>
 	</module>
 	<module name="TelnetServer" class="nu.rydin.kom.modules.TelnetServer">
-		<parameter name="port" value="23"/>
+		<parameter name="port" value="2323"/>
 		<parameter name="authentication" value="password"/>
 		<parameter name="selfRegister" value="false"/>
 	</module>
-	<module name="TelnetServerTicketLogin" class="nu.rydin.kom.modules.TelnetServer">
+	<!-- Uncomment for ticket-based login (you typically won't need this)
+	 module name="TelnetServerTicketLogin" class="nu.rydin.kom.modules.TelnetServer">
 		<parameter name="port" value="2300"/>
 		<parameter name="authentication" value="ticket"/>
 	</module>
 		<module name="AuthenticationServer" class="nu.rydin.kom.modules.AuthenticationServer">
 		<parameter name="port" value="2301"/>
 		<parameter name="ticketLifetime" value="20000"/>
-	</module>
+	</module -->
 	<module name="SSHModule" class="nu.rydin.kom.modules.ssh.SSHServer">
 		<parameter name="serverhostkeyfile" value="server_host_key"/>
-		<parameter name="port" value="22"/>
+		<parameter name="port" value="2222"/>
 		<parameter name="maxauthretry" value="3"/>
 		<parameter name="maxconn" value="1000"/>
 		<parameter name="selfRegister" value="false"/>		
@@ -56,10 +57,10 @@
 			<pathelement location="../kom_servlet/distr/javax.servlet.jar"/>
 			<pathelement location="../kom_servlet/distr/org.mortbay.jetty.jar"/>
 			<pathelement location="../kom_servlet/distr/commons-el.jar"/>			
-			<pathelement location="C:\Program Files\Java\jdk1.5.0_05\lib\tools.jar"/>
-			<pathelement location="C:\java\apache-ant-1.6.2\lib\ant.jar"/>
+			<pathelement location="/usr/java/lib/tools.jar"/>
+			<pathelement location="/usr/local/javatools/ant/lib/ant.jar"/>
 			<pathelement location="../kom_soap/lib/kom_soap.jar"/>						
 		</classpath>
-		<parameter name="jetty.home" value="/usr/local/javatools/jetty-5.1.4"/>
+		<parameter name="jetty.home" value="/usr/local/javatools/jetty"/>
 	</module>
 </modules>

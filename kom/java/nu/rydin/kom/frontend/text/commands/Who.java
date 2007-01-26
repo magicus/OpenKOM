@@ -7,7 +7,9 @@
 package nu.rydin.kom.frontend.text.commands;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 
+import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
@@ -35,6 +37,11 @@ public class Who extends AbstractCommand
 		MessageFormatter formatter = context.getMessageFormatter();
 		PrintWriter out = context.getOut();
 		UserListItem[] users = context.getSession().listLoggedInUsers();
+
+		// Compact if user wants it
+    	//
+    	if(context.getCachedUserInfo().testFlags(0, UserFlags.COMPACT_WHO));
+    		this.makeCompact(users);
 		DisplayController dc = context.getDisplayController();
 		dc.normal();
 		HeaderPrinter hp = new HeaderPrinter();
@@ -52,6 +59,8 @@ public class Who extends AbstractCommand
 		for(int idx = 0; idx < top; ++idx)
 		{
 			UserListItem each = users[idx];
+			if(each == null)
+				continue; // Eliminated by compacting
 			String confName = each.isInMailbox() 
 				? formatter.format("misc.mailboxtitle")
 				: context.formatObjectName(each.getConference());
@@ -68,5 +77,37 @@ public class Who extends AbstractCommand
 		}
 		out.println();
 		out.println(formatter.format("who.total", new Object[] { new Integer(top), new Integer(active) }));
+    }
+    
+    private void makeCompact(UserListItem[] users)
+    {
+    	int top = users.length;
+    	HashMap<Long, Integer> index = new HashMap<Long, Integer>(top);
+    	for(int idx = 0; idx < top; ++idx)
+    	{
+    		UserListItem each = users[idx];
+    		long id = each.getUser().getId();
+    		
+    		// Haven't seen it bedore? Remember it and skip to next!
+    		//
+    		if(!index.containsKey(id))
+    		{
+    			index.put(id, idx);
+    			continue;
+    		}
+    		
+    		// We've seem ot before. Consolidate!
+    		//
+    		int p = index.get(id);
+    		UserListItem old = users[p];
+    		boolean moreActive = each.getLastHeartbeat() > old.getLastHeartbeat();
+    		users[p] = new UserListItem(old.getSessionId(), old.getUser(), old.getClientType(), 
+    					(moreActive ? each.getAction() : old.getAction()),
+    					(moreActive ? each.getConference() : old.getConference()),
+    					(moreActive ? each.isInMailbox() : old.isInMailbox()), 
+    					Math.min(old.getLoginTime(), each.getLoginTime()),
+    					Math.max(old.getLastHeartbeat(), each.getLastHeartbeat()));
+    		users[idx] = null;
+    	}
     }
 }

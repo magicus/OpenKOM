@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.exceptions.AmbiguousPatternException;
+import nu.rydin.kom.exceptions.EmptyMessageException;
 import nu.rydin.kom.exceptions.EscapeException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.KOMRuntimeException;
@@ -287,6 +288,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
         {
             int middle = (this.getTerminalSettings().getHeight() - headerRows) / 2;
             this.pushViewport(0, middle);
+            QuoteEditor quoter = new QuoteEditor(this, replyTo, this);
             this.revealCursor(false);
             this.refreshViewport();
             m_tc.setCursor(middle, 0);
@@ -297,7 +299,6 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
             PrintUtils.printRepeated(out, '-', this.getTerminalSettings().getWidth() - divider.length() - 1);
             m_tc.reset();
             m_tc.messageBody();
-            QuoteEditor quoter = new QuoteEditor(this, replyTo, this);
             quoter.pushViewport(middle + 5, this.getTerminalSettings().getHeight() - 1);
             quoter.edit();
             this.refresh();
@@ -305,6 +306,10 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
         catch(InterruptedException e)
         {
             // Just return
+        }
+        catch(EmptyMessageException e)
+        {
+        	// Can't quote an emty message
         }
         finally
         {
