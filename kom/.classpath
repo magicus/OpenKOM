@@ -13,5 +13,7 @@
 	<classpathentry kind="lib" path="distr/mysql-connector-java-3.0.16-ga-bin.jar"/>
 	<classpathentry kind="lib" path="conf"/>
 	<classpathentry kind="lib" path="distr/commons-logging.jar"/>
+	<classpathentry kind="lib" path="distr/activation.jar"/>
+	<classpathentry kind="lib" path="distr/mail.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

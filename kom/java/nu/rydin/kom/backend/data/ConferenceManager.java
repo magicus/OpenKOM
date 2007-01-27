@@ -51,7 +51,7 @@ public class ConferenceManager
 		m_changeReplyToConfStmt = conn.prepareStatement(
 		    "UPDATE conferences SET replyConf = ? WHERE id = ?");
 		m_loadConfStmt = conn.prepareStatement(
-			"SELECT n.fullname, n.keywords, c.administrator, c.permissions, c.nonmember_permissions, n.visibility, c.replyConf, c.created, c.lasttext " +
+			"SELECT n.fullname, n.keywords, c.administrator, c.permissions, c.nonmember_permissions, n.visibility, c.replyConf, c.created, c.lasttext, n.emailalias " +
 			"FROM names n, conferences c " +
 			"WHERE c.id = ? AND n.id = c.id");
 		m_loadRangeStmt = conn.prepareStatement(	
@@ -229,7 +229,8 @@ public class ConferenceManager
 			ConferenceInfo answer = new ConferenceInfo(
 				id,							// Id
 				new Name(rs.getString(1), rs.getShort(6), NameManager.CONFERENCE_KIND),	// Name
-                rs.getString(2),
+                rs.getString(2),            // Keywords
+                rs.getString(10),           // Email alias
 				rs.getLong(3),				// Admin
 				rs.getInt(4),				// Permissions
 				rs.getInt(5),				// Nonmember permissions

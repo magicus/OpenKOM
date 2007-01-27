@@ -86,16 +86,23 @@ public class BasicMessagePrinter implements MessagePrinter
 		sb.append(context.smartFormatDate(message.getCreated()));
 		PrintUtils.printIndented(out, sb.toString(), width, 0);
 		
-		// Print the original mail recipient if this is a mail.
+		// Print the original mail recipient if this is a personal message.
+		// Also, print email sender, if any.
 		//
 		for(int idx = 0; idx < attributes.length; ++idx)
 		{
 		    MessageAttribute each = attributes[idx];
-		    if(each.getKind() == MessageAttributes.MAIL_RECIPIENT && each.getUserId() != context.getLoggedInUserId())
+		    switch(each.getKind())
 		    {
-		        PrintUtils.printIndented(out,
-		                formatter.format("BasicMessagePrinter.original.mail.recipient", context.formatObjectName(each.getUsername(), each.getUserId())),
-		                width, 0);		        
+		    case MessageAttributes.MAIL_RECIPIENT:
+			    if(each.getUserId() != context.getLoggedInUserId())
+			        PrintUtils.printIndented(out,
+			                formatter.format("BasicMessagePrinter.original.mail.recipient", context.formatObjectName(each.getUsername(), each.getUserId())),
+			                width, 0);		        
+			    break;
+		    case MessageAttributes.EMAIL_SENDER:
+		    	PrintUtils.printIndented(out, formatter.format("BasicMessagePrinter.email.sender", each.getValue()), width, 0);
+		    	break;
 		    }
 		}
 		

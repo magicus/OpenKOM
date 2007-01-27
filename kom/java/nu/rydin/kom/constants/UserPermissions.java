@@ -87,6 +87,18 @@ public class UserPermissions
 	 * Permission to change suffix	
 	 */
 	public static final long CHANGE_SUFFIX			= 0x4000L;
+	
+	/**
+	 * Permission to send messages on behalf of other users
+	 * (typically used by e.g. email daemons)
+	 */
+	public static final long POST_BY_PROXY			= 0x8000L;
+	
+	/**
+	 * Permission to post anywhere, disregarding conference 
+	 * permissions. (Typically used by e.g. email daemons)
+	 */
+	public static final long POST_ANYWHERE			= 0x10000L;
 		
 	/**
 	 * All permissions

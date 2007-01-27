@@ -17,6 +17,7 @@ import nu.rydin.kom.backend.NameUtils;
 import nu.rydin.kom.backend.SQLUtils;
 import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.EmailRecipientNotRecognizedException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
@@ -50,6 +51,7 @@ public class NameManager
     private final PreparedStatement m_searchObjectStmt;
     private final PreparedStatement m_changeKeywordsStmt;
     private final PreparedStatement m_changeEmailAliasStmt;
+    private final PreparedStatement m_findByEmailAlias;
 	
 	public NameManager(Connection conn)
 	throws SQLException
@@ -88,7 +90,9 @@ public class NameManager
         m_changeKeywordsStmt = conn.prepareStatement(
             "UPDATE names SET keywords = ? WHERE id = ?");
         m_changeEmailAliasStmt = conn.prepareStatement(
-            "UPDATE names SET emailalias = ? WHERE id = ?");        
+            "UPDATE names SET emailalias = ? WHERE id = ?");    
+        m_findByEmailAlias = conn.prepareStatement(
+            "SELECT id FROM names WHERE emailalias = ?");
 	}
 	
 	public void finalize()
@@ -138,7 +142,9 @@ public class NameManager
         if(m_changeKeywordsStmt != null)
             m_changeKeywordsStmt.close();
         if(m_changeEmailAliasStmt != null)
-            m_changeEmailAliasStmt.close();                        
+            m_changeEmailAliasStmt.close();
+        if(m_findByEmailAlias != null)
+            m_findByEmailAlias.close();                                
 	}
 	
 	/**
@@ -549,6 +555,25 @@ public class NameManager
         this.invalidateCache(id);
     }
     
+    public long findByEmailAlias(String alias)
+    throws SQLException, EmailRecipientNotRecognizedException
+    {
+        m_findByEmailAlias.clearParameters();
+        m_findByEmailAlias.setString(1, alias);
+        ResultSet rs = null;
+        try
+        {
+        	rs = m_findByEmailAlias.executeQuery();
+        	if(!rs.next())
+        		throw new EmailRecipientNotRecognizedException(alias);
+        	return rs.getLong(1);
+        }
+        finally
+        {
+        	if(rs != null)
+        		rs.close();
+        }
+    }
     
 	protected String createKey(String name)
 	{

@@ -52,6 +52,11 @@ public class MessageAttributes
 	public static final short FOOTNOTE			= 7;
 	
 	/**
+	 * Email originating address
+	 */
+	public static final short EMAIL_SENDER		= 8;
+	
+	/**
 	 * Flag-array determining whether a user can perform a command
 	 * only on messages that she/he has created.
 	 */

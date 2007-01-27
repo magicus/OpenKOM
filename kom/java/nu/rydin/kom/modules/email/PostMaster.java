@@ -17,15 +17,20 @@ import nu.rydin.kom.modules.Module;
  */
 public class PostMaster implements Module
 {
-    private Listener worker;
+    private POP3Poller worker;
     
     public void start(Map parameters) 
     throws ModuleException
     {
-        worker = new Listener(
+        worker = new POP3Poller(
+                (String) parameters.get("host"),
                 Integer.parseInt((String) parameters.get("port")),
+                (String) parameters.get("user"),
+                (String) parameters.get("password"),
                 (String) parameters.get("domain"),
-                Integer.parseInt((String) parameters.get("numWorkers")));
+                (String) parameters.get("postmaster"),
+                (String) parameters.get("postmasterPassword"),
+                Integer.parseInt((String) parameters.get("pollDelay")) * 60000);
         worker.start();
     }
 

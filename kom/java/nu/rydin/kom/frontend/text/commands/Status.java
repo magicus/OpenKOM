@@ -76,7 +76,9 @@ public class Status extends AbstractCommand
 		PrintUtils.printLabelled(out, formatter.format("status.user.id"), LABEL_LENGTH, Long.toString(info.getId()));
 		PrintUtils.printLabelled(out, formatter.format("status.user.name"), LABEL_LENGTH, context.formatObjectName(info.getName(), info.getId()));
         PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.keywords"), 
-                LABEL_LENGTH, info.getKeywords());        
+                LABEL_LENGTH, info.getKeywords());
+        PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.email.alias"), 
+                LABEL_LENGTH, info.getEmailAlias());        
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.address1"), 
 			LABEL_LENGTH, info.getAddress1());
 		PrintUtils.printLabelledIfDefined(out, formatter.format("status.user.address2"), 
@@ -156,7 +158,9 @@ public class Status extends AbstractCommand
 		PrintUtils.printLabelled(out, formatter.format("status.conference.id"), LABEL_LENGTH, Long.toString(info.getId()));
 		PrintUtils.printLabelled(out, formatter.format("status.conference.name"), LABEL_LENGTH, context.formatObjectName(info.getName(), info.getId()));
         PrintUtils.printLabelledIfDefined(out, formatter.format("status.conference.keywords"), 
-                LABEL_LENGTH, info.getKeywords());                
+                LABEL_LENGTH, info.getKeywords());
+        PrintUtils.printLabelledIfDefined(out, formatter.format("status.conference.email.alias"), 
+                LABEL_LENGTH, info.getEmailAlias());                
 		PrintUtils.printLabelled(out, formatter.format("status.conference.type"), LABEL_LENGTH, confType);
 		if (info.getReplyConf() != -1)
 		{

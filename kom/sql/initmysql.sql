@@ -150,13 +150,13 @@ CREATE TABLE IF NOT EXISTS bookmarks
 	created DATETIME NOT NULL,
 	annotation VARCHAR(100),
 	PRIMARY KEY(user, message),
-	FOREGIN KEY(message) REFERENCES message(id) ON DELETE CASCADE,
+	FOREIGN KEY(message) REFERENCES messages(id) ON DELETE CASCADE,
 	INDEX(user, created)
 ) TYPE=INNODB;
 
 CREATE TABLE IF NOT EXISTS magicconferences
 (
-	conference BIGINT NOT NULL,
+	conference BIGINT NULL,
 	kind SMALLINT NOT NULL,
 	PRIMARY KEY(conference, kind),
 	FOREIGN KEY(conference) REFERENCES conferences(id) ON DELETE CASCADE,

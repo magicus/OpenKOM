@@ -82,6 +82,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeReplyToConference"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ChangePermissions"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeKeywords"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ChangeEmailAlias"/>
 	</category>	
 	<category id="profile" i18n="command.category.profile" order="100">
 		<command class="nu.rydin.kom.frontend.text.commands.ChangeSuffix" permissions="4008"/>

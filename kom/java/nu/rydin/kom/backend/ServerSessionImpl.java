@@ -59,6 +59,8 @@ import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.BadPasswordException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.EmailRecipientNotRecognizedException;
+import nu.rydin.kom.exceptions.EmailSenderNotRecognizedException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.exceptions.NoMoreMessagesException;
@@ -994,7 +996,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
     public MessageOccurrence storeMail(long recipient, UnstoredMessage msg)
-    throws ObjectNotFoundException, UnexpectedException	
+    throws ObjectNotFoundException, UnexpectedException, AuthorizationException
 	{
         return storeReplyAsMail(recipient, msg, -1L);
 	}
@@ -1007,12 +1009,17 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     }
 
 
-    protected MessageOccurrence storeReplyAsMessage(long conference,
+    protected MessageOccurrence storeReplyAsMessage(long author, long conference,
             UnstoredMessage msg, long replyTo) throws ObjectNotFoundException,
             UnexpectedException, AuthorizationException
 	{
 		try
 		{
+			// If we're posting on behald on someone else, we must hold the
+			// POST_BY_PROXY privilege
+			//
+			if(author != this.getLoggedInUserId())
+				this.checkRights(UserPermissions.POST_BY_PROXY);
 		    MessageManager mm = m_da.getMessageManager();
 		    long me = this.getLoggedInUserId();
 		    UserInfo myinf = this.getLoggedInUser();
@@ -1023,13 +1030,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// reply to something posted by a moderator.
 			//
 			if(replyTo == -1)
-				this.assertConferencePermission(conference, ConferencePermissions.WRITE_PERMISSION);
+				this.assertConferencePermission(author, conference, ConferencePermissions.WRITE_PERMISSION);
 			else
-				this.assertConferencePermission(conference, ConferencePermissions.REPLY_PERMISSION);
+				this.assertConferencePermission(author, conference, ConferencePermissions.REPLY_PERMISSION);
 			
 			// Store message in conference
 			//
-			MessageOccurrence occ = mm.addMessage(me, this.getCensoredName(me).getName(),
+			MessageOccurrence occ = mm.addMessage(author, this.getCensoredName(author).getName(),
 				conference, replyTo, msg.getSubject(), msg.getBody());
 			
 			// Mark message as read unless the user is a narcissist.
@@ -1042,9 +1049,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			m_lastReadMessageId = occ.getGlobalId();
 			
 			// Notify the rest of the world that there is a new message!
+			// Notice that we post the event with OUR user id and not the author's.
+			// I think that's the right thing to do...
 			//
 			this.broadcastEvent(
-				new NewMessageEvent(me, occ.getConference(), occ.getLocalnum(), 
+				new NewMessageEvent(this.getLoggedInUserId(), occ.getConference(), occ.getLocalnum(), 
 					occ.getGlobalId()));
 
 			m_stats.incNumPosted();
@@ -1056,25 +1065,45 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
     
+    
+    protected MessageOccurrence storeReplyAsMessage(long conference,
+            UnstoredMessage msg, long replyTo) throws ObjectNotFoundException,
+            UnexpectedException, AuthorizationException
+	{
+		return this.storeReplyAsMessage(this.getLoggedInUserId(), conference, msg, replyTo);
+	}
+
+    
     public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg,
-            MessageLocator replyTo) throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException
+            MessageLocator replyTo) throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException, AuthorizationException
     {
         return storeReplyAsMail(recipient, msg, this.resolveLocator(replyTo).getGlobalId());
     }
 	
     protected MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg,
-            long replyTo) throws ObjectNotFoundException, UnexpectedException
+            long replyTo) throws ObjectNotFoundException, UnexpectedException, AuthorizationException
+    {
+    	return this.storeReplyAsMail(this.getLoggedInUserId(), recipient, msg, replyTo);
+    }
+    
+    protected MessageOccurrence storeReplyAsMail(long author, long recipient, UnstoredMessage msg,
+            long replyTo) throws ObjectNotFoundException, UnexpectedException, AuthorizationException
     {
 		try
 		{
+			// If we're posting on behald on someone else, we must hold the
+			// POST_BY_PROXY privilege
+			//
+			if(author != this.getLoggedInUserId())
+				this.checkRights(UserPermissions.POST_BY_PROXY);
+
 		    MessageManager mm = m_da.getMessageManager();
-		    long me = this.getLoggedInUserId();
 		    UserInfo myinf = this.getLoggedInUser();
 		    
 			// Store message in recipient's mailbox
 			//
-			MessageOccurrence occ = mm.addMessage(me, 
-			    this.getCensoredName(me).getName(), 
+			MessageOccurrence occ = mm.addMessage(author, 
+			    this.getCensoredName(author).getName(), 
 				recipient, replyTo, msg.getSubject(), msg.getBody()); 
 			
 			// Set the mail attribute with the original recipient. This is used
@@ -1089,13 +1118,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			if((myinf.getFlags1() & UserFlags.KEEP_COPIES_OF_MAIL) != 0)
 			{
 			    MessageOccurrence copy = mm.createMessageOccurrence(
-				occ.getGlobalId(), MessageManager.ACTION_COPIED, me, this.getName(me).getName(), me);
+				occ.getGlobalId(), MessageManager.ACTION_COPIED, author, this.getName(author).getName(), author);
 
 			    // Mark copy as read unless the user is a narcissist.
 				//
 			    if((myinf.getFlags1() & UserFlags.NARCISSIST) == 0)
 				{
-				    this.markMessageAsRead(me, copy.getLocalnum());
+				    this.markMessageAsRead(this.getLoggedInUserId(), copy.getLocalnum());
 				}
 			    
 				// Make this the "current" message
@@ -1104,8 +1133,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			}
 
 			// Notify recipient of the new message.
+			// Notice that we post the event with OUR user id and not the author's.
+			// I think that's the right thing to do...
 			//
-			this.sendEvent(recipient, new NewMessageEvent(me, recipient, occ.getLocalnum(), occ.getGlobalId()));
+			this.sendEvent(recipient, new NewMessageEvent(this.getLoggedInUserId(), recipient, occ.getLocalnum(), occ.getGlobalId()));
 			
 			m_stats.incNumPosted(); 
 			return occ;
@@ -1115,6 +1146,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
     }
+
    
 	public MessageOccurrence storePresentation(UnstoredMessage msg, long object)
 	throws UnexpectedException, AuthorizationException, ObjectNotFoundException
@@ -2499,22 +2531,30 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public boolean hasPermissionInConference(long conferenceId, int mask)
 	throws ObjectNotFoundException, UnexpectedException
 	{
+		return this.hasPermissionInConference(this.getLoggedInUserId(), conferenceId, mask);
+	}
+	
+	public boolean hasPermissionInConference(long userId, long conferenceId, int mask)
+	throws ObjectNotFoundException, UnexpectedException
+	{
+		UserInfo ui = this.getUser(userId);
 		try
 		{
 			// Do we have the permission to disregard conference permissions?
 			//
-			if(this.getLoggedInUser().hasRights(UserPermissions.DISREGARD_CONF_PERM))
+			if(ui.hasRights(UserPermissions.DISREGARD_CONF_PERM))
 			    // We can only disregard everything but ADMIN_PERMISSION.
 			    //
 			    if((mask & ConferencePermissions.ADMIN_PERMISSION) != mask)
 			        return true;				
-			return m_da.getMembershipManager().hasPermission(this.getLoggedInUserId(), conferenceId, mask);
+			return m_da.getMembershipManager().hasPermission(ui.getId(), conferenceId, mask);
 		}
 		catch(SQLException e)
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+
 	
 	public boolean hasPermissionInCurrentConference(int mask)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
@@ -3245,7 +3285,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public void assertConferencePermission(long conferenceId, int mask)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
 	{
-		if(!this.hasPermissionInConference(conferenceId, mask))
+		this.assertConferencePermission(this.getLoggedInUserId(), conferenceId, mask);
+	}
+	
+	public void assertConferencePermission(long userId, long conferenceId, int mask)
+	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
+	{
+		if(!this.hasPermissionInConference(userId, conferenceId, mask))
 		{
 		    if (mask == ConferencePermissions.REPLY_PERMISSION)
 		    {
@@ -3260,6 +3306,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 			
 	}
+	
 		
 	public void assertModifyConference(long conferenceId)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
@@ -4077,7 +4124,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    		    try
 	    		    {
 	    		        GlobalMessageSearchResult gms = (GlobalMessageSearchResult) obj;
-	    		        return  ServerSessionImpl.this.hasPermissionInConference(gms.getConference().getId(), ConferencePermissions.READ_PERMISSION)
+	    		        return ServerSessionImpl.this.hasMessageReadPermissions(gms.getGlobalId())
 	    		        	&& !ServerSessionImpl.this.m_userContext.userMatchesFilter(
 	    		        	        gms.getAuthor().getId(), FilterFlags.MESSAGES);
 	    		    }
@@ -4512,4 +4559,57 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             throw new UnexpectedException(this.getLoggedInUserId(), e);
         }        
     }
+
+	public MessageOccurrence postIncomingEmail(String sender, String receiver, String subject, String content) throws EmailRecipientNotRecognizedException, EmailSenderNotRecognizedException, AuthorizationException, UnexpectedException 
+	{
+		// Make sure we hold the apropriate privileges
+		//
+		this.checkRights(UserPermissions.POST_ANYWHERE | UserPermissions.POST_BY_PROXY);
+		
+		UserManager um = m_da.getUserManager();
+		NameManager nm = m_da.getNameManager();
+		MessageManager mm = m_da.getMessageManager();
+		try
+		{
+			// Try to map sender and receiver email
+			//
+			long senderId = um.matchEmailSender(sender);
+			long receiverId = nm.findByEmailAlias(receiver);
+			
+			// Getting here means that we have a valid sender and receiver. Now, check
+			// that the sender has permission to post in the selected conference.
+			//
+			if(!this.hasPermissionInConference(senderId, receiverId, ConferencePermissions.WRITE_PERMISSION))
+				throw new AuthorizationException();
+			
+			// Are we sending to a person or a conference?
+			//
+			MessageOccurrence occ;
+			UnstoredMessage msg = new UnstoredMessage(subject, content);
+			switch(this.getName(receiverId).getKind())
+			{
+			case NameManager.CONFERENCE_KIND:
+				occ = this.storeReplyAsMessage(senderId, receiverId, msg, -1);
+				break;
+			case NameManager.USER_KIND:
+				occ = this.storeReplyAsMail(senderId, receiverId, msg, -1);
+				break;
+			default:
+				throw new IllegalStateException("Don't know how to handle message");
+			}
+			
+			// Store sender email address as message attribute
+			//
+			mm.addMessageAttribute(occ.getGlobalId(), MessageAttributes.EMAIL_SENDER, sender);
+			return occ;
+		}
+        catch(ObjectNotFoundException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        		
+        catch(SQLException e)
+        {
+            throw new UnexpectedException(this.getLoggedInUserId(), e);
+        }        
+	}
 }

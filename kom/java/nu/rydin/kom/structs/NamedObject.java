@@ -16,12 +16,14 @@ public class NamedObject implements Serializable
 	private final long id;
 	private final Name name;
     private final String keywords;
+    private final String emailAlias;
 
-	protected NamedObject(long id, Name name, String keywords)
+	protected NamedObject(long id, Name name, String keywords, String emailAlias)
 	{
 		this.id 	  = id;
 		this.name     = name;
         this.keywords = keywords;
+        this.emailAlias = emailAlias;
 	}
 	
 	public long getId()
@@ -37,5 +39,10 @@ public class NamedObject implements Serializable
     public String getKeywords()
     {
         return keywords;
+    }
+    
+    public String getEmailAlias()
+    {
+        return emailAlias;
     }
 }

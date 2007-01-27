@@ -326,9 +326,10 @@ public interface ServerSession
 	 * @return  Newly created message occurrence
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws AuthorizationException 
 	 */	
 	public MessageOccurrence storeMail(long recipient, UnstoredMessage msg)
-	throws ObjectNotFoundException, UnexpectedException;
+	throws ObjectNotFoundException, UnexpectedException, AuthorizationException;
 
 	/**
 	 * Stores a reply to a message in a conference
@@ -354,9 +355,10 @@ public interface ServerSession
 	 * @return Newly created message occurrence
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws AuthorizationException 
 	 */
 	public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg, MessageLocator replyTo)
-	throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException;
+	throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException, AuthorizationException;
 
 	/**
 	 * Stores a presentation of an object
@@ -1718,4 +1720,21 @@ public interface ServerSession
      */
     public Bookmark[] listBookmarks()
     throws UnexpectedException;
+    
+    /**
+     * Posts an incoming email to the approriate conference and on behalf of
+     * the user that the sender email was mapped to. The caller must hold the
+     * POST_BY_PROXY and POST_ANYWHERE privileges.
+     * 
+     * @param sender The sender email
+     * @param receiver The receiver email
+     * @param subject The message subject
+     * @param content The message content
+     * @throws EmailRecipientNotRecognizedException
+     * @throws EmailSenderNotRecognizedException
+     * @throws AuthorizationException
+     * @throws UnexpectedException
+     */
+    public MessageOccurrence postIncomingEmail(String sender, String receiver, String subject, String content)
+    throws EmailRecipientNotRecognizedException, EmailSenderNotRecognizedException, AuthorizationException, UnexpectedException;
 }

@@ -22,9 +22,12 @@ import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.EmailRecipientNotRecognizedException;
+import nu.rydin.kom.exceptions.EmailSenderNotRecognizedException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.UserInfo;
+import nu.rydin.kom.utils.Logger;
 import nu.rydin.kom.utils.PasswordUtils;
 
 /**
@@ -46,6 +49,7 @@ public class UserManager
 	private final PreparedStatement m_updateTimeZoneStmt;
 	private final PreparedStatement m_getSysopStmt;
 	private final PreparedStatement m_countStmt;
+	private final PreparedStatement m_matchEmailSenderStmt;
 	
 	private final NameManager m_nameManager;
 	
@@ -73,7 +77,7 @@ public class UserManager
 		    "UPDATE users SET address1 = ?, address2 = ?, address3 = ?, address4 = ?, " +
 		    "phoneno1 = ?, phoneno2 = ?, email1 = ?, email2 = ?, url = ? WHERE id = ?");
 		m_loadUserStmt = conn.prepareStatement(			"SELECT n.fullname, u.userid, n.keywords, u.address1, u.address2, u.address3, u.address4, " +
-			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.timezone, u.created, u.lastlogin, n.visibility " +
+			"u.phoneno1, u.phoneno2, u.email1, u.email2, u.url, u.charset, u.flags1, u.flags2, " +			"u.flags3, u.flags4, u.rights, u.locale, u.timezone, u.created, u.lastlogin, n.visibility, n.emailalias " +
 			"FROM users u, names n WHERE u.id = ? AND n.id = u.id");
 		m_updateCharsetStmt = conn.prepareStatement(
 			"UPDATE users SET charset = ? WHERE id = ?");
@@ -91,6 +95,8 @@ public class UserManager
 		    "SELECT id FROM users WHERE userid = 'sysop'");
 		m_countStmt = conn.prepareStatement(
 		    "SELECT COUNT(*) from users");
+		m_matchEmailSenderStmt = conn.prepareStatement(
+			"SELECT id FROM users WHERE email1 LIKE ? OR email2 LIKE ?");
 	}
 	
 	/**
@@ -127,6 +133,8 @@ public class UserManager
 		    m_getSysopStmt.close();
 		if(m_countStmt != null)
 		    m_countStmt.close();
+		if(m_matchEmailSenderStmt != null)
+			m_matchEmailSenderStmt.close();
 	}
 	
 	/**
@@ -365,6 +373,7 @@ public class UserManager
 				new Name(rs.getString(1), rs.getShort(23), NameManager.USER_KIND),	// name
 				rs.getString(2),	// userid
                 rs.getString(3),    // keywords
+                rs.getString(23),   // emailalias
 				rs.getString(4),	// address1
 				rs.getString(5),	// address2
 				rs.getString(6),	// address3
@@ -547,5 +556,31 @@ public class UserManager
 	        if(rs != null)
 	            rs.close();
 	    }
+	}
+	
+	public long matchEmailSender(String email)
+	throws SQLException, EmailSenderNotRecognizedException
+	{
+		String pattern = '%' + email + '%';
+		m_matchEmailSenderStmt.clearParameters();
+		m_matchEmailSenderStmt.setString(1, pattern);
+		m_matchEmailSenderStmt.setString(2, pattern);
+		ResultSet rs = null;
+		try
+		{
+			rs = m_matchEmailSenderStmt.executeQuery();
+			if(!rs.next())
+				throw new EmailSenderNotRecognizedException(email);
+			long id = rs.getLong(1);
+			if(rs.next())
+				Logger.warn(this, "More than one match for " + email);
+			return id;
+				
+		}
+	    finally
+	    {
+	        if(rs != null)
+	            rs.close();
+	    }		
 	}
 }
