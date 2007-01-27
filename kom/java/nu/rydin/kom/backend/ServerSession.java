@@ -140,19 +140,21 @@ public interface ServerSession
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 * @throws NoCurrentMessageException
+	 * @throws AuthorizationException 
 	 */
 	
 	public Envelope readLastMessage()
-	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException;
+	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException, AuthorizationException;
 
     /**
      * Retrievs a message and marks it as unread
      * 
      * @param message
      * @return
+     * @throws AuthorizationException 
      */
     public Envelope readMessage(MessageLocator message)
-    throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException;
+    throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException, AuthorizationException;
 
 	/**
 	 * Retrievs a message and marks it as unread
@@ -184,9 +186,10 @@ public interface ServerSession
 	 * @throws NoMoreMessagesException
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws AuthorizationException 
 	 */	
 	public Envelope readNextMessage(long conf)
-	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException;
+	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException;
 
 
 	/**
@@ -195,9 +198,10 @@ public interface ServerSession
 	 * @throws NoMoreMessagesException
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws AuthorizationException 
 	 */	
 	public Envelope readNextMessageInCurrentConference()
-	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException;
+	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException;
 
 	/**
 	 * Retrieves the next reply in a depth-first fashion and marks it as read.
@@ -205,9 +209,10 @@ public interface ServerSession
 	 * @throws NoMoreMessagesException
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws AuthorizationException 
 	 */	
 	public Envelope readNextReply()
-	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException;
+	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException;
 
 	/**
 	 * Creates a conference and makes the current user a member and the administrator of it.
@@ -380,9 +385,10 @@ public interface ServerSession
 	 * @return The envelope around the latest matching message.
 	 * @throws UnexpectedException
 	 * @throws ObjectNotFoundException
+	 * @throws AuthorizationException 
 	 */
 	public Envelope readTaggedMessage(short tag, long object)
-	throws UnexpectedException, ObjectNotFoundException;
+	throws UnexpectedException, ObjectNotFoundException, AuthorizationException;
 
     /**
      * Stores a "no comment" to the given message
@@ -1309,9 +1315,10 @@ public interface ServerSession
 	 * @return Message envelope.
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws AuthorizationException 
 	 */
 	public Envelope getLastRulePostingInConference (long conference)
-	throws ObjectNotFoundException, NoRulesException, UnexpectedException;
+	throws ObjectNotFoundException, NoRulesException, UnexpectedException, AuthorizationException;
 
 	/**
 	 * Returns the Envelope for the last rule posting (which is the last message which has a
@@ -1320,9 +1327,10 @@ public interface ServerSession
 	 * @return Message envelope.
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws AuthorizationException 
 	 */
 	public Envelope getLastRulePosting()
-	throws ObjectNotFoundException, NoRulesException, UnexpectedException;
+	throws ObjectNotFoundException, NoRulesException, UnexpectedException, AuthorizationException;
 
 	/**
 	 * Store a rule posting (an ordinary message containg a message attribute of the kind

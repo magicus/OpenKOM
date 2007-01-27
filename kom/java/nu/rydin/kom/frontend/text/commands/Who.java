@@ -40,7 +40,7 @@ public class Who extends AbstractCommand
 
 		// Compact if user wants it
     	//
-    	if(context.getCachedUserInfo().testFlags(0, UserFlags.COMPACT_WHO));
+    	if(context.getCachedUserInfo().testFlags(0, UserFlags.COMPACT_WHO))
     		this.makeCompact(users);
 		DisplayController dc = context.getDisplayController();
 		dc.normal();

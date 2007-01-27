@@ -44,8 +44,6 @@ public class QuoteEditor extends FullscreenEditor
         WordWrapper ww = context.getWordWrapper(body, 
                 QUOTE_WIDTH - 8); //8 = length of ">" + linenumber.
         Buffer buffer = this.getBuffer();
-        if(buffer.size() == 0)
-        	throw new EmptyMessageException();
         
         // Let user pick lines to include
         //
@@ -55,6 +53,8 @@ public class QuoteEditor extends FullscreenEditor
             line = "> " + line;
             buffer.add(line);
         }
+        if(buffer.size() == 0)
+        	throw new EmptyMessageException();
     }
 
     public void mainloop() throws InterruptedException,

@@ -55,7 +55,7 @@ public class ConferenceManager
 			"FROM names n, conferences c " +
 			"WHERE c.id = ? AND n.id = c.id");
 		m_loadRangeStmt = conn.prepareStatement(	
-			"SELECT MIN(localnum), MAX(localnum) FROM messageoccurrences WHERE conference = ?");
+			"SELECT MIN(localnum), MAX(localnum) FROM messageoccurrences WHERE conference = ? AND kind != 3");
 		m_isMailboxStmt = conn.prepareStatement(
 		     "SELECT COUNT(*) FROM users WHERE id = ?");
 		m_listByDateStmt = conn.prepareStatement(

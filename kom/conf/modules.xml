@@ -49,8 +49,7 @@
 		<parameter name="maxconn" value="1000"/>
 		<parameter name="selfRegister" value="false"/>		
 	</module>
-	<module name="PostMaster" class="nu.rydin.kom.modules.email.PostMaster">
-		<parameter name="domain" value="common.pfft.se"/>
+	<!-- module name="PostMaster" class="nu.rydin.kom.modules.email.PostMaster">
 		<parameter name="host" value="pop.webtajm.com"/>
 		<parameter name="port" value="110"/>
 		<parameter name="user" value="pop@kom.common.se"/>
@@ -58,7 +57,7 @@
 		<parameter name="pollDelay" value="1"/>		
 		<parameter name="postmaster" value="postmaster"/>
 		<parameter name="postmasterPassword" value="postmaster"/>
-	</module>	
+	</module -->	
 	<module name="ServletEngine" class="nu.rydin.kom.servlet.ServletModule">
 		<classpath>
 			<pathelement location="../kom_servlet/lib/kom_servlet.jar"/>		

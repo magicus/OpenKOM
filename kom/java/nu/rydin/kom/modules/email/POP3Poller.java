@@ -45,8 +45,6 @@ public class POP3Poller extends Thread
     private final String user;
 
     private final String password;
-
-    private final String domain;
     
     private final String postmaster;
     
@@ -55,13 +53,12 @@ public class POP3Poller extends Thread
     private final int pollDelay;
 
     public POP3Poller(String host, int port, String user, String password,
-            String domain, String postmaster, String postmasterPassword, int pollDelay)
+            String postmaster, String postmasterPassword, int pollDelay)
     {
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
-        this.domain = domain;
         this.postmaster = postmaster;
         this.postmasterPassword = postmasterPassword;
         this.pollDelay = pollDelay;
@@ -91,7 +88,6 @@ public class POP3Poller extends Thread
         Logger.info(this, "Polling mailbox " + user + " at host " + host);
         try
         {
-        	int dl = this.domain.length();
             for (;;)
             {
                 boolean commit = false;
@@ -107,9 +103,7 @@ public class POP3Poller extends Thread
                         int top = messages.length;
                         if(top > 0)
                         {
-                            // There are messages to process! Get us a server session! 
-                            //
-                            ServerSession ss = ssf.login(this.postmaster, this.postmasterPassword, ClientTypes.SOAP, true);
+                            ServerSession ss = null;
                             try
                             {
                                 for (int idx = 0; idx < top; ++idx)
@@ -144,23 +138,23 @@ public class POP3Poller extends Thread
                                     if(recipients == null)
                                     {
                                     	Logger.warn(this, "Null recipients. Can't handle message from " + each.getFrom());
+                                    	each.setFlag(Flags.Flag.DELETED, true);
                                     	continue;
                                     }
                                     for(int idx2 = 0; idx2 < recipients.length; ++idx2)
                                     {
                                     	String to = ((InternetAddress) recipients[idx2]).getAddress();
-                                    	
-                                    	// We deal only with emails sent to "our" domain
-                                    	//
-                                    	Logger.info(this, "Processing " + to);
-                                    	if(!to.endsWith(this.domain))
-                                    		continue;
+                                    	Logger.info(this, "Processing email to " + to);
                                     	
                                     	// Looking good! Let's send it!
                                     	//
                                     	try
                                     	{
-                                    		MessageOccurrence occ = ss.postIncomingEmail(from, to.substring(0, to.length() - dl - 1), 
+                                    		// Create server session of we don't already have one
+                                    		//
+                                    		if(ss == null)
+                                    			ss = ssf.login(this.postmaster, this.postmasterPassword, ClientTypes.SOAP, true);
+                                    		MessageOccurrence occ = ss.postIncomingEmail(from, to.substring(0, to.indexOf("@")), 
                                     				each.getSubject(), this.getContent(each));
                                     		Logger.info(this, "Email from " + from + " accepted and stored as (" + occ.getGlobalId() + ")");
                                     		each.setFlag(Flags.Flag.DELETED, true);
@@ -180,15 +174,18 @@ public class POP3Poller extends Thread
                                     	catch(AuthorizationException e)
                                     	{
                                     		Logger.warn(this, "Not authorized to store message. Check privileges of postmaster!");
-                       
-                                    		// Don't delete!
+                                    		
+                                    		// TODO: Check reason before deleting!
+                                    		//
+                                    		each.setFlag(Flags.Flag.DELETED, true);
                                     	}
                                     }
                                 }
                             }
                             finally
                             {
-                                ss.close();
+                            	if(ss != null)
+                            		ss.close();
                             }
                         }
                         // We made it through, so we can commit changes!

@@ -707,7 +707,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public Envelope readLastMessage()
-	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
+	throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException, AuthorizationException
 	{
 		return this.innerReadMessage(null);
 	}
@@ -759,19 +759,19 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 		    
     public Envelope readMessage(MessageLocator message)
-    throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
+    throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException, AuthorizationException
     {
         return this.innerReadMessage(this.resolveLocator(message));
     }
 	
 	public Envelope readNextMessageInCurrentConference()
-	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
+	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException
 	{
 	    return this.readNextMessage(this.getCurrentConferenceId());
 	}
 	
 	public Envelope readNextMessage(long confId)
-	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
+	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException
 	{
         MembershipList memberships = m_userContext.getMemberships();
 		try
@@ -808,7 +808,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public Envelope readNextReply()
-	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
+	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException
 	{
 		try
 		{ 
@@ -1193,7 +1193,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 
 	public Envelope readTaggedMessage(short tag, long object)
-	throws UnexpectedException, ObjectNotFoundException
+	throws UnexpectedException, ObjectNotFoundException, AuthorizationException
 	{
 		try
 		{
@@ -3377,19 +3377,23 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
     
     protected Envelope innerReadMessage(long globalId)
-    throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException
+    throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException, AuthorizationException
     {
         return this.innerReadMessage(new MessageLocator(globalId));
     }
 		
 	protected Envelope innerReadMessage(MessageLocator locator)
-	throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException
+	throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException, AuthorizationException
 	{
 		try
 		{
+			// Check that we are allowed to read this
+			//
+			locator = this.resolveLocator(locator); 
+			this.assertMessageReadPermissions(locator.getGlobalId());
+			
 			// Resolve reply to (if any)
 			//
-            locator = this.resolveLocator(locator); 
 			long conf = this.getCurrentConferenceId();
 			MessageManager mm = m_da.getMessageManager();
 			ConferenceManager cm = m_da.getConferenceManager();
@@ -3516,8 +3520,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        long me = this.getLoggedInUserId();
 	        
 	        // Check whether we have read access in at least one of them
+	        // Treat no occurrences at all as an object not found, rather than 
+	        // authorization problem
 	        //
 	        int top = occs.length;
+	        if(top == 0)
+	        	throw new ObjectNotFoundException("Messageid=" + globalId);
+	        
 	        for(int idx = 0; idx < top; ++idx)
 	        {
 	            // Get out of here as soon as we have read access in a conference
@@ -3934,7 +3943,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public Envelope getLastRulePostingInConference (long conference)
-	throws ObjectNotFoundException, NoRulesException, UnexpectedException
+	throws ObjectNotFoundException, NoRulesException, UnexpectedException, AuthorizationException
 	{
 		try
 		{
@@ -3952,7 +3961,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 	
 	public Envelope getLastRulePosting()
-	throws ObjectNotFoundException, NoRulesException, UnexpectedException
+	throws ObjectNotFoundException, NoRulesException, UnexpectedException, AuthorizationException
 	{
 		return getLastRulePostingInConference (this.m_currentConferenceId);
 	}
@@ -4576,12 +4585,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			long senderId = um.matchEmailSender(sender);
 			long receiverId = nm.findByEmailAlias(receiver);
 			
-			// Getting here means that we have a valid sender and receiver. Now, check
-			// that the sender has permission to post in the selected conference.
-			//
-			if(!this.hasPermissionInConference(senderId, receiverId, ConferencePermissions.WRITE_PERMISSION))
-				throw new AuthorizationException();
-			
 			// Are we sending to a person or a conference?
 			//
 			MessageOccurrence occ;
@@ -4589,9 +4592,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			switch(this.getName(receiverId).getKind())
 			{
 			case NameManager.CONFERENCE_KIND:
+				/// We need to check permissions if we're posting to a conference
+				//
+				if(!this.hasPermissionInConference(senderId, receiverId, ConferencePermissions.WRITE_PERMISSION))
+					throw new AuthorizationException();
 				occ = this.storeReplyAsMessage(senderId, receiverId, msg, -1);
 				break;
 			case NameManager.USER_KIND:
+				// No need to check permissions here. Everyone can send mail
+				//
 				occ = this.storeReplyAsMail(senderId, receiverId, msg, -1);
 				break;
 			default:
