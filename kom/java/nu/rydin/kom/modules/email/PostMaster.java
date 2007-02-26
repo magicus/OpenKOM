@@ -29,7 +29,9 @@ public class PostMaster implements Module
                 (String) parameters.get("password"),
                 (String) parameters.get("postmaster"),
                 (String) parameters.get("postmasterPassword"),
-                Integer.parseInt((String) parameters.get("pollDelay")) * 60000);
+                Integer.parseInt((String) parameters.get("pollDelay")) * 60000,
+                (String) parameters.get("deadLetterArea"), 
+                Long.parseLong((String) parameters.get("systemMessageConf")));
         worker.start();
     }
 

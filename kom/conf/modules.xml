@@ -53,10 +53,12 @@
 		<parameter name="host" value="pop.webtajm.com"/>
 		<parameter name="port" value="110"/>
 		<parameter name="user" value="pop@kom.common.se"/>
-		<parameter name="password" value="plupp!!47"/>
+		<parameter name="password" value="xxxx"/>
 		<parameter name="pollDelay" value="1"/>		
 		<parameter name="postmaster" value="postmaster"/>
 		<parameter name="postmasterPassword" value="postmaster"/>
+		<parameter name="deadLetterArea" value="/Users/pontusrydin/deadletters"/>
+		<parameter name="systemMessageConf" value="137"/>
 	</module -->	
 	<module name="ServletEngine" class="nu.rydin.kom.servlet.ServletModule">
 		<classpath>

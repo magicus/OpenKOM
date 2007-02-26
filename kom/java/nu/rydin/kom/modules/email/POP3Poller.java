@@ -1,15 +1,22 @@
 package nu.rydin.kom.modules.email;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.mail.Address;
 import javax.mail.Flags;
 import javax.mail.Folder;
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -18,8 +25,6 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
-
-import com.sun.mail.pop3.POP3Store;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.backend.ServerSessionFactory;
@@ -31,9 +36,11 @@ import nu.rydin.kom.exceptions.EmailRecipientNotRecognizedException;
 import nu.rydin.kom.exceptions.EmailSenderNotRecognizedException;
 import nu.rydin.kom.exceptions.LoginProhibitedException;
 import nu.rydin.kom.exceptions.NoSuchModuleException;
+import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.modules.Modules;
 import nu.rydin.kom.structs.MessageOccurrence;
+import nu.rydin.kom.structs.UnstoredMessage;
 import nu.rydin.kom.utils.Logger;
 
 public class POP3Poller extends Thread
@@ -49,11 +56,16 @@ public class POP3Poller extends Thread
     private final String postmaster;
     
     private final String postmasterPassword;
+    
+    private final String deadLetterArea;
 
     private final int pollDelay;
+    
+    private final long systemMessageConf;
 
     public POP3Poller(String host, int port, String user, String password,
-            String postmaster, String postmasterPassword, int pollDelay)
+            String postmaster, String postmasterPassword, int pollDelay,
+            String deadLetterArea, long systemMessageConf)
     {
         this.host = host;
         this.port = port;
@@ -62,6 +74,9 @@ public class POP3Poller extends Thread
         this.postmaster = postmaster;
         this.postmasterPassword = postmasterPassword;
         this.pollDelay = pollDelay;
+        this.deadLetterArea = deadLetterArea;
+        this.systemMessageConf = systemMessageConf;
+        this.setName("Postmaster");
     }
 
     public void run()
@@ -112,21 +127,18 @@ public class POP3Poller extends Thread
                                     Address[] fromAddresses = each.getFrom();
                                     if(fromAddresses == null || fromAddresses.length == 0)
                                     {
-                                    	Logger.warn(this, "Null sender. Can't handle message");
-                                    	each.setFlag(Flags.Flag.DELETED, true);
+                                    	this.handleDeadLetter(each, "Null sender. Can't handle message", ss);
                                     	continue;
                                     }
                                     Address fromAddress = fromAddresses[0];
                                     if(fromAddress == null)
                                     {
-                                    	Logger.warn(this, "Null sender. Can't handle message");
-                                    	each.setFlag(Flags.Flag.DELETED, true);
+                                    	this.handleDeadLetter(each, "Null sender. Can't handle message", ss);
                                     	continue;
                                     }
                                     if(!fromAddress.getType().equals("rfc822"))
                                     {
-                                    	Logger.warn(this, "Can't handle address of type " + fromAddress.getType());
-                                    	each.setFlag(Flags.Flag.DELETED, true);
+                                    	this.handleDeadLetter(each, "Can't handle address of type " + fromAddress.getType(), ss);
                                     	continue;
                                     }
                                     
@@ -137,8 +149,7 @@ public class POP3Poller extends Thread
                                     Address[] recipients = each.getRecipients(RecipientType.TO);
                                     if(recipients == null)
                                     {
-                                    	Logger.warn(this, "Null recipients. Can't handle message from " + each.getFrom());
-                                    	each.setFlag(Flags.Flag.DELETED, true);
+                                    	this.handleDeadLetter(each, "Null recipients. Can't handle message from " + each.getFrom(), ss);
                                     	continue;
                                     }
                                     for(int idx2 = 0; idx2 < recipients.length; ++idx2)
@@ -154,31 +165,33 @@ public class POP3Poller extends Thread
                                     		//
                                     		if(ss == null)
                                     			ss = ssf.login(this.postmaster, this.postmasterPassword, ClientTypes.SOAP, true);
+                                    		String subject = each.getSubject();
+                                    		if(subject == null)
+                                    			subject = "";
                                     		MessageOccurrence occ = ss.postIncomingEmail(from, to.substring(0, to.indexOf("@")), 
-                                    				each.getSubject(), this.getContent(each));
+                                    				subject, this.getContent(each));
                                     		Logger.info(this, "Email from " + from + " accepted and stored as (" + occ.getGlobalId() + ")");
                                     		each.setFlag(Flags.Flag.DELETED, true);
                                     	}
                                     	catch(EmailRecipientNotRecognizedException e)
                                     	{
-                                    		Logger.warn(this, "Recipient " + to + " not recoginized. Message skipped!");
-                                    		each.setFlag(Flags.Flag.DELETED, true);
+                                    		this.handleDeadLetter(each, "Recipient " + to + " not recoginized. Message skipped!", ss);
                                     		
                                     		// TODO: Maybe send something back?
                                     	}
                                     	catch(EmailSenderNotRecognizedException e)
                                     	{
-                                    		Logger.warn(this, "Sender " + from + " not recoginized. Message skipped!");
-                                    		each.setFlag(Flags.Flag.DELETED, true);
+                                    		this.handleDeadLetter(each, "Sender " + from + " not recoginized. Message skipped!", ss);
                                     	}
                                     	catch(AuthorizationException e)
                                     	{
-                                    		Logger.warn(this, "Not authorized to store message. Check privileges of postmaster!");
-                                    		
-                                    		// TODO: Check reason before deleting!
-                                    		//
-                                    		each.setFlag(Flags.Flag.DELETED, true);
+                                    		this.handleDeadLetter(each, "Not authorized to store message. Check privileges of postmaster or that sender is member of destination conference!", ss);
                                     	}
+                                        catch (UnexpectedException e)
+                                        {
+                                            Logger.error(this, "Internal error when processing email", e);
+                                            this.handleDeadLetter(each, "Internal error, check logs!", ss);
+                                        }
                                     }
                                 }
                             }
@@ -204,10 +217,6 @@ public class POP3Poller extends Thread
                     {
                         Logger.error(this, "Congratulations! This can't happen!");
                     } 
-                    catch (UnexpectedException e)
-                    {
-                        Logger.error(this, "Expect the unexpected!", e);
-                    }
                     finally
                     {
                         folder.close(commit);
@@ -233,11 +242,83 @@ public class POP3Poller extends Thread
             Logger.info(this, "Shutting down");
         }
     }
-
-    public String getContent(Part message) throws MessagingException, IOException
+    
+    
+    protected void handleDeadLetter(Message message, String reason, ServerSession ss) throws ObjectNotFoundException, AuthorizationException, UnexpectedException, IOException, MessagingException
     {
-        String ct = message.getContentType();
-        
+    	// Log warning
+    	//
+    	Logger.warn(this, reason);
+    	
+    	// Dump message to dead letter area
+    	//
+    	InputStream is = message.getInputStream();
+    	PrintStream os = null;
+    	File file;
+    	for(;;)
+    	{
+	    	String filename = "dead_letter_" + UUID.randomUUID();
+	    	file = new File(this.deadLetterArea, filename);
+	    	
+	    	// Check for the very unlikely condition that we already have
+	    	// a file with the same name
+	    	//
+	    	if(!file.exists())
+	    	{
+	    		// Didn't exist. We're good!
+	    		//
+	    		os = new PrintStream(new FileOutputStream(file));
+	    		break;
+	    	}
+    	}
+    	
+    	// Copy entire email to dead letter file
+    	//
+    	// First, dump all headers.
+    	// TODO: There HAS to be a way to stream out the entire raw message using JavaMail!!!
+    	//
+    	for(Enumeration en = message.getAllHeaders(); en.hasMoreElements();)
+    	{
+    		Header header = (Header) en.nextElement();
+    		os.print(header.getName());
+    		os.print(": ");
+    		os.println(header.getValue());
+    	}
+    	os.println();
+    	byte[] buffer = new byte[10000];
+    	int n;
+    	while((n = is.read(buffer)) > 0)
+    		os.write(buffer, 0, n);
+    	os.close();
+    	
+    	// Notify operators by posting a message in the system message
+    	// conference
+    	//
+    	StringBuffer msg = new StringBuffer(5000); 
+    	msg.append("Undeliverable incoming email message.\n\n");
+    	msg.append("Reason: ");
+    	msg.append(reason);
+    	msg.append("\n\nFor the entire message, please refer to local file ");
+    	msg.append(file.getAbsolutePath());
+    	msg.append(". \n\nHeaders follow:\n\n");
+    	for(Enumeration en = message.getAllHeaders(); en.hasMoreElements();)
+    	{
+    		Header header = (Header) en.nextElement();
+    		msg.append(header.getName());
+    		msg.append(": ");
+    		msg.append(header.getValue());
+    		msg.append('\n');
+    	}
+    	UnstoredMessage notification = new UnstoredMessage("Undeliverable email", msg.toString());
+    	ss.storeMessage(this.systemMessageConf, notification);
+    	
+    	// Getting here means all is well, so we can delete the message!
+    	//
+    	message.setFlag(Flags.Flag.DELETED, true);
+    }
+
+    protected String getContent(Part message) throws MessagingException, IOException
+    {
         // Act according to mime type
         //
         if (message.isMimeType("text/plain"))
@@ -255,7 +336,7 @@ public class POP3Poller extends Thread
             
             // Getting here means we didn't find anything we understand
             // 
-            return null;
+            return "<Warning: Empty message or no plain-text part>";
         } 
         else if (message.isMimeType("message/rfc822"))
         {
@@ -267,7 +348,7 @@ public class POP3Poller extends Thread
         {
             // No comprende...
             //
-            return null;
+            return "<Warning: Didn't find any part of the message I could understand (probably all HTML without plain-text part)>";
         }
     }
 }
