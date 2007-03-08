@@ -123,6 +123,7 @@ public class StatisticsDaemon
 	        for(StringTokenizer st = new StringTokenizer(operations, ","); st.hasMoreTokens();)
 	        {
 	            String each = st.nextToken();
+	            Logger.debug(this, "Trying operation " + each);
 	            int p = each.indexOf(' ');
 	            if(p == -1)
 	            {
@@ -223,11 +224,12 @@ public class StatisticsDaemon
         
         // Print total
         //
-        
         PrintUtils.printRepeated(out, ' ', 15);
         PrintUtils.printRepeated(out, '=', 6);
         out.println();
-        PrintUtils.printRightJustified(out, Long.toString(total), 21);
+        String totalLabel = formatter.format("authorstat.total");
+        out.print(totalLabel);
+        PrintUtils.printRightJustified(out, Long.toString(total), 21 - totalLabel.length());
         out.println();
         
         // System.out.println(sw.getBuffer());
@@ -270,7 +272,7 @@ public class StatisticsDaemon
         //
         PreparedStatement stmt = conn.prepareStatement(
                 "SELECT n.fullname, COUNT(*) c FROM messageoccurrences m, names n " +
-                "WHERE n.id = m.conference AND n.visibility = 0 AND m.action_ts > ? " +
+                "WHERE n.id = m.conference AND n.visibility = 0 AND m.action_ts > ? AND n.kind = 1 " +
                 "GROUP BY m.conference " +
                 "ORDER BY c DESC");
         stmt.setTimestamp(1, start);
@@ -288,7 +290,7 @@ public class StatisticsDaemon
                 out.print(' ');
                 PrintUtils.printRightJustified(out, Long.toString(n), 10);
                 out.print(' ');
-                out.println(NameUtils.stripSuffix(rs.getString(1)));   
+                out.println(rs.getString(1));   
             }
         }
         finally
@@ -299,11 +301,12 @@ public class StatisticsDaemon
         
         // Print total
         //
-        
         PrintUtils.printRepeated(out, ' ', 15);
         PrintUtils.printRepeated(out, '=', 6);
         out.println();
-        PrintUtils.printRightJustified(out, Long.toString(total), 21);
+        String totalLabel = formatter.format("confstat.total");
+        out.print(totalLabel);
+        PrintUtils.printRightJustified(out, Long.toString(total), 21 - totalLabel.length());
         out.println();
         
         // System.out.println(sw.getBuffer());
