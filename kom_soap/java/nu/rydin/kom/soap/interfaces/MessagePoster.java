@@ -45,9 +45,10 @@ public interface MessagePoster
 	 * @return  Newly created message occurrence
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
+	 * @throws AuthorizationException 
 	 */	
 	public MessageOccurrence storeMail(SecurityToken token, long recipient, UnstoredMessage msg)
-	throws ObjectNotFoundException, UnexpectedException, SessionExpiredException;
+	throws ObjectNotFoundException, UnexpectedException, SessionExpiredException, AuthorizationException;
 
 	/**
 	 * Stores a reply to a message in a conference
@@ -77,7 +78,8 @@ public interface MessagePoster
 	 * @throws ObjectNotFoundException
 	 * @throws UnexpectedException
 	 * @throws NoCurrentMessageException 
+	 * @throws AuthorizationException 
 	 */
 	public MessageOccurrence storeReplyAsMail(SecurityToken token, long recipient, UnstoredMessage msg, long replyTo)
-	throws ObjectNotFoundException, UnexpectedException, SessionExpiredException, NoCurrentMessageException;
+	throws ObjectNotFoundException, UnexpectedException, SessionExpiredException, NoCurrentMessageException, AuthorizationException;
 }

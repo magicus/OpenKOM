@@ -30,7 +30,7 @@ public class MessagePosterService implements MessagePoster
         return new MessageOccurrence(ss.storeMessage(conf, msg.toNative()));
     }
 
-    public MessageOccurrence storeMail(SecurityToken token, long recipient, UnstoredMessage msg) throws ObjectNotFoundException, UnexpectedException, SessionExpiredException
+    public MessageOccurrence storeMail(SecurityToken token, long recipient, UnstoredMessage msg) throws ObjectNotFoundException, UnexpectedException, SessionExpiredException, AuthorizationException
     {
         ServerSession ss = SessionRegistry.instance().get(token);
         return new MessageOccurrence(ss.storeMail(recipient, msg.toNative()));
@@ -42,7 +42,7 @@ public class MessagePosterService implements MessagePoster
         return new MessageOccurrence(ss.storeReplyAsMessage(conference, msg.toNative(), new MessageLocator(replyTo)));
     }
 
-    public MessageOccurrence storeReplyAsMail(SecurityToken token, long recipient, UnstoredMessage msg, long replyTo) throws ObjectNotFoundException, UnexpectedException, SessionExpiredException, NoCurrentMessageException
+    public MessageOccurrence storeReplyAsMail(SecurityToken token, long recipient, UnstoredMessage msg, long replyTo) throws ObjectNotFoundException, UnexpectedException, SessionExpiredException, NoCurrentMessageException, AuthorizationException
     {
         ServerSession ss = SessionRegistry.instance().get(token);
         return new MessageOccurrence(ss.storeReplyAsMail(recipient, msg.toNative(), new MessageLocator(replyTo)));
