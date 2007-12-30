@@ -169,7 +169,7 @@ public class POP3Poller extends Thread
                                     		if(subject == null)
                                     			subject = "";
                                     		MessageOccurrence occ = ss.postIncomingEmail(from, to.substring(0, to.indexOf("@")), 
-                                    				subject, this.getContent(each));
+                                    				each.getSentDate(), each.getReceivedDate(), subject, this.getContent(each));
                                     		Logger.info(this, "Email from " + from + " accepted and stored as (" + occ.getGlobalId() + ")");
                                     		each.setFlag(Flags.Flag.DELETED, true);
                                     	}

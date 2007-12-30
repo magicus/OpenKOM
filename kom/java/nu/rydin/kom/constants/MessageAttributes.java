@@ -57,9 +57,19 @@ public class MessageAttributes
 	public static final short EMAIL_SENDER		= 8;
 	
 	/**
+	 * Email received timestamp
+	 */
+	public static final short EMAIL_RECEIVED	= 9;
+	
+	/**
+	 * Email sent timestamp
+	 */
+	public static final short EMAIL_SENT		= 10; 
+	
+	/**
 	 * Flag-array determining whether a user can perform a command
 	 * only on messages that she/he has created.
 	 */
 	public static final boolean[] onlyOwner = new boolean[] 
-	    { false, false, false, false, false, true, true, true };
+	    { false, false, false, false, false, true, true, true, true, true };
 }

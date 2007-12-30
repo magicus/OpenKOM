@@ -650,7 +650,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			{
 				// Ooops! Exception while cleaning up! 
 				//
-				m_out.println(m_formatter.format("logout.failure"));
+				Logger.error(this, m_formatter.format("logout.failure"), e);
 			}
 		}
 	}
@@ -737,7 +737,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
             hp.addHeader(m_formatter.format("list.sessions.client"), 7, true);
             hp.addSpace(1);
             int termWidth = this.getTerminalSettings().getWidth();
-            int firstColsWidth = 7 + 7 + 7 + 7+ 1;
+            int firstColsWidth = 7 + 7 + 7 + 7 + 1;
             int lastColWidth = termWidth - firstColsWidth - 1 ; 
             hp.printOn(m_out);
             

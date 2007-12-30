@@ -7,6 +7,8 @@
 package nu.rydin.kom.frontend.text;
 
 import java.io.PrintWriter;
+import java.sql.Timestamp;
+import java.util.Date;
 
 import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.constants.ConferencePermissions;
@@ -87,7 +89,7 @@ public class BasicMessagePrinter implements MessagePrinter
 		PrintUtils.printIndented(out, sb.toString(), width, 0);
 		
 		// Print the original mail recipient if this is a personal message.
-		// Also, print email sender, if any.
+		// Also, print email sender adn timestamps, if any.
 		//
 		for(int idx = 0; idx < attributes.length; ++idx)
 		{
@@ -103,6 +105,12 @@ public class BasicMessagePrinter implements MessagePrinter
 		    case MessageAttributes.EMAIL_SENDER:
 		    	PrintUtils.printIndented(out, formatter.format("BasicMessagePrinter.email.sender", each.getValue()), width, 0);
 		    	break;
+		    case MessageAttributes.EMAIL_SENT:
+		    	PrintUtils.printIndented(out, formatter.format("BasicMessagePrinter.email.sent", context.smartFormatDate(new Timestamp(Integer.valueOf(each.getValue())))), width, 0);
+		    	break;
+		    case MessageAttributes.EMAIL_RECEIVED:
+		    	PrintUtils.printIndented(out, formatter.format("BasicMessagePrinter.email.received", context.smartFormatDate(new Timestamp(Integer.valueOf(each.getValue())))), width, 0);
+		    	break;		    	
 		    }
 		}
 		

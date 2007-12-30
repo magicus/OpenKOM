@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -386,8 +387,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			if(!m_closed)
-				this.close();
+			this.close();
 		}
 		catch(UnexpectedException e)
 		{
@@ -1317,9 +1317,11 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         this.postEvent(new DetachRequestEvent(m_userId, m_userId));
     }
 	
-	public void close()
+	public synchronized void close()
 	throws UnexpectedException
 	{
+	    if(m_closed)
+		return; // Closing twice is a noop!
 		try
 		{
 			// Send notification!
@@ -4569,7 +4571,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         }        
     }
 
-	public MessageOccurrence postIncomingEmail(String sender, String receiver, String subject, String content) throws EmailRecipientNotRecognizedException, EmailSenderNotRecognizedException, AuthorizationException, UnexpectedException 
+	public MessageOccurrence postIncomingEmail(String sender, String receiver, Date sent, Date received, String subject, String content) throws EmailRecipientNotRecognizedException, EmailSenderNotRecognizedException, AuthorizationException, UnexpectedException 
 	{
 		// Make sure we hold the apropriate privileges
 		//
@@ -4607,9 +4609,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 				throw new IllegalStateException("Don't know how to handle message");
 			}
 			
-			// Store sender email address as message attribute
+			// Store sender email address, sent and received timestamps as message attributes
 			//
-			mm.addMessageAttribute(occ.getGlobalId(), MessageAttributes.EMAIL_SENDER, sender);
+			long id = occ.getGlobalId();
+			mm.addMessageAttribute(id, MessageAttributes.EMAIL_SENDER, sender);
+			mm.addMessageAttribute(id, MessageAttributes.EMAIL_SENT, Long.toString(sent.getTime()));
+			mm.addMessageAttribute(id, MessageAttributes.EMAIL_RECEIVED, Long.toString(received.getTime()));
 			return occ;
 		}
         catch(ObjectNotFoundException e)

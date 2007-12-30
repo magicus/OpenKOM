@@ -6,6 +6,7 @@
  */
 package nu.rydin.kom.backend;
 
+import java.util.Date;
 import java.sql.Timestamp;
 
 import nu.rydin.kom.events.Event;
@@ -1736,6 +1737,8 @@ public interface ServerSession
      * 
      * @param sender The sender email
      * @param receiver The receiver email
+     * @param sent When mail was sent
+     * @param received When mail was received by MTA
      * @param subject The message subject
      * @param content The message content
      * @throws EmailRecipientNotRecognizedException
@@ -1743,6 +1746,6 @@ public interface ServerSession
      * @throws AuthorizationException
      * @throws UnexpectedException
      */
-    public MessageOccurrence postIncomingEmail(String sender, String receiver, String subject, String content)
+    public MessageOccurrence postIncomingEmail(String sender, String receiver, Date sent, Date received, String subject, String content)
     throws EmailRecipientNotRecognizedException, EmailSenderNotRecognizedException, AuthorizationException, UnexpectedException;
 }
