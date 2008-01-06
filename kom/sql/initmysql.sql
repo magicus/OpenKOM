@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS names
 	id BIGINT NOT NULL AUTO_INCREMENT,
 	norm_name VARCHAR(80) NOT NULL,
 	fullname VARCHAR(80) NOT NULL,
-	mailalias VARCHAR(80),
+	emailalias VARCHAR(80),
 	kind SMALLINT,
 	visibility SMALLINT NOT NULL,
 	keywords VARCHAR(100),	
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS memberships
 	user BIGINT NOT NULL,
 	priority BIGINT NOT NULL,
 	flags BIGINT NOT NULL,
-	active BIT,
+	active TINYINT(1),
 	permissions INT NOT NULL,
 	negation_mask INT NOT NULL,	
 	markers TEXT,
@@ -159,8 +159,7 @@ CREATE TABLE IF NOT EXISTS magicconferences
 	conference BIGINT NULL,
 	kind SMALLINT NOT NULL,
 	PRIMARY KEY(conference, kind),
-	FOREIGN KEY(conference) REFERENCES conferences(id) ON DELETE CASCADE,
-	FOREIGN KEY(user) REFERENCES users(id) ON DELETE CASCADE
+	FOREIGN KEY(conference) REFERENCES conferences(id) ON DELETE CASCADE
 ) TYPE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messagelog
@@ -180,7 +179,7 @@ CREATE TABLE IF NOT EXISTS messagelogpointers
 	recipient BIGINT NOT NULL,
 	logid BIGINT NOT NULL,
 	kind SMALLINT NOT NULL,
-	sent BIT NOT NULL,
+	sent TINYINT(1) NOT NULL,
 	INDEX mlpuser_ix(recipient),
 	FOREIGN KEY (recipient) REFERENCES names(id) ON DELETE CASCADE,
 	INDEX logitem(logid),
