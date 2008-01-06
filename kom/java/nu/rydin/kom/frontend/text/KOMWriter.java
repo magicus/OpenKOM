@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -209,9 +208,9 @@ public class KOMWriter extends PrintWriter
 		    m_writer.flush();
 		    synchronized(m_newlineListeners)
 		    {
-		        for(Iterator itor = m_newlineListeners.iterator(); itor.hasNext();)
-		        {
-		            ((NewlineListener) itor.next()).onNewline();
+		        for (NewlineListener newlineListener : m_newlineListeners)
+                {
+		            newlineListener.onNewline();
 		        }
 		    }
 		} else if(c == '\r')
