@@ -4,13 +4,10 @@ import java.sql.Timestamp;
 
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.UnexpectedException;
-import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.FlagParameter;
-import nu.rydin.kom.frontend.text.parser.UserParameter;
 import nu.rydin.kom.structs.MessageSearchResult;
-import nu.rydin.kom.structs.NameAssociation;
 
 public class ListComments extends SearchGlobalCommand 
 {

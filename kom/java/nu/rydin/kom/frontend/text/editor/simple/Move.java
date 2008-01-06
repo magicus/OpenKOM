@@ -18,7 +18,6 @@ import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
-import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.NameAssociation;
 
 /**

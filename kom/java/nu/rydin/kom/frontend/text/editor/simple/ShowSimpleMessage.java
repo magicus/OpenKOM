@@ -17,7 +17,6 @@ import nu.rydin.kom.frontend.text.editor.EditorContext;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Message;
 import nu.rydin.kom.structs.MessageLocator;
-import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.utils.PrintUtils;
 
 /**
