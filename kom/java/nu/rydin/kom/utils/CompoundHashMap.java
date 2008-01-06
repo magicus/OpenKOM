@@ -16,18 +16,18 @@ import java.util.Set;
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 
-public class CompoundHashMap 
+public class CompoundHashMap<K, V> 
 {
-    private HashMap keys;
-    private HashMap values;
+    private HashMap<K, V> keys;
+    private HashMap<V, K> values;
 
     public CompoundHashMap()
     {
-    	keys = new HashMap();
-    	values = new HashMap();
+    	keys = new HashMap<K, V>();
+    	values = new HashMap<V, K>();
     }
     
-    public void put(Object key, Object value)
+    public void put(K key, V value)
     {
             this.removeByKey(key);
             this.removeByValue(value);
@@ -35,41 +35,41 @@ public class CompoundHashMap
             values.put(value, key);
     }
     
-    public void putAll(Map m)
+    public void putAll(Map<K, V> m)
     {
-    	Iterator it = m.keySet().iterator();
+    	Iterator<K> it = m.keySet().iterator();
     	while (it.hasNext())
     	{
-    		String key = (String)it.next();
+    		K key = it.next();
     		this.put (key, m.get(key));
     	}
     }
 
-    public void removeByKey(Object key)
+    public void removeByKey(K key)
     {
-            Object value = keys.get(key);
+            V value = keys.get(key);
             keys.remove(key);
             values.remove(value);
     }
 
-    public void removeByValue(Object value)
+    public void removeByValue(V value)
     {
-            Object key = values.get(value);
+            K key = values.get(value);
             values.remove(value);
             keys.remove(key);
     }                                         
 	
-	public Object getByKey(Object key)
+	public V getByKey(K key)
     {
             return keys.get(key);
     }
 
-    public Object getByValue(Object value)
+    public K getByValue(V value)
     {
             return values.get(value);
     }
 
-    public boolean containsKey(Object key)
+    public boolean containsKey(K key)
     {
             return keys.containsKey(key);
     }
@@ -79,12 +79,12 @@ public class CompoundHashMap
             return values.containsKey(value);
     }
 
-    public Set keySet()
+    public Set<K> keySet()
     {
             return keys.keySet();
     }
 
-    public Set valueSet()
+    public Set<V> valueSet()
     {
             return values.keySet();
     }
