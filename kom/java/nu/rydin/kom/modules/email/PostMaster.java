@@ -19,19 +19,19 @@ public class PostMaster implements Module
 {
     private POP3Poller worker;
     
-    public void start(Map parameters) 
+    public void start(Map<String, String> parameters) 
     throws ModuleException
     {
         worker = new POP3Poller(
-                (String) parameters.get("host"),
-                Integer.parseInt((String) parameters.get("port")),
-                (String) parameters.get("user"),
-                (String) parameters.get("password"),
-                (String) parameters.get("postmaster"),
-                (String) parameters.get("postmasterPassword"),
-                Integer.parseInt((String) parameters.get("pollDelay")) * 60000,
-                (String) parameters.get("deadLetterArea"), 
-                Long.parseLong((String) parameters.get("systemMessageConf")));
+                parameters.get("host"),
+                Integer.parseInt(parameters.get("port")),
+                parameters.get("user"),
+                parameters.get("password"),
+                parameters.get("postmaster"),
+                parameters.get("postmasterPassword"),
+                Integer.parseInt(parameters.get("pollDelay")) * 60000,
+                parameters.get("deadLetterArea"), 
+                Long.parseLong(parameters.get("systemMessageConf")));
         worker.start();
     }
 

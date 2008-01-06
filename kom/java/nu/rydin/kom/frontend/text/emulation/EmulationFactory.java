@@ -37,6 +37,6 @@ public class EmulationFactory
 			}
 		}
 		
-		return (Emulator)knownEmulators.get(name); 
+		return knownEmulators.get(name); 
 	}
 }

@@ -154,13 +154,13 @@ public class TermInfoParser
 		return temp.replaceAll("$", "");
 	}
 	
-	public HashMap getEncodingMap()
+	public HashMap<String, String> getEncodingMap()
 	{
 		return keyValueMap;
 	}
 	
 	public String getEncoding(String name)
 	{
-		return (String)keyValueMap.get(name);
+		return keyValueMap.get(name);
 	}
 }

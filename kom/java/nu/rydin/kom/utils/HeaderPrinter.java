@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public class HeaderPrinter
 {
-    private final ArrayList m_headers = new ArrayList();
+    private final ArrayList<Entry> m_headers = new ArrayList<Entry>();
     
     private static abstract class Entry
     {
@@ -92,8 +92,8 @@ public class HeaderPrinter
     public void addHeader(String label, int width, boolean rightJustify)
     {
         m_headers.add(rightJustify 
-                ? (Entry) new RightJustifiedEntry(label, width) 
-                : (Entry) new LeftJustifiedEntry(label, width));
+                ? new RightJustifiedEntry(label, width) 
+                : new LeftJustifiedEntry(label, width));
     }
     
     public void addSpace(int width)
@@ -105,10 +105,10 @@ public class HeaderPrinter
     {
         int top = m_headers.size();
         for(int idx = 0; idx < top; ++idx)
-            ((Entry) m_headers.get(idx)).printLabel(out);
+            m_headers.get(idx).printLabel(out);
         out.println();
         for(int idx = 0; idx < top; ++idx)
-            ((Entry) m_headers.get(idx)).printUnderline(out);
+            m_headers.get(idx).printUnderline(out);
         out.println();
     }
 }

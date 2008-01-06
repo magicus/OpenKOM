@@ -12,6 +12,7 @@ import java.util.Collection;
 
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandCategory;
 import nu.rydin.kom.frontend.text.parser.Parser;
 
 public class ListCommands extends nu.rydin.kom.frontend.text.commands.ListCommands
@@ -21,7 +22,7 @@ public class ListCommands extends nu.rydin.kom.frontend.text.commands.ListComman
 		super(context, fullName, permissions);
 	}
 
-    protected Collection getCategories(Context context) throws KOMException, IOException 
+    protected Collection<CommandCategory> getCategories(Context context) throws KOMException, IOException 
     {
         return Parser.load("fullscreeneditorcommands.xml", context).getCategories();
     }

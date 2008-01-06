@@ -17,7 +17,7 @@ import nu.rydin.kom.utils.CompoundHashMap;
 public class Emulator
 {
 	private String emulationName;
-	protected CompoundHashMap associations;
+	protected CompoundHashMap<String, String> associations;
 	
 	public static final String ACS_CHARS = "acsc";
 	public static final String BACK_TAB = "cbt";
@@ -433,15 +433,15 @@ public class Emulator
 		// just walk the compound hash and pull out anything that matches.
 		//
 		HashSet<String> v = new HashSet<String>();
-		Iterator it = associations.keySet().iterator();
+		Iterator<String> it = associations.keySet().iterator();
 		String key;
 		String value;
 		while (it.hasNext())
 		{
-			key = (String)it.next();
+			key = it.next();
 			if ('k' == key.charAt(0))
 			{
-				value = ((String)associations.getByKey(key)).substring(0, 0);
+				value = associations.getByKey(key).substring(0, 0);
 				if (!v.contains(value))
 				{
 					v.add(value);
@@ -457,11 +457,11 @@ public class Emulator
 	
 	public String parseKeySequence (String sequence)
 	{
-		return (String)associations.getByValue(sequence);
+		return associations.getByValue(sequence);
 	}
 	
 	public String convertTerminalControl (String control)
 	{
-		return (String)associations.getByKey(control);
+		return associations.getByKey(control);
 	}
 }

@@ -205,7 +205,7 @@ class DummyConfigurationContext implements ConfigurationContext
             //Override to make sure noone does something stupid.
         }
 
-        public List getAllowedAuthentications()
+        public List<String> getAllowedAuthentications()
         {
             List<String> result = new ArrayList<String>();
             result.add("password");
@@ -253,12 +253,12 @@ class DummyConfigurationContext implements ConfigurationContext
             return port;
         }
 
-        public List getRequiredAuthentications()
+        public List<String> getRequiredAuthentications()
         {
-            return new ArrayList();
+            return new ArrayList<String>();
         }
 
-        public Map getServerHostKeys()
+        public Map<String, SshPrivateKey> getServerHostKeys()
         {
             return serverHostKeys;
         }

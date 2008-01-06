@@ -39,7 +39,7 @@ public class Modules
         return module;
     }
     
-    public static Set listModuleNames()
+    public static Set<String> listModuleNames()
     {
         return s_modules.keySet();
     }

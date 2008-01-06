@@ -96,7 +96,7 @@ public class TelnetServer implements Module, Runnable
 	private boolean m_useTicket;
 	private boolean m_selfRegister;
 		
-	public void start(Map parameters)
+	public void start(Map<String, String> parameters)
 	{
 	    // Perform checks before start.
 	    //

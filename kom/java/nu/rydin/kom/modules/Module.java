@@ -19,7 +19,7 @@ public interface Module
      * Starts the module and any background threads associated with it
      * @param parameters Module specific parameters
      */
-    void start(Map parameters) throws ModuleException;
+    void start(Map<String, String> parameters) throws ModuleException;
     
     /**
      * Stops the module and any background threads associated with it

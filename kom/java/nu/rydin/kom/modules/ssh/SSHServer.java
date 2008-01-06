@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -189,10 +188,9 @@ public class SSHServer implements Module
                 // Closing all connections
                 Logger.info(this, "Disconnecting active sessions");
 
-                for (Iterator it = activeConnections.iterator(); it.hasNext();)
+                for (TransportProtocolServer connection : activeConnections)
                 {
-                    ((TransportProtocolServer) it.next())
-                            .disconnect("The server is shutting down");
+                    connection.disconnect("The server is shutting down");
                 }
 
                 listener = null;
@@ -231,17 +229,17 @@ public class SSHServer implements Module
         }
     }
 
-    public void start(Map parameters)
+    public void start(Map<String, String> parameters)
     {
         // Setup J2SSH dummy configuration classes.
         //
         try
         {
             ConfigurationContext dummy = new DummyConfigurationContext(
-                    (String) parameters.get("serverhostkeyfile"), Integer
-                            .parseInt((String) parameters.get("port")), Integer
-                            .parseInt((String) parameters.get("maxauthretry")),
-                    Integer.parseInt((String) parameters.get("maxconn")));
+                    parameters.get("serverhostkeyfile"), Integer
+                            .parseInt(parameters.get("port")), Integer
+                            .parseInt(parameters.get("maxauthretry")),
+                    Integer.parseInt(parameters.get("maxconn")));
             ConfigurationLoader.initialize(true, dummy);
             selfRegister = "true".equals(parameters.get("selfRegister"));
         } catch (ConfigurationException e)

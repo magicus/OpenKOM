@@ -88,7 +88,7 @@ public class AuthenticationServer implements Module, Runnable
     
     private ServerSocket m_socket;
     
-    public void start(Map parameters)
+    public void start(Map<String, String> parameters)
     {
         int port = Integer.parseInt((String) parameters.get("port"));
 		try

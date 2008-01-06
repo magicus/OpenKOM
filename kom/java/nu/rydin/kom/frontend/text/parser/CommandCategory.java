@@ -43,7 +43,7 @@ public class CommandCategory implements Comparable
     {
         return order;
     }
-    public List getCommands()
+    public List<Command> getCommands()
     {
         return commands;
     }
