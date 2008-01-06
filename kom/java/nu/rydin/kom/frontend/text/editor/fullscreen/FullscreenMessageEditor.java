@@ -65,7 +65,6 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
         int w = this.getTerminalSettings().getWidth();
         DisplayController dc = this.getDisplayController();
         PrintWriter out = this.getOut();
-        LineEditor in = this.getIn();
         MessageFormatter formatter = this.getMessageFormatter();
         tc.eraseScreen();
         tc.setCursor(0, 0);
