@@ -18,14 +18,14 @@ public class SystemSettings
 {
 	private final Properties m_resources;
 	
-    public SystemSettings(Map parameters)
+    public SystemSettings(Map<String, String> parameters)
     {
         m_resources = new Properties();
-        Set keys = parameters.keySet();
-        for (Iterator iter = keys.iterator(); iter.hasNext();)
+        Set<String> keys = parameters.keySet();
+        for (Iterator<String> iter = keys.iterator(); iter.hasNext();)
         {
-            String key = (String) iter.next();
-            m_resources.setProperty(key, (String)parameters.get(key));
+            String key = iter.next();
+            m_resources.setProperty(key, parameters.get(key));
         }
     }
 
