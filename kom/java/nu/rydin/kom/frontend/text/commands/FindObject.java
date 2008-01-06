@@ -7,9 +7,7 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.KOMWriter;
-import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.NamedObjectParameter;
 import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.NameAssociation;
@@ -27,7 +25,6 @@ public class FindObject extends AbstractCommand
         // Set up
         //
         KOMWriter out = context.getOut();
-        LineEditor in = context.getIn();
         MessageFormatter fmt = context.getMessageFormatter();
         DisplayController dc = context.getDisplayController();
         
