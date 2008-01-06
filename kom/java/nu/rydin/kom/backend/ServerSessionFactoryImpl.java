@@ -8,7 +8,6 @@ package nu.rydin.kom.backend;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationHandler;
@@ -19,7 +18,6 @@ import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -120,7 +118,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
     
     private ContextCleaner m_contextCleaner;
 		
-	public void start(Map properties) throws ModuleException
+	public void start(Map<String, String> properties) throws ModuleException
 	{
 	    // Initialize the static global server settings class.
 	    //
