@@ -78,9 +78,18 @@ public class Parser
             long rp = m_command.getRequiredPermissions();
             if((rp & context.getCachedUserInfo().getRights()) != rp)
                 throw new AuthorizationException();
+
+            boolean pageBreak = context.getIn().getPageBreak();
+            // Page break might have been disabled on a previous more prompt. 
+            // Turn it on for this command.
+            context.getIn().setPageBreak(true);
+            
             m_command.printPreamble(context.getOut());
             m_command.execute(context, m_parameterArray);
             m_command.printPostamble(context.getOut());
+                		
+    		// Reset page break again.
+    		context.getIn().setPageBreak(pageBreak);
         }
 
         public void executeBatch(Context context) throws KOMException,
@@ -107,7 +116,7 @@ public class Parser
             return m_command;
         }
 
-        public List getMatches()
+        public List<Match> getMatches()
 
         {
             return m_matches;
@@ -177,11 +186,10 @@ public class Parser
     {
         m_commands = new Command[commands.size()];
         commands.toArray(m_commands);
-	    for(Iterator itor = categories.entrySet().iterator(); itor.hasNext();)
-	    {
-	        Map.Entry each = (Map.Entry) itor.next();
-	        m_categories.add((CommandCategory) each.getValue());
-	    }
+        for (CommandCategory each : categories.values())
+        {
+	        m_categories.add(each);
+	    }	    
     }
     
     public void addAlias(String alias, String actualCommand)
@@ -248,7 +256,7 @@ public class Parser
         return resolveMatchingCommand(context, commandLine).getCommand();
     }
 
-    public static int askForResolution(Context context, List candidates,
+    public static int askForResolution(Context context, List<String> candidates,
             String promptKey, boolean printHeading, String headingKey,
             boolean allowPrefixes, String legendKeyPrefix) throws IOException, InterruptedException,
             InvalidChoiceException, OperationInterruptedException
@@ -269,7 +277,7 @@ public class Parser
 		        int top = candidates.size();
 		        for (int idx = 0; idx < top; ++idx)
 		        {
-		            String candidate = candidates.get(idx).toString();
+		            String candidate = candidates.get(idx);
 		            int printIndex = idx + 1;
 		            PrintUtils
 		                    .printRightJustified(out, Integer.toString(printIndex), 2);
@@ -321,7 +329,7 @@ public class Parser
     }
 
     public static int resolveString(Context context, String input,
-            List candidates, String headingKey, String promptKey,
+            List<String> candidates, String headingKey, String promptKey,
             boolean allowPrefixes, String legendKeyPrefix) 
     throws InvalidChoiceException,
             OperationInterruptedException, IOException, InterruptedException
@@ -331,9 +339,8 @@ public class Parser
         List<Integer> originalNumbers = new LinkedList<Integer>();
         List<String> matchingCandidates = new LinkedList<String>();
         int i = 0;
-        for (Iterator iter = candidates.iterator(); iter.hasNext();)
+        for (String candidate : candidates)
         {
-            String candidate = iter.next().toString();
             String cookedCandidate = NameUtils.normalizeName(candidate);
             if (NameUtils.match(cookedInput, cookedCandidate, allowPrefixes))
             {
@@ -370,9 +377,8 @@ public class Parser
             throws IOException, InterruptedException, KOMException
     {
         List<String> commandNames = new ArrayList<String>();
-        for (Iterator iter = potentialTargets.iterator(); iter.hasNext();)
+        for (CommandToMatches potentialTarget : potentialTargets)
         {
-            CommandToMatches potentialTarget = (CommandToMatches) iter.next();
             commandNames.add(potentialTarget.getCommand().getFullName());
         }
 
@@ -500,10 +506,9 @@ public class Parser
         if (potentialTargets.size() > 1)
         {
             List<CommandToMatches> newPotentialTargets = new LinkedList<CommandToMatches>();
-            for (Iterator<CommandToMatches> iter = potentialTargets.iterator(); iter.hasNext();)
+            for (CommandToMatches each : potentialTargets)
             {
-                CommandToMatches each = iter.next();
-                List matches = each.getMatches();
+                List<Match> matches = each.getMatches();
                 CommandNamePart[] words = each.getCommand().getNameSignature();
                 boolean failedAtLeastOnce = false;
 
@@ -518,7 +523,7 @@ public class Parser
                     //If so, put it in the new list.
                     for (int i = 0; i < words.length; i++)
                     {
-                        if (!((Match) matches.get(i)).isMatching())
+                        if (!matches.get(i).isMatching())
                         {
                             failedAtLeastOnce = true;
                         }
@@ -551,9 +556,8 @@ public class Parser
         List<CommandToMatches> potentialTargets = new LinkedList<CommandToMatches>();
 
         // Build a copy of all commands first, to filter down later.
-        for (int i = 0; i < m_commands.length; i++)
+        for (Command each : m_commands)
         {
-            Command each = m_commands[i];
             if(each.hasAccess(context))
                 potentialTargets.add(new CommandToMatches(each));
         }
@@ -605,7 +609,7 @@ public class Parser
         return potentialTargets;
     }
     
-    public TreeSet getCategories()
+    public TreeSet<CommandCategory> getCategories()
     {
         return m_categories;
     }
