@@ -22,7 +22,6 @@ import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.AuthenticationException;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
-import nu.rydin.kom.exceptions.EmailRecipientNotRecognizedException;
 import nu.rydin.kom.exceptions.EmailSenderNotRecognizedException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.structs.Name;
