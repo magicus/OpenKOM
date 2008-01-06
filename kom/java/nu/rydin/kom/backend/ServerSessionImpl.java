@@ -1021,7 +1021,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			if(author != this.getLoggedInUserId())
 				this.checkRights(UserPermissions.POST_BY_PROXY);
 		    MessageManager mm = m_da.getMessageManager();
-		    long me = this.getLoggedInUserId();
 		    UserInfo myinf = this.getLoggedInUser();
 
 			// Check that we have the permission to write here. If it's a reply, we should
@@ -1091,7 +1090,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     {
 		try
 		{
-			// If we're posting on behald on someone else, we must hold the
+			// If we're posting on behalf on someone else, we must hold the
 			// POST_BY_PROXY privilege
 			//
 			if(author != this.getLoggedInUserId())
@@ -1992,7 +1991,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	throws UnexpectedException
 	{
         MembershipList memberships = m_userContext.getMemberships();
-		ConferenceManager cm = m_da.getConferenceManager();
 		MembershipInfo[] m = memberships.getMemberships();
 		int top = m.length;
 		List<MembershipListItem> list = new ArrayList<MembershipListItem>(top);
@@ -2233,7 +2231,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			if (s.size()>1)
 			{
 				msgToSend = "[";
-				Iterator buildRecIter = rec_names.iterator();
+				Iterator<Name> buildRecIter = rec_names.iterator();
 				while (buildRecIter.hasNext())
 				{
 					msgToSend += buildRecIter.next().toString();
@@ -2250,10 +2248,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			
 			// Now just send it
 			//
-			Iterator iter = s.iterator();
+			Iterator<Long> iter = s.iterator();
 			while (iter.hasNext())
 			{
-			    long user = ((Long)iter.next()).longValue();
+			    long user = iter.next().longValue();
 				sendChatMessageHelper(user, msgToSend);
 				
 				// Create link from recipient to message
@@ -3668,8 +3666,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 	    synchronized(m_deferredEvents)
 	    {
-	        for(Iterator itor = m_deferredEvents.iterator(); itor.hasNext();)
-	            ((DeferredEvent) itor.next()).dispatch(m_sessions);
+	        for(Iterator<DeferredEvent> itor = m_deferredEvents.iterator(); itor.hasNext();)
+	            itor.next().dispatch(m_sessions);
 	        m_deferredEvents.clear();
 	    }
 	}
