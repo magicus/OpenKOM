@@ -236,9 +236,9 @@ public class MembershipList
 	public void save(long userId, MembershipManager mm)
 	throws SQLException
 	{
-		for(Iterator itor = m_dirty.iterator(); itor.hasNext();)
+		for(Iterator<MembershipInfo> itor = m_dirty.iterator(); itor.hasNext();)
 		{
-			MembershipInfo each = (MembershipInfo) itor.next();
+			MembershipInfo each = itor.next();
 			try
 			{
 				mm.updateMarkers(userId, each.getConference(), each.getReadMessages());

@@ -17,7 +17,7 @@ public class ServerSettings
 {
 	public static SystemSettings s_settings;
 	
-	public static void initialize(Map parameters)
+	public static void initialize(Map<String, String> parameters)
 	{
 	    s_settings = new SystemSettings(parameters);
 	}

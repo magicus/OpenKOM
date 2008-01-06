@@ -133,7 +133,7 @@ public class PermissionHandler extends DefaultHandler
         }
     }
     
-    public Map getMethodProtections()
+    public Map<Method, Long> getMethodProtections()
     {
         return m_methods;
     }
