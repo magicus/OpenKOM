@@ -357,16 +357,7 @@ public class LineEditor implements NewlineListener
 		
 		// Create "more" prompt
 		//
-		// Getting the more prompt
-		//
-		StringBuffer sb = new StringBuffer();
-		sb.append(m_formatter.format("misc.more"));
-		sb.append(" (");
-		sb.append(m_formatter.format("misc.y"));
-		sb.append("/");
-		sb.append(m_formatter.format("misc.n"));
-		sb.append(") ");
-		m_morePrompt = sb.toString();
+        m_morePrompt = m_formatter.format("misc.more");
 		
 		// Create tokenizer
 		//
@@ -617,6 +608,57 @@ public class LineEditor implements NewlineListener
 		return result;
 	}
 	
+
+	/**
+     * Displays a prompt and waits for user input. The user may choose to abort (noChars), 
+     * continue another page (yesChars) or continue all (goAheadChars).
+     * 
+     * @param prompt
+     * @return true = continue, false = abort
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public boolean getMore(String prompt)
+    throws IOException, InterruptedException
+    {       
+        boolean result = false;
+        
+        // Print prompt
+        m_out.print(prompt);
+        m_out.flush();
+        
+        String yes = m_formatter.format("misc.more.yeschars");
+        String no = m_formatter.format("misc.more.nochars");
+        String goAhead = m_formatter.format("misc.more.goaheadchars");
+        
+        String all = yes + no + goAhead;
+        char answer = waitForCharacter(all.toCharArray());
+        if (yes.indexOf(answer) != -1) 
+        {
+            result = true;
+        } 
+        else if (goAhead.indexOf(answer) != -1)
+        {
+            result = true;
+            // Disable page break for now. It will be enabled before the next command is executed
+            // (see nu.rydin.kom.frontend.text.parser.Parser.ExecutableCommand.execute(Context))
+            setPageBreak(false);
+        }
+        
+        // No need to check for a no character since waitForChar won't
+        // return
+        // on any other characters but the specified ones.
+            
+        // Erase the prompt
+        //
+        m_out.print('\r');
+        PrintUtils.printRepeated(m_out, ' ', prompt.length());
+        m_out.print('\r');
+        m_out.flush();  
+        return result;
+    }
+    	
+	
 	/**
 	 * Waits for the user to input any of the given characters and then returns it,
 	 * or throws InputInterruptedException on ctrl-c.
@@ -729,7 +771,7 @@ public class LineEditor implements NewlineListener
 	public KeystrokeTokenizer.Token readToken(int flags)
 	throws EventDeliveredException, InterruptedException, IOException
 	{
-	    KeystrokeTokenizer tokenizer = (KeystrokeTokenizer) m_tokenizerStack.peek();
+	    KeystrokeTokenizer tokenizer = m_tokenizerStack.peek();
 	    KeystrokeTokenizer.Token token = null;
 	    while(token == null)
 	    {
@@ -825,7 +867,7 @@ public class LineEditor implements NewlineListener
 			            }
 			        }
 		        }
-		        token = ((KeystrokeTokenizer) m_tokenizerStack.peek()).feedCharacter(ch);
+		        token = m_tokenizerStack.peek().feedCharacter(ch);
 		    }
 		    int kind = token.getKind();
 		    boolean exit = (kind & Keystrokes.TOKEN_MOFIDIER_BREAK) != 0;
@@ -848,7 +890,7 @@ public class LineEditor implements NewlineListener
 		    	    {
 				    	this.deleteLine(buffer, cursorpos);
 						cursorpos = 0;						
-						String command = (String) m_history.get(--historyPos);
+						String command = m_history.get(--historyPos);
 		    	        buffer.append(command);
 		    	        m_out.print(command);
 		    	        cursorpos = command.length();
@@ -857,19 +899,23 @@ public class LineEditor implements NewlineListener
 		    	        m_out.write(BELL);
 		    		break;
 		    	case Keystrokes.TOKEN_NEXT:
-		    	case Keystrokes.TOKEN_DOWN:
-		    	    if(historyPos < m_history.size() - 1 && (flags & FLAG_ALLOW_HISTORY) != 0)
-		    	    {
-				    	this.deleteLine(buffer, cursorpos);
-						cursorpos = 0;						
-						String command = (String) m_history.get(++historyPos);
-		    	        buffer.append(command);
-		    	        m_out.print(command);
-		    	        cursorpos = command.length();
-		    	    }
-		    	    else
-		    	        m_out.write(BELL);
-	    			break;
+                case Keystrokes.TOKEN_DOWN:
+                    if(historyPos < m_history.size() && (flags & FLAG_ALLOW_HISTORY) != 0)
+                    {
+                        this.deleteLine(buffer, cursorpos);
+                        cursorpos = 0;
+                        historyPos++;
+                        if (historyPos < m_history.size())
+                        {
+                            String command = m_history.get(historyPos);
+                            buffer.append(command);
+                            m_out.print(command);
+                            cursorpos = command.length();
+                        }
+                    }
+                    else
+                        m_out.write(BELL);
+                    break;
 	    		case Keystrokes.TOKEN_RIGHT:
 	    		    if(cursorpos==buffer.length() || (flags & FLAG_ECHO) == 0)
 		    		{
@@ -1099,7 +1145,7 @@ public class LineEditor implements NewlineListener
 	{
 		while(m_eventQueue.isEmpty())
 			this.wait();
-		return (Event) m_eventQueue.removeFirst();
+		return m_eventQueue.removeFirst();
 	}	
 	
 	public long getLastKeystrokeTime()
@@ -1123,8 +1169,7 @@ public class LineEditor implements NewlineListener
 		    if(++m_lineCount >= m_tsProvider.getTerminalSettings().getHeight() - 1)
 		    {
 		        m_dontCount = true;
-		        if(!this.getYesNo(m_morePrompt, m_formatter.format("misc.more.yeschars").toCharArray(), 
-		                m_formatter.format("misc.more.nochars").toCharArray()))
+		        if(!this.getMore(m_morePrompt))
 		            throw new OutputInterruptedException();
 		        m_lineCount = 0;
 		    }
@@ -1134,7 +1179,7 @@ public class LineEditor implements NewlineListener
 	        // We can't throw an InterruptedException here, since it would have to be
 	        // passed through the Writer interface.
 	        //
-	        // Don't page-break after this, since it could interefere with a session
+	        // Don't page-break after this, since it could interfere with a session
 	        // trying to wind down it's operations.
 	        //
 	        m_bypass = true;
