@@ -9,7 +9,6 @@ package nu.rydin.kom.boot;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -91,11 +90,11 @@ public class Bootstrap
 	 public void join()
 	 throws InterruptedException
 	 {
-	     for(Iterator itor = Modules.listModuleNames().iterator(); itor.hasNext();)
+	     for (String moduleName : Modules.listModuleNames())
 	     {
 	         try
 	         {
-	             Modules.getModule(itor.next().toString()).join();
+	             Modules.getModule(moduleName).join();
 	         }
 	         catch(NoSuchModuleException e)
 	         {

@@ -7,8 +7,9 @@
 package nu.rydin.kom.frontend.text;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+
 import nu.rydin.kom.exceptions.AmbiguousPatternException;
 
 /**
@@ -59,10 +60,9 @@ public class KeystrokeTokenizerDefinition implements Cloneable
         {
             State copy = new State(m_tokenKind);
             HashMap<Character, State> map = new HashMap<Character, State>(m_nextStates.size());
-            for(Iterator itor = m_nextStates.entrySet().iterator(); itor.hasNext();)
+            for (Entry<Character, State> each : m_nextStates.entrySet())
             {
-                Map.Entry each = (Map.Entry) itor.next();
-                map.put((Character) each.getKey(), ((State) each.getValue()).deepCopy());
+                map.put(each.getKey(), each.getValue().deepCopy());
             }
             copy.m_nextStates = map;
             return copy;

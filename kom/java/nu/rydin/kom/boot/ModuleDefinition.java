@@ -10,7 +10,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,12 +35,12 @@ class ModuleDefinition
     /**
      * Module specific class path
      */
-    private final List classPath;
+    private final List<String> classPath;
     
     /**
      * Module specific parameters
      */
-    private final Map parameters;
+    private final Map<String, String> parameters;
     
     /**
      * Consructs a new module definition.
@@ -50,7 +49,7 @@ class ModuleDefinition
      * @param className The module implementation class
      * @param parameters Module specific parameters
      */
-    public ModuleDefinition(String name, String className, List classPath, Map parameters)
+    public ModuleDefinition(String name, String className, List<String> classPath, Map<String, String> parameters)
     {
         this.name 		= name;
         this.className 	= className;
@@ -77,7 +76,7 @@ class ModuleDefinition
     /**
      * Returns the module specific class path
      */
-    public List getClassPath()
+    public List<String> getClassPath()
     {
         return classPath;
     }
@@ -85,7 +84,7 @@ class ModuleDefinition
     /**
      * Returns module specific parameters
      */
-    public Map getParameters()
+    public Map<String, String> getParameters()
     {
         return parameters;
     }
@@ -101,8 +100,10 @@ class ModuleDefinition
             int top = classPath.size();
             URL[] urls = new URL[top];
             int idx = 0;
-            for(Iterator itor = classPath.iterator(); itor.hasNext(); ++idx)
-                urls[idx] = new File((String) itor.next()).toURL();
+            for (String classPathEntry : classPath)
+            {
+                urls[idx] = new File(classPathEntry).toURL();
+            }
             loader = new URLClassLoader(urls, this.getClass().getClassLoader());
         }
         else
