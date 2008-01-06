@@ -25,7 +25,7 @@ public class FilterUtils
     public static Object[] applyFilter(Object[] data, Filter filter)
     throws UnexpectedException
     {
-        // We're lazy: Assuume nothing gets wiped out and
+        // We're lazy: Assume nothing gets wiped out and
         // reallocate array only if we need to.
         //
         ArrayList list = null;
