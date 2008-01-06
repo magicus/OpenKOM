@@ -63,7 +63,7 @@ public class Help extends AbstractCommand
 		     description.add(s.trim());
 		 }
 		 
-		 public ArrayList getDescription()
+		 public ArrayList<String> getDescription()
 		 {
 		     return description;
 		 }
@@ -73,7 +73,7 @@ public class Help extends AbstractCommand
 		     exceptions.add(s);
 		 }
 		 
-		 public ArrayList getExceptions()
+		 public ArrayList<String> getExceptions()
 		 {
 		     return exceptions;
 		 }
@@ -83,7 +83,7 @@ public class Help extends AbstractCommand
 		     seeAlso.add(new String[] {s, t});
 		 }
 		 
-		 public ArrayList getReferences()
+		 public ArrayList<String[]> getReferences()
 		 {
 		     return seeAlso;
 		 }
@@ -305,31 +305,31 @@ public class Help extends AbstractCommand
 	    }
 
 	    out.println (formatter.format("help.description"));
-	    ArrayList myDesc = htc.getDescription();
+	    ArrayList<String> myDesc = htc.getDescription();
 	    for (int i = 0; i < myDesc.size(); ++i)
 	    {
-	        PrintUtils.printIndented(out, myDesc.get(i).toString(), termWidth, "  ");
+	        PrintUtils.printIndented(out, myDesc.get(i), termWidth, "  ");
 	        out.println();
 	    }
 
-	    ArrayList myExc = htc.getExceptions();
+	    ArrayList<String> myExc = htc.getExceptions();
 	    if (0 < myExc.size())
 	    {
 		    out.println (formatter.format("help.exceptions"));
 		    for (int i = 0; i < myExc.size(); ++i)
 		    {
-			    PrintUtils.printIndented(out, myExc.get(i).toString(), termWidth, "  ");
+			    PrintUtils.printIndented(out, myExc.get(i), termWidth, "  ");
 			    out.println();
 		    }
 	    }
 	    
-	    ArrayList myRefs = htc.getReferences();
+	    ArrayList<String[]> myRefs = htc.getReferences();
 	    if (0 < myRefs.size())
 	    {
 		    out.println (formatter.format("help.seealso"));
 		    for (int i = 0; i < htc.getReferences().size(); ++i)
 		    {
-		        String[] p = (String[]) htc.getReferences().get(i);
+		        String[] p = htc.getReferences().get(i);
 		        if (p[1].equals("command"))
 	                out.println ("  " + formatter.format(p[0] + ".name"));		  
 		        else

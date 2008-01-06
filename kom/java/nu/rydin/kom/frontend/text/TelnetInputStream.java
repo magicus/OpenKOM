@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -441,8 +440,10 @@ public class TelnetInputStream extends InputStream
 		Logger.debug(this, "NAWS: " + width + "*" + height);
 		synchronized(m_sizeListeners)
 		{
-			for(Iterator itor = m_sizeListeners.iterator(); itor.hasNext();)
-				((TerminalSizeListener) itor.next()).terminalSizeChanged(width, height);
+			for (TerminalSizeListener terminalSizeListener : m_sizeListeners)
+			{    
+                terminalSizeListener.terminalSizeChanged(width, height);
+			}
 		}
 	}
 	
@@ -530,8 +531,10 @@ public class TelnetInputStream extends InputStream
 	    Logger.debug(this, "ENVIRON: var=" + name + " value=" + value);
 	    synchronized(m_environmentListeners)
 	    {
-	        for(Iterator itor = m_environmentListeners.iterator(); itor.hasNext();)
-	            ((EnvironmentListener) itor.next()).environmentChanged(name, value);
+	        for (EnvironmentListener environmentListener : m_environmentListeners)
+            {
+	            environmentListener.environmentChanged(name, value);
+            }
 	    }
 	}
 	

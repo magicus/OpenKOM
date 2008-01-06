@@ -28,7 +28,7 @@ public class ListCommands extends AbstractCommand
 		super(fullName, AbstractCommand.NO_PARAMETERS, permissions);
 	}
 	
-	protected Collection getCategories(Context context) throws IOException, KOMException 
+	protected Collection<CommandCategory> getCategories(Context context) throws IOException, KOMException 
 	{
 		return context.getParser().getCategories();
 	}
@@ -39,21 +39,21 @@ public class ListCommands extends AbstractCommand
 		PrintWriter out = context.getOut();
 		DisplayController dc = context.getDisplayController();
 		MessageFormatter formatter = context.getMessageFormatter();
-		Collection cats = this.getCategories(context);
-		for(Iterator itor = cats.iterator(); itor.hasNext();)
+		Collection<CommandCategory> cats = this.getCategories(context);
+		for(Iterator<CommandCategory> categoryItor = cats.iterator(); categoryItor.hasNext();)
 		{
 		    // Print category header
 		    //
-		    CommandCategory cat = (CommandCategory) itor.next();
+		    CommandCategory cat = categoryItor.next();
 		    dc.header();
 		    out.println();
 		    out.println(formatter.format(cat.getI18nKey()));
 		    
 		    // Print commands
 		    //
-		    for(Iterator itor2 = cat.getCommands().iterator(); itor2.hasNext();)
+		    for(Iterator<Command> commandItor = cat.getCommands().iterator(); commandItor.hasNext();)
 		    {
-		        Command command = (Command) itor2.next();
+		        Command command = commandItor.next();
 		        dc.normal();
 		        out.print("  ");
 		        out.print(command.getFullName());

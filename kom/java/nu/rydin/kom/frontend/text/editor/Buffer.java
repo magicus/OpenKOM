@@ -48,9 +48,9 @@ public class Buffer
 	public String toString()
 	{
 		StringBuffer buffer = new StringBuffer();
-		for(Iterator itor = m_lines.iterator(); itor.hasNext();)
+		for(Iterator<Line> itor = m_lines.iterator(); itor.hasNext();)
 		{
-			Line line = (Line) itor.next();
+			Line line = itor.next();
 			String content = line.m_content;
 			if(content.length() > 0)
 			{
