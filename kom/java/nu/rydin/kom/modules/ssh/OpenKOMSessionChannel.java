@@ -7,7 +7,6 @@
 package nu.rydin.kom.modules.ssh;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,6 +53,7 @@ public class OpenKOMSessionChannel extends IOChannel
 {
     public final static String SESSION_CHANNEL_TYPE = "session";
     
+    @SuppressWarnings("unused")
     private ChannelOutputStream stderrOut;
     private final List<TerminalSizeListener> m_sizeListeners = new LinkedList<TerminalSizeListener>();
     
@@ -61,7 +61,7 @@ public class OpenKOMSessionChannel extends IOChannel
     private int ptyRows = 25;
     private final SSHServer server;
     
-     public OpenKOMSessionChannel(final SSHServer server)
+    public OpenKOMSessionChannel(final SSHServer server)
     {
         super();
         this.server = server;
@@ -235,8 +235,11 @@ public class OpenKOMSessionChannel extends IOChannel
             String term = bar.readString();
             int cols = (int) bar.readInt();
             int rows = (int) bar.readInt();
+            @SuppressWarnings("unused")
             int width = (int) bar.readInt();
+            @SuppressWarnings("unused")
             int height = (int) bar.readInt();
+            @SuppressWarnings("unused")
             String modes = bar.readString();
             
             Logger.debug(this, "Requested pty-req with " + term + " of " + cols + "x" + rows);
@@ -260,7 +263,9 @@ public class OpenKOMSessionChannel extends IOChannel
             ByteArrayReader bar = new ByteArrayReader(requestData);
             int cols = (int) bar.readInt();
             int rows = (int) bar.readInt();
+            @SuppressWarnings("unused")
             int width = (int) bar.readInt();
+            @SuppressWarnings("unused")
             int height = (int) bar.readInt();
             
             Logger.debug(this, "Requested window-change to " + cols + "x" + rows);
@@ -269,8 +274,10 @@ public class OpenKOMSessionChannel extends IOChannel
             {
 	    		synchronized(m_sizeListeners)
 	    		{
-	    			for(Iterator itor = m_sizeListeners.iterator(); itor.hasNext();)
-	    				((TerminalSizeListener) itor.next()).terminalSizeChanged(cols, rows);
+	    		    for (TerminalSizeListener listener : m_sizeListeners)
+                    {
+                        listener.terminalSizeChanged(cols, rows);
+                    }
 	    		}
             }
 
