@@ -532,7 +532,8 @@ public class MembershipManager
 		//
 		try
 		{
-			MembershipInfo mi = this.loadMembership(user, conference);
+			@SuppressWarnings("unused")
+            MembershipInfo mi = this.loadMembership(user, conference);
 			m_updatePermissionsStmt.clearParameters();
 			m_updatePermissionsStmt.setInt(1, permissions);
 			m_updatePermissionsStmt.setInt(2, negations);
