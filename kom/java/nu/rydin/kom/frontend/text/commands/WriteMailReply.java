@@ -75,7 +75,8 @@ public class WriteMailReply extends AbstractCommand
 
 		// Store the message
 		//
-		MessageOccurrence occ = session.storeReplyAsMail(editor.getRecipient().getId(), msg, textNumber);
+		@SuppressWarnings("unused")
+        MessageOccurrence occ = session.storeReplyAsMail(editor.getRecipient().getId(), msg, textNumber);
 		
         context.getOut().println(
                 context.getMessageFormatter().format("write.mail.saved", session.getUser(editor.getRecipient().getId()).getName()));

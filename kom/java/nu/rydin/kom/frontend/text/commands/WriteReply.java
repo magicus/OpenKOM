@@ -88,7 +88,8 @@ public class WriteReply extends AbstractCommand
                     originalMessage.getUser().getName(), 
                     context.getSession().getMessageHeader(replyTo).getSubject()
                     );
-            
+
+            @SuppressWarnings("unused")
             MessageOccurrence newMessage = session.storeReplyAsMail(editor.getRecipient().getId(), msg, replyTo);
 
             // Print confirmation
