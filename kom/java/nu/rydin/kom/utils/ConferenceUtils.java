@@ -7,7 +7,6 @@
 package nu.rydin.kom.utils;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.Visibilities;
@@ -27,7 +26,6 @@ public class ConferenceUtils
             short visibility)
     throws LineEditingDoneException, OperationInterruptedException, IOException, InterruptedException
     {
-		PrintWriter out = context.getOut();
 		LineEditor in = context.getIn();
 		MessageFormatter fmt = context.getMessageFormatter();
 		
