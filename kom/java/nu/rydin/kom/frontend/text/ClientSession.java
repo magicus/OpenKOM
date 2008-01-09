@@ -736,9 +736,9 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
             hp.addHeader(m_formatter.format("list.sessions.idle"), 7, true);
             hp.addHeader(m_formatter.format("list.sessions.client"), 7, true);
             hp.addSpace(1);
-            int termWidth = this.getTerminalSettings().getWidth();
-            int firstColsWidth = 7 + 7 + 7 + 7 + 1;
-            int lastColWidth = termWidth - firstColsWidth - 1 ; 
+            //int termWidth = this.getTerminalSettings().getWidth();
+            //int firstColsWidth = 7 + 7 + 7 + 7 + 1;
+            //int lastColWidth = termWidth - firstColsWidth - 1 ; 
             hp.printOn(m_out);
             
             // Print list
@@ -1307,11 +1307,13 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		// Calculate number of messages and print greeting
 		//
 		int numMessages = m_session.countUnread(id);
-		m_out.println(m_formatter.format("misc.enter.conference", 
-			new String[] { confName, 
-					numMessages == 0 
-						? m_formatter.format("misc.no.messages")
-						: Long.toString(numMessages) }));
+		m_out.println(m_formatter.format(numMessages == 1 
+		        ? "misc.one.unread.message" 
+		                : "misc.enter.conference", 
+		                new String[] { confName, 
+		             numMessages == 0 
+		             ? m_formatter.format("misc.no.messages") 
+		                     : Long.toString(numMessages) }));
 	}
 			
 	public MessageEditor getMessageEditor()
