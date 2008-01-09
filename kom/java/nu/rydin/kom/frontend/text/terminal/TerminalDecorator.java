@@ -185,6 +185,10 @@ public class TerminalDecorator implements TerminalController
     {
         m_underlying.messageHeader();
     }
+    public void mailMessageHeader()
+    {
+        m_underlying.mailMessageHeader();
+    }
     public void messageSubject()
     {
         m_underlying.messageSubject();
