@@ -116,6 +116,12 @@ public class ANSIDisplayController implements DisplayController
         m_writer.print(ANSISequences.CYAN);
     }
 
+    public void mailMessageHeader() 
+    {
+        m_writer.print(ANSISequences.BRIGHT);
+        m_writer.print(ANSISequences.GREEN);
+    }
+
     public void messageFooter() 
     {
         m_writer.print(ANSISequences.BRIGHT);

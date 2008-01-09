@@ -17,6 +17,8 @@ public interface DisplayController
     
     public void messageHeader();
     
+    public void mailMessageHeader();
+    
     public void messageBody();
     
     public void quotedMessageBody();

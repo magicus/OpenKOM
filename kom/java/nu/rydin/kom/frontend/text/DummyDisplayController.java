@@ -95,6 +95,11 @@ public class DummyDisplayController implements DisplayController
         // We're a dummy, so we ignore everything        
     }
 
+    public void mailMessageHeader() 
+    {
+        // We're a dummy, so we ignore everything        
+    }
+
     public void messageFooter() 
     {
         // We're a dummy, so we ignore everything        
