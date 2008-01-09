@@ -48,7 +48,12 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
     {
         // All things to be printed before the body goes here.
 
-        context.getDisplayController().messageHeader();
+        if (isMail(context, envelope)) {
+            context.getDisplayController().mailMessageHeader();
+        }
+        else {
+            context.getDisplayController().messageHeader();
+        }
         printFirstLine(context, envelope);
         printMailInformation(context, envelope);
         printReplyOriginInfo(context, envelope);
@@ -442,5 +447,32 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
     {
         return getClass().getSimpleName() + "." + keyName;
     }
+    
 
+    /**
+     * Determines if the envelope contains a mail, in this case defines as
+     * having an message occurrence in the current user's mailbox.
+     * @param context
+     * @param envelope
+     * @return
+     */
+    protected boolean isMail(Context context, Envelope envelope)
+    {
+        
+        long user = context.getLoggedInUserId();
+        
+        MessageOccurrence[] occs = envelope.getOccurrences();
+        for(int idx = 0; idx < occs.length; ++idx)
+        {
+            MessageOccurrence occ = occs[idx];
+            
+            if (occ.getConference() == user)
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
+    
 }
