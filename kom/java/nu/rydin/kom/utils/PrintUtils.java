@@ -81,7 +81,6 @@ public class PrintUtils
 	public static void printIndented(PrintWriter out, String s, int width, String initialIndent, String indent)
 	{
 	    String[] p = s.split(" ");
-	    int indentLength = indent.length(); 
 	    int rowLength = initialIndent.length();
 	    int wordLength;
 	    String thisRow = initialIndent;
