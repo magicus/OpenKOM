@@ -613,6 +613,9 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			m_heartbeatSender.start();
 			m_in.setKeystrokeListener(m_heartbeatSender);
 			
+			// Ensure that more prompts will be shown (if the user choose goAhead during login).
+			this.getIn().setPageBreak(true);
+			
 			// MAIN SCREEN TURN ON!
 			//		
 			this.mainloop();
