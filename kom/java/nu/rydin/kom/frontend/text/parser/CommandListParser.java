@@ -31,7 +31,7 @@ public class CommandListParser extends DefaultHandler
     public static final short STATE_CATEGORY		= 2;
     public static final short STATE_COMMAND			= 3;
     
-    private static final Class[] s_commandCtorSignature = new Class[]
+    private static final Class<?>[] s_commandCtorSignature = new Class<?>[]
           { Context.class, String.class, long.class };
 
     private final Map<String, CommandCategory> m_categories = new HashMap<String, CommandCategory>();
@@ -79,8 +79,9 @@ public class CommandListParser extends DefaultHandler
 	            if(!"command".equals(qName))
 	                throw new SAXException("Node 'command' expected");
 	            String className = atts.getValue("class");
-	            Class clazz = Class.forName(className);
-	            Constructor ctor = clazz.getConstructor(s_commandCtorSignature);
+	            Class<?> clazz = Class.forName(className);
+	            Class<? extends Command> commandClazz = clazz.asSubclass(Command.class);
+	            Constructor<? extends Command> commandCtor = commandClazz.getConstructor(s_commandCtorSignature);
 	            String pString = atts.getValue("permissions");
 	            long permissions = pString != null ? Long.parseLong(pString, 16) : 0L;
 	
@@ -89,11 +90,9 @@ public class CommandListParser extends DefaultHandler
 	            MessageFormatter formatter = m_context.getMessageFormatter();
 	            String name = formatter.format(className + ".name");
 	            
-	            Command primaryCommand = (Command) ctor
-	                    .newInstance(new Object[]
-	                    { m_context, name, new Long(permissions) });
-	            m_commands.add(primaryCommand);
-	            m_currentCat.addCommand(primaryCommand);
+                Command primaryCommand = commandCtor.newInstance(new Object[] { m_context, name, new Long(permissions) });
+                m_commands.add(primaryCommand);
+                m_currentCat.addCommand(primaryCommand);
 	
 	            // Install aliases
 	            //
@@ -109,9 +108,8 @@ public class CommandListParser extends DefaultHandler
 	
 	                // We found an alias! Create command.
 	                //
-	                Command aliasCommand = (Command) ctor
-	                        .newInstance(new Object[]
-	                        { m_context, alias, new Long(permissions) });
+                    Command aliasCommand = commandCtor.newInstance(new Object[]
+                    { m_context, alias, new Long(permissions) });
 	                m_commands.add(aliasCommand);
 	                m_currentCat.addCommand(aliasCommand);
 	            }
