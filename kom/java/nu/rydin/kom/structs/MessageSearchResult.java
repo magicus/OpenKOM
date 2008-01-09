@@ -20,9 +20,10 @@ public abstract class MessageSearchResult implements Serializable
     private final NameAssociation m_author;
     private final String m_subject;
     private final long m_replyTo;
+    private final NameAssociation m_mailRecipient;
 
     public MessageSearchResult(long globalid, int localid, NameAssociation author,
-            String subject, long replyTo, Timestamp timestamp)
+            String subject, long replyTo, Timestamp timestamp, NameAssociation mailRecipient)
     {
         m_globalid 	= globalid;
         m_localid 	= localid;
@@ -30,6 +31,7 @@ public abstract class MessageSearchResult implements Serializable
         m_subject 	= subject;
         m_replyTo 	= replyTo;
         m_timestamp = timestamp;
+        m_mailRecipient = mailRecipient;
     }
 
     public NameAssociation getAuthor()
@@ -57,5 +59,9 @@ public abstract class MessageSearchResult implements Serializable
     public Timestamp getTimestamp()
     {
         return m_timestamp;
+    }
+    public NameAssociation getMailRecipient() 
+    {
+        return m_mailRecipient;
     }
 }
