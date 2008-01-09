@@ -658,7 +658,7 @@ public class Parser
      * @param class1
      * @return
      */
-    public Command getCommand(Class class1)
+    public Command getCommand(Class<? extends Command> class1)
     {
         for (int i = 0; i < m_commands.length; i++)
         {
