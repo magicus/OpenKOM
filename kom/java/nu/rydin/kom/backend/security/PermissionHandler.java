@@ -25,7 +25,7 @@ public class PermissionHandler extends DefaultHandler
     private static final short CLASS_STATE		= 1;
         
     private short m_state = INITIAL_STATE;
-    private Class m_class;
+    private Class<?> m_class;
     private Map<Method, Long> m_methods = new HashMap<Method, Long>();
     
     public void startElement(String namespaceURI, String localName,
@@ -86,14 +86,14 @@ public class PermissionHandler extends DefaultHandler
         //
         int p2 = s.indexOf(')', p1);
         String pStr = s.substring(p1 + 1, p2);
-        ArrayList<Class> list = new ArrayList<Class>(10);
+        ArrayList<Class<?>> list = new ArrayList<Class<?>>(10);
         for(StringTokenizer st = new StringTokenizer(pStr); st.hasMoreTokens();)
         {
             String each = st.nextToken().trim();
             
             // Try to load class
             //
-            Class pClass;
+            Class<?> pClass;
             try
             {
                 pClass = Class.forName(each);
@@ -118,7 +118,7 @@ public class PermissionHandler extends DefaultHandler
         
         // Assemble parameter array
         //
-        Class[] pArr = new Class[list.size()];
+        Class<?>[] pArr = new Class[list.size()];
         list.toArray(pArr);
         
         // We have a name and a parameter array. Enough to find a method!
