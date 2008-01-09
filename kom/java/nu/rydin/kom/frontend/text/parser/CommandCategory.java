@@ -14,7 +14,7 @@ import nu.rydin.kom.frontend.text.Command;
 /**
  * @author Pontus Rydin
  */
-public class CommandCategory implements Comparable
+public class CommandCategory implements Comparable<CommandCategory>
 {
     private String id;
     
@@ -52,9 +52,8 @@ public class CommandCategory implements Comparable
         commands.add(command);
     }
     
-    public int compareTo(Object o)
+    public int compareTo(CommandCategory cat)
     {
-        CommandCategory cat = (CommandCategory) o;
         return cat.order == this.order ? 0 : (this.order > cat.order ? 1 : -1);
     }
 }
