@@ -63,33 +63,44 @@ public class MessageAttribute implements Serializable
 	{
 	    return userId + ":" + userName; 
 	}
+	
+	public static Name parseUserNamePayload(String payload, short kind) {
+        if (kind == MessageAttributes.NOCOMMENT || kind == MessageAttributes.ORIGINAL_DELETED || kind == MessageAttributes.MAIL_RECIPIENT)
+        {
+            int i = payload.indexOf(":");
+            if (i > 0 && payload.length() > i)
+                return new Name(payload.substring(i + 1), Visibilities.PUBLIC, NameManager.USER_KIND);
+        }
+        return new Name("", Visibilities.PUBLIC, NameManager.USER_KIND);
+	    
+	}
 
 	public Name getUsername()
 	{
-	    if (m_kind == MessageAttributes.NOCOMMENT || m_kind == MessageAttributes.ORIGINAL_DELETED || m_kind == MessageAttributes.MAIL_RECIPIENT)
-	    {
-	        int i = m_value.indexOf(":");
-	        if (i > 0 && m_value.length() > i)
-	            return new Name(m_value.substring(i + 1), Visibilities.PUBLIC, NameManager.USER_KIND);
-	    }
-	    return new Name("", Visibilities.PUBLIC, NameManager.USER_KIND);
+	    return parseUserNamePayload(m_value, m_kind);
+	}
+
+	public static long parseUserIdPayload(String payload, short kind)
+	{
+        if (kind == MessageAttributes.NOCOMMENT || kind == MessageAttributes.ORIGINAL_DELETED || kind == MessageAttributes.MAIL_RECIPIENT)
+        {
+            try
+            {
+                int i = payload.indexOf(":");
+                if (i > 0)
+                    return Long.parseLong(payload.substring(0, i));
+            } 
+            catch (NumberFormatException e)
+            {
+                //Malformed payload...
+            }
+        }
+        return -1;
+	    
 	}
 	
 	public long getUserId()
 	{
-	    if (m_kind == MessageAttributes.NOCOMMENT || m_kind == MessageAttributes.ORIGINAL_DELETED || m_kind == MessageAttributes.MAIL_RECIPIENT)
-	    {
-	        try
-            {
-	            int i = m_value.indexOf(":");
-	            if (i > 0)
-	                return Long.parseLong(m_value.substring(0, i));
-            } 
-	        catch (NumberFormatException e)
-            {
-	            //Malformed payload...
-            }
-	    }
-	    return -1;
+	    return parseUserIdPayload(m_value, m_kind);
 	}	
 }
