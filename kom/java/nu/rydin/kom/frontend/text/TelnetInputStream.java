@@ -59,7 +59,8 @@ public class TelnetInputStream extends InputStream
 	private static final int OPT_BINARY		= 0;
 	private static final int OPT_ECHO		= 1;
 	private static final int OPT_SUPPRESS_GA= 3;
-	private static final int OPT_NAOCRD		= 10;
+	@SuppressWarnings("unused")
+    private static final int OPT_NAOCRD		= 10;
 	private static final int OPT_FLOWCONTROL = 33;
 	private static final int OPT_NAWS		= 31;
 	private static final int OPT_LINEMODE	= 34;
