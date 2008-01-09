@@ -200,9 +200,14 @@ public class MessageManager
 			 "limit 1 offset 0");
 				
 		m_searchMessagesLocally = m_conn.prepareStatement(
-				"SELECT ms.id, mo.localnum, mo.user, m.author_name, ms.subject, m.reply_to, m.created " +
-				"FROM messagesearch ms, messageoccurrences mo, messages m " +
-				"WHERE ms.id = mo.message AND ms.id = m.id AND mo.conference = ? and mo.kind <> 3 " +
+				"SELECT ms.id, mo.localnum, mo.user, m.author_name, ms.subject, m.reply_to, m.created, ma.value " +
+				"FROM messagesearch ms " +
+				"JOIN messageoccurrences mo ON ms.id = mo.message " + 
+				"JOIN messages m ON ms.id = m.id " + 
+                "LEFT OUTER JOIN messageattributes ma " + 
+                "ON m.id = ma.message " +
+                "AND ma.kind = " + String.valueOf(MessageAttributes.MAIL_RECIPIENT) + " " +
+				"WHERE mo.conference = ? and mo.kind <> 3 " +
 				"AND MATCH(ms.subject, ms.body) AGAINST (? IN BOOLEAN MODE) " +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
@@ -213,25 +218,36 @@ public class MessageManager
 		        "SELECT COUNT(*) FROM messagesearch");
 
 		m_grepMessagesLocally = m_conn.prepareStatement(
-				"SELECT ms.id, mo.localnum, mo.user, m.author_name, ms.subject, m.reply_to, m.created " +
-				"FROM messagesearch ms, messageoccurrences mo, messages m " +
-				"WHERE ms.id = mo.message AND ms.id = m.id AND mo.conference = ? and mo.kind <> 3 " +
+				"SELECT ms.id, mo.localnum, mo.user, m.author_name, ms.subject, m.reply_to, m.created, ma.value " +
+				"FROM messagesearch ms " +
+				"JOIN messageoccurrences mo ON ms.id = mo.message " + 
+				"JOIN messages m ON ms.id = m.id " + 
+                "LEFT OUTER JOIN messageattributes ma " + 
+                "ON m.id = ma.message " +
+                "AND ma.kind = " + String.valueOf(MessageAttributes.MAIL_RECIPIENT) + " " +
+				"WHERE mo.conference = ? and mo.kind <> 3 " +
 				"AND (ms.subject LIKE ? OR ms.body LIKE ?) " +
 				"ORDER BY localnum DESC " +
 				"LIMIT ? OFFSET ?");
 		
 		m_listAllMessagesLocally = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.user, m.author_name, m.subject, m.reply_to, m.created " +
-		        "FROM messages m JOIN messageoccurrences mo " +
-		        "ON m.id = mo.message " +
-		        "WHERE mo.conference = ? AND mo.kind <> 3 " +
+		        "SELECT m.id, mo.localnum, mo.user, m.author_name, m.subject, m.reply_to, m.created, ma.value " +
+		        "FROM messages m " + 
+		        "JOIN messageoccurrences mo ON m.id = mo.message " +
+		        "LEFT OUTER JOIN messageattributes ma " + 
+		        "ON m.id = ma.message " +
+		        "AND ma.kind = " + String.valueOf(MessageAttributes.MAIL_RECIPIENT) + " " +
+		        "WHERE mo.conference = ? AND mo.kind <> 3 " + 
 		        "ORDER BY localnum DESC " +
 		        "LIMIT ? OFFSET ?");
 		
 		m_listMessagesLocallyByAuthor = m_conn.prepareStatement(
-		        "SELECT m.id, mo.localnum, mo.user, m.author_name, m.subject, m.reply_to, m.created " +
-		        "FROM messages m JOIN messageoccurrences mo " +
-		        "ON m.id = mo.message " +
+		        "SELECT m.id, mo.localnum, mo.user, m.author_name, m.subject, m.reply_to, m.created, ma.value " +
+		        "FROM messages m " + 
+		        "JOIN messageoccurrences mo ON m.id = mo.message " +
+                "LEFT OUTER JOIN messageattributes ma " + 
+                "ON m.id = ma.message " +
+                "AND ma.kind = " + String.valueOf(MessageAttributes.MAIL_RECIPIENT) + " " +
 		        "WHERE mo.conference = ? AND m.author = ? AND mo.kind <> 3 " +
 		        "ORDER BY localnum DESC " +
 		        "LIMIT ? OFFSET ?");
@@ -1353,6 +1369,16 @@ public class MessageManager
         List<LocalMessageSearchResult> l = new ArrayList<LocalMessageSearchResult>();
         while (rs.next())
         {
+            
+            NameAssociation mailRecipient = null;
+            String mailRecipientMessageAttributeValue = rs.getString(8);
+            if (mailRecipientMessageAttributeValue != null)
+            {
+                mailRecipient = new NameAssociation(
+                        MessageAttribute.parseUserIdPayload(mailRecipientMessageAttributeValue, MessageAttributes.MAIL_RECIPIENT),
+                        MessageAttribute.parseUserNamePayload(mailRecipientMessageAttributeValue, MessageAttributes.MAIL_RECIPIENT));
+            }
+            
             l.add(new LocalMessageSearchResult(
                     rs.getLong(1), // globalid
                     rs.getInt(2), // localid
@@ -1360,7 +1386,8 @@ public class MessageManager
                     new Name(rs.getString(4), Visibilities.PUBLIC, NameManager.USER_KIND)), // authorname
                     rs.getString(5), // subject
                     rs.getLong(6), // Reply to
-                    rs.getTimestamp(7)) // Timestamp
+                    rs.getTimestamp(7), // Timestamp
+                    mailRecipient)
                     );
         }
         LocalMessageSearchResult[] lmsr = new LocalMessageSearchResult[l.size()];
