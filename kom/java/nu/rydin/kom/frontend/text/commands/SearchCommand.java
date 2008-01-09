@@ -34,6 +34,10 @@ public abstract class SearchCommand extends AbstractCommand
 	{
 		KOMWriter out = context.getOut();
 		
+		// Allow the concrete classes to do context specific initialisation
+		// before printing the result
+		preparePrinting(context);
+		
 		// Get approximate count
 		//
 		long n = this.count(context, parameterArray);
@@ -76,6 +80,11 @@ public abstract class SearchCommand extends AbstractCommand
 		}
 	}
     
+    protected void preparePrinting(Context context) 
+    {
+        // Default behavior - do nothing
+    }
+
     protected static void printNoSearchResultsMessage(Context context)
     {
         MessageFormatter formatter = context.getMessageFormatter();
