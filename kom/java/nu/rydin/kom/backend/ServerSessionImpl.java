@@ -4611,8 +4611,10 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			//
 			long id = occ.getGlobalId();
 			mm.addMessageAttribute(id, MessageAttributes.EMAIL_SENDER, sender);
-			mm.addMessageAttribute(id, MessageAttributes.EMAIL_SENT, Long.toString(sent.getTime()));
-			mm.addMessageAttribute(id, MessageAttributes.EMAIL_RECEIVED, Long.toString(received.getTime()));
+			if(sent != null)
+			    mm.addMessageAttribute(id, MessageAttributes.EMAIL_SENT, Long.toString(sent.getTime()));
+			if(received != null)
+			    mm.addMessageAttribute(id, MessageAttributes.EMAIL_RECEIVED, Long.toString(received.getTime()));
 			return occ;
 		}
         catch(ObjectNotFoundException e)

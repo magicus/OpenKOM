@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS memberships
 	user BIGINT NOT NULL,
 	priority BIGINT NOT NULL,
 	flags BIGINT NOT NULL,
-	active TINYINT(1),
+	active BIT,
 	permissions INT NOT NULL,
 	negation_mask INT NOT NULL,	
 	markers TEXT,
@@ -159,7 +159,8 @@ CREATE TABLE IF NOT EXISTS magicconferences
 	conference BIGINT NULL,
 	kind SMALLINT NOT NULL,
 	PRIMARY KEY(conference, kind),
-	FOREIGN KEY(conference) REFERENCES conferences(id) ON DELETE CASCADE
+	FOREIGN KEY(conference) REFERENCES conferences(id) ON DELETE CASCADE,
+	FOREIGN KEY(user) REFERENCES users(id) ON DELETE CASCADE
 ) TYPE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messagelog
@@ -179,7 +180,7 @@ CREATE TABLE IF NOT EXISTS messagelogpointers
 	recipient BIGINT NOT NULL,
 	logid BIGINT NOT NULL,
 	kind SMALLINT NOT NULL,
-	sent TINYINT(1) NOT NULL,
+	sent BIT NOT NULL,
 	INDEX mlpuser_ix(recipient),
 	FOREIGN KEY (recipient) REFERENCES names(id) ON DELETE CASCADE,
 	INDEX logitem(logid),
