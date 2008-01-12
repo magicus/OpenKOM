@@ -37,6 +37,11 @@ public class CommandSuggestions
 	public static final short NEXT_MAIL			= 5;
 	
 	/**
+	 * Read next selected message
+	 */
+	public static final short NEXT_SELECTED     = 6;
+	
+	/**
 	 * Error determining next command
 	 */
 	public static final short ERROR				= -1;
