@@ -36,6 +36,8 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextReply"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadOriginal"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ReadNextSelectedMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ReadPreviousSelectedMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadRules"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ViewPresentation"/>		
 	</category>
@@ -69,11 +71,18 @@
 	<category id="search" i18n="command.category.search" order="80">	
 		<command class="nu.rydin.kom.frontend.text.commands.ListLocalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListGlobalMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SelectAndListGlobalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SearchLocalMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SelectAndSearchLocalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SearchGlobalMessage"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.SelectAndSearchGlobalMessage"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.GrepLocalMessage"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SelectAndGrepLocalMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ListComments"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SelectAndListComments"/>
 		<command class="nu.rydin.kom.frontend.text.commands.FindObject"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ListSelectedMessages"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ClearSelectedMessages"/>
 	</category>
 	<category id="conf.admin" i18n="command.category.conf.admin" order="90">
 		<command class="nu.rydin.kom.frontend.text.commands.CreateConference" permissions="0009"/>		
