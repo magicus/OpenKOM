@@ -11,7 +11,6 @@ import java.sql.Timestamp;
 
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.exceptions.*;
-import nu.rydin.kom.frontend.text.SelectedMessages;
 import nu.rydin.kom.structs.*;
 
 /**
