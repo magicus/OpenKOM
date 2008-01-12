@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 import nu.rydin.kom.backend.data.ConferenceManager;
 import nu.rydin.kom.backend.data.FileManager;
@@ -311,6 +312,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     protected final UserContext m_userContext;
     
     private final int FILTER_ADJUST_THREASHOLD = 10;
+
+    private SelectedMessages m_selectedMessages;
 			
 	public ServerSessionImpl(DataAccess da, long userId, int sessionId, short clientType, SessionManager sessions)
 	throws UnexpectedException
@@ -333,7 +336,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			m_loginTime			= System.currentTimeMillis();
 			m_sessions			= sessions;
             m_sessionId         = sessionId;
-						            
+			m_selectedMessages  = new SelectedMessages();
+            
             // Create user context
             //
             m_userContext = UserContextFactory.getInstance().getOrCreateContext(userId, m_da.getMembershipManager(), m_da.getRelationshipManager());
@@ -536,6 +540,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			            //
 			            Logger.error(this, "Error finding next mail", e);
 			        }
+			    }
+			    
+			    
+			    // Do we have any selected messages?
+			    //
+			    if (this.getSelectedMessages().hasUnreadMessages()) {
+			        return new SessionState(CommandSuggestions.NEXT_SELECTED, conf, this.getSelectedMessages().getUnread());
 			    }
 		    
 			    // First, try a reply. Then, try any unread message in current conference
@@ -1015,7 +1026,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-			// If we're posting on behald on someone else, we must hold the
+			// If we're posting on behalf on someone else, we must hold the
 			// POST_BY_PROXY privilege
 			//
 			if(author != this.getLoggedInUserId())
@@ -3891,7 +3902,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     {
 		try
 		{
-			return this.censorMessages(m_da.getMessageManager().listMessagesGloballyByAuthor(user, offset, length));
+			return this.removeDuplicateMessages(this.censorMessages(
+			        m_da.getMessageManager().listMessagesGloballyByAuthor(user, offset, length)));
 		}
 		catch (SQLException e)
 		{
@@ -4045,7 +4057,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     {
 		try
 		{
-			return this.censorMessages(m_da.getMessageManager().searchMessagesGlobally(searchterm, offset, length));
+			return this.removeDuplicateMessages(this.censorMessages(m_da.getMessageManager().searchMessagesGlobally(searchterm, offset, length)));
 		}
 		catch (SQLException e)
 		{
@@ -4062,7 +4074,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
 		try
 		{
-    		return m_da.getMessageManager().searchMessagesLocally(conference, searchterm, offset, length);
+    		return this.removeDuplicateMessages(m_da.getMessageManager().searchMessagesLocally(conference, searchterm, offset, length));
 		}
     	catch (SQLException e)
 		{
@@ -4075,7 +4087,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	{
     	try
 		{
-    		return m_da.getMessageManager().grepMessagesLocally(conference, searchterm, offset, length);
+    		return this.removeDuplicateMessages(m_da.getMessageManager().grepMessagesLocally(conference, searchterm, offset, length));
 		}
     	catch (SQLException e)
 		{
@@ -4120,6 +4132,48 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     		throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
     }
+    
+    
+    private List<MessageSearchResult> innerRemoveDuplicateMessages(MessageSearchResult[] messages)
+    {
+
+        // Keep the first (oldest) occurrence. 
+        
+        // Store the unique GlobalMessageSearchResult's in a sorted map (we don't want to change the order of the result)
+        // key = global id.
+        Map<Long, MessageSearchResult> uniqueMessageSearchResult = new TreeMap<Long, MessageSearchResult>();
+        
+        int top = messages.length;
+        for (int idx = 0; idx < top; idx++)
+        {
+            MessageSearchResult result = messages[idx];
+            if(!uniqueMessageSearchResult.containsKey(result.getGlobalId())) 
+            {
+                uniqueMessageSearchResult.put(result.getGlobalId(), result);
+            }
+        }
+        
+        List<MessageSearchResult> uniqueList = new ArrayList<MessageSearchResult>(uniqueMessageSearchResult.size());
+        uniqueList.addAll(uniqueMessageSearchResult.values());
+
+        return uniqueList;
+    }
+    
+    
+    protected GlobalMessageSearchResult[] removeDuplicateMessages(GlobalMessageSearchResult[] messages)
+    {
+        List<MessageSearchResult> result = this.innerRemoveDuplicateMessages(messages);
+        return result.toArray(new GlobalMessageSearchResult[result.size()]);
+    }
+    
+    
+    protected LocalMessageSearchResult[] removeDuplicateMessages(LocalMessageSearchResult[] messages)
+    {
+        List<MessageSearchResult> result = this.innerRemoveDuplicateMessages(messages);
+        return result.toArray(new LocalMessageSearchResult[result.size()]);
+
+    }
+    
     
     protected GlobalMessageSearchResult[] censorMessages(GlobalMessageSearchResult[] messages)
     throws ObjectNotFoundException, UnexpectedException
@@ -4420,7 +4474,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	public MessageSearchResult[] listCommentsGloballyToAuthor(long user, Timestamp startDate, int offset, int length) throws UnexpectedException {
 		try
 		{
-			return this.censorMessages(m_da.getMessageManager().listCommentsGloballyToAuthor(user, startDate, offset, length));
+			return this.removeDuplicateMessages(this.censorMessages(m_da.getMessageManager().listCommentsGloballyToAuthor(user, startDate, offset, length)));
 		}
 		catch (SQLException e)
 		{
@@ -4624,6 +4678,13 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         catch(SQLException e)
         {
             throw new UnexpectedException(this.getLoggedInUserId(), e);
-        }        
+        }  
 	}
+	
+    public SelectedMessages getSelectedMessages()
+    {
+        return m_selectedMessages;
+    }
+    
+
 }
