@@ -1,3 +1,9 @@
+/*
+ * Created on Jan 9, 2008
+ *  
+ * Distributed under the GPL license.
+ * See http://www.gnu.org for details
+ */
 package nu.rydin.kom.frontend.text.commands;
 
 import nu.rydin.kom.frontend.text.Context;
@@ -9,6 +15,10 @@ import nu.rydin.kom.structs.MessageSearchResult;
 import nu.rydin.kom.utils.HeaderPrinter;
 import nu.rydin.kom.utils.PrintUtils;
 
+/**
+ * @author Henrik Schröder
+ * @author <a href=mailto:magnus.neck@abc.se>Magnus Neck</a>
+ */
 public class ConferenceMessageSearchResultPrinter implements
         MessageSearchResultPrinter
 {
