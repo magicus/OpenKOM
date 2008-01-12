@@ -22,7 +22,9 @@ import nu.rydin.kom.structs.MessageSearchResult;
 public abstract class SearchCommand extends AbstractCommand
 {
     protected static final int CHUNK_SIZE = 100;
-    
+
+    protected MessageSearchResultPrinter m_resultPrinter = null;
+
     public SearchCommand(String fullName,
             CommandLineParameter[] signature, long permissions)
     {
@@ -77,10 +79,17 @@ public abstract class SearchCommand extends AbstractCommand
 			{
 				innerPrintSearchResultRow(context, out, msr[i]);
 			}
+			
+			processMessageResult(context, msr);
 		}
 	}
     
-    protected void preparePrinting(Context context) 
+    protected void processMessageResult(Context context, MessageSearchResult[] msr)
+    {
+        // Default behavior - do nothing        
+    }
+
+    protected void preparePrinting(Context context) throws KOMException 
     {
         // Default behavior - do nothing
     }
@@ -97,9 +106,6 @@ public abstract class SearchCommand extends AbstractCommand
     abstract long count(Context context, Object[] parameterArray)
     throws KOMException;
     
-    abstract void innerPrintSearchResultRow(Context context, KOMWriter out, MessageSearchResult msr);
-    
-    abstract void printSearchResultHeader(Context context);
     
     protected void printCount(Context context, long count)
     {
@@ -110,5 +116,17 @@ public abstract class SearchCommand extends AbstractCommand
         out.println(formatter.format("search.count", new Object[] { new Long(count) }));
         out.println();
     }
+    
+    protected void innerPrintSearchResultRow(Context context, KOMWriter out,
+            MessageSearchResult msr)
+    {
+        m_resultPrinter.printSearchResultRow(context, out, msr);        
+    }
+    
+    protected void printSearchResultHeader(Context context)
+    {
+        m_resultPrinter.printSearchResultHeader(context);
+    }
+
 
 }
