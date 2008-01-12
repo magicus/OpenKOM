@@ -75,6 +75,7 @@ import nu.rydin.kom.frontend.text.commands.GotoNextConference;
 import nu.rydin.kom.frontend.text.commands.ReadNextMail;
 import nu.rydin.kom.frontend.text.commands.ReadNextMessage;
 import nu.rydin.kom.frontend.text.commands.ReadNextReply;
+import nu.rydin.kom.frontend.text.commands.ReadNextSelectedMessage;
 import nu.rydin.kom.frontend.text.commands.ShowTime;
 import nu.rydin.kom.frontend.text.editor.StandardWordWrapper;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
@@ -1109,6 +1110,8 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	    short suggestion = m_state.getSuggestedAction(); 
 		switch(suggestion)
 		{
+		    case CommandSuggestions.NEXT_SELECTED:
+		        return m_parser.getCommand(ReadNextSelectedMessage.class);
 			case CommandSuggestions.NEXT_MAIL:
 				return m_parser.getCommand(ReadNextMail.class);
 			case CommandSuggestions.NEXT_REPLY:
@@ -1662,4 +1665,5 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
     {
         m_loggedIn = false;
     }
+    
 }
