@@ -1,3 +1,6 @@
-#Sun May 28 18:44:50 EDT 2006
+#Sat Jan 12 08:57:50 EST 2008
 eclipse.preferences.version=1
+formatter_profile=_OpenKOM
+formatter_settings_version=11
 internal.default.compliance=default
+org.eclipse.jdt.ui.text.custom_code_templates=<?xml version\="1.0" encoding\="UTF-8"?><templates/>

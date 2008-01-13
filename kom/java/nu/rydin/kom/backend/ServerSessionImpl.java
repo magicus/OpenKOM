@@ -1385,7 +1385,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
             // adjust as long as we find filtered messages. 
             // This will not always yield an accurate result, but it will at
             // least prevent us from going into conferences where all messages
-            // are posted by Måns^h^h^h^hfiltered users.
+            // are posted by MŒns^h^h^h^hfiltered users.
             //
             if(n > 0 && n <= FILTER_ADJUST_THREASHOLD && m_userContext.getFilterCache().size() > 0)
             {
