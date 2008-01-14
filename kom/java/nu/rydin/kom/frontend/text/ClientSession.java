@@ -221,20 +221,30 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 
 		public void onEvent(BroadcastMessageEvent event) 
 		{
-			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
-            String name = formatObjectName(event.getUserName(), event.getOriginatingUser());
-			String header = event.getKind() == MessageLogKinds.BROADCAST 
-			    ? m_formatter.format("event.broadcast.default", 
-                        new Object[] { name }) 
-			    : name + ' ';
-			getDisplayController().broadcastMessageHeader();
-			m_out.print(header);
-			if (event.getKind() == MessageLogKinds.BROADCAST)
-			{
-			    getDisplayController().broadcastMessageBody();
-			}
-			printWrapped(event.getMessage(), header.length());
-			m_out.println();
+		    try
+		    {
+    		    boolean more = (context.getCachedUserInfo().getFlags1() & UserFlags.MORE_PROMPT_IN_BROADCAST) != 0;
+    		    context.getIn().setPageBreak(more);
+    			this.beepMaybe(UserFlags.BEEP_ON_BROADCAST);
+                String name = formatObjectName(event.getUserName(), event.getOriginatingUser());
+    			String header = event.getKind() == MessageLogKinds.BROADCAST 
+    			    ? m_formatter.format("event.broadcast.default", 
+                            new Object[] { name }) 
+    			    : name + ' ';
+    			getDisplayController().broadcastMessageHeader();
+    			m_out.print(header);
+    			if (event.getKind() == MessageLogKinds.BROADCAST)
+    			{
+    			    getDisplayController().broadcastMessageBody();
+    			}
+    			printWrapped(event.getMessage(), header.length());
+    			m_out.println();
+    			context.getIn().setPageBreak(true);
+		    }
+		    catch(UnexpectedException e)
+		    {
+		        Logger.error(this, "Error in broadcast message handler", e);
+		    }
 		}
 
 		public void onEvent(ChatAnonymousMessageEvent event) 
