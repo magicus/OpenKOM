@@ -6,26 +6,30 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.structs.MessageSearchResult;
 
 /**
  * @author <a href=mailto:magnus.neck@abc.se>Magnus Neck</a>
  */
-public class SelectAndGrepLocalMessage extends GrepLocalMessage
+public class SelectAndGrepLocalMessage extends AbstractSelect
 {
 
-    public SelectAndGrepLocalMessage(Context context, String fullName,
-            long permissions)
+    public SelectAndGrepLocalMessage (Context context, String fullName, long permissions)
     {
-        super(context, fullName, permissions);
+        super(fullName, new CommandLineParameter[] { new RawParameter(
+                "search.param.0.ask", true) }, permissions);
     }
 
     
     @Override
-    protected void processMessageResult(Context context, MessageSearchResult[] msr)
+    protected boolean select(Context context, Object[] parameters)
+    throws KOMException
     {
-        context.getSession().getSelectedMessages().setMessages(msr);
+        return context.getSession().selectGrepMessagesLocally(context.getSession().getCurrentConferenceId(), (String) parameters[0]);
     }
     
 }

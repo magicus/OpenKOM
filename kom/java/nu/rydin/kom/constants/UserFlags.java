@@ -49,6 +49,7 @@ public class UserFlags
 	public static long SHOW_SUFFIX							= 0x00800000;
     public static long SHOW_END_OF_IDLE_MESSAGE             = 0x01000000;
     public static long COMPACT_WHO			             	= 0x02000000;
+    public static long MORE_PROMPT_IN_BROADCAST             = 0x04000000;
 
 	/**
 	 * Default value for flagword 1

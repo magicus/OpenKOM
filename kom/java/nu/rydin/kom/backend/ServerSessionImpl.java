@@ -210,6 +210,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     		}
         }
     }
+    
+    private static final int MAX_SELECTION = 1000;
 
 	/**
 	 * Current conference id, or -1 if it could not be determined
@@ -4396,7 +4398,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         }
 	    catch(SQLException e)
 	    {
-	        throw new UnexpectedException(this.getLoggedInUserId(), e);
+	        throw new UnexpectedException(this.getLoggedInUserId(), e); 
 	    }	    
     }
 
@@ -4685,6 +4687,46 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     {
         return m_selectedMessages;
     }
-    
 
+    public boolean selectGrepMessagesLocally(long conference, String searchterm)
+            throws UnexpectedException
+    {
+        m_selectedMessages.setMessages(this.grepMessagesLocally(conference, searchterm, 0, MAX_SELECTION));
+        return m_selectedMessages.getMessages().length < MAX_SELECTION;
+    }
+
+    public boolean selectMessagesGlobally(String searchterm)
+            throws UnexpectedException
+    {
+        m_selectedMessages.setMessages(this.searchMessagesGlobally(searchterm, 0, MAX_SELECTION));
+        return m_selectedMessages.getMessages().length < MAX_SELECTION;
+    }
+
+    public boolean selectMessagesGloballyByAuthor(long user)
+            throws UnexpectedException
+    {
+        m_selectedMessages.setMessages(this.listMessagesGloballyByAuthor(user, 0, MAX_SELECTION));
+        return m_selectedMessages.getMessages().length < MAX_SELECTION;
+    }
+
+    public boolean selectMessagesLocally(long conference, String searchterm)
+            throws UnexpectedException
+    {
+        m_selectedMessages.setMessages(this.searchMessagesLocally(conference, searchterm, 0, MAX_SELECTION));
+        return m_selectedMessages.getMessages().length < MAX_SELECTION;
+    }
+
+    public boolean selectMessagesLocallyByAuthor(long conference, long user)
+            throws UnexpectedException
+    {
+        m_selectedMessages.setMessages(this.listMessagesLocallyByAuthor(conference, user, 0, MAX_SELECTION));
+        return m_selectedMessages.getMessages().length < MAX_SELECTION;
+    }
+
+    public boolean selectCommentsGloballyToAuthor(long user, Timestamp startDate)
+            throws UnexpectedException
+    {
+        m_selectedMessages.setMessages(this.listCommentsGloballyToAuthor(user, startDate, 0, MAX_SELECTION));
+        return m_selectedMessages.getMessages().length < MAX_SELECTION;
+    }
 }

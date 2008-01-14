@@ -6,25 +6,29 @@
  */
 package nu.rydin.kom.frontend.text.commands;
 
+import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.structs.MessageSearchResult;
 
 /**
  * @author <a href=mailto:magnus.neck@abc.se>Magnus Neck</a>
  */
-public class SelectAndSearchGlobalMessage extends SearchGlobalMessage
+public class SelectAndSearchGlobalMessage extends AbstractSelect
 {
 
-    public SelectAndSearchGlobalMessage(Context context, String fullName,
-            long permissions)
+    public SelectAndSearchGlobalMessage (Context context, String fullName, long permissions)
     {
-        super(context, fullName, permissions);
+        super(fullName, new CommandLineParameter[] { new RawParameter(
+                "search.param.0.ask", true) }, permissions);
     }
     
     @Override
-    protected void processMessageResult(Context context, MessageSearchResult[] msr)
+    protected boolean select(Context context, Object[] parameters)
+    throws KOMException
     {
-        context.getSession().getSelectedMessages().setMessages(msr);
+        return context.getSession().selectMessagesGlobally((String) parameters[0]);
     }
 
 }

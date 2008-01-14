@@ -1197,6 +1197,16 @@ public interface ServerSession
 	public LocalMessageSearchResult[] listMessagesLocallyByAuthor(long conference, long user, int start, int length)
 	throws UnexpectedException;
 	
+	 /**
+     * Selects the messages in the given conference written by the given user.
+     * 
+     * @param conference Conference Id
+     * @return True if selection is complete, false if incomplete
+     * @throws UnexpectedException
+     */
+    public boolean selectMessagesLocallyByAuthor(long conference, long user)
+    throws UnexpectedException;
+	
 	/**
 	 * Returns the approximate number of messages in the given conference written by the given user.
 	 * @param conference The conference
@@ -1220,7 +1230,17 @@ public interface ServerSession
 	throws UnexpectedException;
     
     /**
-     * Returns the approximate number of messages written by a cerain user. Counts only messages in 
+     * List all messages written by a given user.
+     * 
+     * @param user
+     * @return True if selection is complete, false if incomplete
+     * @throws UnexpectedException
+     */
+    public boolean selectMessagesGloballyByAuthor(long user)
+    throws UnexpectedException;
+    
+    /**
+     * Returns the approximate number of messages written by a certain user. Counts only messages in 
      * conferences the caller is a member of.
      * 
      * @param user The user
@@ -1239,6 +1259,18 @@ public interface ServerSession
      */
     public GlobalMessageSearchResult[] searchMessagesGlobally(String searchterm, int offset, int length)
 	throws UnexpectedException;
+
+    /**
+     * Selects result from doing a global search on the given searchterm.
+     * 
+     * @param searchterm
+     * @throws UnexpectedException
+     * 
+     * @returns true if selection is complete, false if incomplete (overflow)
+     */
+    public boolean selectMessagesGlobally(String searchterm)
+    throws UnexpectedException;
+
     
     /**
      * Returns the approximate number of messages matching a given search term
@@ -1405,6 +1437,16 @@ public interface ServerSession
     throws UnexpectedException;
     
     /**
+     * Selects based on a grep-like search in the given conference.
+     * 
+     * @param conference
+     * @param searchterm
+     * @return true if selection is complete, false if incomplete (overflow)
+     */
+    public boolean selectGrepMessagesLocally(long conference, String searchterm)
+    throws UnexpectedException;
+    
+    /**
      * Count approximate number of hits with a grep-like search
      * @param conference
      * @param searchterm
@@ -1427,6 +1469,18 @@ public interface ServerSession
 	 * @throws UnexpectedException
 	 */
     public abstract LocalMessageSearchResult[] searchMessagesLocally(long conference, String searchterm, int offset, int length)
+    throws UnexpectedException;
+    
+    /**
+     * Selects the resuls from doing a search in the given conference
+     * with the given searchterm.
+     * 
+     * @param conference The id of the conference to search in
+     * @param searchterm The searchterm in MySQL IN BOOLEAN MODE format.
+     * @return true if selection is complete, false if incomplete (overflow)
+     * @throws UnexpectedException
+     */
+    public abstract boolean selectMessagesLocally(long conference, String searchterm)
     throws UnexpectedException;
     
     /**
@@ -1694,6 +1748,18 @@ public interface ServerSession
      */
 	public abstract MessageSearchResult[] listCommentsGloballyToAuthor(long user, Timestamp startDate, int offset, int length)
 	throws UnexpectedException;
+	
+    /**
+     * Select the messages that are comments to messages written by the given user.
+     * 
+     * @param user
+     * @param offset
+     * @param length
+     * @return True if selection is complete
+     * @throws UnexpectedException
+     */
+    public abstract boolean selectCommentsGloballyToAuthor(long user, Timestamp startDate)
+    throws UnexpectedException;	
 
 	/**
 	 * Counts the number of messages that are comments to messages written by the given user.
@@ -1731,7 +1797,7 @@ public interface ServerSession
     throws UnexpectedException;
     
     /**
-     * Posts an incoming email to the approriate conference and on behalf of
+     * Posts an incoming email to the appropriate conference and on behalf of
      * the user that the sender email was mapped to. The caller must hold the
      * POST_BY_PROXY and POST_ANYWHERE privileges.
      * 
