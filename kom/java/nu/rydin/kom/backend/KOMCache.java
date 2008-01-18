@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import nu.rydin.kom.structs.CacheInformation;
+import nu.rydin.kom.utils.Logger;
 
 import com.frameworx.util.MRUCache;
 
@@ -21,13 +22,92 @@ import com.frameworx.util.MRUCache;
  */
 public class KOMCache extends MRUCache
 {
-	private Set<Object> m_deferredInvalidations = new HashSet<Object>();
+    private static class Entry
+    {
+        private final Object data;
+        
+        private long era;
+
+        public Entry(Object data, long era)
+        {
+            super();
+            this.data = data;
+            this.era = era;
+        }
+    }
+    
+    private static class Transaction 
+    {  
+        private final Set<Object> deletions = new HashSet<Object>();
+        
+        private final Map<Object, Entry> dirtyData = new HashMap<Object, Entry>();
+        
+        private Transaction()
+        {
+        }
+        
+        public void put(Object key, Entry value)
+        {
+            dirtyData.put(key, value);
+        }
+        
+        public void delete(Object key)
+        {
+            dirtyData.remove(key);
+            deletions.add(key);
+        }
+        
+        public Entry get(Object key)
+        {
+            return dirtyData.get(key);
+        }
+        
+        public boolean pendingDeletion(Object key)
+        {
+            return deletions.contains(key);
+        }
+        
+        public void commit(KOMCache cache)
+        {
+            for(Iterator itor = dirtyData.entrySet().iterator(); itor.hasNext();)
+            {
+                Map.Entry each = (Map.Entry) itor.next();
+                Object key = each.getKey();
+                Entry dirty = (Entry) each.getValue();
+                Entry clean = (Entry) cache.get(key);
+                
+                // If dirty data isn't stale...
+                //
+                if(clean == null || dirty.era > clean.era)
+                    cache.put(key, dirty);
+            }       
+            for(Iterator itor = deletions.iterator(); itor.hasNext();)
+                cache.remove(itor.next());
+            this.rollback();
+        } 
+        
+        public void rollback()
+        {
+            dirtyData.clear();
+            deletions.clear();
+        }
+    }
+    
+	private ThreadLocal<Transaction> transaction = new ThreadLocal<Transaction>()
+	{
+	    public Transaction initialValue()
+	    {
+	        return new Transaction();
+	    }
+	};
 	
-	private Map<Object, Object> m_dirtyData = new HashMap<Object, Object>();
+	private long era = 0;
+		
+	private long numAccesses = 0;
 	
-	private long m_numAccesses = 0;
+	private long numHits = 0;
 	
-	private long m_numHits = 0;
+	private boolean committing = false;
 	
 	public KOMCache(int maxSize)
 	{
@@ -39,54 +119,73 @@ public class KOMCache extends MRUCache
 		super(maxSize, evictionPolicy);
 	}
 	
-	public Object get(Object key)
+	public synchronized Object put(Object key, Object value)
 	{
-	    Object answer = super.get(key);
-	    ++m_numAccesses;
+	    if(committing)
+	        super.put(key, value);
+	    else
+	    {
+	        Logger.warn(this, "You should use deferredPut instead!");
+	        this.deferredPut(key, value);
+	    }
+	    return value;
+	}
+	
+	public synchronized Object get(Object key)
+	{
+	    Object answer = this.innerGet(key);
+	    ++numAccesses;
 	    if(answer != null)
-	        ++m_numHits;
+	        ++numHits;
 	    return answer;
+	}
+	
+	private synchronized Object innerGet(Object key)
+	{
+	    Transaction tx = transaction.get();
+	    
+	    // Pending deletion in this tx? No hit!
+	    //
+	    if(tx.pendingDeletion(key))
+	        return null;
+	    Entry entry = (Entry) super.get(key);
+	    return entry != null ? entry.data : null;
 	}
 	
 	public long getNumAccesses()
 	{
-	    return m_numAccesses;
+	    return numAccesses;
 	}
 	
 	public long getNumHits()
 	{
-	    return m_numHits;
+	    return numHits;
 	}
 	
 	public CacheInformation getStatistics()
 	{
-	    return new CacheInformation(m_numAccesses, m_numHits);
+	    return new CacheInformation(numAccesses, numHits);
 	}
 	
 	public synchronized void registerInvalidation(Object key)
 	{
-		m_dirtyData.remove(key);
-		m_deferredInvalidations.add(key);
+	    transaction.get().delete(key);
 	}
 	
 	public synchronized void deferredPut(Object key, Object value)
 	{
-		m_dirtyData.put(key, value);
+		transaction.get().put(key, new Entry(value, ++era));
 	}
 	
-	public synchronized void performDeferredOperations()
+	public synchronized void commit()
 	{
-		for(Iterator itor = m_dirtyData.entrySet().iterator(); itor.hasNext();)
-		{
-			Map.Entry each = (Map.Entry) itor.next();
-			this.put(each.getKey(), each.getValue());
-		}		
-		for(Iterator itor = m_deferredInvalidations.iterator(); itor.hasNext();)
-			this.remove(itor.next());
+	    committing = true;
+	    transaction.get().commit(this);
+	    committing = false;
 	}
 	
-	public synchronized void discardDeferredInvalidations()
+	public synchronized void rollback()
 	{
-		m_deferredInvalidations.clear();
+	    transaction.get().rollback();
 	}
 }

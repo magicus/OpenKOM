@@ -778,7 +778,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			m_out.flush();
 			try
 			{
-                int choice = m_in.getChoice(m_formatter.format("login.multiple.session.question"), new String[] { "1", "2", "3"}, 0, m_formatter.format("misc.invalid.choice"));
+                int choice = m_in.getChoice(m_formatter.format("login.multiple.session.question"), new String[] { "1", "2", "3"}, -1, m_formatter.format("misc.invalid.choice"));
                 switch(choice)
                 {
                 case 0:

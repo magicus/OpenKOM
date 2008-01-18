@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -4135,32 +4136,23 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
     }
     
-    
     private List<MessageSearchResult> innerRemoveDuplicateMessages(MessageSearchResult[] messages)
     {
-
-        // Keep the first (oldest) occurrence. 
-        
-        // Store the unique GlobalMessageSearchResult's in a sorted map (we don't want to change the order of the result)
-        // key = global id.
-        Map<Long, MessageSearchResult> uniqueMessageSearchResult = new TreeMap<Long, MessageSearchResult>();
-        
-        int top = messages.length;
-        for (int idx = 0; idx < top; idx++)
+        // The list is already sorted and we want to preserve the order, so we can
+        // take the easy route to making thing unique.
+        //
+        long lastId = -1;
+        List<MessageSearchResult> answer = new ArrayList<MessageSearchResult>(messages.length);
+        for(MessageSearchResult each : messages)
         {
-            MessageSearchResult result = messages[idx];
-            if(!uniqueMessageSearchResult.containsKey(result.getGlobalId())) 
+            if(each.getGlobalId() != lastId)
             {
-                uniqueMessageSearchResult.put(result.getGlobalId(), result);
+                answer.add(each);
+                lastId = each.getGlobalId();
             }
         }
-        
-        List<MessageSearchResult> uniqueList = new ArrayList<MessageSearchResult>(uniqueMessageSearchResult.size());
-        uniqueList.addAll(uniqueMessageSearchResult.values());
-
-        return uniqueList;
+        return answer;
     }
-    
     
     protected GlobalMessageSearchResult[] removeDuplicateMessages(GlobalMessageSearchResult[] messages)
     {
@@ -4691,42 +4683,47 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     public boolean selectGrepMessagesLocally(long conference, String searchterm)
             throws UnexpectedException
     {
-        m_selectedMessages.setMessages(this.grepMessagesLocally(conference, searchterm, 0, MAX_SELECTION));
+        m_selectedMessages.setMessages(this.grepMessagesLocally(conference, searchterm, 0, MAX_SELECTION), this.isSelectionReversed());
         return m_selectedMessages.getMessages().length < MAX_SELECTION;
     }
 
     public boolean selectMessagesGlobally(String searchterm)
             throws UnexpectedException
     {
-        m_selectedMessages.setMessages(this.searchMessagesGlobally(searchterm, 0, MAX_SELECTION));
+        m_selectedMessages.setMessages(this.searchMessagesGlobally(searchterm, 0, MAX_SELECTION), this.isSelectionReversed());
         return m_selectedMessages.getMessages().length < MAX_SELECTION;
     }
 
     public boolean selectMessagesGloballyByAuthor(long user)
             throws UnexpectedException
     {
-        m_selectedMessages.setMessages(this.listMessagesGloballyByAuthor(user, 0, MAX_SELECTION));
+        m_selectedMessages.setMessages(this.listMessagesGloballyByAuthor(user, 0, MAX_SELECTION), this.isSelectionReversed());
         return m_selectedMessages.getMessages().length < MAX_SELECTION;
     }
 
     public boolean selectMessagesLocally(long conference, String searchterm)
             throws UnexpectedException
     {
-        m_selectedMessages.setMessages(this.searchMessagesLocally(conference, searchterm, 0, MAX_SELECTION));
+        m_selectedMessages.setMessages(this.searchMessagesLocally(conference, searchterm, 0, MAX_SELECTION), this.isSelectionReversed());
         return m_selectedMessages.getMessages().length < MAX_SELECTION;
     }
 
     public boolean selectMessagesLocallyByAuthor(long conference, long user)
             throws UnexpectedException
     {
-        m_selectedMessages.setMessages(this.listMessagesLocallyByAuthor(conference, user, 0, MAX_SELECTION));
+        m_selectedMessages.setMessages(this.listMessagesLocallyByAuthor(conference, user, 0, MAX_SELECTION), this.isSelectionReversed());
         return m_selectedMessages.getMessages().length < MAX_SELECTION;
     }
 
     public boolean selectCommentsGloballyToAuthor(long user, Timestamp startDate)
             throws UnexpectedException
     {
-        m_selectedMessages.setMessages(this.listCommentsGloballyToAuthor(user, startDate, 0, MAX_SELECTION));
+        m_selectedMessages.setMessages(this.listCommentsGloballyToAuthor(user, startDate, 0, MAX_SELECTION), this.isSelectionReversed());
         return m_selectedMessages.getMessages().length < MAX_SELECTION;
+    }
+    
+    private boolean isSelectionReversed()
+    {
+        return (this.getLoggedInUser().getFlags1() & UserFlags.SELECT_YOUNGEST_FIRST) == 0;
     }
 }

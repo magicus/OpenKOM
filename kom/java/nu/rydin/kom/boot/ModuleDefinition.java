@@ -102,7 +102,7 @@ class ModuleDefinition
             int idx = 0;
             for (String classPathEntry : classPath)
             {
-                urls[idx] = new File(classPathEntry).toURL();
+                urls[idx++] = new File(classPathEntry).toURL();
             }
             loader = new URLClassLoader(urls, this.getClass().getClassLoader());
         }

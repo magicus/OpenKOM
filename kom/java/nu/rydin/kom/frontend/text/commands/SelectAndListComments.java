@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.I18NDefaultStrategy;
 import nu.rydin.kom.frontend.text.parser.TimePeriodParameter;
 import nu.rydin.kom.structs.MessageSearchResult;
 
@@ -21,6 +22,7 @@ public class SelectAndListComments extends AbstractSelect
     protected boolean select(Context context, Object[] parameters)
     throws KOMException
     {
-        return context.getSession().selectCommentsGloballyToAuthor(context.getLoggedInUserId(), (Timestamp) parameters[0]);
+        Timestamp start = parameters[0] != null ? (Timestamp) parameters[0] : new Timestamp(System.currentTimeMillis() - 86400000 * 24 * 7); // Default to week
+        return context.getSession().selectCommentsGloballyToAuthor(context.getLoggedInUserId(), start);
     }
 }

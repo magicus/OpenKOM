@@ -168,7 +168,7 @@ public class NameManager
 			if(!rs.next())
 				throw new ObjectNotFoundException("id=" + id);
 			Name answer = new Name(rs.getString(1), rs.getShort(2), rs.getShort(3));
-			cache.put(new Long(id), answer);
+			cache.deferredPut(new Long(id), answer);
 			return answer;
 		}
 		finally

@@ -627,7 +627,7 @@ public class MembershipManager
                 
                 // Update cache and return 
                 //
-                pCache.put(pKey, new Integer(perm));
+                pCache.deferredPut(pKey, new Integer(perm));
 				return perm;
 			}
 			
@@ -642,7 +642,7 @@ public class MembershipManager
 			// set.
 			//
             int perm = ((u | c) & ~m);
-            pCache.put(pKey, new Integer(perm));
+            pCache.deferredPut(pKey, new Integer(perm));
 			return perm;	
 		}
 		finally

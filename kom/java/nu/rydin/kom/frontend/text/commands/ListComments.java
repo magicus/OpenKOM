@@ -19,11 +19,11 @@ public class ListComments extends SearchGlobalCommand
         		new TimePeriodParameter(false, context.getFlagLabels("search.timespan")) }, permissions);
     }
     
-	public void execute(Context context, Object[] parameterArray)
+	public void execute(Context context, Object[] parameters)
 	throws KOMException
 	{
-	    startDate = (Timestamp) parameterArray[0];
-		super.execute(context, parameterArray);
+	    startDate = parameters[0] != null ? (Timestamp) parameters[0] : new Timestamp(System.currentTimeMillis() - 86400000 * 24 * 7); // Default to week
+		super.execute(context, parameters);
 	}
 
     MessageSearchResult[] innerSearch(Context context, Object[] parameterArray, int offset) throws UnexpectedException

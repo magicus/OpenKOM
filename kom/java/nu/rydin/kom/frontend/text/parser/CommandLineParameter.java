@@ -40,6 +40,7 @@ public abstract class CommandLineParameter extends CommandLinePart
 	{
 		return ',';
 	}
+	
 
 	public Match fillInMissingObject(Context context) 
 	throws IOException, InterruptedException, OperationInterruptedException, InvalidChoiceException
@@ -65,7 +66,7 @@ public abstract class CommandLineParameter extends CommandLinePart
 				    {
 				        // Not being able to figure out the default is
 				        // not the end of the world, so we let this one slide.
-				        // However, we definately want to log it!
+				        // However, we definitely want to log it!
 				        //
 				        Logger.warn(this, e);
 				    }

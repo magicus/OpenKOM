@@ -149,7 +149,7 @@ public class ConferenceManager
      */
     public void changeReplyToConference(long originalConferenceId, long newReplyToConferenceId) throws SQLException
     {
-        CacheManager.instance().getConferenceCache().registerInvalidation(new Long(originalConferenceId));
+        CacheManager.instance().getConferenceCache().registerInvalidation(originalConferenceId);
         m_changeReplyToConfStmt.clearParameters();
         if (newReplyToConferenceId == -1)
             m_changeReplyToConfStmt.setNull(1, Types.BIGINT);
@@ -178,7 +178,7 @@ public class ConferenceManager
         // Scrap the entire permission cache, since changing the conference permission would
         // have consequences all over the place.
         //
-        CacheManager.instance().getConferenceCache().registerInvalidation(new Long(id));
+        CacheManager.instance().getConferenceCache().registerInvalidation(id);
         CacheManager.instance().getPermissionCache().clear();
     }
 	

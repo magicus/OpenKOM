@@ -145,10 +145,10 @@ public class BasicMessagePrinter extends AbstractMessagePrinter
 		    	PrintUtils.printIndented(out, formatter.format(getResourceKey("email.sender"), each.getValue()), width, 0);
 		    	break;
 		    case MessageAttributes.EMAIL_SENT:
-		    	PrintUtils.printIndented(out, formatter.format(getResourceKey("email.sent"), context.smartFormatDate(new Timestamp(Integer.valueOf(each.getValue())))), width, 0);
+		    	PrintUtils.printIndented(out, formatter.format(getResourceKey("email.sent"), context.smartFormatDate(new Timestamp(Long.valueOf(each.getValue())))), width, 0);
 		    	break;
 		    case MessageAttributes.EMAIL_RECEIVED:
-		    	PrintUtils.printIndented(out, formatter.format(getResourceKey("email.received"), context.smartFormatDate(new Timestamp(Integer.valueOf(each.getValue())))), width, 0);
+		    	PrintUtils.printIndented(out, formatter.format(getResourceKey("email.received"), context.smartFormatDate(new Timestamp(Long.valueOf(each.getValue())))), width, 0);
 		    	break;		    	
 		    }
 		}

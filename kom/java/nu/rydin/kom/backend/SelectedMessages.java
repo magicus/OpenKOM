@@ -6,6 +6,9 @@
  */
 package nu.rydin.kom.backend;
 
+import java.lang.reflect.Array;
+import java.util.Collections;
+
 import nu.rydin.kom.exceptions.InternalException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
@@ -40,9 +43,24 @@ public class SelectedMessages
     
     public void setMessages(MessageSearchResult[] msr)
     {
+        this.setMessages(msr, false);
+    }
+    
+    public void setMessages(MessageSearchResult[] msr, boolean reverse)
+    {
         m_nextMessageIndex = 0;
+        if(reverse)
+        {
+            for(int left = 0, right = msr.length - 1; left < right; left++, right--)
+            {
+                MessageSearchResult tmp = msr[left];
+                msr[left] = msr[right];
+                msr[right] = tmp;
+            }
+        }
         m_messages = msr;
     }
+
     
     public MessageSearchResult[] getMessages()
     {

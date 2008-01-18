@@ -15,7 +15,7 @@ public class CacheManager
 	 
 	private KOMCache m_userCache = new KOMCache(1000); // TODO: Read from config
 	
-	private KOMCache m_conferenceCache = new KOMCache(2000); // TODO: Read from config
+	private KOMCache m_conferenceCache = new KOMCache(5000); // TODO: Read from config
 	
 	private KOMCache m_messageCache = new KOMCache(100); // TODO: Read from config
 	
@@ -30,20 +30,20 @@ public class CacheManager
 	
 	public void commit()
 	{
-		m_userCache.performDeferredOperations();
-		m_conferenceCache.performDeferredOperations();
-		m_messageCache.performDeferredOperations();
-		m_nameCache.performDeferredOperations();
-        m_permissionCache.performDeferredOperations();
+		m_userCache.commit();
+		m_conferenceCache.commit();
+		m_messageCache.commit();
+		m_nameCache.commit();
+        m_permissionCache.commit();
 	}
 	
 	public void rollback()
 	{
-		m_userCache.discardDeferredInvalidations();
-		m_conferenceCache.discardDeferredInvalidations();
-		m_messageCache.discardDeferredInvalidations();
-		m_nameCache.discardDeferredInvalidations();
-        m_permissionCache.discardDeferredInvalidations();
+		m_userCache.rollback();
+		m_conferenceCache.rollback();
+		m_messageCache.rollback();
+		m_nameCache.rollback();
+        m_permissionCache.rollback();
 	}
 	
 	public void clear()

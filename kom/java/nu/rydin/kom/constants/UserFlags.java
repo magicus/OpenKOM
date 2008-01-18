@@ -50,6 +50,7 @@ public class UserFlags
     public static long SHOW_END_OF_IDLE_MESSAGE             = 0x01000000;
     public static long COMPACT_WHO			             	= 0x02000000;
     public static long MORE_PROMPT_IN_BROADCAST             = 0x04000000;
+    public static long SELECT_YOUNGEST_FIRST                = 0x08000000;
 
 	/**
 	 * Default value for flagword 1
@@ -57,7 +58,7 @@ public class UserFlags
 	public static long DEFAULT_FLAGS1 = SHOW_ATTENDANCE_MESSAGES | ALLOW_BROADCAST_MESSAGES |
 		ALLOW_CHAT_MESSAGES | KEEP_COPIES_OF_MAIL | EMPTY_LINE_FINISHES_CHAT | BEEP_ON_CHAT
 		| PRIORITIZE_MAIL | BEEP_ON_NEW_MESSAGES | SHOW_NUM_UNREAD | READ_CROSS_CONF_REPLIES 
-		| READ_REPLY_TREE | SHOW_SUFFIX | COMPACT_WHO;
+		| READ_REPLY_TREE | SHOW_SUFFIX | COMPACT_WHO | MORE_PROMPT_IN_BROADCAST;
 	
 	/**
 	 * Default value for flagword 2
