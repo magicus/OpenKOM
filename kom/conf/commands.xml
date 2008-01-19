@@ -39,7 +39,8 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextSelectedMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadPreviousSelectedMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadRules"/>
-		<command class="nu.rydin.kom.frontend.text.commands.ViewPresentation"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.ViewPresentation"/>	
+		<command class="nu.rydin.kom.frontend.text.commands.ListReaders"/>	
 	</category>
 	<category id="choose" i18n="command.category.choose" order="50">
 		<command class="nu.rydin.kom.frontend.text.commands.RollbackReads"/>

@@ -1712,6 +1712,18 @@ public interface ServerSession
      */
     public Relationship[] listFilters()
     throws UnexpectedException;
+
+    /**
+     * Lists all users that have read a certain text. 
+     * 
+     * @param ml Message locator with at least the global ID set.
+     * @return An array of NameAssociations for printing
+     * @throws UnexpectedException
+     * @throws NoCurrentMessageException
+     */
+    
+    public NameAssociation[] listReaders(MessageLocator ml)
+    throws UnexpectedException, NoCurrentMessageException;
     
     /**
      * Clears all caches

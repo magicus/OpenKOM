@@ -3131,6 +3131,37 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	        throw new UnexpectedException (this.getLoggedInUserId(), e);
 	    }                        
     }
+    
+    public NameAssociation[] listReaders(MessageLocator ml)
+    throws UnexpectedException, NoCurrentMessageException
+    {
+        try
+        {
+            long globid = 0;
+            
+            if (null == ml)
+            {
+                if (-1 == this.m_lastReadMessageId)
+                    throw new NoCurrentMessageException();
+                else
+                    globid = this.m_lastReadMessageId;
+            }
+            else
+            {
+                globid = this.localToGlobal(this.m_currentConferenceId, ml.getLocalnum());
+            }
+
+            return m_da.getMembershipManager().listReaders(globid);
+        }
+        catch (SQLException e)
+        {
+            throw new UnexpectedException (this.getLoggedInUserId(), e);            
+        }
+        catch (ObjectNotFoundException e)
+        {
+            throw new UnexpectedException (this.getLoggedInUserId(), e);            
+        }
+    }
 
 	protected void markAsInvalid()
 	{

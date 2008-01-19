@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 import nu.rydin.kom.backend.CacheManager;
 import nu.rydin.kom.backend.KOMCache;
@@ -51,7 +53,7 @@ public class MembershipManager
 	private final PreparedStatement m_updatePriorityStmt;
 	private final PreparedStatement m_movePrioritiesUpStmt;
 	private final PreparedStatement m_movePrioritiesDownStmt;
-	
+	private final PreparedStatement m_getReadMarkersForMessageStmt;
 	private final Connection m_conn;
 	
 	public MembershipManager(Connection conn)
@@ -91,12 +93,16 @@ public class MembershipManager
 		m_getNonmemberPermissionsStmt = m_conn.prepareStatement(
 		    "SELECT nonmember_permissions FROM conferences WHERE id = ?");
 		m_updatePriorityStmt = m_conn.prepareStatement(
-	    "UPDATE memberships SET priority = ? WHERE user = ? AND conference = ?");
+	        "UPDATE memberships SET priority = ? WHERE user = ? AND conference = ?");
 		m_movePrioritiesUpStmt = m_conn.prepareStatement(
-	    "UPDATE memberships SET priority = priority - 1 WHERE user = ? AND priority <= ? AND priority > ?");
+	        "UPDATE memberships SET priority = priority - 1 WHERE user = ? AND priority <= ? AND priority > ?");
 		m_movePrioritiesDownStmt = m_conn.prepareStatement(
-	    "UPDATE memberships SET priority = priority + 1 WHERE user = ? AND priority >= ? AND priority < ?");
-	}	
+		    "UPDATE memberships SET priority = priority + 1 WHERE user = ? AND priority >= ? AND priority < ?");
+        m_getReadMarkersForMessageStmt = m_conn.prepareStatement(
+            "select memberships.user, memberships.conference, localnum, markers, fullname " + 
+            "from memberships join messageoccurrences on memberships.conference=messageoccurrences.conference " +
+            "join names on names.id=memberships.user where message = ?");
+    }	
 	
 	public void close()
 	throws SQLException
@@ -133,6 +139,8 @@ public class MembershipManager
 		    m_movePrioritiesUpStmt.close();
 		if(m_movePrioritiesDownStmt != null)
 		    m_movePrioritiesDownStmt.close();
+        if (m_getReadMarkersForMessageStmt != null)
+            m_getReadMarkersForMessageStmt.close();
 	}
 	
 	public void finalize()
@@ -447,6 +455,41 @@ public class MembershipManager
 			throw new ObjectNotFoundException("Membership(user=" + user + "conf=" + conference + ")");
 	}
 	
+    public NameAssociation[] listReaders(long message)
+    throws ObjectNotFoundException, SQLException
+    {
+        m_getReadMarkersForMessageStmt.clearParameters();
+        m_getReadMarkersForMessageStmt.setLong(1, message);
+        ResultSet rs = null;
+        try
+        {
+            Set<NameAssociation> s = new HashSet<NameAssociation>();
+            rs = m_getReadMarkersForMessageStmt.executeQuery();
+            while (rs.next())
+            {
+                if (null != rs.getString(4))
+                {
+                    if (MembershipInfo.decodeMessageRanges(rs.getString(4)).includes(rs.getInt(3)))
+                    {
+                        // I should be taken out and shot for this, but until we move object kinds to their
+                        // own constants file, this is a stopgap measure.
+                        //
+                        s.add (new NameAssociation (rs.getLong(1), rs.getString(5), (short)0));
+                    }
+                }
+            }
+            NameAssociation[] retval = new NameAssociation[s.size()];
+            s.toArray(retval);
+            return retval;
+        }
+        finally
+        {
+            if (null != rs)
+            {
+                rs.close();
+            }
+        }
+    }
 	
 	/**
 	 * Signs off from a conference
