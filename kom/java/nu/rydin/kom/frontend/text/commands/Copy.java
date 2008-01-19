@@ -28,6 +28,7 @@ import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class Copy extends AbstractCommand
 {
@@ -64,7 +65,7 @@ public class Copy extends AbstractCommand
                     ")? ",
                     new String[] { fmt.format("misc.no"), 
                                    fmt.format("misc.yes") },
-                    0,
+                    -1,
                     fmt.format("nu.rydin.kom.exceptions.InvalidChoiceException.format"));
             
             if (1 != choice)
