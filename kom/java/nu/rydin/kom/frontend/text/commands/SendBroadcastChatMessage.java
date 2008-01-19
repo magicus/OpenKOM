@@ -18,6 +18,7 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
 import nu.rydin.kom.frontend.text.LineEditor;
+import nu.rydin.kom.frontend.text.NamePicker;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.simple.AbstractEditor;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleChatEditor;
@@ -28,6 +29,7 @@ import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author Henrik Schröder
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class SendBroadcastChatMessage extends AbstractCommand
 {
@@ -89,10 +91,12 @@ public class SendBroadcastChatMessage extends AbstractCommand
             
             if (1 != choice)
             {
-                // Maybe we should ask for a new unicast or multicast recipient here, but for the
-                // moment, this is sufficient to avoid the Pontus Special.
-                //
-                throw new OperationInterruptedException();
+                out.print (formatter.format("chat.fulhack.raw.ask") + " ");
+                out.flush();
+                String recv = in.readLine();
+                NameAssociation na = NamePicker.resolveName(recv, (short)-1, context);
+                session.sendMulticastMessage(new long[] { na.getId() }, message, false);
+                return;
             }            
         }
         
