@@ -11,10 +11,13 @@ import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.MessageLogKinds;
+import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
+import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.editor.WordWrapper;
 import nu.rydin.kom.frontend.text.editor.simple.AbstractEditor;
 import nu.rydin.kom.frontend.text.editor.simple.SimpleChatEditor;
@@ -70,6 +73,29 @@ public class SendBroadcastChatMessage extends AbstractCommand
         if (message.length() == 0)
             return;
 
+        if (0 != (session.getLoggedInUser().getFlags1() & UserFlags.CONFIRM_BROADCAST_MESSAGES))
+        {
+            LineEditor in = context.getIn();
+            int choice = in.getChoice(formatter.format("chat.confirm") +
+                    " (" +
+                    formatter.format("misc.y") +
+                    "/" + 
+                    formatter.format("misc.n") +
+                    ")? ",
+                    new String[] { formatter.format("misc.n"), 
+                                   formatter.format("misc.y") },
+                    -1,
+                    formatter.format("nu.rydin.kom.exceptions.InvalidChoiceException.format"));
+            
+            if (1 != choice)
+            {
+                // Maybe we should ask for a new unicast or multicast recipient here, but for the
+                // moment, this is sufficient to avoid the Pontus Special.
+                //
+                throw new OperationInterruptedException();
+            }            
+        }
+        
         // Send it
         //
         NameAssociation[] refused = session.broadcastChatMessage(message,

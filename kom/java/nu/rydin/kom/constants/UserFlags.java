@@ -51,6 +51,7 @@ public class UserFlags
     public static long COMPACT_WHO			             	= 0x02000000;
     public static long MORE_PROMPT_IN_BROADCAST             = 0x04000000;
     public static long SELECT_YOUNGEST_FIRST                = 0x08000000;
+    public static long CONFIRM_BROADCAST_MESSAGES           = 0x10000000;
 
 	/**
 	 * Default value for flagword 1
