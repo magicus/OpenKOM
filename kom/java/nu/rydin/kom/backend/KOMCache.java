@@ -74,7 +74,7 @@ public class KOMCache extends MRUCache
                 Map.Entry each = (Map.Entry) itor.next();
                 Object key = each.getKey();
                 Entry dirty = (Entry) each.getValue();
-                Entry clean = (Entry) cache.get(key);
+                Entry clean = (Entry) cache.rawGet(key);
                 
                 // If dirty data isn't stale...
                 //
@@ -129,6 +129,11 @@ public class KOMCache extends MRUCache
 	        this.deferredPut(key, value);
 	    }
 	    return value;
+	}
+	
+	public synchronized Object rawGet(Object key)
+	{
+	    return super.get(key);
 	}
 	
 	public synchronized Object get(Object key)
