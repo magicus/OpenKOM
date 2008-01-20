@@ -10,10 +10,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.constants.Activities;
 import nu.rydin.kom.constants.MessageLogKinds;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
-import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.DisplayController;
@@ -61,11 +61,23 @@ public class SendBroadcastChatMessage extends AbstractCommand
             out.println(context.getMessageFormatter().format("chat.saytoall"));
             out.flush();
 
+            // Update state
+            //
+            session.setActivity(Activities.BROADCAST, true);
+                        
             // Read message
             //
             AbstractEditor editor = new SimpleChatEditor(context);
-            message = editor.edit().getBody();
-        } else
+            try
+            {
+                message = editor.edit().getBody();
+            }
+            finally
+            {
+                session.restoreState();
+            }
+        } 
+        else
         {
             message = (String) parameterArray[0];
         }

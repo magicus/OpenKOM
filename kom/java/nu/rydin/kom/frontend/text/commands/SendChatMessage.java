@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.constants.Activities;
 import nu.rydin.kom.constants.ChatRecipientStatus;
 import nu.rydin.kom.exceptions.GenericException;
 import nu.rydin.kom.exceptions.InternalException;
@@ -25,6 +26,7 @@ import nu.rydin.kom.structs.NameAssociation;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class SendChatMessage extends AbstractCommand
 {
@@ -124,10 +126,25 @@ public class SendChatMessage extends AbstractCommand
 	
 			out.flush();
 			
-			// Read message
+            // Update state
+            //
+            session.setActivity(Activities.CHAT, true);
+            if (1 == destinations.length)
+            {
+                session.setLastObject(destinations[0]);
+            }
+			
+            // Read message
 			//
 			AbstractEditor editor = new SimpleChatEditor(context);
-			message = editor.edit().getBody();
+			try
+            {
+			    message = editor.edit().getBody();
+            }
+            finally
+            {
+                session.restoreState();
+            }
 		}
 				
 		// Empty message? User interrupted

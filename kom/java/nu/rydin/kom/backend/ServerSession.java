@@ -1828,4 +1828,54 @@ public interface ServerSession
     throws EmailRecipientNotRecognizedException, EmailSenderNotRecognizedException, AuthorizationException, UnexpectedException;
 
     public SelectedMessages getSelectedMessages();
+    
+    /**
+     * Sets the current activity indicator. See constants.Activities for values.
+     * 
+     * @param activity The new activity.
+     * @param keepState Record the previous state.
+     */
+    public void setActivity (short activity, boolean keepState);
+    
+    /**
+     * Retrieves the current activity.
+     * 
+     * @return The activity ID.
+     */
+    
+    /**
+     * Restores the previous activity, which is initialized to Activities.AUTO on logon.
+     */
+    public void restoreState();
+    
+    public short getActivity();
+    
+    /**
+     * Sets the activity string, which may be displayed in the user list.
+     * 
+     * @param text The text to be set.
+     */
+    public void setActivityString (String text);
+    
+    /**
+     * Retrieves the user-specified activity string if set.
+     * 
+     * @return A String containing the text.
+     */
+    public String getActivityString();
+    
+    /**
+     * Retrieves the last object operated on (given that the command that acted on the object actually
+     * updated this variable. Retrieved and used in certain situations by the Who command.
+     * 
+     * @return An object ID.
+     */
+    public long getLastObject();
+    
+    /**
+     * Sets the last object the user fiddled with.
+     * 
+     * @param ID The ID of a named object.
+     */
+    public void setLastObject(long ID);
 }

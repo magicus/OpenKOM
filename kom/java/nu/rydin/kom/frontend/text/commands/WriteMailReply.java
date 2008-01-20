@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.constants.Activities;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.ObjectNotFoundException;
@@ -26,6 +27,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class WriteMailReply extends AbstractCommand
 {
@@ -58,13 +60,21 @@ public class WriteMailReply extends AbstractCommand
         }
         ConferenceInfo originalConference = session.getConference(originalMessage.getConference());
 
+        // Update state
+        //
+        session.setActivity(Activities.MAIL, true);
+        session.setLastObject(mh.getAuthor());
+        
 		// Get editor and execute it
 		//
         MessageEditor editor = context.getMessageEditor();
         editor.setRecipient(new NameAssociation(mh.getAuthor(), mh.getAuthorName()));
         editor.setReplyTo(textNumber);
         
-        UnstoredMessage msg = editor.edit(
+        UnstoredMessage msg;
+        try
+        {
+            msg = editor.edit(
                 textNumber,
                 originalConference.getId(),
                 originalConference.getName(),
@@ -72,6 +82,11 @@ public class WriteMailReply extends AbstractCommand
                 originalMessage.getUser().getName(), 
                 mh.getSubject()
                 );
+        }
+        finally
+        {
+            session.restoreState();
+        }
 
 		// Store the message
 		//
@@ -80,6 +95,5 @@ public class WriteMailReply extends AbstractCommand
 		
         context.getOut().println(
                 context.getMessageFormatter().format("write.mail.saved", session.getUser(editor.getRecipient().getId()).getName()));
-
 	}
 }

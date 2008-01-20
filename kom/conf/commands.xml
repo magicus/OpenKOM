@@ -12,7 +12,8 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ListSessions"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.WhoAmI"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.DisplayCurrentConference"/>
-		<command class="nu.rydin.kom.frontend.text.commands.Status" permissions="0008"/>				
+		<command class="nu.rydin.kom.frontend.text.commands.Status" permissions="0008"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SetActivity"/>				
 	</category>
 	<category id="chat" i18n="command.category.chat" order="20">	
 		<command class="nu.rydin.kom.frontend.text.commands.SendBroadcastChatMessage" permissions="0408"/>

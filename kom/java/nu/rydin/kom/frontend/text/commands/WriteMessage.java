@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.constants.Activities;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -38,12 +39,24 @@ public class WriteMessage extends AbstractCommand
         //
         session.assertConferencePermission(session.getCurrentConferenceId(), ConferencePermissions.WRITE_PERMISSION);
 
+        // Update the state
+        //
+        session.setActivity(Activities.POST, true);
+        
         // Get editor and execute it
         //
         MessageEditor editor = context.getMessageEditor();
         ConferenceInfo recipient = session.getCurrentConference();
         editor.setRecipient(new NameAssociation(recipient.getId(), recipient.getName()));
-        UnstoredMessage msg = editor.edit();
+        UnstoredMessage msg;
+        try
+        {
+            msg = editor.edit();
+        }
+        finally
+        {
+            session.restoreState();
+        }
 
         // Store text
         //

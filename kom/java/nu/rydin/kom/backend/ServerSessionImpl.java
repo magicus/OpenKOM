@@ -32,6 +32,7 @@ import nu.rydin.kom.backend.data.MessageManager;
 import nu.rydin.kom.backend.data.NameManager;
 import nu.rydin.kom.backend.data.RelationshipManager;
 import nu.rydin.kom.backend.data.UserManager;
+import nu.rydin.kom.constants.Activities;
 import nu.rydin.kom.constants.ChatRecipientStatus;
 import nu.rydin.kom.constants.CommandSuggestions;
 import nu.rydin.kom.constants.ConferencePermissions;
@@ -314,6 +315,22 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
      */
     protected final UserContext m_userContext;
     
+    /**
+     * Last object acted on, used by user list
+     */
+    private long m_lastObject;
+
+    /**
+     * Free text used by user list, if set by user.
+     */
+    private String m_freeActivityText;
+    
+    /**
+     * Activity types, used by user list. Last activity used to revert from a temp auto change.
+     */
+    private short m_currentActivity;
+    private short m_lastActivity;
+    
     private final int FILTER_ADJUST_THREASHOLD = 10;
 
     private SelectedMessages m_selectedMessages;
@@ -339,6 +356,8 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			m_loginTime			= System.currentTimeMillis();
 			m_sessions			= sessions;
             m_sessionId         = sessionId;
+            m_currentActivity   = Activities.AUTO;
+            m_lastActivity      = Activities.AUTO;
 			m_selectedMessages  = new SelectedMessages();
             
             // Create user context
@@ -768,10 +787,51 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		catch(SQLException e)
 		{
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
-		}
-		
+		}	
 	}
-		    
+		 
+    public short getActivity()
+    {
+        return m_currentActivity;
+    }
+    
+    public void setActivity(short a, boolean keepLastState)
+    {
+        Logger.info(this, "mla=" + m_lastActivity +", mca=" + m_currentActivity + ", a=" + a + ", kls=" + keepLastState);
+        if (keepLastState)
+        {
+            m_lastActivity = m_currentActivity;
+        }
+        m_currentActivity = a;
+    }
+    
+    public String getActivityString()
+    {
+        return m_freeActivityText;
+    }
+    
+    public void setActivityString(String a)
+    {
+        m_freeActivityText = a;
+    }
+    
+    public long getLastObject()
+    {
+        return m_lastObject;
+    }
+    
+    public void setLastObject(long o)
+    {
+        m_lastObject = o;
+    }
+    
+    public void restoreState()
+    {
+        m_currentActivity = m_lastActivity;
+        m_lastActivity = Activities.AUTO;
+        m_lastObject = -1;  // Since we're no longer operating on an object, we're surely not fiddling with this one
+    }
+    
     public Envelope readMessage(MessageLocator message)
     throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException, AuthorizationException
     {
@@ -2075,7 +2135,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			answer[idx] = new UserListItem(session.getSessionId(), new NameAssociation(user, new Name(userName, 
 			        Visibilities.PUBLIC, NameManager.USER_KIND)), session.getClientType(), (short) 0, 
                     new NameAssociation(confId, conferenceName), inMailbox, session.getLoginTime(),
-			        ((ServerSessionImpl) session).getLastHeartbeat()); 
+			        ((ServerSessionImpl) session).getLastHeartbeat(), session.getActivity(), session.getActivityString(), session.getLastObject()); 
 		}
 		return answer;
 	}

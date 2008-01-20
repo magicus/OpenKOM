@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import nu.rydin.kom.constants.Activities;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
@@ -22,6 +23,7 @@ import nu.rydin.kom.utils.StringUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class Who extends AbstractCommand
 {
@@ -68,10 +70,55 @@ public class Who extends AbstractCommand
 			PrintUtils.printRightJustified(out, StringUtils.formatElapsedTime(now - each.getLoginTime()), 7);
 			long idle = now - each.getLastHeartbeat();
 			PrintUtils.printRightJustified(out, idle >= 60000 ? StringUtils.formatElapsedTime(now - each.getLastHeartbeat()) : "", 7);
-			out.print(' ');
-			PrintUtils.printIndented(out, 
-			        formatter.format("who.format", new Object[] { context.formatObjectName(each.getUser()), confName }),
-			        lastColWidth, 0, firstColsWidth);
+            
+            // Depending on the activity, format a suitable string and print it.
+            //
+            switch (each.getActivity())
+            {
+            case Activities.AUTO:               // OpenKOM standard, shows conference.
+    			PrintUtils.printIndented(out, 
+    			        formatter.format("who.format", new Object[] { context.formatObjectName(each.getUser()), confName }),
+    			        lastColWidth, 0, firstColsWidth);
+                break;
+
+            case Activities.MAIL:               // User is writing a mail
+                PrintUtils.printIndented(out,
+                        formatter.format(each.getLastObject() == context.getSession().getLoggedInUserId() ?
+                                         "who.mail.to.you" : "who.mail", new Object[] { context.formatObjectName(each.getUser()) }),
+                        lastColWidth, 0, firstColsWidth);
+                break;
+
+            case Activities.POST:               // User is writing a post or a reply
+                PrintUtils.printIndented(out, 
+                        formatter.format("who.post.where", new Object[] { context.formatObjectName(each.getUser()), confName }),
+                        lastColWidth, 0, firstColsWidth);
+                break;
+
+            case Activities.CHAT:               // User is sending a unicast or multicast
+                PrintUtils.printIndented(out,
+                        formatter.format(each.getLastObject() == context.getSession().getLoggedInUserId() ?
+                                         "who.chat.to.you" : "who.chat", new Object[] { context.formatObjectName(each.getUser()) }),
+                        lastColWidth, 0, firstColsWidth);
+                break;
+                
+            case Activities.BROADCAST:          // User is sending a broadcast message
+                PrintUtils.printIndented(out, 
+                        formatter.format("who.broadcast", new Object[] { context.formatObjectName(each.getUser()) }),
+                        lastColWidth, 0, firstColsWidth);
+                break;
+
+            case Activities.FREETEXT:           // User has set his or her own activity
+                PrintUtils.printIndented(out,
+                        formatter.format("who.freeformat", new Object[] { context.formatObjectName(each.getUser()), each.getActivityText() }),
+                        lastColWidth, 0, firstColsWidth);
+                break;
+
+            default:                            // Can't happen. We think.
+                PrintUtils.printIndented(out,
+                        "Strange state.",
+                        lastColWidth, 0, firstColsWidth);
+                break;
+            };
 			if(idle < 60000)
 			    ++active;
 		}
@@ -106,7 +153,8 @@ public class Who extends AbstractCommand
     					(moreActive ? each.getConference() : old.getConference()),
     					(moreActive ? each.isInMailbox() : old.isInMailbox()), 
     					Math.min(old.getLoginTime(), each.getLoginTime()),
-    					Math.max(old.getLastHeartbeat(), each.getLastHeartbeat()));
+    					Math.max(old.getLastHeartbeat(), each.getLastHeartbeat()),
+                        each.getActivity(), each.getActivityText(), each.getLastObject());
     		users[idx] = null;
     	}
     }

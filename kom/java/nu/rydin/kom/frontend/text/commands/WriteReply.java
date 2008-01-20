@@ -9,6 +9,7 @@ package nu.rydin.kom.frontend.text.commands;
 import java.io.IOException;
 
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.constants.Activities;
 import nu.rydin.kom.constants.ConferencePermissions;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
@@ -27,6 +28,7 @@ import nu.rydin.kom.structs.UnstoredMessage;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin </a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class WriteReply extends AbstractCommand
 {
@@ -75,19 +77,32 @@ public class WriteReply extends AbstractCommand
         //
         if (originalConference.getId() == context.getLoggedInUserId())
         {
+            // Update state
+            //
+            session.setActivity(Activities.MAIL, true);
+            session.setLastObject(originalMessage.getUser().getId());
+            
             // Launch editor, get message, store message as mail.
             //
             MessageEditor editor = context.getMessageEditor();
             editor.setRecipient(originalMessage.getUser());
             editor.setReplyTo(replyTo);
-            UnstoredMessage msg = editor.edit(
-                    replyTo, 
-                    originalConference.getId(),
-                    originalConference.getName(),
-                    originalMessage.getUser().getId(), 
-                    originalMessage.getUser().getName(), 
-                    context.getSession().getMessageHeader(replyTo).getSubject()
-                    );
+            UnstoredMessage msg;
+            try
+            {
+                msg = editor.edit(
+                        replyTo, 
+                        originalConference.getId(),
+                        originalConference.getName(),
+                        originalMessage.getUser().getId(), 
+                        originalMessage.getUser().getName(), 
+                        context.getSession().getMessageHeader(replyTo).getSubject()
+                        );
+            }
+            finally
+            {
+                session.restoreState();
+            }
 
             @SuppressWarnings("unused")
             MessageOccurrence newMessage = session.storeReplyAsMail(editor.getRecipient().getId(), msg, replyTo);
@@ -120,13 +135,20 @@ public class WriteReply extends AbstractCommand
             // Phew. NOW we can check if we actually have permission to reply here.
             //
             session.assertConferencePermission(recipient.getId(), ConferencePermissions.REPLY_PERMISSION);
+
+            // Before we do anything useful, why don't we just update the state..
+            //
+            session.setActivity(Activities.POST, true);
             
             // Launch editor, get message, store message as reply.
             
             MessageEditor editor = context.getMessageEditor();
             editor.setRecipient(new NameAssociation(recipient.getId(), recipient.getName()));
             editor.setReplyTo(replyTo);
-            UnstoredMessage msg = editor.edit(
+            UnstoredMessage msg;
+            try
+            {
+                msg = editor.edit(
                     replyTo, 
                     recipient.getId(),
                     recipient.getName(),
@@ -134,7 +156,11 @@ public class WriteReply extends AbstractCommand
                     originalMessage.getUser().getName(), 
                     context.getSession().getMessageHeader(replyTo).getSubject()
                     );
-
+            }
+            finally
+            {
+                session.restoreState();
+            }
 
             MessageOccurrence newMessage = session.storeReplyAsMessage(editor.getRecipient().getId(), msg, replyTo);            
 

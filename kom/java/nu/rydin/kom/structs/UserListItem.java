@@ -7,6 +7,7 @@
 package nu.rydin.kom.structs;
 
 import java.io.Serializable;
+import nu.rydin.kom.constants.Activities;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
@@ -28,9 +29,15 @@ public class UserListItem implements Serializable
 	public final long m_lastHeartbeat;
     
     public final short m_clientType;
+    
+    public final String m_freeActivityText;
+    
+    public final long m_lastObject;
+    
+    public final short m_activity;
 	
 	public UserListItem(int session, NameAssociation user, short clientType, short action, NameAssociation conference, boolean inMailbox,
-	        long loginTime, long lastHeartbeat)
+	        long loginTime, long lastHeartbeat, short activity, String freeActivityText, long lastObject)
 	{
         m_session           = session;
 		m_user 				= user;
@@ -40,6 +47,9 @@ public class UserListItem implements Serializable
 		m_inMailbox			= inMailbox;
 		m_loginTime			= loginTime;
 		m_lastHeartbeat		= lastHeartbeat;
+        m_activity          = activity;
+        m_freeActivityText  = freeActivityText;
+        m_lastObject        = lastObject;
 	}
 	
     public int getSessionId()
@@ -80,5 +90,20 @@ public class UserListItem implements Serializable
     public short getClientType()
     {
         return m_clientType;
+    }
+    
+    public short getActivity()
+    {
+        return m_activity;
+    }
+    
+    public String getActivityText()
+    {
+        return m_freeActivityText;
+    }
+    
+    public long getLastObject()
+    {
+        return m_lastObject;
     }
 }
