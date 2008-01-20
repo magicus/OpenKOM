@@ -71,6 +71,7 @@ public class Who extends AbstractCommand
 			long idle = now - each.getLastHeartbeat();
 			PrintUtils.printRightJustified(out, idle >= 60000 ? StringUtils.formatElapsedTime(now - each.getLastHeartbeat()) : "", 7);
             
+            out.print(' ');
             // Depending on the activity, format a suitable string and print it.
             //
             switch (each.getActivity())
