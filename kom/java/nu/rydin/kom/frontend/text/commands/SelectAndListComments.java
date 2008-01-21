@@ -5,9 +5,7 @@ import java.sql.Timestamp;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.I18NDefaultStrategy;
 import nu.rydin.kom.frontend.text.parser.TimePeriodParameter;
-import nu.rydin.kom.structs.MessageSearchResult;
 
 public class SelectAndListComments extends AbstractSelect
 {

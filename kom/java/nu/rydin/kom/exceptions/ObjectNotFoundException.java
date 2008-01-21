@@ -10,6 +10,8 @@ package nu.rydin.kom.exceptions;
  */
 public class ObjectNotFoundException extends UserException
 {
+    static final long serialVersionUID = 2005;
+    
 	public ObjectNotFoundException()
 	{
 		super();

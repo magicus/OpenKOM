@@ -19,6 +19,8 @@ import nu.rydin.kom.constants.Visibilities;
  */
 public class MessageAttribute implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final long m_id;
 	private final long m_message;
 	private final short m_kind;

@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class ImmediateShutdownException extends KOMRuntimeException
 {
+    static final long serialVersionUID = 2005;
+    
     public ImmediateShutdownException()
     {
         super();

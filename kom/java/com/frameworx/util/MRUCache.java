@@ -65,6 +65,8 @@ public class MRUCache implements Map
 	 */
 	class CacheItem extends ListAtom
 		{
+        static final long serialVersionUID = 2005;
+        
 		/**
 		 * The key
 		 */

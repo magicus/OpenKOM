@@ -9,13 +9,17 @@ package nu.rydin.kom.exceptions;
 /**
  * @author Magnus Ihse Bursie
  */
-public class InvalidLineNumberException extends UserException {
-
-    public InvalidLineNumberException() {
+public class InvalidLineNumberException extends UserException 
+{
+    static final long serialVersionUID = 2005;
+    
+    public InvalidLineNumberException() 
+    {
         super();
     }
 
-    public InvalidLineNumberException(String msg) {
+    public InvalidLineNumberException(String msg) 
+    {
         super(msg);
     }
 }

@@ -12,6 +12,8 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public abstract class KOMException extends Exception
 {
+    static final long serialVersionUID = 2005;
+    
     protected Object[] m_msgArgs;
     
 	public KOMException()

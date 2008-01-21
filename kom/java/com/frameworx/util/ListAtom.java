@@ -18,6 +18,8 @@ import java.io.Serializable;
  */
 public class ListAtom implements Serializable
 	{
+    static final long serialVersionUID = 2005;
+    
 	/**
 	 * Predecessor
 	 */

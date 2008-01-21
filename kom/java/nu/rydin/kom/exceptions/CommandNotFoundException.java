@@ -12,13 +12,17 @@ import nu.rydin.kom.frontend.text.editor.EditorContext;
 /**
  * @author Magnus Ihse Bursie
  */
-public class CommandNotFoundException extends UserException {
-
-    public CommandNotFoundException() {
+public class CommandNotFoundException extends UserException 
+{
+    static final long serialVersionUID = 2005;
+    
+    public CommandNotFoundException() 
+    {
         super();
     }
 
-    public CommandNotFoundException(String msg) {
+    public CommandNotFoundException(String msg) 
+    {
         super(msg);
     }
     

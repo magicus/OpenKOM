@@ -15,5 +15,7 @@ package nu.rydin.kom.exceptions;
  */
 public class InputInterruptedException extends SystemException
 {
+    static final long serialVersionUID = 2005;
+    
     // Just for classification
 }

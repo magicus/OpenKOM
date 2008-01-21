@@ -96,7 +96,6 @@ public class FullscreenEditor extends EditorContext
 	public UnstoredMessage edit()
 	throws KOMException, InterruptedException
 	{
-	    TerminalController tc = this.getTerminalController();
 	    MessageFormatter formatter = this.getMessageFormatter();
 	    //tc.eraseScreen();
 	    //tc.setCursor(0, 0);

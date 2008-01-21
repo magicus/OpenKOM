@@ -14,6 +14,8 @@ import java.sql.Timestamp;
  */
 public class ConferenceListItem extends NameAssociation implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final Timestamp created;
     
     private final Timestamp lastActive;

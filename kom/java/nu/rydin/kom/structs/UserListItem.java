@@ -7,13 +7,14 @@
 package nu.rydin.kom.structs;
 
 import java.io.Serializable;
-import nu.rydin.kom.constants.Activities;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  */
 public class UserListItem implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final int m_session;
     
     public final NameAssociation m_user;

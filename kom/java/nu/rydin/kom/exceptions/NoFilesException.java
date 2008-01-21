@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class NoFilesException extends UserException
 {
+    static final long serialVersionUID = 2005;
+    
     public NoFilesException()
     {
         super();

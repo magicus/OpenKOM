@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class SessionListItem implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final int sessionId;
     private final short sessionType;
     private final long loginTime;

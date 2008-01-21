@@ -13,6 +13,8 @@ import nu.rydin.kom.frontend.text.KeystrokeTokenizer;
  */
 public class LineEditingDoneException extends LineEditorException
 {
+    static final long serialVersionUID = 2005;
+    
     private final KeystrokeTokenizer.Token m_token;
 
     public LineEditingDoneException(KeystrokeTokenizer.Token token, String line, int position)

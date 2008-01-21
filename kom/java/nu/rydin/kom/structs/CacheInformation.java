@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class CacheInformation implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final long numAccesses;
     
     private final long numHits;

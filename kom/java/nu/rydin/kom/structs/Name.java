@@ -16,6 +16,8 @@ import nu.rydin.kom.constants.Visibilities;
  */
 public class Name implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	static private Name s_emptyName = new Name("", Visibilities.PUBLIC, NameManager.UNKNOWN_KIND);
     private String m_name;
     

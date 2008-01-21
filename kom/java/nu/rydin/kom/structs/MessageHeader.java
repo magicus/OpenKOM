@@ -14,6 +14,8 @@ import java.sql.Timestamp;
  */
 public class MessageHeader implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private final long m_id;
 	private final Timestamp m_created;	
 	private final long m_author;

@@ -8,6 +8,8 @@ package nu.rydin.kom.exceptions;
  */
 public class SelectionOverflowException extends UserException
 {
+    static final long serialVersionUID = 2005;
+    
     private long[] partialSelection; 
     
     public SelectionOverflowException(long[] partialSelection)

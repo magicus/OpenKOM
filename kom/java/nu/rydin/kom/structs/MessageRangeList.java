@@ -15,6 +15,8 @@ import com.frameworx.util.ListAtom;
  */
 public class MessageRangeList extends ListAtom implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private MessageRange m_range;
 	
 	public MessageRangeList(MessageRange range)

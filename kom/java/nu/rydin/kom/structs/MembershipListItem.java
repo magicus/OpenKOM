@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class MembershipListItem implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private NameAssociation m_conference;
 	
 	private int m_unread;

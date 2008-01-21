@@ -16,7 +16,8 @@ import nu.rydin.kom.events.*;
 public class EventDeliveredException extends LineEditorException
 {
 	private Event m_event;
-	
+    static final long serialVersionUID = 2005;
+    	
 	public EventDeliveredException(Event event, String line, int pos)
 	{
 	    super(line, pos);

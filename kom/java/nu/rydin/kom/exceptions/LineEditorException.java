@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class LineEditorException extends SystemException
 {
+    static final long serialVersionUID = 2005;
+    
     private final String m_line;
     private final int m_pos;
     

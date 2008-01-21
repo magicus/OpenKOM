@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class NamedObject implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private final long id;
 	private final Name name;
     private final String keywords;

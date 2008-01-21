@@ -11,7 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class SystemException extends KOMException
 {
-
+    static final long serialVersionUID = 2005;
+   
     public SystemException()
     {
         super();

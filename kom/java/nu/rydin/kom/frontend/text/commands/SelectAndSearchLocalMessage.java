@@ -10,7 +10,6 @@ import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
 import nu.rydin.kom.frontend.text.parser.RawParameter;
-import nu.rydin.kom.structs.MessageSearchResult;
 
 /**
  * @author <a href=mailto:magnus.neck@abc.se>Magnus Neck</a>

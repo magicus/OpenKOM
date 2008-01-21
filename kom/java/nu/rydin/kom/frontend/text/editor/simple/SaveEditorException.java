@@ -10,7 +10,8 @@ import nu.rydin.kom.exceptions.EscapeException;
  */
 public class SaveEditorException extends EscapeException
 {
-
+    static final long serialVersionUID = 2005;
+    
     public SaveEditorException()
     {
         super();

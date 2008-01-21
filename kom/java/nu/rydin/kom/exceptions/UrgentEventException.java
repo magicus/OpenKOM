@@ -16,6 +16,8 @@ import nu.rydin.kom.events.Event;
  */
 public class UrgentEventException extends EventDeliveredException
 {
+    static final long serialVersionUID = 2005;
+    
 	public UrgentEventException(Event event, String line, int pos)
 	{
 		super(event, line, pos);

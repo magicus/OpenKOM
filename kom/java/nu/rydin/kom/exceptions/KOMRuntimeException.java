@@ -13,6 +13,8 @@ import nu.rydin.kom.frontend.text.Context;
  */
 public class KOMRuntimeException extends RuntimeException 
 {
+    static final long serialVersionUID = 2005;
+    
 	public KOMRuntimeException()
 	{
 		super();

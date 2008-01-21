@@ -15,6 +15,8 @@ import nu.rydin.kom.constants.Visibilities;
  */
 public class NameAssociation implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private long m_id;
 	
 	private Name m_name;

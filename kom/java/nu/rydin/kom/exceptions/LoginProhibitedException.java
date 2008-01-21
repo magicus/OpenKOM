@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class LoginProhibitedException extends KOMException
 {
+    static final long serialVersionUID = 2005;
+    
     public LoginProhibitedException()
     {
         super();

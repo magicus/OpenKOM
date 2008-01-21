@@ -13,6 +13,8 @@ import java.sql.Timestamp;
  */
 public class GlobalMessageSearchResult extends MessageSearchResult
 {
+    static final long serialVersionUID = 2005;
+    
     private final NameAssociation m_conference;
 
     public GlobalMessageSearchResult(long globalid, int localid, NameAssociation conference, 

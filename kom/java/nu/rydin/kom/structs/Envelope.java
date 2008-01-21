@@ -13,8 +13,12 @@ import java.io.Serializable;
  */
 public class Envelope implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	public static class RelatedMessage implements Serializable
 	{
+        static final long serialVersionUID = 2005;
+        
 		private final MessageOccurrence m_occurrence;
 		
 		private final long m_author;

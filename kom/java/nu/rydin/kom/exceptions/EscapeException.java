@@ -13,4 +13,5 @@ package nu.rydin.kom.exceptions;
  */
 public class EscapeException extends SystemException
 {
+    static final long serialVersionUID = 2005;
 }

@@ -12,6 +12,8 @@ package nu.rydin.kom.exceptions;
  */
 public class RepliesNotAllowedException extends AuthorizationException
 {
+    static final long serialVersionUID = 2005;
+    
     public RepliesNotAllowedException()
     {
         super();

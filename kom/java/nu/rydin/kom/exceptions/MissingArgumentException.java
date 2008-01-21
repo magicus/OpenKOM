@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class MissingArgumentException extends UserException
 {
+    static final long serialVersionUID = 2005;
+    
 	public MissingArgumentException()
 	{
 		super();

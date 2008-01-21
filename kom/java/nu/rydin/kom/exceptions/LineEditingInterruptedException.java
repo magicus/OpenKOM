@@ -6,9 +6,10 @@ package nu.rydin.kom.exceptions;
 /**
  * @author Magnus Ihse Bursie
  */
-public class LineEditingInterruptedException extends
-        OperationInterruptedException
+public class LineEditingInterruptedException extends OperationInterruptedException
 {
+    static final long serialVersionUID = 2005;
+    
     private String m_partialLine;
     
     public LineEditingInterruptedException(String partialLine)

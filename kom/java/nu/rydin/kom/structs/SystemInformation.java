@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class SystemInformation implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final boolean allowLogins;
     
     private final CacheInformation nameCache;

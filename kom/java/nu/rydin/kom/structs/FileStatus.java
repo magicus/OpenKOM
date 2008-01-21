@@ -14,6 +14,8 @@ import java.sql.Timestamp;
  */
 public class FileStatus implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final long m_parent;
     
     private final String m_name;

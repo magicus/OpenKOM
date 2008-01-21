@@ -14,6 +14,8 @@ import java.sql.Timestamp;
  */
 public class UserLogItem implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final long m_userId;
     
     private String m_userName;

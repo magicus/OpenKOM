@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class ModuleException extends Exception
 {
+    static final long serialVersionUID = 2005;
+    
     public ModuleException(String msg)
     {
         super(msg);

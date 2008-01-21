@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class SessionState implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private final short suggestedAction;
     
     private final long currentConference;

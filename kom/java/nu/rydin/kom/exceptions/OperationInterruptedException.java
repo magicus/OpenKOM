@@ -16,5 +16,7 @@ package nu.rydin.kom.exceptions;
  */
 public class OperationInterruptedException extends UserException
 {
+    static final long serialVersionUID = 2005;
+    
     // Just for classification
 }

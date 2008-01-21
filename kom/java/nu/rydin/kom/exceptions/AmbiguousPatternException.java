@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class AmbiguousPatternException extends Exception 
 {
+    static final long serialVersionUID = 2005;
+    
     public AmbiguousPatternException() 
     {
         super();

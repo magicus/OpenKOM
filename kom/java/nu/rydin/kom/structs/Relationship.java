@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class Relationship implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
     private long id;
     private long referer;
     private long referee;

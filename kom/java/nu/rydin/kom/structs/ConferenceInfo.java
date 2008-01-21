@@ -13,6 +13,8 @@ import java.sql.Timestamp;
  */
 public class ConferenceInfo extends NamedObject
 {
+    static final long serialVersionUID = 2005;
+    
 	private final long m_administrator;
 	private final int m_permissions;
 	private final int m_nonmemberPermissions;

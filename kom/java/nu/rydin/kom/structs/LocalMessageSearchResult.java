@@ -13,7 +13,9 @@ import java.sql.Timestamp;
  */
 public class LocalMessageSearchResult extends MessageSearchResult
 {
-    public LocalMessageSearchResult(long globalid, int localid, NameAssociation author, String subject, long replyTo, 
+    static final long serialVersionUID = 2005;
+    
+   public LocalMessageSearchResult(long globalid, int localid, NameAssociation author, String subject, long replyTo, 
             Timestamp timestamp, NameAssociation mailRecipient)
     {
         super(globalid, localid, author, subject, replyTo, timestamp, mailRecipient);

@@ -14,6 +14,8 @@ import java.sql.Timestamp;
  */
 public class MessageOccurrence extends MessageLocator implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private final Timestamp m_timestamp;
 	private final short m_kind;
 	private final NameAssociation m_user;

@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class AllRecipientsNotReachedException extends SystemException 
 {
+    static final long serialVersionUID=2005;
+    
 	public AllRecipientsNotReachedException()
 	{
 		super();

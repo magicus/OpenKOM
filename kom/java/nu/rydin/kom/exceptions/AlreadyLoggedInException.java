@@ -15,6 +15,8 @@ import nu.rydin.kom.structs.SessionListItem;
  */
 public class AlreadyLoggedInException extends SystemException
 {
+    static final long serialVersionUID = 2005;
+    
     public List<SessionListItem> sessions;
     
 	public AlreadyLoggedInException(List<SessionListItem> sessions)

@@ -12,6 +12,8 @@ package nu.rydin.kom.exceptions;
  */
 public class ConferenceNotFoundException extends ObjectNotFoundException
 {
+    static final long serialVersionUID = 2005;
+    
     public ConferenceNotFoundException()
     {
         super();

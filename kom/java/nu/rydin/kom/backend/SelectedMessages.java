@@ -6,9 +6,6 @@
  */
 package nu.rydin.kom.backend;
 
-import java.lang.reflect.Array;
-import java.util.Collections;
-
 import nu.rydin.kom.exceptions.InternalException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.frontend.text.Context;

@@ -8,6 +8,8 @@ package nu.rydin.kom.exceptions;
 
 public class EmailRecipientNotRecognizedException extends SystemException 
 {
+    static final long serialVersionUID = 2005;
+    
 	public EmailRecipientNotRecognizedException(String email)
 	{
 		super(email);

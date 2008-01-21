@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class MessageNotFoundException extends ObjectNotFoundException
 {
+    static final long serialVersionUID = 2005;
+    
     public MessageNotFoundException()
     {
         super();

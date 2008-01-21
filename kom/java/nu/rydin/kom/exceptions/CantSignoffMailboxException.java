@@ -12,6 +12,8 @@ package nu.rydin.kom.exceptions;
 
 public class CantSignoffMailboxException extends UserException 
 {
+    static final long serialVersionUID = 2005;
+    
 	public CantSignoffMailboxException() 
 	{
 		super();

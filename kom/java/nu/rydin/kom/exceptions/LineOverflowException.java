@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class LineOverflowException extends LineEditorException
 {
+    static final long serialVersionUID = 2005;
+    
 	public LineOverflowException(String line, int pos)
 	{
 	    super(line, pos);

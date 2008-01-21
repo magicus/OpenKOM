@@ -14,6 +14,8 @@ import java.sql.Timestamp;
  */
 public class LocalMessageHeader extends MessageHeader implements Serializable 
 {
+    static final long serialVersionUID = 2005;
+    
 	private final long m_conference;
 	private final int m_localnum;
 	

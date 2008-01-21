@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class UnexpectedException extends SystemException
 {
+    static final long serialVersionUID = 2005;
+    
 	private long m_user;
 		
 	public UnexpectedException(long user, Throwable t)

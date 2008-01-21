@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public abstract class UserException extends KOMException
 {
+    static final long serialVersionUID = 2005;
+    
     public UserException()
     {
         super();

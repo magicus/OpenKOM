@@ -14,6 +14,8 @@ import java.util.TimeZone;
  */
 public class UserInfo extends NamedObject
 {
+    static final long serialVersionUID = 2005;
+    
 	public static final int ADDRESS1 		= 0x00000001;
 	public static final int ADDRESS2 		= 0x00000002;
 	public static final int ADDRESS3 		= 0x00000004;

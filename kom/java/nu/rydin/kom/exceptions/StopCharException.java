@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class StopCharException extends LineEditorException
 {
+    static final long serialVersionUID = 2005;
+    
 	private char m_stopChar;
 	
 	public StopCharException(String line, int pos, char stopChar)

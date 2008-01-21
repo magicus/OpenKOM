@@ -15,6 +15,8 @@ import java.util.StringTokenizer;
  */
 public class MembershipInfo implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private final long m_user;
 	private final long m_conference;
 	private final boolean m_active;

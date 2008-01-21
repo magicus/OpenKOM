@@ -13,6 +13,8 @@ import nu.rydin.kom.exceptions.EscapeException;
  */
 public class QuitEditorException extends EscapeException
 {
+    static final long serialVersionUID = 2005;
+    
     public QuitEditorException()
     {
         super();

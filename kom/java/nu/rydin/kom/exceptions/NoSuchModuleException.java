@@ -11,6 +11,8 @@ package nu.rydin.kom.exceptions;
  */
 public class NoSuchModuleException extends SystemException
 {
+    static final long serialVersionUID = 2005;
+    
     public NoSuchModuleException()
     {
         super();

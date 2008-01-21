@@ -14,6 +14,8 @@ import java.io.Serializable;
  */
 public class MessageRange implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private int m_min;
 	
 	private int m_max;

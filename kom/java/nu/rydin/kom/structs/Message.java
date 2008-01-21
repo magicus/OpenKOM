@@ -15,6 +15,8 @@ import java.sql.Timestamp;
  */
 public class Message extends MessageHeader implements Serializable
 {
+    static final long serialVersionUID = 2005;
+    
 	private String m_body;
 	
 	private final MessageOccurrence[] m_occurrences;

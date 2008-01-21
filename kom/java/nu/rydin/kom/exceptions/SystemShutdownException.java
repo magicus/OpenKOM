@@ -18,6 +18,8 @@ import nu.rydin.kom.events.Event;
  */
 public class SystemShutdownException extends UrgentEventException
 {
+    static final long serialVersionUID = 2005;
+    
 	public SystemShutdownException(Event e, String line, int pos)
 	{
 		super(e, line, pos);
