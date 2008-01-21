@@ -28,7 +28,7 @@ public class FilterUtils
         // We're lazy: Assume nothing gets wiped out and
         // reallocate array only if we need to.
         //
-        ArrayList list = null;
+        ArrayList<Object> list = null;
         int top = data.length;
         for (int idx = 0; idx < top; idx++)
         {
@@ -40,7 +40,7 @@ public class FilterUtils
                 //
                 if(list == null)
                 {
-                    list = new ArrayList(top - 1);
+                    list = new ArrayList<Object>(top - 1);
                     for(int idx2 = 0; idx2 < idx; ++idx2)
                         list.add(data[idx2]);
                 }
