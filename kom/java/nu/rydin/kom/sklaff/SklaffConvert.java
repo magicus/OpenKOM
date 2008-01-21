@@ -406,6 +406,7 @@ public class SklaffConvert
             //
             if(me.getAuthor() != sklaffUser)
             {
+                @SuppressWarnings("unused")
                 long id = convertMessage(me, sklaffUser, user, true, replyFixups, conn);   
                 // System.out.println("Created message: " + file + " linked to: " + id);
             }
@@ -453,8 +454,8 @@ public class SklaffConvert
                 // Link to message in party's mailbox
                 //
                 id = rs.getLong(1);
-                int localnum = rs.getInt(2);
-               // System.out.println("Found message: " + file + " linked to: " + id + ", party=(" + me.getReplyToUser() + "," + localnum);
+                //int localnum = rs.getInt(2);
+                // System.out.println("Found message: " + file + " linked to: " + id + ", party=(" + me.getReplyToUser() + "," + localnum);
                 addMsgOcc.setInt(1, me.getNum());
                 addMsgOcc.setLong(2, user);
                 addMsgOcc.setLong(3, id);
@@ -523,6 +524,7 @@ public class SklaffConvert
         }
         long author = authorObj.longValue();
         long replyTo = -1;
+        @SuppressWarnings("unused")
         long replyToAuthor = -1;
         long replyConf = -1;
         boolean needFixup = false;

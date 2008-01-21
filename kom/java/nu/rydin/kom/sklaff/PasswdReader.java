@@ -88,6 +88,7 @@ public class PasswdReader
                     continue;
                 }                
                 st.nextToken(); // Skip group
+                @SuppressWarnings("unused")
                 String name = st.nextToken();
                 answer.put(new Integer(nbr), new PasswdEntry(id, passwd, ud.getFullName(), 
                         ud.getLastLogin()));

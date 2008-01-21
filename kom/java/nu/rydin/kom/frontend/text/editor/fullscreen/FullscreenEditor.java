@@ -341,7 +341,6 @@ public class FullscreenEditor extends EditorContext
 	    
 	    // Move cursor up
 	    //
-	    boolean needsRefresh = m_cx == 0;
 	    if(line > 0 && moveUp)
 	        this.moveUp();
 	    m_cx = 0;
@@ -366,7 +365,7 @@ public class FullscreenEditor extends EditorContext
             if(line >= buffer.size() - 1)
         	    buffer.add("");
             String merged = left + buffer.get(line);
-            int l = merged.length();
+            //int l = merged.length();
             
             // Word wrap if needed
             //

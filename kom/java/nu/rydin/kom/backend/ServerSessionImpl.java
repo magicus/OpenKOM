@@ -795,7 +795,6 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
     
     public void setActivity(short a, boolean keepLastState)
     {
-        Logger.info(this, "mla=" + m_lastActivity +", mca=" + m_currentActivity + ", a=" + a + ", kls=" + keepLastState);
         if (keepLastState)
         {
             m_lastActivity = m_currentActivity;

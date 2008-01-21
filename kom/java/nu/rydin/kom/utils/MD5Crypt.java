@@ -74,6 +74,7 @@ public class MD5Crypt {
 
 	/* now we have a properly formatted salt */
 
+    @SuppressWarnings("unused")
 	int saltLength = salt.length();
 
 	MessageDigest md5_1, md5_2;

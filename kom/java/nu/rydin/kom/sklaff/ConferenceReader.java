@@ -33,12 +33,14 @@ public class ConferenceReader
                 line = CharConvert.convert(line);
                 StringTokenizer st = new StringTokenizer(line, ":");
                 String id = st.nextToken();
+                @SuppressWarnings("unused")
                 String lastTest = st.nextToken();
                 String owner = st.nextToken();
                 if(sklommon)
                     st.nextToken();
                 String time = st.nextToken();
                 String type = st.nextToken();
+                @SuppressWarnings("unused")
                 String life = st.nextToken();
                 String replyConf = st.nextToken();
                 String name = st.nextToken();
