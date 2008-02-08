@@ -8,15 +8,19 @@
 package nu.rydin.kom.frontend.text.commands;
 
 import java.io.PrintWriter;
+import java.io.IOException;
+
 
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.exceptions.CantSignoffMailboxException;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.NoMoreNewsException;
+import nu.rydin.kom.exceptions.OperationInterruptedException;
 import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
+import nu.rydin.kom.frontend.text.LineEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
-import nu.rydin.kom.frontend.text.parser.ConferenceParameter;
+import nu.rydin.kom.frontend.text.parser.ConferenceWildcardParameter;
 import nu.rydin.kom.i18n.MessageFormatter;
 import nu.rydin.kom.structs.Name;
 import nu.rydin.kom.structs.NameAssociation;
@@ -28,13 +32,45 @@ public class SignOff extends AbstractCommand
 {
 	public SignOff (Context context, String fullName, long permissions)
 	{
-	    super(fullName, new CommandLineParameter[] { new ConferenceParameter(true) }, permissions);
+	    super(fullName, new CommandLineParameter[] { new ConferenceWildcardParameter(true) }, permissions);
 	}
 	
 	public void execute(Context context, Object[] parameterArray) 
-	throws KOMException
+	throws KOMException, InterruptedException, IOException
 	{
-		long conference = ((NameAssociation)parameterArray[0]).getId();
+        if (-1 == ((NameAssociation)parameterArray[0]).getId())  //.equals(parameterArray[0].toString()))
+        {
+            MessageFormatter mf = context.getMessageFormatter();
+            PrintWriter out = context.getOut();
+            LineEditor in = context.getIn();
+            out.println(mf.format("signoff.allconfs.info"));
+            int choice = in.getChoice(mf.format("signoff.allconfs.verify") +
+                                        " (" +
+                                        mf.format("misc.yes") +
+                                        "/" + 
+                                        mf.format("misc.no") +
+                                        ")? ",
+                                      new String[] { mf.format("misc.no"), 
+                                                     mf.format("misc.yes") },
+                                      0,
+                                      mf.format("nu.rydin.kom.exceptions.InvalidChoiceException.format"));
+            if (1 == choice)
+            {
+                int cnt = context.getSession().signoffAllConferences();
+                out.println (mf.format ("signoff.allconfs.result", cnt));
+                
+                // All conferences include the current one, dump the user in the mailbox.
+                //
+                context.getSession().gotoConference(context.getLoggedInUserId());
+                return;
+            }
+            else
+            {
+                throw new OperationInterruptedException();
+            }
+        }
+
+        long conference = ((NameAssociation)parameterArray[0]).getId();
 		if (context.getLoggedInUserId() == conference)
 		{
 			throw new CantSignoffMailboxException();

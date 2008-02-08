@@ -1776,6 +1776,83 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+    
+    public int signupForAllConferences()
+    throws UnexpectedException, ObjectNotFoundException
+    {
+        int cnt = 0;
+        long uid = this.getLoggedInUserId();
+        MembershipManager mm = m_da.getMembershipManager();
+        
+        // Start by retrieving a list of all conferences
+        //        
+        long[] allconfs;
+        MembershipInfo[] memberOf;
+        try
+        {
+            allconfs = m_da.getConferenceManager().getConferenceIdsByPattern("%");
+            memberOf = mm.listMembershipsByUser(uid);
+        }
+        catch (SQLException e)
+        {
+            throw new UnexpectedException (uid, e);
+        }
+        catch (ObjectNotFoundException e)
+        {
+            // Throw a VERY unexpected exception..
+            //
+            throw new UnexpectedException (uid, e);
+        }
+        
+        // Put them in a better structure ..
+        //
+        HashSet<Long> s = new HashSet<Long>();
+        for (int i = 0; i < allconfs.length; ++i)
+        {
+            s.add (allconfs[i]);
+        }
+        
+        // .. and clean out anything the user is already a member of.
+        //
+        for (int i = 0; i < memberOf.length; ++i)
+        {
+            // if (s.contains(joined[i].getConference()))
+            // {
+                s.remove(memberOf[i].getConference());
+            // }
+        }
+        
+        // Finally, call signup() for each conference left in the set, silently swallowing
+        // every exception. This should be more efficient than verifying visibility and rights
+        // for every conference. Prove me wrong :-)
+        //
+        Iterator<Long> it = s.iterator();
+        while (it.hasNext())
+        {
+            try
+            {
+                mm.signup(uid, it.next(), 0, 0, 0);
+                ++cnt;
+            }
+            catch (Exception e)
+            {
+                // Don't bother differentiating between types, all we care about is that the
+                // signup failed.
+            }
+        }
+        
+        // Finally, refresh membership list and return the number of joined conferences.
+        //
+        try
+        {
+            this.reloadMemberships();
+        }
+        catch (SQLException e)
+        {
+            throw new UnexpectedException (uid, e);
+        }
+        return cnt;
+    }
 	
 	public Name signoff (long conferenceId)
 	throws ObjectNotFoundException, UnexpectedException, NotMemberException
@@ -1799,6 +1876,54 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		//
 	}
 	
+    public int signoffAllConferences()
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        // First, determine which conferences the user is a member of.
+        //
+        MembershipManager mm = m_da.getMembershipManager();
+        long uid = this.getLoggedInUserId();
+        MembershipInfo mo[];
+        try
+        {
+            mo = mm.listMembershipsByUser(uid);
+        }
+        catch (SQLException e)
+        {
+            throw new UnexpectedException (uid, e);
+        }
+        
+        // Walk through the array, swallowing any exception silently
+        //
+        int cnt = 0;
+        for (int i = 0; i < mo.length; ++i)
+        {
+            try
+            {
+                // Can't sign off mailbox.
+                //
+                if (uid == mo[i].getConference())
+                    continue;
+
+                mm.signoff(uid, mo[i].getConference());
+                ++cnt;
+            }
+            catch (Exception e) { }
+        }
+        
+        // Reload the memberships (should be quick by now) and return count.
+        //
+        try
+        {
+            this.reloadMemberships();
+        }
+        catch (SQLException e)
+        {
+            throw new UnexpectedException (uid, e);
+        }
+        return cnt;
+    }
+    
 	public long prioritizeConference(long conference, long targetconference)
 	throws ObjectNotFoundException, UnexpectedException, NotMemberException
 	{

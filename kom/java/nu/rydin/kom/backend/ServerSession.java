@@ -548,6 +548,15 @@ public interface ServerSession
 	public Name signup(long conferenceId)
 	throws ObjectNotFoundException, AlreadyMemberException, UnexpectedException, AuthorizationException;
 
+    /**
+     * Signs the user up for every conference which the user has permission to sign up for.
+     * 
+     * @return The number of new conference memberships.
+     * @throws UnexpectedException
+     */
+    public int signupForAllConferences()
+    throws UnexpectedException, ObjectNotFoundException;
+    
 	/**
 	 * Signs off from a conference.
 	 * @param conferenceId Object identifier.
@@ -560,6 +569,17 @@ public interface ServerSession
 	public Name signoff(long conferenceId)
 	throws ObjectNotFoundException, UnexpectedException, NotMemberException;
 	
+    /**
+     * Signs off every conference except for the user's mailbox.
+     * 
+     * @return The number of conferences signed off from.
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     * @throws NotMemberException
+     */
+    public int signoffAllConferences()
+    throws ObjectNotFoundException, UnexpectedException;
+    
 	/**
 	 * Re-prioritizes conferences for the current user, placing the given conference 
 	 * at the position of the given targetconference, and shifting every conference 
