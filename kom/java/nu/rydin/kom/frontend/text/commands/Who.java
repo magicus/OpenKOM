@@ -136,7 +136,7 @@ public class Who extends AbstractCommand
     		UserListItem each = users[idx];
     		long id = each.getUser().getId();
     		
-    		// Haven't seen it bedore? Remember it and skip to next!
+    		// Haven't seen it before? Remember it and skip to next!
     		//
     		if(!index.containsKey(id))
     		{
@@ -144,7 +144,7 @@ public class Who extends AbstractCommand
     			continue;
     		}
     		
-    		// We've seem ot before. Consolidate!
+    		// We've seen it before. Consolidate!
     		//
     		int p = index.get(id);
     		UserListItem old = users[p];

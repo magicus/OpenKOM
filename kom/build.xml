@@ -32,6 +32,12 @@
 
 	<target name="build-jar" depends="compile">
 		<mkdir dir="lib"/>
+		<copy todir="classes">
+			<fileset dir="${basedir}/conf">
+    				<include name="*"/>
+    				<exclude name="modules.xml"/>
+			</fileset>
+		</copy>
 		<jar destfile="lib/kom.jar" basedir="classes"/>
 	</target>
 
