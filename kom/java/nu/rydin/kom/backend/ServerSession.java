@@ -214,7 +214,7 @@ public interface ServerSession
 	 */	
 	public Envelope readNextReply()
 	throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException;
-
+    
 	/**
 	 * Creates a conference and makes the current user a member and the administrator of it.
 	 *  
@@ -499,6 +499,16 @@ public interface ServerSession
 	 */		
 	public long getCurrentMessage()
 	throws NoCurrentMessageException;
+    
+    /**
+     * Returns the thread ID for the message.
+     * 
+     * @return
+     * @throws MessageNotFoundException
+     * @throws UnexpectedException
+     */
+    public long getThreadIdForMessage(MessageLocator ml)
+    throws MessageNotFoundException, UnexpectedException;
 
 	/**
 	 * Returns an occurrence of the last read message, either in the current conference, or, 
@@ -717,7 +727,17 @@ public interface ServerSession
 	public int markThreadAsUnread(long root)
 	throws ObjectNotFoundException, UnexpectedException;
 	
-	/**
+    /**
+     * Marks all messages in a thread as unread
+     * @param root The root of the thread
+     * @param immediate Set to true to perform operation immediately
+     * @return The number of messages marked as unread
+     * @throws UnexpectedException
+     */
+    public int markThreadAsUnread(long root, boolean immediate)
+    throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException;
+
+    /**
 	 * Marks all messages with a matching subject as unread
 	 * 
 	 * @param subject The subject
@@ -728,7 +748,19 @@ public interface ServerSession
 	public int markSubjectAsUnread(String subject, boolean localOnly)
 	throws ObjectNotFoundException, UnexpectedException;
 	
-	/**
+    /**
+     * Marks all messages with a matching subject as unread
+     * 
+     * @param subject The subject
+     * @param localOnly Look in current conference only
+     * @param immediate Set to true to perform operation immediately
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public int markSubjectAsUnread(String subject, boolean localOnly, boolean immediate)
+    throws ObjectNotFoundException, UnexpectedException;
+
+    /**
 	 * Queues up a message to be marked as unread at logout.
 	 * 
 	 * @param The message (null for current message)

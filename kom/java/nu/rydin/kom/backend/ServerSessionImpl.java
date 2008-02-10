@@ -1597,6 +1597,31 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}		
 	}
 	
+    public long getThreadIdForMessage (MessageLocator ml) 
+    throws MessageNotFoundException, UnexpectedException
+    {
+        if (!ml.isValid())
+        {
+            throw new MessageNotFoundException();
+        }
+        try
+        {
+            if (-1 == ml.getGlobalId())
+            {
+                ml.setGlobalId(this.localToGlobal(this.getCurrentConferenceId(), ml.getLocalnum()));
+            }
+            return m_da.getMessageManager().getThreadIdForMessage (ml.getGlobalId());
+        }
+        catch (SQLException e)
+        {
+            throw new UnexpectedException (this.getLoggedInUserId(), e);
+        }
+        catch (ObjectNotFoundException e)
+        {
+            throw new UnexpectedException (this.getLoggedInUserId(), e);
+        }
+    }
+    
 	public void deleteMessageInCurrentConference (int localNum)
 	throws AuthorizationException, ObjectNotFoundException, UnexpectedException
 	{
@@ -2093,7 +2118,25 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    this.innerMarkAsUnreadAtLogout(this.resolveLocator(message).getGlobalId());
 	    this.saveUnreadMarkers();
 	}
-		
+
+    public int markThreadAsUnread(long root, boolean immediate)
+    throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException
+    {
+        ReadLogItem old = null;
+        if (immediate)
+        {
+            old = this.m_pendingUnreads;
+            this.m_pendingUnreads = null;
+        }
+        int n = this.markThreadAsUnread(root);
+        if (immediate)
+        {
+            this.applyUnreadMarkers();
+            this.m_pendingUnreads = old;
+        }
+        return n;
+    }
+    
 	public int markThreadAsUnread(long root)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -2102,6 +2145,24 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    return n;
 	}
 	
+    public int markSubjectAsUnread(String subject, boolean localOnly, boolean immediate)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        ReadLogItem old = null;
+        if (immediate)
+        {
+            old = this.m_pendingUnreads;
+            this.m_pendingUnreads = null;
+        }
+        int n = this.markSubjectAsUnread(subject, localOnly);
+        if (immediate)
+        {
+            this.applyUnreadMarkers();
+            this.m_pendingUnreads = old;
+        }
+        return n;
+    }
+    
 	public int markSubjectAsUnread(String subject, boolean localOnly)
 	throws ObjectNotFoundException, UnexpectedException
 	{
@@ -4559,7 +4620,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    }	    
 	}
 	
-	protected void applyUnreadMarkers()
+	public void applyUnreadMarkers()
 	throws UnexpectedException
 	{
 		for(; m_pendingUnreads != null; m_pendingUnreads = m_pendingUnreads.getPrevious())

@@ -37,6 +37,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextReply"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadOriginal"/>
+		<command class="nu.rydin.kom.frontend.text.commands.ReadFirstPost"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadNextSelectedMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadPreviousSelectedMessage"/>
 		<command class="nu.rydin.kom.frontend.text.commands.ReadRules"/>
@@ -52,7 +53,9 @@
 		<command class="nu.rydin.kom.frontend.text.commands.SkipBranch"/>
 		<command class="nu.rydin.kom.frontend.text.commands.MarkAsUnread"/>
 		<command class="nu.rydin.kom.frontend.text.commands.MarkTreeAsUnread"/>
-		<command class="nu.rydin.kom.frontend.text.commands.MarkSubjectAsUnread"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.SelectTree"/>
+		<command class="nu.rydin.kom.frontend.text.commands.MarkSubjectAsUnread"/>
+		<command class="nu.rydin.kom.frontend.text.commands.SelectSubject"/>
 	</category>
 	<category id="write" i18n="command.category.write" order="60">
 		<command class="nu.rydin.kom.frontend.text.commands.WriteMessage" permissions="0808"/>

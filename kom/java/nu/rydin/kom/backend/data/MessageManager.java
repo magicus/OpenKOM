@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import nu.rydin.kom.backend.CacheManager;
@@ -89,6 +90,8 @@ public class MessageManager
     private final PreparedStatement m_addBookmarkStmt;
     private final PreparedStatement m_deleteBookmarkStmt;
     private final PreparedStatement m_listBookmarksStmt;
+    private final PreparedStatement m_getThreadIdForMessageStmt;
+    private final PreparedStatement m_getMessagesByThreadIdAndStartStmt;
 	
 	private final Connection m_conn; 
 	
@@ -310,7 +313,10 @@ public class MessageManager
                 "DELETE FROM bookmarks WHERE user = ? AND message = ?");
         m_listBookmarksStmt = m_conn.prepareStatement(
                 "SELECT message, annotation FROM bookmarks WHERE user = ? ORDER BY created DESC");
-
+        m_getThreadIdForMessageStmt = m_conn.prepareStatement(
+                "select thread from messages where id = ?");
+        m_getMessagesByThreadIdAndStartStmt = m_conn.prepareStatement(
+                "select id from messages where thread = ? and id > ?");
 	}
 	
 	public void close()
@@ -388,6 +394,10 @@ public class MessageManager
             m_deleteBookmarkStmt.close();
         if(m_listBookmarksStmt != null)
             m_listBookmarksStmt.close();
+        if (m_getThreadIdForMessageStmt != null)
+            m_getThreadIdForMessageStmt.close();
+        if (m_getMessagesByThreadIdAndStartStmt != null)
+            m_getMessagesByThreadIdAndStartStmt.close();
 	}
 	
 	public void finalize()
@@ -1548,5 +1558,60 @@ public class MessageManager
             if(rs != null)
                 rs.close();
         }
+    }
+
+    public long getThreadIdForMessage(long msgid) 
+    throws SQLException, MessageNotFoundException
+    {
+        m_getThreadIdForMessageStmt.clearParameters();
+        m_getThreadIdForMessageStmt.setLong(1, msgid);
+
+        ResultSet rs = null;
+        try
+        {
+            rs = m_getThreadIdForMessageStmt.executeQuery();
+            rs.first();
+            return rs.getLong(1);
+        }
+        finally
+        {
+            if (rs != null)
+            {
+                rs.close();
+            }
+        }
+    }
+    
+    public long[] getMessagesByThreadIdAndStart(long thread, long start)
+    throws SQLException
+    {
+        m_getMessagesByThreadIdAndStartStmt.clearParameters();
+        m_getMessagesByThreadIdAndStartStmt.setLong(1, thread);
+        m_getMessagesByThreadIdAndStartStmt.setLong(2, start);
+        
+        ResultSet rs = null;
+        try
+        {
+            rs = m_getMessagesByThreadIdAndStartStmt.executeQuery();
+            List<Long> msgs = new ArrayList<Long>();
+            while (rs.next())
+            {
+                msgs.add (rs.getLong(1));
+            }
+            long[] retval = new long[msgs.size()];
+            int i = 0;
+            for (Iterator<Long> it = msgs.iterator(); it.hasNext(); ++i)
+            {
+                retval[i] = (long)it.next();
+            }
+        }
+        finally
+        {
+            if (rs != null)
+            {
+                rs.close();
+            }
+        }
+        return null;
     }
 }
