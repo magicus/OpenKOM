@@ -28,7 +28,8 @@
 		<command class="nu.rydin.kom.frontend.text.commands.GotoNextConference"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.Signup"/>
 		<command class="nu.rydin.kom.frontend.text.commands.SignOff"/>
-		<command class="nu.rydin.kom.frontend.text.commands.Prioritize"/>		
+		<command class="nu.rydin.kom.frontend.text.commands.Prioritize"/>
+		<command class="nu.rydin.kom.frontend.text.commands.AutoPrioritizeConferences"/>
 	</category>
 	<category id="read" i18n="command.category.read" order="40">
 		<command class="nu.rydin.kom.frontend.text.commands.ReadMessage"/>

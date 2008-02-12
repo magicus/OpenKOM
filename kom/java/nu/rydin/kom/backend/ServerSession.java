@@ -604,6 +604,15 @@ public interface ServerSession
 	public long prioritizeConference(long conference, long targetconference)
 	throws ObjectNotFoundException, UnexpectedException, NotMemberException;
 	
+    /**
+     * Re-prioritizes all of the current user's conferences.
+     * 
+     * @see ServerSessionImpl.SortableMembershipInfo.compareTo()
+     * @throws UnexpectedException
+     */
+    public void autoPrioritizeConferences()
+    throws UnexpectedException;
+    
 	/**
 	 * Returns a user record based on a global id
 	 * @param userId The global id

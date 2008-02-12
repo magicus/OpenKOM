@@ -32,6 +32,7 @@ import nu.rydin.kom.structs.PermissionKey;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class MembershipManager
 {
@@ -737,4 +738,31 @@ public class MembershipManager
 			rs.getInt(8)		// negation_mask
 			);
 	}
+    
+    /**
+     * Reprioritizes the conference for the user.
+     * 
+     * @param newprio New priority (starting at zero)
+     * @param user User for whom to reprioritize conference
+     * @param conference Conference ID
+     * @throws SQLException
+     */
+    public void updatePriority (long newprio, long user, long conference)
+    throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            m_updatePriorityStmt.clearParameters();
+            m_updatePriorityStmt.setLong(1, newprio);           
+            m_updatePriorityStmt.setLong(2, user);
+            m_updatePriorityStmt.setLong(3, conference);
+            m_updatePriorityStmt.executeUpdate();
+        }
+        finally
+        {
+            if (rs != null)
+                rs.close();
+        }
+    }
 }

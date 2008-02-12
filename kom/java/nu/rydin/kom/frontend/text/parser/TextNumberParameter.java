@@ -15,6 +15,7 @@ import nu.rydin.kom.structs.MessageLocator;
  * The "return type" for a TextNumberParameter is a TextNumber object.
  * 
  * @author Magnus Ihse Bursie (magnus@ihse.net)
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class TextNumberParameter extends CommandLineParameter
 {
@@ -66,7 +67,23 @@ public class TextNumberParameter extends CommandLineParameter
             cooked = cooked.substring(1, top);
         }
         
-		try
+        // 2008Feb11 jepson: Added support for the thread ID format.
+        
+        if ((cooked.length() > 2) && (cooked.charAt(0) == '[') && (cooked.charAt(top-1) == ']'))
+        {
+            // Thread ID with closing bracket
+            global = true;
+            cooked = cooked.substring(1, top-1);
+        }
+
+        if ((cooked.length() > 1) && (cooked.charAt(0) == '['))
+        {
+            // Thread ID without closing bracket
+            global = true;
+            cooked = cooked.substring(1, top);
+        }
+
+        try
 		{
 			int number = Integer.parseInt(cooked);
 			if (number > 0)

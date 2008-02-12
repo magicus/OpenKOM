@@ -211,6 +211,45 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         }
     }
     
+    private class SortableMembershipInfo implements Comparable<SortableMembershipInfo>
+    {
+        private final MembershipInfo m_mi;
+        private final long m_parentCount;
+        
+        public SortableMembershipInfo (MembershipInfo mi, long parentCount)
+        {
+            m_mi = mi;
+            m_parentCount = parentCount;
+        }
+        
+        public MembershipInfo getMembershipInfo()
+        {
+            return m_mi;
+        }
+        
+        protected long getId()
+        {
+            return m_mi.getConference();
+        }
+        
+        protected long getPriority()
+        {
+            return m_mi.getPriority();
+        }
+        
+        protected long getParentCount()
+        {
+            return m_parentCount;
+        }
+        
+        public int compareTo (SortableMembershipInfo that)
+        {
+            return this.getParentCount() < that.getParentCount() ? -1 : 
+                   (this.getParentCount() > that.getParentCount() ? 1 :
+                   (this.getPriority() < that.getPriority() ? -1 : 1)); 
+        }
+    }
+    
     private static final int MAX_SELECTION = 1000;
 
 	/**
@@ -1981,6 +2020,46 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	    }
 	}
 	
+    public void autoPrioritizeConferences()
+    throws UnexpectedException
+    {
+        try
+        {
+            ConferenceManager cm = this.m_da.getConferenceManager();
+            MembershipManager mm = this.m_da.getMembershipManager();
+            MembershipInfo[] mi = mm.listMembershipsByUser(this.getLoggedInUserId());
+
+            // Put the data in a sortable wrapper and place in a better container.
+            //
+            List<SortableMembershipInfo> newOrder = new ArrayList<SortableMembershipInfo>(mi.length);
+            for (int i = 0; i < mi.length; ++i)
+            {
+                // FIXME: If we experience a performance bottleneck (which I doubt), change
+                // this to start by populating a hash table with conference ID + parent
+                // count (one call, bulk transfer of n rows) instead of n separate calls.
+                // Then again, the autoprioritize command won't get run all that often and
+                // we'll be fine with an extra few seconds as long as the so called
+                // database doesn't buckle under the load. 
+                //
+                newOrder.add(new SortableMembershipInfo(mi[i], cm.countParentsForConference(mi[i].getConference())));
+            }
+            java.util.Collections.sort(newOrder);
+            
+            // OK, we're now sorted according to the Algorithm of Darkness. Walk the list,
+            // writing new priorities back to the database.
+            //
+            Iterator<SortableMembershipInfo> it = newOrder.listIterator();
+            for (int i = 1; it.hasNext(); ++i)
+            {
+                mm.updatePriority(i, this.getLoggedInUserId(), it.next().getId());
+            }
+        }
+        catch (Exception e)
+        {
+            throw new UnexpectedException (this.getLoggedInUserId(), e);
+        }
+    }
+    
 	public UserInfo getUser(long userId)
 	throws ObjectNotFoundException, UnexpectedException
 	{

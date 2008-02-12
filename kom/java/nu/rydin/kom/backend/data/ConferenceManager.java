@@ -27,6 +27,7 @@ import nu.rydin.kom.structs.Name;
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
  * @author <a href=mailto:guru@slideware.com>Ulf Hedlund</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class ConferenceManager 
 {	
@@ -41,6 +42,8 @@ public class ConferenceManager
 	private final PreparedStatement m_listByNameStmt;
 	private final PreparedStatement m_countStmt;
 	private final PreparedStatement m_changePermissionsStmt;
+    private final PreparedStatement m_getParentCountForConfStmt;
+    private final PreparedStatement m_getMaxParentCountStmt;
 	
 	public ConferenceManager(Connection conn, NameManager nameManager)
 	throws SQLException
@@ -75,6 +78,8 @@ public class ConferenceManager
 		m_countStmt = conn.prepareStatement("SELECT count(*) FROM conferences");
 		m_changePermissionsStmt = conn.prepareStatement(
 		     "UPDATE conferences SET permissions = ?, nonmember_permissions = ? WHERE id = ?");
+        m_getParentCountForConfStmt = conn.prepareStatement("select count(*) from conferences where replyConf = ?");
+        m_getMaxParentCountStmt = conn.prepareStatement("select count(*) as count from conferences where replyConf is not null group by replyConf order by count desc limit 1");
 	}
 	
 	public void close()
@@ -97,6 +102,10 @@ public class ConferenceManager
 			    m_listByNameStmt.close();
 			if(m_countStmt != null)
 			    m_countStmt.close();
+            if(m_getParentCountForConfStmt != null)
+                m_getParentCountForConfStmt.close();
+            if(m_getMaxParentCountStmt != null)
+                m_getMaxParentCountStmt.close();
 		}
 		catch(SQLException e)
 		{
@@ -369,6 +378,42 @@ public class ConferenceManager
 	    }
 	}
 	
+    public long countParentsForConference(long conf)
+    throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            m_getParentCountForConfStmt.clearParameters();
+            m_getParentCountForConfStmt.setLong(1, conf);
+            rs = m_getParentCountForConfStmt.executeQuery();
+            rs.first();
+            return rs.getLong(1);
+        }
+        finally
+        {
+            if (rs != null)
+                rs.close();
+        }
+    }
+    
+    public long getMaxParentCount()
+    throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            m_getMaxParentCountStmt.executeQuery();
+            rs.first();
+            return rs.getLong(1);
+        }
+        finally
+        {
+            if (rs != null)
+                rs.close();
+        }
+    }
+    
 	public ConferenceListItem[] listByName(long user)
 	throws SQLException
 	{
@@ -401,6 +446,6 @@ public class ConferenceManager
 			{
 				rs.close();
 			}
-		}	    	    
+        }
 	}	
 }
