@@ -17,6 +17,7 @@ import java.util.Stack;
 
 import nu.rydin.kom.backend.EventSource;
 import nu.rydin.kom.backend.ServerSession;
+import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.events.EventTarget;
 import nu.rydin.kom.events.SessionShutdownEvent;
@@ -37,6 +38,7 @@ import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class LineEditor implements NewlineListener
 {
@@ -50,6 +52,7 @@ public class LineEditor implements NewlineListener
 	public static final int FLAG_RECORD_HISTORY			= 0x20;
 	public static final int FLAG_ALLOW_HISTORY			= 0x40;
 	public static final int FLAG_DONT_REFRESH			= 0x80;
+    public static final int FLAG_TREAT_SPACE_AS_NEWLINE = 0x100;
 	
 	private static final char BELL 				= 7;
 	private static final char BS				= 8;
@@ -608,7 +611,6 @@ public class LineEditor implements NewlineListener
 		return result;
 	}
 	
-
 	/**
      * Displays a prompt and waits for user input. The user may choose to abort (noChars), 
      * continue another page (yesChars) or continue all (goAheadChars).
@@ -630,8 +632,42 @@ public class LineEditor implements NewlineListener
         String yes = m_formatter.format("misc.more.yeschars");
         String no = m_formatter.format("misc.more.nochars");
         String goAhead = m_formatter.format("misc.more.goaheadchars");
+
+        // This is a quick fix, since the only alternative is completely rewriting
+        // getMore() and a few other methods. The current architecture was never designed
+        // for changing core constants (such as misc.more.yeschars) runtime.
+        //
+        boolean addSpaceAsYesChar = false;
+        try
+        {
+            if ((this.m_session.getUser(this.m_session.getLoggedInUserId()).getFlags1() & UserFlags.TREAT_SPACE_AS_NEWLINE) != 0)
+                addSpaceAsYesChar = true;
+        }
+        catch (Exception e)
+        {
+            // Quietly throw the exception away, there's nothing we can do anyway.
+        }
+        
+        if (addSpaceAsYesChar)
+        {
+            // Space might be a no character by default, if so we need to drop it from that
+            // string as well as adding it to the yes characters.
+            //
+            if (!yes.contains(" "))
+            {
+                yes += " ";
+            }
+            
+            int idx = no.indexOf(' ');
+            if (-1 != idx)
+            {
+                StringBuffer tmpNo = new StringBuffer(no);
+                no = tmpNo.deleteCharAt(idx).toString();
+            }
+        }
         
         String all = yes + no + goAhead;
+        
         char answer = waitForCharacter(all.toCharArray());
         if (yes.indexOf(answer) != -1) 
         {
@@ -1051,7 +1087,13 @@ public class LineEditor implements NewlineListener
 						m_out.flush();
 						break; 
 					}
-					
+                    
+                    if (((flags & FLAG_TREAT_SPACE_AS_NEWLINE) != 0) && (0 == cursorpos) && SPACE == ch)
+                    {
+                        m_out.write("\r\n");
+                        return "\n"; // execute default command
+                    }
+                    
 					// Skip non printable characters
 					//
 					if(ch < 32 && ch != TAB)

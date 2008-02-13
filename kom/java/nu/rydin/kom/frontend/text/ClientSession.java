@@ -1044,7 +1044,8 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
     			try
     			{
     				cmdString = m_in.readLine("", "", 0, LineEditor.FLAG_ECHO | LineEditor.FLAG_RECORD_HISTORY
-    				        | LineEditor.FLAG_STOP_ON_EVENT | LineEditor.FLAG_STOP_ONLY_WHEN_EMPTY | LineEditor.FLAG_ALLOW_HISTORY);
+    				        | LineEditor.FLAG_STOP_ON_EVENT | LineEditor.FLAG_STOP_ONLY_WHEN_EMPTY | LineEditor.FLAG_ALLOW_HISTORY | 
+                            ((this.getCachedUserInfo().getFlags1() & UserFlags.TREAT_SPACE_AS_NEWLINE) != 0 ? LineEditor.FLAG_TREAT_SPACE_AS_NEWLINE : 0));
     			}
     			catch(EventDeliveredException e)
     			{

@@ -8,6 +8,7 @@ package nu.rydin.kom.constants;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class UserFlags
 {
@@ -52,6 +53,7 @@ public class UserFlags
     public static long MORE_PROMPT_IN_BROADCAST             = 0x04000000;
     public static long SELECT_YOUNGEST_FIRST                = 0x08000000;
     public static long CONFIRM_BROADCAST_MESSAGES           = 0x10000000;
+    public static long TREAT_SPACE_AS_NEWLINE               = 0x20000000;
 
 	/**
 	 * Default value for flagword 1
