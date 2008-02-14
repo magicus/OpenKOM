@@ -203,8 +203,6 @@ public class Parser
             if (!(m_commands[i] instanceof AliasWrapper))
                 continue;
             
-            i=i+0;
-            
             if (alias.equalsIgnoreCase(m_commands[i].getFullName()))
             {
                 pos = i;
