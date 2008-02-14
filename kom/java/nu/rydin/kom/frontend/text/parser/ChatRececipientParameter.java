@@ -52,7 +52,7 @@ public class ChatRececipientParameter extends NamedObjectParameter
         {
             return ALL_USERS;
         }
-
+        
         ServerSession session = context.getSession();
         
         // Use a set since we want each name only once, even if the
@@ -72,16 +72,33 @@ public class ChatRececipientParameter extends NamedObjectParameter
             {
                 set.add(conferences[idx]);
             }
-        } else
+        } 
+        else
         {
             // Otherwise, we select it from the list of logged in users.
+
+            long numId = this.getNamedObjectIdIfPresent(pattern);
             UserListItem[] users = session.listLoggedInUsers();
             for (int idx = 0; idx < users.length; ++idx)
             {
                 NameAssociation name = users[idx].getUser();
-                if (NameUtils.match(pattern, name.getName().getName(), false))
+
+                // First, see if we were passed a numeric ID instead of a name; if so, we
+                // won't have to call NameUtils.match().
+                //
+                if (-1 != numId)
                 {
-                    set.add(name);
+                    if (numId == name.getId())
+                    {
+                        set.add(name);
+                    }
+                }
+                else
+                {
+                    if (NameUtils.match(pattern, name.getName().getName(), false))
+                    {
+                        set.add(name);
+                    }
                 }
             }
         }
@@ -133,5 +150,19 @@ public class ChatRececipientParameter extends NamedObjectParameter
     {
         return (super.isValidName(name) || name.equals("*") || (name
                 .startsWith("*") && super.isValidName(name.substring(1))));
+    }
+    
+    @SuppressWarnings ("finally")
+    private long getNamedObjectIdIfPresent (String pattern)
+    {
+        long l = -1;
+        try
+        {
+            l = Long.parseLong(pattern);
+        }
+        finally
+        {
+            return l;
+        }
     }
 }
