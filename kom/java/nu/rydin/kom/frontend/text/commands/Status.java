@@ -112,8 +112,12 @@ public class Status extends AbstractCommand
 		try
 		{
 		    String note = context.getSession().readFile(info.getId(), ".note.txt");
-			out.println(formatter.format("status.user.note"));
-			out.println(note);
+            out.println(formatter.format("status.user.note"));
+            String[] lines = note.split("\n");
+            for (int i = 0; i < lines.length; ++i)
+            {
+                out.println(lines[i]);
+            }
 		}
 		catch (ObjectNotFoundException e)
 		{
