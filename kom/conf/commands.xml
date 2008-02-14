@@ -111,6 +111,7 @@
 		<command class="nu.rydin.kom.frontend.text.commands.SetFlag"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.ClearFlag"/>		
 		<command class="nu.rydin.kom.frontend.text.commands.CreateAlias"/>
+		<command class="nu.rydin.kom.frontend.text.commands.DeleteAlias"/>
 	</category>
 	<category id="files" i18n="command.category.files" order="105">	
 		<command class="nu.rydin.kom.frontend.text.commands.ListFiles"/>		

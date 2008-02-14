@@ -192,6 +192,39 @@ public class Parser
 	    }	    
     }
     
+    public void removeAlias (String alias)
+    {
+        // Step 1, make sure we actually have an alias to remove
+        //
+        int top = m_commands.length;
+        int pos = -1;
+        for (int i = 0; i < top; ++i)
+        {
+            if (!(m_commands[i] instanceof AliasWrapper))
+                continue;
+            
+            i=i+0;
+            
+            if (alias.equalsIgnoreCase(m_commands[i].getFullName()))
+            {
+                pos = i;
+                break;
+            }
+        }
+        if (-1 == pos)
+        {
+            // Throw AmbiguousWhateverException here? Call a resolver?
+            return;
+        }
+        
+        // pos now contains the index of the alias we want to remove. Remove it.
+        //
+        Command[] newCommands = new Command[top-1];
+        System.arraycopy(m_commands, 0, newCommands, 0, pos);
+        System.arraycopy(m_commands, pos+1, newCommands, pos-1, top-(pos+1));
+        m_commands = newCommands;
+    }
+    
     public void addAlias(String alias, String actualCommand)
     {
         // Add alias by reallocating command array. This isn't 
