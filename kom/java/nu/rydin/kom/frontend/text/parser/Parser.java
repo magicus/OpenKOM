@@ -192,7 +192,7 @@ public class Parser
 	    }	    
     }
     
-    public void removeAlias (String alias)
+    public boolean removeAlias (String alias)
     {
         // Step 1, make sure we actually have an alias to remove
         //
@@ -214,7 +214,7 @@ public class Parser
         if (-1 == pos)
         {
             // Throw AmbiguousWhateverException here? Call a resolver?
-            return;
+            return false;
         }
         
         // pos now contains the index of the alias we want to remove. Remove it.
@@ -223,6 +223,7 @@ public class Parser
         System.arraycopy(m_commands, 0, newCommands, 0, pos);
         System.arraycopy(m_commands, pos+1, newCommands, pos-1, top-(pos+1));
         m_commands = newCommands;
+        return true;
     }
     
     public void addAlias(String alias, String actualCommand)

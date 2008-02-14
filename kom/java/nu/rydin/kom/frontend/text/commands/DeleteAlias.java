@@ -48,8 +48,10 @@ public class DeleteAlias extends AbstractCommand
                                   mf.format("nu.rydin.kom.exceptions.InvalidChoiceException.format"));
         if (1 == choice)
         {
-            context.getParser().removeAlias(alias);
-            out.println (mf.format ("delete.alias.confirmed", alias));
+            if (context.getParser().removeAlias(alias))
+                out.println (mf.format ("delete.alias.confirmed", alias));
+            else
+                out.println (mf.format ("delete.alias.no.such.alias", alias));
             return;
         }
         else
