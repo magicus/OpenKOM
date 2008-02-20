@@ -13,11 +13,15 @@ import nu.rydin.kom.structs.*;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public interface MessageEditor
 {
 	public UnstoredMessage edit()
 	throws KOMException, InterruptedException, IOException;
+    
+    public UnstoredMessage edit(boolean askForSubject)
+    throws KOMException, InterruptedException, IOException;
 	
 	public UnstoredMessage edit(MessageLocator replyTo, long recipientId, 
 	        Name recipientName, long replyToAuthor, Name replyToAuthorName, 

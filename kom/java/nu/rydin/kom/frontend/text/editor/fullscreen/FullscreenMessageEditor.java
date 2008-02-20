@@ -56,7 +56,12 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
 
     public UnstoredMessage edit() throws KOMException, InterruptedException
     {
-        return this.edit(MessageLocator.NO_MESSAGE, -1, Name.emptyName(), -1, Name.emptyName(), "");
+        return this.edit(MessageLocator.NO_MESSAGE, -1, Name.emptyName(), -1, Name.emptyName(), "", true);
+    }
+
+    public UnstoredMessage edit(boolean askForSubject) throws KOMException, InterruptedException
+    {
+        return this.edit(MessageLocator.NO_MESSAGE, -1, Name.emptyName(), -1, Name.emptyName(), "", askForSubject);
     }
 
     protected void printHeader()
@@ -101,7 +106,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
 
     public UnstoredMessage edit(MessageLocator replyTo, 
             long recipientId, Name recipientName, long replyToAuthor,
-            Name replyToAuthorName, String oldSubject) throws KOMException,
+            Name replyToAuthorName, String oldSubject, boolean askForSubject) throws KOMException,
             InterruptedException
     {
         TerminalController tc = this.getTerminalController();
@@ -159,7 +164,7 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
             tc.up(1);
             dc.input();
             out.flush();
-            this.setSubject(in.readLine(oldSubject));
+            this.setSubject(askForSubject ? in.readLine(oldSubject) : oldSubject);
 
             // Establish viewport
             //
@@ -190,6 +195,14 @@ public class FullscreenMessageEditor extends FullscreenEditor implements
             throw new KOMRuntimeException(formatter
                     .format("error.reading.user.input"), e);
         }
+    }
+
+    public UnstoredMessage edit(MessageLocator replyTo, 
+            long recipientId, Name recipientName, long replyToAuthor,
+            Name replyToAuthorName, String oldSubject) throws KOMException,
+            InterruptedException
+    {
+        return this.edit(replyTo, recipientId, recipientName, replyToAuthor, replyToAuthorName, oldSubject, true);
     }
 
     protected KeystrokeTokenizer getKeystrokeTokenizer()

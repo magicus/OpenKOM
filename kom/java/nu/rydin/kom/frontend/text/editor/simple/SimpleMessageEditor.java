@@ -36,12 +36,18 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 	public UnstoredMessage edit()
 	throws KOMException, InterruptedException
 	{
-	    return this.edit(MessageLocator.NO_MESSAGE, -1, null, -1, null, null);
+	    return this.edit(MessageLocator.NO_MESSAGE, -1, null, -1, null, null, true);
 	}
+    
+    public UnstoredMessage edit(boolean askForSubject)
+    throws KOMException, InterruptedException
+    {
+        return this.edit(MessageLocator.NO_MESSAGE, -1, null, -1, null, "", askForSubject);
+    }
 	
-	public UnstoredMessage edit(MessageLocator replyTo, long recipientId, 
-	        Name recipientName, long replyToAuthor, Name replyToAuthorName, String oldSubject)
-		throws KOMException, InterruptedException
+    public UnstoredMessage edit(MessageLocator replyTo, long recipientId, 
+        Name recipientName, long replyToAuthor, Name replyToAuthorName, String oldSubject, boolean askForSubject)
+	throws KOMException, InterruptedException
 	{
 		DisplayController dc = this.getDisplayController();
 		PrintWriter out = this.getOut();
@@ -87,7 +93,14 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			out.print(subjLine);
 			dc.input();
 			out.flush();
-			this.setSubject(in.readLine(oldSubject));
+            if (askForSubject)
+                this.setSubject(in.readLine(oldSubject));
+            else
+            {
+                this.setSubject(oldSubject);
+                out.println(); //Since the user doesn't give us a line feed, we'll have to provide one ourselves
+            }
+            
 			dc.messageHeader();
 			PrintUtils.printRepeated(out, '-', Math.min(width - 1, subjLine.length() + this.getSubject().length()));
 			out.println();
@@ -103,6 +116,13 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 		}
 	}	
 	
+    public UnstoredMessage edit(MessageLocator replyTo, long recipientId, 
+            Name recipientName, long replyToAuthor, Name replyToAuthorName, String oldSubject)
+        throws KOMException, InterruptedException
+    {
+        return this.edit(replyTo, recipientId, recipientName, replyToAuthor, replyToAuthorName, oldSubject, true);
+    }
+
 	protected void refresh() throws KOMException
 	{
 
