@@ -32,7 +32,7 @@ public class SetActivity extends AbstractCommand
         MessageFormatter fmt = context.getMessageFormatter();
         if (null == parameterArray[0])
         {
-            context.getSession().restoreState();
+            context.getSession().clearStates();
             out.println(fmt.format("set.activity.none"));
         }
         else

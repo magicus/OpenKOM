@@ -868,6 +868,12 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         m_lastObject = -1;  // Since we're no longer operating on an object, we're surely not fiddling with this one
     }
     
+    public void clearStates()
+    {
+        m_lastActivity = Activities.AUTO;
+        restoreState();
+    }
+    
     public Envelope readMessage(MessageLocator message)
     throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException, AuthorizationException
     {

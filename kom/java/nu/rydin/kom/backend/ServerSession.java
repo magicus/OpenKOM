@@ -1919,18 +1919,23 @@ public interface ServerSession
      * @param keepState Record the previous state.
      */
     public void setActivity (short activity, boolean keepState);
-    
-    /**
-     * Retrieves the current activity.
-     * 
-     * @return The activity ID.
-     */
-    
+        
     /**
      * Restores the previous activity, which is initialized to Activities.AUTO on logon.
      */
     public void restoreState();
     
+    /**
+     * Clears both the current and the last state. Called to clear all activity markers.
+     * 
+     */
+    public void clearStates();
+
+    /**
+     * Retrieves the current activity.
+     * 
+     * @return The activity ID.
+     */
     public short getActivity();
     
     /**
