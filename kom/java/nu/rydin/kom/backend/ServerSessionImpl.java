@@ -2253,7 +2253,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 	}
 
 	
-	public void changeUnread(int nUnread)
+	public void changeUnread(int nUnread, long conference)
 	throws ObjectNotFoundException, UnexpectedException
 	{
 		try
@@ -2261,7 +2261,7 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			// Update message markers
 			//
 			ConferenceManager cm = m_da.getConferenceManager();
-			ConferenceInfo ci = cm.loadConference(this.getCurrentConferenceId());
+			ConferenceInfo ci = cm.loadConference(conference);
 			int high = ci.getLastMessage();
 			high = Math.max(0, high - nUnread);
 			m_userContext.getMemberships().changeRead(ci.getId(), ci.getFirstMessage(), high);
@@ -2276,6 +2276,46 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
+    
+    public void changeUnread(int nUnread)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        changeUnread (nUnread, this.getCurrentConferenceId());
+    }
+    
+    public void changeUnreadInAllConfs(int nUnread)
+    throws ObjectNotFoundException, UnexpectedException
+    {
+        try
+        {
+            ConferenceManager cm = m_da.getConferenceManager();
+            MembershipList ml = m_userContext.getMemberships();
+            MembershipManager mm = this.m_da.getMembershipManager();
+            MembershipInfo[] mi = mm.listMembershipsByUser(this.getLoggedInUserId());
+            
+            for (MembershipInfo m : mi)
+            {
+                try
+                {
+                    ConferenceInfo ci = cm.loadConference(m.getConference());
+                    int high = ci.getLastMessage();
+                    high = Math.max(0, high - nUnread);
+                    ml.changeRead(ci.getId(), ci.getFirstMessage(), high);
+                }
+                catch (Exception e)
+                {
+                    // When does this happen? If the DB goes away? If a conference is 
+                    // deleted while we run? If the user signs off a conference in another
+                    // session while running this?  
+                }
+            }
+            m_replyStack = null;
+        }
+        catch (SQLException e)
+        {
+            throw new UnexpectedException (this.getLoggedInUserId(), e);
+        }
+    }
 
 	public MembershipListItem[] listNewsFor(long userId)
 	throws UnexpectedException

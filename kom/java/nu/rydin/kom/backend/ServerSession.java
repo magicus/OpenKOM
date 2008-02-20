@@ -788,6 +788,28 @@ public interface ServerSession
 	 */	
 	public void changeUnread(int nUnread)
 	throws ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Changes the number of unread messages in the given conference. Destroys the
+     * previous interval markers.
+     * 
+     * @param nUnread Number of messages to keep as unread
+     * @param conference The conference to fiddle with
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public void changeUnread(int nUnread, long conference)
+    throws ObjectNotFoundException, UnexpectedException;
+    
+    /**
+     * Changes the number of unread messages in all conferences. Should never be run.
+     * 
+     * @param nUnread The number of texts to keep unread in each conference
+     * @throws ObjectNotFoundException
+     * @throws UnexpectedException
+     */
+    public void changeUnreadInAllConfs(int nUnread)
+    throws ObjectNotFoundException, UnexpectedException;
 
 	/**
 	 * Rolls back the <i>n</i> latest reads, marking the read messages
