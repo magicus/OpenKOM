@@ -1847,10 +1847,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 		}
 	}
     
-    public int signupForAllConferences()
+    public Name[] signupForAllConferences()
     throws UnexpectedException, ObjectNotFoundException
     {
-        int cnt = 0;
         long uid = this.getLoggedInUserId();
         MembershipManager mm = m_da.getMembershipManager();
         
@@ -1896,13 +1895,15 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         // every exception. This should be more efficient than verifying visibility and rights
         // for every conference. Prove me wrong :-)
         //
+        ArrayList<Name> joins = new ArrayList<Name>(s.size());
         Iterator<Long> it = s.iterator();
         while (it.hasNext())
         {
             try
             {
-                mm.signup(uid, it.next(), 0, 0, 0);
-                ++cnt;
+                long l = it.next();
+                mm.signup(uid, l, 0, 0, 0);
+                joins.add(getCensoredName(l));
             }
             catch (Exception e)
             {
@@ -1921,7 +1922,9 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
         {
             throw new UnexpectedException (uid, e);
         }
-        return cnt;
+        Name[] joined = new Name[joins.size()];
+        joins.toArray(joined);
+        return joined;
     }
 	
 	public Name signoff (long conferenceId)

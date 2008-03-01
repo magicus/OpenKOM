@@ -561,10 +561,10 @@ public interface ServerSession
     /**
      * Signs the user up for every conference which the user has permission to sign up for.
      * 
-     * @return The number of new conference memberships.
+     * @return A list of all conferences the user signed up for
      * @throws UnexpectedException
      */
-    public int signupForAllConferences()
+    public Name[] signupForAllConferences()
     throws UnexpectedException, ObjectNotFoundException;
     
 	/**

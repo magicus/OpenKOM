@@ -51,7 +51,8 @@ public class Copy extends AbstractCommand
 		if(messageid == -1)
 			throw new NoCurrentMessageException();
 
-        ConferenceInfo ci = session.getCurrentConference();
+        // ConferenceInfo ci = session.getCurrentConference();
+        ConferenceInfo ci = session.getConference(session.getCurrentMessageOccurrence().getConference());
         boolean mustConfirm = ((ci.getPermissions() & ConferencePermissions.READ_PERMISSION) == 0) || (ci.getVisibility() != Visibilities.PUBLIC);
         if (mustConfirm)
         {

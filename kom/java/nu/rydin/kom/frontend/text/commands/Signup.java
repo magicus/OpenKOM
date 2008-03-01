@@ -51,10 +51,26 @@ public class Signup extends AbstractCommand
                                                      mf.format("misc.y") },
                                       0,
                                       mf.format("nu.rydin.kom.exceptions.InvalidChoiceException.format"));
+            out.println();
             if (1 == choice)
             {
-                int cnt = context.getSession().signupForAllConferences();
-                out.println (mf.format ("signup.allconfs.result", cnt));
+                Name[] joined = context.getSession().signupForAllConferences();
+                int l = joined.length;
+                if (0 == l)
+                {
+                    out.println (mf.format ("signup.allconfs.none"));
+                    return;
+                }
+
+                out.println (mf.format ("signup.allconfs.listhead"));
+                out.println();
+                for (int i = 0; i < l; ++i)
+                {
+                    out.println(joined[i].getName());
+                }
+                out.println();
+                out.println (mf.format ("signup.allconfs.result", l) + " " +
+                             mf.format (1 == l ? "misc.conference.single" : "misc.conference.multiple"));
                 return;
             }
             else
