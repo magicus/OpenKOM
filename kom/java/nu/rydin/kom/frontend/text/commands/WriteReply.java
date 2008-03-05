@@ -11,6 +11,7 @@ import java.io.IOException;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.constants.Activities;
 import nu.rydin.kom.constants.ConferencePermissions;
+import nu.rydin.kom.constants.MessageAttributes;
 import nu.rydin.kom.constants.UserFlags;
 import nu.rydin.kom.exceptions.KOMException;
 import nu.rydin.kom.exceptions.MessageNotFoundException;
@@ -19,6 +20,7 @@ import nu.rydin.kom.frontend.text.AbstractCommand;
 import nu.rydin.kom.frontend.text.Context;
 import nu.rydin.kom.frontend.text.MessageEditor;
 import nu.rydin.kom.frontend.text.parser.CommandLineParameter;
+import nu.rydin.kom.frontend.text.parser.RawParameter;
 import nu.rydin.kom.frontend.text.parser.TextNumberParameter;
 import nu.rydin.kom.structs.ConferenceInfo;
 import nu.rydin.kom.structs.MessageLocator;
@@ -35,7 +37,7 @@ public class WriteReply extends AbstractCommand
     public WriteReply(Context context, String fullName, long permissions)
     {
         super(fullName, new CommandLineParameter[] { new TextNumberParameter(
-                false) }, permissions);
+                false), new RawParameter("", false) }, permissions);
     }
 
     public void execute(Context context, Object[] parameterArray)
@@ -43,6 +45,43 @@ public class WriteReply extends AbstractCommand
     {
         ServerSession session = context.getSession();
 
+        // First order of business, find out how many parameters we were given, and unless
+        // it's two or zero, which one of them the user thinks (s)he supplied.
+        //
+        boolean hasId = false;
+        boolean hasType = false;
+        
+        // The parser doesn't fill the parameterArray from the start, it puts the supplied
+        // parameters in their respective location. Which is generally good, but occasionally
+        // leads to interesting solutions, such as this one :-)
+        //
+        int parmcount = 0;
+        if (null != parameterArray[0]) ++parmcount;
+        if (null != parameterArray[1]) ++parmcount;
+
+        // The usual case is no parameters.
+        //
+        if (0 != parmcount)
+        {
+            if (2 == parmcount)
+            {
+                // We got both. Good, that makes things much easier, since we know in
+                // what order they were passed.
+                //
+                hasId = true;
+                hasType = true;
+            }
+            else
+            {
+                if (null != parameterArray[0]) 
+                    hasId = true;
+                else
+                    hasType = true;
+            }
+        }
+        
+        // After figuring out what parameters, if any, we were given, things can progress
+        // the way they usually do.
         // First, we need to figure out which message we are replying to. If no 
         // parameter was given, that means we're replying to the last read message.
         //
@@ -54,12 +93,18 @@ public class WriteReply extends AbstractCommand
         }
         catch (ObjectNotFoundException e) 
         {
-            throw new MessageNotFoundException();
+            if (hasId)
+            {
+                // If we were given a numeric parameter that couldn't be resolved, throw
+                // an exception. Otherwise, just keep going.
+                throw new MessageNotFoundException();
+            }
         }
 
         // Second, we need to figure out which conference the original message was in.
         //
         MessageOccurrence originalMessage;
+        MessageOccurrence newMessage;
         try
         {
             originalMessage = session.getMostRelevantOccurrence(session.getCurrentConferenceId(), replyToId);
@@ -104,8 +149,7 @@ public class WriteReply extends AbstractCommand
                 session.restoreState();
             }
 
-            @SuppressWarnings("unused")
-            MessageOccurrence newMessage = session.storeReplyAsMail(editor.getRecipient().getId(), msg, replyTo);
+            newMessage = session.storeReplyAsMail(editor.getRecipient().getId(), msg, replyTo);
 
             // Print confirmation
             //
@@ -162,7 +206,7 @@ public class WriteReply extends AbstractCommand
                 session.restoreState();
             }
 
-            MessageOccurrence newMessage = session.storeReplyAsMessage(editor.getRecipient().getId(), msg, replyTo);            
+            newMessage = session.storeReplyAsMessage(editor.getRecipient().getId(), msg, replyTo);            
 
             // Print confirmation
             //
@@ -171,6 +215,13 @@ public class WriteReply extends AbstractCommand
                             new Object[] { 
                             	new Integer(newMessage.getLocalnum()),
                             	new Long(newMessage.getGlobalId()) } ));
+        }
+        
+        // Just one more thing to do. Did we get a comment type that we need to set?
+        //
+        if (hasType)
+        {
+            session.addMessageAttribute(newMessage.getGlobalId(), MessageAttributes.COMMENT_TYPE, (String) parameterArray[1], false);
         }
     }
 }

@@ -18,6 +18,11 @@ import nu.rydin.kom.structs.MessageOccurrence;
 import nu.rydin.kom.structs.Envelope.RelatedMessage;
 import nu.rydin.kom.utils.PrintUtils;
 
+/**
+ * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
+ */
+
 public abstract class AbstractMessagePrinter implements MessagePrinter
 {
 
@@ -36,7 +41,6 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
         {
             context.getOut().print(ANSISequences.CLEAR_DISPLAY);
         }
-
         printHeader(context, envelope);
         printBody(context, envelope);
         printFooter(context, envelope);
@@ -163,8 +167,18 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
         {
             // Text is a comment
             //
+            
+            MessageAttribute[] attrs = null;
+            try
+            {
+                attrs = context.getSession().getMatchingMessageAttributes(envelope.getMessage().getId(), MessageAttributes.COMMENT_TYPE);
+            }
+            catch (UnexpectedException e)
+            {
+                // Quietly ignore.
+            }
             PrintUtils.printIndented(out, getFormattedOriginInfo(context,
-                    replyTo), width, 0);
+                    replyTo, (attrs != null && attrs.length>0) ? attrs : null), width, 0);
         } else
         {
             // Even though this text looks like it's not a comment, it might be
@@ -193,7 +207,7 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
      * @return
      */
     protected abstract String getFormattedOriginInfo(Context context,
-            RelatedMessage replyTo);
+            RelatedMessage replyTo, MessageAttribute[] attrs);
 
     /**
      * Returns a string with information about the origin text (which is deleted
@@ -397,9 +411,20 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
         {
             Envelope.RelatedMessage each = replies[idx];
             MessageOccurrence occ = each.getOccurrence();
+            MessageAttribute[] ma = null;
+            boolean hasAttr = false;
+            try
+            {
+                ma = context.getSession().getMatchingMessageAttributes(occ.getGlobalId(), MessageAttributes.COMMENT_TYPE);
+                hasAttr = (ma.length > 0);
+            }
+            catch (UnexpectedException e)
+            {
+                // Never mind.
+            }
 
             PrintUtils.printIndented(out,
-                    getFormattedReply(context, each, occ), width, 0);
+                    getFormattedReply(context, each, occ, hasAttr ? ma : null), width, 0);
         }
     }
 
@@ -412,7 +437,7 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
      * @return
      */
     protected abstract String getFormattedReply(Context context,
-            RelatedMessage reply, MessageOccurrence occ);
+            RelatedMessage reply, MessageOccurrence occ, MessageAttribute[] attrs);
 
     /**
      * Finds the MOVEDFROM attribute and returns and returns it if found.

@@ -57,6 +57,7 @@ public class MessageManager
 	private final PreparedStatement m_loadOccurrenceStmt;
 	private final PreparedStatement m_getVisibleOccurrencesStmt;
 	private final PreparedStatement m_getMessageAttributesStmt;
+    private final PreparedStatement m_getMatchingMessageAttributesStmt;
 	private final PreparedStatement m_addMessageAttributeStmt;
 	private final PreparedStatement m_dropMessageAttributeStmt;
 	private final PreparedStatement m_dropMessageOccurrenceStmt;
@@ -151,6 +152,11 @@ public class MessageManager
 		    "FROM messageattributes " +
 		    "WHERE message = ? " +
 			"order by created asc");
+        m_getMatchingMessageAttributesStmt = m_conn.prepareStatement(
+            "select id, message, kind, created, value " +
+            "from messageattributes " +
+            "where message = ? and kind = ? " +
+            "order by created asc");
 		m_addMessageAttributeStmt = m_conn.prepareStatement(
 		    "INSERT INTO messageattributes (message, kind, created, value) " +
 		    "VALUES (?, ?, ?, ?)");
@@ -398,6 +404,14 @@ public class MessageManager
             m_getThreadIdForMessageStmt.close();
         if (m_getMessagesByThreadIdAndStartStmt != null)
             m_getMessagesByThreadIdAndStartStmt.close();
+        if (m_getMessageAttributesStmt != null)
+            m_getMessageAttributesStmt.close();
+        if (m_getMatchingMessageAttributesStmt != null)
+            m_getMatchingMessageAttributesStmt.close();
+        if (m_addMessageAttributeStmt != null)
+            m_addMessageAttributeStmt.close();
+        if (m_dropMessageAttributeStmt != null)
+            m_dropMessageAttributeStmt.close();
 	}
 	
 	public void finalize()
@@ -1076,7 +1090,38 @@ public class MessageManager
 		}
 	}
 	
-	public void addMessageAttribute(long message, short kind, String value)
+    public MessageAttribute[] getMatchingMessageAttributes(long messageId, short kind)
+    throws SQLException
+    {
+        List<MessageAttribute> list = new ArrayList<MessageAttribute>();
+        m_getMatchingMessageAttributesStmt.clearParameters();
+        m_getMatchingMessageAttributesStmt.setLong(1, messageId);
+        m_getMatchingMessageAttributesStmt.setShort(2, kind);
+        ResultSet rs = null;
+        try
+        {
+            rs = m_getMatchingMessageAttributesStmt.executeQuery();
+            while(rs.next())
+            {
+                list.add(new MessageAttribute(
+                        rs.getLong(1),      //id
+                        rs.getLong(2),      //message
+                        rs.getShort(3),     //kind
+                        rs.getTimestamp(4), //created
+                        rs.getString(5)));  //value
+            }
+            MessageAttribute[] result = new MessageAttribute[list.size()];
+            list.toArray(result);
+            return result;
+        }
+        finally
+        {
+            if(rs != null)
+                rs.close();
+        }
+    }
+
+    public void addMessageAttribute(long message, short kind, String value)
 	throws SQLException
 	{
 		// Create messageattribute

@@ -194,9 +194,11 @@
  <command class="nu.rydin.kom.frontend.text.commands.WriteReply">
   <parameters>
    <param order="0">Den text du vill kommentera</param>
+   <param order="1">Kommentarstyp, fritext.</param>
   </parameters>
   <description>
    <block>Kommandot postar ett uppföljningsinlägg till den angivna texten. Om du inte anger textnummer antar OpenKOM att du vill kommentera den text du senast läste.</block>
+   <block>Du kan också ange en kommentarstyp som fri text, exempelvis "Medhåll", "Mothåll" eller "Pik".</block>
   </description>
   <seealso>
    <element type="command" value="nu.rydin.kom.frontend.text.commands.WriteMessage"/>

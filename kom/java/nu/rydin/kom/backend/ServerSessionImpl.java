@@ -3907,7 +3907,33 @@ public class ServerSessionImpl implements ServerSession, EventTarget, EventSourc
 			throw new UnexpectedException(this.getLoggedInUserId(), e);
 		}
 	}
-	
+    
+    /**
+     * Retrieves all message attributes, if any, of the given type for the given message.
+     */
+    public MessageAttribute[] getMatchingMessageAttributes (long message, short kind)
+    throws UnexpectedException
+    {
+        try
+        {
+            return kind == -1 ? m_da.getMessageManager().getMessageAttributes(message) :
+                                m_da.getMessageManager().getMatchingMessageAttributes(message, kind);
+        }
+        catch (SQLException e)
+        {
+            throw new UnexpectedException (this.getLoggedInUserId(), e);
+        }
+    }
+    
+    /**
+     * Retrieves all message attributes for a given message
+     */
+    public MessageAttribute[] getMessageAttributes(long message)
+    throws UnexpectedException
+    {
+        return getMatchingMessageAttributes(message, (short)-1);
+    }
+    
 	/**
 	 * Checks that at least one occurrence of the message is readable to
 	 * the logged in user.

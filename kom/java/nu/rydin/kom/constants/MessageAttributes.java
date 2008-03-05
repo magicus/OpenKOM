@@ -7,7 +7,8 @@
 package nu.rydin.kom.constants;
 
 /**
- * @author Pontus Rydin
+ * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class MessageAttributes
 {
@@ -64,12 +65,16 @@ public class MessageAttributes
 	/**
 	 * Email sent timestamp
 	 */
-	public static final short EMAIL_SENT		= 10; 
-	
+	public static final short EMAIL_SENT		= 10;
+    
+    /**
+     * Comment type, displayed in message header and comment lists.
+     */
+	public static final short COMMENT_TYPE      = 11;
 	/**
 	 * Flag-array determining whether a user can perform a command
 	 * only on messages that she/he has created.
 	 */
 	public static final boolean[] onlyOwner = new boolean[] 
-	    { false, false, false, false, false, true, true, true, true, true };
+	    { false, false, false, false, false, true, true, true, true, true, false, false };
 }

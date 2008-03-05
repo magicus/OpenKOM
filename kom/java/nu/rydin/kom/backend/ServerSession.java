@@ -1143,7 +1143,28 @@ public interface ServerSession
 	 */
 	public void addMessageAttribute(long message, short attribute, String payload, boolean deleteOld)
 	throws UnexpectedException, AuthorizationException;
-	
+
+    /**
+     * Returns the message attributes associated with the given message.
+     * 
+     * @param message Global message identifier.
+     * @return
+     * @throws UnexpectedException
+     */
+    public MessageAttribute[] getMessageAttributes (long message)
+    throws UnexpectedException;
+    
+    /**
+     * Returns the message attributes of the supplied type associated with the given message.
+     * 
+     * @param message Message ID.
+     * @param kind Attribute type.
+     * @return
+     * @throws UnexpectedException
+     */
+    public MessageAttribute[] getMatchingMessageAttributes (long message, short kind)
+    throws UnexpectedException;
+    
 	/**
 	 * Returns various debug information
 	 * @return

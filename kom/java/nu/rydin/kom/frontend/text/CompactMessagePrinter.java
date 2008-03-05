@@ -23,6 +23,7 @@ import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author Henrik Schröder
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class CompactMessagePrinter extends AbstractMessagePrinter
 {
@@ -68,7 +69,7 @@ public class CompactMessagePrinter extends AbstractMessagePrinter
     }
 
 
-    protected String getFormattedOriginInfo(Context context, Envelope.RelatedMessage replyTo)
+    protected String getFormattedOriginInfo(Context context, Envelope.RelatedMessage replyTo, MessageAttribute[] attrs)
     {
         MessageFormatter formatter = context.getMessageFormatter();
 
@@ -76,22 +77,29 @@ public class CompactMessagePrinter extends AbstractMessagePrinter
         {
             // Simple case: Original text was in same conference
             //
-            return formatter.format(getResourceKey("reply.to.same.conference"), 
-                new Object[] { new Long(replyTo.getOccurrence().getLocalnum()), 
-                    context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) });        
+            return attrs == null ?
+                formatter.format(getResourceKey("reply.to.same.conference"), 
+                    new Object[] { new Long(replyTo.getOccurrence().getLocalnum()), 
+                        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }) :
+                formatter.format(getResourceKey("reply.to.same.conference.type"), 
+                    new Object[] { new String(attrs[0].getValue()), new Long(replyTo.getOccurrence().getLocalnum()), 
+                        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) });        
         }
         else
         {
             // Complex case: Original text was in a different conference
             //
-            return formatter.format(getResourceKey("reply.to.different.conference"), 
-                new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
-                    context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()),
-                    context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) });
+            return attrs == null ? 
+                formatter.format(getResourceKey("reply.to.different.conference"), 
+                    new Object[] { new Long(replyTo.getOccurrence().getLocalnum()),
+                        context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()),
+                        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) }) :
+                formatter.format(getResourceKey("reply.to.different.conference.type"), 
+                    new Object[] { new String(attrs[0].getValue()), new Long(replyTo.getOccurrence().getLocalnum()),
+                        context.formatObjectName(replyTo.getConferenceName(), replyTo.getConference()),
+                        context.formatObjectName(replyTo.getAuthorName(), replyTo.getAuthor()) });
         }
-
     }
-
 
     protected String getFormattedOriginDeletedInfo(Context context, MessageAttribute originalDeletedAttribute)
     {
@@ -158,7 +166,7 @@ public class CompactMessagePrinter extends AbstractMessagePrinter
 		}
     }
    
-    protected String getFormattedReply(Context context, Envelope.RelatedMessage reply, MessageOccurrence occ)
+    protected String getFormattedReply(Context context, Envelope.RelatedMessage reply, MessageOccurrence occ, MessageAttribute[] attrs)
     {
         MessageFormatter formatter = context.getMessageFormatter();
 
@@ -166,14 +174,21 @@ public class CompactMessagePrinter extends AbstractMessagePrinter
         //
         if(reply.isLocal())
         {
-            return formatter.format(getResourceKey("reply.same.conference"),
-                new Object[] { new Long(occ.getLocalnum()), reply.getAuthorName() });
+            return null == attrs ?
+                formatter.format(getResourceKey("reply.same.conference"),
+                    new Object[] { new Long(occ.getLocalnum()), reply.getAuthorName() }) :
+                formatter.format(getResourceKey("reply.same.conference.type"),
+                        new Object[] { new String(attrs[0].getValue()), new Long(occ.getLocalnum()), reply.getAuthorName() });
         }
         else
-        {
-            return formatter.format(getResourceKey("reply.different.conference"),
-                new Object[] { new Long(occ.getLocalnum()), reply.getConferenceName(), 
-                    reply.getAuthorName() });
+        {                   
+            return null == attrs ? 
+                formatter.format(getResourceKey("reply.different.conference"),
+                    new Object[] { new Long(occ.getLocalnum()), new Long(occ.getGlobalId()), 
+                        reply.getAuthorName(), reply.getConferenceName() }) :
+                formatter.format(getResourceKey("reply.different.conference.type"),
+                    new Object[] { new String(attrs[0].getValue()), new Long(occ.getLocalnum()), new Long(occ.getGlobalId()), 
+                        reply.getAuthorName(), reply.getConferenceName() });                            
         }
     }
     
