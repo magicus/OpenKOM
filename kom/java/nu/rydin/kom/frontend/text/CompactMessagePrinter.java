@@ -178,17 +178,18 @@ public class CompactMessagePrinter extends AbstractMessagePrinter
                 formatter.format(getResourceKey("reply.same.conference"),
                     new Object[] { new Long(occ.getLocalnum()), reply.getAuthorName() }) :
                 formatter.format(getResourceKey("reply.same.conference.type"),
-                        new Object[] { new String(attrs[0].getValue()), new Long(occ.getLocalnum()), reply.getAuthorName() });
+                    new Object[] { new String(attrs[0].getValue()), new Long(occ.getLocalnum()), 
+                        reply.getAuthorName() });
         }
         else
         {                   
             return null == attrs ? 
                 formatter.format(getResourceKey("reply.different.conference"),
-                    new Object[] { new Long(occ.getLocalnum()), new Long(occ.getGlobalId()), 
-                        reply.getAuthorName(), reply.getConferenceName() }) :
+                    new Object[] { new Long(occ.getLocalnum()), reply.getConferenceName(), 
+                        reply.getAuthorName() }) :
                 formatter.format(getResourceKey("reply.different.conference.type"),
-                    new Object[] { new String(attrs[0].getValue()), new Long(occ.getLocalnum()), new Long(occ.getGlobalId()), 
-                        reply.getAuthorName(), reply.getConferenceName() });                            
+                    new Object[] { new String(attrs[0].getValue()), new Long(occ.getLocalnum()), 
+                        reply.getConferenceName(), reply.getAuthorName() });                            
         }
     }
     
