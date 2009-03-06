@@ -10,6 +10,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -37,9 +42,186 @@ import com.sshtools.j2ssh.util.StartStopState;
  * This is a J2SSH server implemented as an OpenKOM module.
  * 
  * @author Henrik Schröder
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class SSHServer implements Module
 {
+    // 090305 jepson    Script kiddie filter
+    // TODO: Grab count and time from system settings
+    
+    // The hosts we're currently watching.
+    //
+    private List<IntrusionAttempt> attempts = 
+        Collections.synchronizedList(new ArrayList<IntrusionAttempt>());
+    
+    // An uninteresting container class
+    //
+    private class IntrusionAttempt
+    {
+        private final String m_host;
+        private final Date m_firstAttempt;
+        private Date m_lastAttempt;
+        private int m_count;
+        private boolean m_isBlocked;
+        
+        public IntrusionAttempt (String host)
+        {
+            Logger.debug(this, "New player: " + host);
+            this.m_host = host;
+            this.m_count = 1;
+            this.m_isBlocked = false;
+            this.m_firstAttempt = new Date();
+            this.m_lastAttempt = new Date(m_firstAttempt.getTime());
+        }
+        
+        public String getHost()
+        {
+            return m_host;
+        }
+        
+        public Date getFirstAttempt()
+        {
+            return m_firstAttempt;
+        }
+        
+        public Date getLastAttempt()
+        {
+            return m_lastAttempt;
+        }
+        
+        public boolean isBlocked()
+        {
+            return m_isBlocked;
+        }
+
+        public void addAttempt()
+        {
+            ++this.m_count;
+            m_lastAttempt.setTime(System.currentTimeMillis()); 
+            if (9 <= this.m_count)  // allow three attempts of three passwords each
+            {
+                m_isBlocked = true;
+            }
+        }
+
+        // debug method
+        //
+        public int getCurrentCount()
+        {
+            return m_count;
+        }
+    }
+    
+    // This is where it gets interesting. Since we're not about to fiddle with J2SSH unless we
+    // absolutely have to, we'll try to make do with what's available from the outside. The only thing
+    // shared between the SSH server and the auth provider is the transport protocol number, so we have
+    // to add a map to convert between protocol and host in this class. Yes, this is dirty. Yes, I welcome
+    // other solutions. No, I don't think there's a better way of doing it, unless someone wants to
+    // override every J2SSH class from here to the auth module and pass the IP.
+    //
+    private Map<Integer, String> protocolHostXref = 
+        Collections.synchronizedMap (new HashMap<Integer, String>());
+
+    // ... and now, something we can call from the authentication provider to notify us of login status.
+    //
+    public void notifyLogonStatus (int protocolNo, boolean succeeded)
+    {
+        String host = protocolHostXref.get(protocolNo);
+        if (null == host)
+        {
+            // This can't happen, so it's guaranteed to..
+            //
+            Logger.warn(this, "notifyLogonStatus() called for non-existant transport protocol "+ protocolNo);
+            return;
+        }
+        synchronized (attempts)
+        {
+            // This is probably the most common case, no hosts on the watch list
+            //
+            if (attempts.isEmpty())
+            {
+                if (!succeeded)
+                {
+                    attempts.add (new IntrusionAttempt (host));
+                }
+                return;
+            }
+            
+            // There's something in the list, check if it's our host
+            //
+            for (Iterator<IntrusionAttempt> iter = attempts.iterator(); iter.hasNext();)
+            {
+                IntrusionAttempt ia = iter.next();
+                if (ia.getHost().equals(host))
+                {
+                    if (succeeded)
+                    {
+                        iter.remove();
+                    }
+                    else
+                    {
+                        ia.addAttempt();
+                    }
+                    return;
+                }
+            }
+            
+            // If we arrive here, it's a new player after all.
+            //
+            if (!succeeded)
+            {
+                attempts.add(new IntrusionAttempt(host));
+            }
+        }
+    }
+    
+    // Drop blacklisted hosts from deny list after ten minutes.
+    // (This is something we actually have to clean out. The protocol-to-host map will, when the 256
+    // transport protocol slots have all been used, just be overwritten.)
+    
+    private class LoginAttemptCleaner extends Thread
+    {
+        public LoginAttemptCleaner()
+        {
+            super ("LoginAttemptCleaner");
+            this.setDaemon(true);
+        }
+        
+        public void run()
+        {
+            try
+            {
+                for (;;)
+                {
+                    Thread.sleep(60000);
+
+                    if (attempts.isEmpty())
+                        continue;
+
+                    long now = System.currentTimeMillis();
+                    synchronized (attempts)
+                    {
+                        for (Iterator<IntrusionAttempt> iter = attempts.iterator();
+                             iter.hasNext();)
+                        {
+                            IntrusionAttempt att = iter.next();
+                            long then = att.getLastAttempt().getTime();
+                            if (600000 < (now - then))
+                            {
+                                Logger.debug(this, "Removed " + att.getHost() + " from deny list");
+                                iter.remove();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.error (this, "Cleaner thread terminated", e);
+            }
+        }
+    }
+    
     private ConnectionListener listener = null;
     private boolean selfRegister;
 
@@ -79,6 +261,17 @@ public class SSHServer implements Module
         Logger.debug(this, "Socket keepalive: " + socket.getKeepAlive());
         
         TransportProtocolServer transport = new TransportProtocolServer();
+        
+        // Add this session to the map
+        //
+        try
+        {
+            this.protocolHostXref.put(transport.getConnectionId(), socket.getInetAddress().getHostAddress());
+        }
+        catch (Exception e)
+        {
+            Logger.warn (this, "Couldn't add protocol-host pair to server map", e);
+        }
 
         // Create the Authentication Protocol
         AuthenticationProtocolServer authentication = new AuthenticationProtocolServer();
@@ -106,6 +299,7 @@ public class SSHServer implements Module
     {
         private ServerSocket server;
         private Thread thread;
+        private Thread victor = null;
         private int maxConnections;
         private int port;
         private StartStopState state = new StartStopState(
@@ -114,6 +308,15 @@ public class SSHServer implements Module
         public ConnectionListener(int port)
         {
             this.port = port;
+            try
+            {
+                victor = new LoginAttemptCleaner();
+                victor.start();
+            }
+            catch (Exception e)
+            {
+                Logger.error(this, "Exception trying to start the cleanup thread", e);
+            }
         }
 
         public void run()
@@ -158,6 +361,21 @@ public class SSHServer implements Module
                     {
                         Logger.debug(this, "New connection requested");
 
+                        synchronized(attempts)
+                        {
+                            for (IntrusionAttempt each : attempts)
+                            {
+                                if (each.getHost().equals(socket.getInetAddress().getHostAddress()))
+                                {
+                                    if (each.isBlocked())
+                                    {
+                                        Logger.info(this, "Refusing session from " + each.getHost() + " - blocked");
+                                        refuseSession(socket);
+                                    }
+                                }
+                            }
+                        }
+                        
                         if (maxConnections < activeConnections.size())
                         {
                             refuseSession(socket);
@@ -225,6 +443,18 @@ public class SSHServer implements Module
             {
                 Logger.warn(this, 
                         "The listening socket reported an error during shutdown", ioe);
+            }
+            
+            try
+            {
+                if (null != victor)
+                {
+                    victor.interrupt();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.warn(this, "Exception shutting down the cleanup thread", e);
             }
         }
     }

@@ -27,7 +27,8 @@ import com.sshtools.j2ssh.SshThread;
  * at a later point as proof of successful authentication.
  * 
  * @author Henrik Schröder
- * @author Pontus Rydin
+ * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 {
@@ -68,6 +69,19 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
     public boolean logonUser(String username, String password)
             throws PasswordChangeException, IOException
     {
+        // Dept. of disgusting hacks.. This is the only way we can get the transport protocol ID.
+        //
+        int protId = 0;
+        try
+        {
+            SshThread t = ((SshThread)Thread.currentThread());
+            protId = Integer.parseInt(t.getName().substring(19), 16);
+        }
+        catch (NumberFormatException e)
+        {
+            Logger.warn(this, "parseInt() failed in logonUser()");
+        }
+        
         try
         {
             Logger.info(this, "Trying to log in as: " + username);
@@ -75,6 +89,21 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
                     username, password);
             postTicket(ticket);
             Logger.info(this, "Successfully authenticated as: " + username);
+            
+            // Notify the SSH server
+            //
+            try
+            {
+                ((SSHServer)Modules.getModule("SSHModule")).notifyLogonStatus(protId, true);
+            }
+            catch (NoSuchModuleException nsme)
+            {
+                Logger.warn (this, "The module manager didn't find the SSH module");
+            }
+            catch (Exception e)
+            {
+            }
+
             return true;
         } catch (AuthenticationException e)
         {
@@ -84,6 +113,18 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
         {
         }
         Logger.info(this, "Failed login");
+        
+        try
+        {
+            ((SSHServer)Modules.getModule("SSHModule")).notifyLogonStatus(protId, false);
+        }
+        catch (NoSuchModuleException e)
+        {
+            Logger.warn (this, "Could not locate SSH module");
+        }
+        catch (Exception e)
+        {
+        }
         return false;
     }
 
