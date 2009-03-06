@@ -24,6 +24,7 @@ import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 {		
@@ -94,7 +95,7 @@ public class SimpleMessageEditor extends AbstractEditor implements MessageEditor
 			dc.input();
 			out.flush();
             if (askForSubject)
-                this.setSubject(in.readLine(oldSubject));
+                this.setSubject(in.readLine(oldSubject).trim());
             else
             {
                 this.setSubject(oldSubject);
