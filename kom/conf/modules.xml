@@ -47,7 +47,11 @@
 		<parameter name="port" value="2222"/>
 		<parameter name="maxauthretry" value="3"/>
 		<parameter name="maxconn" value="1000"/>
-		<parameter name="selfRegister" value="false"/>		
+		<parameter name="selfRegister" value="false"/>
+		<!-- autofilter: lockout time in minutes -->
+		<parameter name="lockout" value="10"/>
+		<!-- autofilter: attempts before lockout -->
+		<parameter name="attempts" value="9"/>
 	</module>
 	<!-- module name="PostMaster" class="nu.rydin.kom.modules.email.PostMaster">
 		<parameter name="host" value="pop.webtajm.com"/>
