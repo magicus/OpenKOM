@@ -12,7 +12,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import nu.rydin.kom.modules.Module;
+import nu.rydin.kom.structs.IntrusionAttempt;
 import nu.rydin.kom.utils.Logger;
 
 import com.sshtools.daemon.authentication.AuthenticationProtocolServer;
@@ -47,70 +47,11 @@ import com.sshtools.j2ssh.util.StartStopState;
 public class SSHServer implements Module
 {
     // 090305 jepson    Script kiddie filter
-    // TODO: Grab count and time from system settings
     
     // The hosts we're currently watching.
     //
     private List<IntrusionAttempt> attempts = 
         Collections.synchronizedList(new ArrayList<IntrusionAttempt>());
-    
-    // An uninteresting container class
-    //
-    private class IntrusionAttempt
-    {
-        private final String m_host;
-        private final Date m_firstAttempt;
-        private Date m_lastAttempt;
-        private int m_count;
-        private boolean m_isBlocked;
-        
-        public IntrusionAttempt (String host)
-        {
-            Logger.debug(this, "New player: " + host);
-            this.m_host = host;
-            this.m_count = 1;
-            this.m_isBlocked = false;
-            this.m_firstAttempt = new Date();
-            this.m_lastAttempt = new Date(m_firstAttempt.getTime());
-        }
-        
-        public String getHost()
-        {
-            return m_host;
-        }
-        
-        public Date getFirstAttempt()
-        {
-            return m_firstAttempt;
-        }
-        
-        public Date getLastAttempt()
-        {
-            return m_lastAttempt;
-        }
-        
-        public boolean isBlocked()
-        {
-            return m_isBlocked;
-        }
-
-        public void addAttempt()
-        {
-            ++this.m_count;
-            m_lastAttempt.setTime(System.currentTimeMillis()); 
-            if (9 <= this.m_count)  // allow three attempts of three passwords each
-            {
-                m_isBlocked = true;
-            }
-        }
-
-        // debug method
-        //
-        public int getCurrentCount()
-        {
-            return m_count;
-        }
-    }
     
     // This is where it gets interesting. Since we're not about to fiddle with J2SSH unless we
     // absolutely have to, we'll try to make do with what's available from the outside. The only thing
@@ -175,18 +116,21 @@ public class SSHServer implements Module
         }
     }
     
-    // Drop blacklisted hosts from deny list after ten minutes.
+    // Drop blacklisted hosts from deny list after preset time.
     // (This is something we actually have to clean out. The protocol-to-host map will, when the 256
     // transport protocol slots have all been used, just be overwritten.)
     
     private class LoginAttemptCleaner extends Thread
     {
-        public LoginAttemptCleaner()
+        private long m_lockoutTime;
+        
+        public LoginAttemptCleaner(long lockoutTime)
         {
             super ("LoginAttemptCleaner");
+            m_lockoutTime = lockoutTime;
             this.setDaemon(true);
         }
-        
+
         public void run()
         {
             try
@@ -206,7 +150,7 @@ public class SSHServer implements Module
                         {
                             IntrusionAttempt att = iter.next();
                             long then = att.getLastAttempt().getTime();
-                            if (600000 < (now - then))
+                            if (m_lockoutTime < (now - then))
                             {
                                 Logger.debug(this, "Removed " + att.getHost() + " from deny list");
                                 iter.remove();
@@ -224,7 +168,10 @@ public class SSHServer implements Module
     
     private ConnectionListener listener = null;
     private boolean selfRegister;
-
+    private Thread victor;
+    private long lockoutTime = 600000;
+    private int allowedAttempts = 9;
+    
     public void configureServices(ConnectionProtocol connection)
             throws IOException
     {
@@ -299,7 +246,6 @@ public class SSHServer implements Module
     {
         private ServerSocket server;
         private Thread thread;
-        private Thread victor = null;
         private int maxConnections;
         private int port;
         private StartStopState state = new StartStopState(
@@ -308,15 +254,6 @@ public class SSHServer implements Module
         public ConnectionListener(int port)
         {
             this.port = port;
-            try
-            {
-                victor = new LoginAttemptCleaner();
-                victor.start();
-            }
-            catch (Exception e)
-            {
-                Logger.error(this, "Exception trying to start the cleanup thread", e);
-            }
         }
 
         public void run()
@@ -506,6 +443,39 @@ public class SSHServer implements Module
 
         Logger.info(this, "OpenKOM SSH server is accepting connections at port "
                         + (String)parameters.get("port"));
+
+        try
+        {
+            lockoutTime = Long.parseLong(parameters.get("lockout"));
+            lockoutTime *= 60000; // convert from minutes to milliseconds
+        }
+        catch (Exception e)
+        {
+            Logger.warn(this, "Lockout time parameter missing or unparsable, defaulting to 10 minutes.");
+        }
+        
+        try
+        {
+            allowedAttempts = Integer.parseInt(parameters.get("attempts"));
+        }
+        catch (Exception e)
+        {
+            Logger.warn(this, "Allowed attempts parameter unparsable or missing from module parameters, defaulting to 3x3.");
+        }
+        
+        IntrusionAttempt.setLimit(allowedAttempts);
+        
+        try
+        {
+            victor = new LoginAttemptCleaner(lockoutTime);
+            victor.start();
+            Logger.info(this, "Cleanup thread started - blocked hosts removed after " + lockoutTime + " ms.");
+        }
+        catch (Exception e)
+        {
+            Logger.error(this, "Exception trying to start the cleanup thread", e);
+        }
+    
     }
 
     public void stop()
