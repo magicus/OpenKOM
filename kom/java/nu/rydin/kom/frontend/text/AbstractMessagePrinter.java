@@ -64,21 +64,126 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
         printHeaderReceivers(context, envelope);
         printSubject(context, envelope);
     }
-
+    
     private final void printBody(Context context, Envelope envelope)
     {
         DisplayController dc = context.getDisplayController();
         PrintWriter out = context.getOut();
-
+        
         context.getDisplayController().messageBody();
         Message message = envelope.getMessage();
-        WordWrapper ww = context.getWordWrapper(message.getBody());
-        String line;
-        while ((line = ww.nextLine()) != null)
+        String s = message.getBody();
+        WordWrapper ww = null;
+        String line, next, url, p[];
+        int openPos, closePos, length = 0, termWidth = context.getTerminalSettings().getWidth() - 2;
+        p = s.split("\n");
+        
+        for (int i = 0; i < p.length; ++i)
         {
+            String t = p[i];
+            
+            // Empty paragraph (used to contain just a CR)?
+            //
+            if (null == t || "".equals(t))
+            {
+                out.println();
+                continue;
+            }
+            
+            // Is there at least one URL in this paragraph?
+            //
+            openPos = t.indexOf("<openkom hint=\"url\">");
+            while (-1 != openPos)
+            {
+                closePos = t.indexOf("</openkom>", openPos);
+                url = t.substring(openPos + 20, closePos).replace(" ", "");
+
+                // Start by printing the text up to the start of the URL tag. If this isn't the first
+                // pass, we may already have pushed data on this line.
+                //
+                if (0 != length)
+                {
+                    if (termWidth - length < 3)
+                    {
+                        out.println();
+                        length = 0;
+                    }
+                    ww = context.getWordWrapper(t.substring(0, openPos), termWidth - length);
+                    line = ww.nextLine();
+                    if (null != line)
+                    {
+                        dc.printWithAttributes(line);
+                        t = t.substring(line.length());
+                        openPos -= line.length();
+                        closePos -= line.length();
+                        length += line.length();
+
+                        // Are we anywhere near a good place to wrap?
+                        //
+                    }
+                }
+                
+                // ... or maybe it is. Anyway, print what's left, if anything.
+                //
+                ww = context.getWordWrapper(t.substring(0, openPos));
+                while (true)
+                {
+                    line = ww.nextLine();
+                    next = ww.nextLine();
+                    if (null != next)
+                    {
+                        dc.printWithAttributes(line);
+                        out.println();
+                        length = 0;
+                        line = next;
+                        next = ww.nextLine();
+                    }
+                    else
+                    {
+                        if (null == line)
+                            break;
+                        dc.printWithAttributes(line);
+                        length += line.length();
+                        break;
+                    }
+                }
+                
+                // At this point, we're sure it's time to print the URL. Start by seeing if it'll fit
+                // on the current line.
+                //
+                if (termWidth - 1 < length + url.length())
+                {
+                    // It won't, we wrap here.
+                    //
+                    out.println();
+                    length = 0;
+                }
+                
+                dc.printWithAttributes(url);
+                length += url.length();
+                t = t.substring(closePos + 10);
+                openPos = t.indexOf("<openkom hint=\"url\">");
+            } // wend
+            
+            // OK, we've printed the last URL in the paragraph (if there was one). Print what's left to
+            // print, remembering that we might have a line with text on already.
+            //
+            ww = context.getWordWrapper(t, termWidth - length);
+            line = ww.nextLine();
+            if (null == line)   // The URL was the last thing in the paragraph.
+                continue;
             dc.printWithAttributes(line);
             out.println();
-        }
+            length = 0;
+            t = t.substring(line.length());
+            ww = context.getWordWrapper(t);
+            while ((line = ww.nextLine()) != null)
+            {
+                dc.printWithAttributes(line);
+                out.println();
+            }
+        } // outer loop
+        
         out.println();
     }
 

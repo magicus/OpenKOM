@@ -33,6 +33,7 @@ import nu.rydin.kom.utils.PrintUtils;
 
 /**
  * @author <a href=mailto:pontus@rydin.nu>Pontus Rydin</a>
+ * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public abstract class AbstractEditor extends EditorContext
 {	
@@ -113,7 +114,7 @@ public abstract class AbstractEditor extends EditorContext
 		
 		// Mainloop
 		//
-		String defaultLine = ""; 
+		String defaultLine = "";
 		for(;;)
 		{
 			dc.messageHeader();
@@ -200,7 +201,7 @@ public abstract class AbstractEditor extends EditorContext
 				 //
 				 if(stopOnEmpty && line.length() == 0)
 				     return;
-				 	
+
 				 // Add line to buffer
 				 //
 				 line += '\n';
@@ -232,7 +233,7 @@ public abstract class AbstractEditor extends EditorContext
 				defaultLine = wrapper.nextLine();
 				if(defaultLine == null)
 					defaultLine = "";
-				
+                
 				// Erase wrapped portion, but don't erase the character around which we wrap.
 				//
 				int top = defaultLine.length();
@@ -266,6 +267,63 @@ public abstract class AbstractEditor extends EditorContext
 						s = e.getLine();
 						if(s.length() > 0)
 							buffer.add(s);
+                        
+                        // Add MessagePrinter hints around URLs.
+                        //                        
+                        boolean hasURL = false; // we have an unclosed tag
+                        int spos, epos;
+                        String cl, url = null;
+                        for (int i = 0; i < buffer.size(); ++i)
+                        {
+                            epos = 0;   // if you forget this, it takes three hours to debug
+                            cl = buffer.get(i);
+                            if (hasURL)
+                            {
+                                // Previous tag not closed because the URL was wrapped (or very long).
+                                //
+                                int bpos = cl.indexOf(' ');
+                                if (-1 != bpos)
+                                {
+                                    // If bpos is -1, this is the kind of annoying URL that contains
+                                    // twelve parameters and takes up three lines. We'll just let it run
+                                    // until we find a place to put the closing tag.
+                                    //
+                                    cl = cl.substring(0, bpos).replace(" ", "") + "</openkom>" + cl.substring(bpos);
+                                    buffer.set(i, cl);
+                                    hasURL = false;
+                                }
+                            }
+                            while (true)
+                            {
+                                spos = cl.indexOf("http://", epos);
+                                if (-1 == spos)
+                                    break;
+                                epos = cl.indexOf(" ", spos);
+                                if (-1 != epos)
+                                {
+                                    url = cl.substring(spos, epos).replace(" ", "");
+                                    cl = cl.substring(0, spos) + "<openkom hint=\"url\">" + url + "</openkom>" + cl.substring(epos);
+                                }
+                                else
+                                {
+                                    cl = cl.substring(0, spos) + "<openkom hint=\"url\">" + cl.substring(spos).replace(" ", "");
+                                    hasURL = true;
+                                }
+                                buffer.set(i, cl);
+                                if (hasURL)
+                                    break;
+
+                                epos += 31;
+                            }
+                        }
+
+                        // Did we fail to terminate? If so, the URL is probably the last (or only)
+                        // text in the message.
+                        //
+                        if (hasURL)
+                        {
+                            buffer.add("</openkom>");
+                        }
 						return;
 					case '\u000c': // Ctrl-L
 					    try
