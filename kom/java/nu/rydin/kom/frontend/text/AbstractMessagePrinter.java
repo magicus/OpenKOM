@@ -120,7 +120,10 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
 
                         // Are we anywhere near a good place to wrap?
                         //
-                        if (5 > termWidth - length)
+                        String[] test = t.split("\\s+");
+                        if (null == test[0])
+                            break;
+                        if (termWidth - 1 <= length + test[0].length())
                         {
                             out.println();
                             length = 0;
