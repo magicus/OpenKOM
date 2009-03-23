@@ -120,6 +120,11 @@ public abstract class AbstractMessagePrinter implements MessagePrinter
 
                         // Are we anywhere near a good place to wrap?
                         //
+                        if (5 > termWidth - length)
+                        {
+                            out.println();
+                            length = 0;
+                        }
                     }
                 }
                 
