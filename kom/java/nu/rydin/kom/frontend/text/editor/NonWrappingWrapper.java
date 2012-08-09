@@ -21,6 +21,11 @@ public class NonWrappingWrapper implements WordWrapper
     {
         m_reader = new BufferedReader(new StringReader(content));
     }
+    
+    public Character getBreakCharacter()
+    {
+        return null;
+    }
 
     public String nextLine()
     {

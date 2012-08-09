@@ -11,5 +11,7 @@ package nu.rydin.kom.frontend.text.editor;
  */
 public interface WordWrapper
 {
+    public Character getBreakCharacter();
+    
 	public String nextLine(); 
 }

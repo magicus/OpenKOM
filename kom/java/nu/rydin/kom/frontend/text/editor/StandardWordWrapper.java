@@ -19,6 +19,7 @@ public class StandardWordWrapper implements WordWrapper
 	private String m_paragraph;
 	private int m_start = 0;
 	private boolean m_inParagraph = false;
+	private Character breakCharacter = null;
 	
 	public static class Factory implements WordWrapperFactory
 	{
@@ -88,6 +89,7 @@ public class StandardWordWrapper implements WordWrapper
 	
 	protected String innerNextLine()
 	{
+	    breakCharacter = null;
 		if(m_paragraph == null)
 		{
 			if(!m_paraTokenizer.hasMoreTokens())
@@ -144,6 +146,7 @@ public class StandardWordWrapper implements WordWrapper
 			if(ch == ' ' || ch == '-')
 			{
 				p = idx + 1;
+				breakCharacter = ch;
 				break;
 			}
 		}
@@ -155,6 +158,7 @@ public class StandardWordWrapper implements WordWrapper
 	    // If the above loop defaulted, we might be breaking in the middle of a
 	    // word, in which case we should not advance the pointer, since there is 
 	    // no space to strip away.
+		//
 		m_start = advance 
 					? p+1 
 					: p;
@@ -162,5 +166,10 @@ public class StandardWordWrapper implements WordWrapper
 		if(m_start >= m_paragraph.length())
 			m_paragraph = null;
 		return answer;
+	}
+	
+	public Character getBreakCharacter()
+	{
+	    return breakCharacter;
 	}
 }
