@@ -12,9 +12,9 @@
 		<pathelement location="${distrPath}/xml-apis.jar"/>
 		<pathelement location="${distrPath}/commons-logging.jar"/>
 		<pathelement location="${distrPath}/concurrent.jar"/>
-		<pathelement location="${distrPath}/j2ssh-common-0.2.7.jar"/>
-		<pathelement location="${distrPath}/j2ssh-core-0.2.7.jar"/>
-		<pathelement location="${distrPath}/j2ssh-daemon-0.2.7.jar"/>
+		<pathelement location="${distrPath}/j2ssh-common-0.2.9.jar"/>
+		<pathelement location="${distrPath}/j2ssh-core-0.2.9.jar"/>
+		<pathelement location="${distrPath}/j2ssh-daemon-0.2.9.jar"/>
 		<pathelement location="${distrPath}/j2ssh-ext-1.1.0.jar"/>
 		<pathelement location="${distrPath}/mail.jar"/>
 	</path>

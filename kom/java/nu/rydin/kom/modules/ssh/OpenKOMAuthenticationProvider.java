@@ -8,6 +8,8 @@ package nu.rydin.kom.modules.ssh;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import nu.rydin.kom.backend.ServerSessionFactory;
 import nu.rydin.kom.exceptions.AuthenticationException;
@@ -33,6 +35,8 @@ import com.sshtools.j2ssh.SshThread;
 public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
 {
     private static final HashMap<String, String> s_tickets = new HashMap<String, String>();
+    
+    private static final Pattern threadNamePattern = Pattern.compile(".*\\s([0-9a-f]+)$");
     
     public OpenKOMAuthenticationProvider()
     {
@@ -86,11 +90,21 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
         try
         {
             SshThread t = ((SshThread)Thread.currentThread());
-            protId = Integer.parseInt(t.getName().substring(19), 16);
+            Matcher m = threadNamePattern.matcher(t.getName());
+            if(m.matches())
+            {
+                String s = m.group(1);
+                Logger.debug(this, "Parsed thread name and found id=" + s);
+                protId = Integer.parseInt(s, 16); // Yes, the number is in hex!
+            }
+            else
+            {
+                Logger.warn(this, "Unable to parse thread name: " + t);
+            }
         }
         catch (NumberFormatException e)
         {
-            Logger.warn(this, "parseInt() failed in logonUser()");
+            Logger.warn(this, "parseInt() failed in logonUser()", e);
         }
         
         String userAtHost = username + "@" + server.getClientFromProtocolNumber(protId);
