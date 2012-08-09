@@ -20,6 +20,27 @@ import nu.rydin.kom.exceptions.UnexpectedException;
 public interface ServerSessionFactory
 {
     /**
+     * Lets the server know we received a successful login from a client. This gives 
+     * us a chance to clear any intrusion detection counters we may have in place
+     * for this client.
+     * @param client The hostname/IP address of the client
+     */
+    public void notifySuccessfulLogin(String client);
+    
+    /**
+     * Lets the server know we received a failed login from a client. This gives 
+     * us a chance to increment any intrusion detection counters we may have in place
+     * for this client. 
+     * @param client The hostname/IP address of the client
+     * @param limit The number of attempts allowed within the "lockout" time limit.
+     * @param lockout The number of milliseconds from the last failed attempt a user is locked out
+     * once the maximum number of failed attempts is reached.
+     */
+    public void notifyFailedLogin(String client, int limit, long lockout);
+    
+    public boolean isBlacklisted(String client);
+    
+    /**
      * Kills a session identified by a session if. Since we must allow this
      * before a user has logged in, the password is needed.
      * 

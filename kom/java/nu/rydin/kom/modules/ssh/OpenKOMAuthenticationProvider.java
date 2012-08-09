@@ -71,6 +71,17 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
     {
         // Dept. of disgusting hacks.. This is the only way we can get the transport protocol ID.
         //
+        SSHServer server = null;
+        try
+        {
+            server =  (SSHServer) Modules.getModule("SSHModule");
+        }
+        catch (NoSuchModuleException nsme)
+        {
+            Logger.fatal(this, "PANIC: The module manager didn't find the SSH module");
+            return false;
+        }
+
         int protId = 0;
         try
         {
@@ -82,37 +93,32 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
             Logger.warn(this, "parseInt() failed in logonUser()");
         }
         
+        String userAtHost = username + "@" + server.getClientFromProtocolNumber(protId);
+        
         try
         {
-            Logger.info(this, "Trying to log in as: " + username);
+            Logger.info(this, "Trying to log in as: " + userAtHost);
             String ticket = ((ServerSessionFactory) Modules.getModule("Backend")).generateTicket(
                     username, password);
             postTicket(ticket);
-            Logger.info(this, "Successfully authenticated as: " + username);
+            Logger.info(this, "Successfully authenticated as: " + userAtHost);
             
             // Notify the SSH server
             //
-            try
-            {
-                ((SSHServer)Modules.getModule("SSHModule")).notifyLogonStatus(protId, true);
-            }
-            catch (NoSuchModuleException nsme)
-            {
-                Logger.warn (this, "The module manager didn't find the SSH module");
-            }
-            catch (Exception e)
-            {
-            }
+            server.notifyLogonStatus(protId, true);
 
             return true;
         } catch (AuthenticationException e)
         {
+            // Just fall thru and return false
         } catch (UnexpectedException e)
         {
+            Logger.error("Unexpected Error", e);
         } catch (NoSuchModuleException e)
         {
+            Logger.fatal(this, "PANIC: Error finding required module", e);
         }
-        Logger.info(this, "Failed login");
+        Logger.info(this, "Failed login for " + userAtHost);
         
         try
         {
@@ -121,9 +127,6 @@ public class OpenKOMAuthenticationProvider extends NativeAuthenticationProvider
         catch (NoSuchModuleException e)
         {
             Logger.warn (this, "Could not locate SSH module");
-        }
-        catch (Exception e)
-        {
         }
         return false;
     }

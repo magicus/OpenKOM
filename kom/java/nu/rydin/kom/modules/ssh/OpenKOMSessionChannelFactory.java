@@ -23,10 +23,12 @@ public class OpenKOMSessionChannelFactory implements ChannelFactory
 
     private final SSHServer server;
     public final static String SESSION_CHANNEL = "session";
+    public final String clientName;
 
-    public OpenKOMSessionChannelFactory(SSHServer server) throws ConfigurationException
+    public OpenKOMSessionChannelFactory(SSHServer server, String clientName) throws ConfigurationException
     {
         this.server = server;
+        this.clientName = clientName;
     }
 
     public Channel createChannel(String channelType, byte[] requestData)
@@ -36,7 +38,7 @@ public class OpenKOMSessionChannelFactory implements ChannelFactory
         {
             if (channelType.equals("session"))
             {
-                return (Channel) new OpenKOMSessionChannel(server);
+                return (Channel) new OpenKOMSessionChannel(server, clientName);
             } 
             else
             {

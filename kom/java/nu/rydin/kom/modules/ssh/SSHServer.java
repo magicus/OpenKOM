@@ -18,7 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import nu.rydin.kom.backend.ServerSessionFactory;
+import nu.rydin.kom.exceptions.NoSuchModuleException;
 import nu.rydin.kom.modules.Module;
+import nu.rydin.kom.modules.Modules;
 import nu.rydin.kom.structs.IntrusionAttempt;
 import nu.rydin.kom.utils.Logger;
 
@@ -45,14 +48,14 @@ import com.sshtools.j2ssh.util.StartStopState;
  * @author <a href=mailto:jepson@xyzzy.se>Jepson</a>
  */
 public class SSHServer implements Module
-{
-    // 090305 jepson    Script kiddie filter
+{    
+    private Map<String, String> parameters; 
     
-    // The hosts we're currently watching.
-    //
-    private List<IntrusionAttempt> attempts = 
-        Collections.synchronizedList(new ArrayList<IntrusionAttempt>());
-    
+    public Map<String, String> getParameters()
+    {
+        return parameters;
+    }
+
     // This is where it gets interesting. Since we're not about to fiddle with J2SSH unless we
     // absolutely have to, we'll try to make do with what's available from the outside. The only thing
     // shared between the SSH server and the auth provider is the transport protocol number, so we have
@@ -62,6 +65,11 @@ public class SSHServer implements Module
     //
     private Map<Integer, String> protocolHostXref = 
         Collections.synchronizedMap (new HashMap<Integer, String>());
+    
+    public String getClientFromProtocolNumber(int protocolNo)
+    {
+        return protocolHostXref.get(protocolNo);
+    }
 
     // ... and now, something we can call from the authentication provider to notify us of login status.
     //
@@ -72,112 +80,34 @@ public class SSHServer implements Module
         {
             // This can't happen, so it's guaranteed to..
             //
-            Logger.warn(this, "notifyLogonStatus() called for non-existant transport protocol "+ protocolNo);
+            Logger.warn(this, "notifyLogonStatus() called for non-existent transport protocol "+ protocolNo);
             return;
         }
-        synchronized (attempts)
+        try
         {
-            // This is probably the most common case, no hosts on the watch list
-            //
-            if (attempts.isEmpty())
-            {
-                if (!succeeded)
-                {
-                    attempts.add (new IntrusionAttempt (host));
-                }
-                return;
-            }
-            
-            // There's something in the list, check if it's our host
-            //
-            for (Iterator<IntrusionAttempt> iter = attempts.iterator(); iter.hasNext();)
-            {
-                IntrusionAttempt ia = iter.next();
-                if (ia.getHost().equals(host))
-                {
-                    if (succeeded)
-                    {
-                        iter.remove();
-                    }
-                    else
-                    {
-                        ia.addAttempt();
-                    }
-                    return;
-                }
-            }
-            
-            // If we arrive here, it's a new player after all.
-            //
-            if (!succeeded)
-            {
-                attempts.add(new IntrusionAttempt(host));
-            }
+            ServerSessionFactory ssf = (ServerSessionFactory) Modules.getModule("Backend");
+            if(succeeded)
+                ssf.notifySuccessfulLogin(host);
+            else
+                ssf.notifyFailedLogin(host, allowedAttempts, lockoutTime);
+        }
+        catch(NoSuchModuleException e)
+        {
+            throw new RuntimeException("Missing server backend!", e);
         }
     }
-    
-    // Drop blacklisted hosts from deny list after preset time.
-    // (This is something we actually have to clean out. The protocol-to-host map will, when the 256
-    // transport protocol slots have all been used, just be overwritten.)
-    
-    private class LoginAttemptCleaner extends Thread
-    {
-        private long m_lockoutTime;
         
-        public LoginAttemptCleaner(long lockoutTime)
-        {
-            super ("LoginAttemptCleaner");
-            m_lockoutTime = lockoutTime;
-            this.setDaemon(true);
-        }
-
-        public void run()
-        {
-            try
-            {
-                for (;;)
-                {
-                    Thread.sleep(60000);
-
-                    if (attempts.isEmpty())
-                        continue;
-
-                    long now = System.currentTimeMillis();
-                    synchronized (attempts)
-                    {
-                        for (Iterator<IntrusionAttempt> iter = attempts.iterator();
-                             iter.hasNext();)
-                        {
-                            IntrusionAttempt att = iter.next();
-                            long then = att.getLastAttempt().getTime();
-                            if (m_lockoutTime < (now - then))
-                            {
-                                Logger.debug(this, "Removed " + att.getHost() + " from deny list");
-                                iter.remove();
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.error (this, "Cleaner thread terminated", e);
-            }
-        }
-    }
-    
     private ConnectionListener listener = null;
     private boolean selfRegister;
-    private Thread victor;
     private long lockoutTime = 600000;
     private int allowedAttempts = 9;
     
-    public void configureServices(ConnectionProtocol connection)
+    public void configureServices(ConnectionProtocol connection, String clientName)
             throws IOException
     {
         connection.addChannelFactory(
                 OpenKOMSessionChannelFactory.SESSION_CHANNEL,
-                new OpenKOMSessionChannelFactory(this));
+                new OpenKOMSessionChannelFactory(this, clientName));
     }
 
     protected List<TransportProtocolServer> activeConnections = new Vector<TransportProtocolServer>();
@@ -185,13 +115,6 @@ public class SSHServer implements Module
     public boolean allowsSelfRegister()
     {
         return selfRegister;
-    }
-
-    protected void refuseSession(Socket socket) throws IOException
-    {
-        TransportProtocolServer transport = new TransportProtocolServer(true);
-        transport.startTransportProtocol(new ConnectedSocketTransportProvider(
-                socket), new SshConnectionProperties());
     }
 
     protected TransportProtocolServer createSession(Socket socket)
@@ -211,6 +134,7 @@ public class SSHServer implements Module
         
         // Add this session to the map
         //
+        String clientName = socket.getInetAddress().getHostAddress();
         try
         {
             this.protocolHostXref.put(transport.getConnectionId(), socket.getInetAddress().getHostAddress());
@@ -227,7 +151,7 @@ public class SSHServer implements Module
         ConnectionProtocol connection = new ConnectionProtocol();
 
         // Configure the connections services
-        configureServices(connection);
+        configureServices(connection, clientName);
 
         // Allow the Connection Protocol to be accepted by the
         // Authentication Protocol
@@ -260,6 +184,7 @@ public class SSHServer implements Module
         {
             try
             {
+                ServerSessionFactory ssf = (ServerSessionFactory) Modules.getModule("Backend");
                 Logger.debug(this, "Starting connection listener thread");
                 state.setValue(StartStopState.STARTED);
                 server = new ServerSocket(port);
@@ -286,6 +211,7 @@ public class SSHServer implements Module
                                         .getUnderlyingProviderDetail()
                                         + " connection closed");
                                 activeConnections.remove(transport);
+                                protocolHostXref.remove(transport.getConnectionId());
                             }
                         }
                     }
@@ -297,37 +223,37 @@ public class SSHServer implements Module
                             && (state.getValue() == StartStopState.STARTED))
                     {
                         Logger.debug(this, "New connection requested");
-
-                        synchronized(attempts)
+                        
+                        /// Check if we're blacklisted
+                        //
+                        String client = socket.getInetAddress().getHostAddress();
+                        if(ssf.isBlacklisted(client))
                         {
-                            for (IntrusionAttempt each : attempts)
-                            {
-                                if (each.getHost().equals(socket.getInetAddress().getHostAddress()))
-                                {
-                                    if (each.isBlocked())
-                                    {
-                                        Logger.info(this, "Refusing session from " + each.getHost() + " - blocked");
-                                        refuseSession(socket);
-                                    }
-                                }
-                            }
+                            Logger.info(this, "Refusing connection from blacklisted host: " + client);
+                            socket.close();
+                            continue;
                         }
                         
-                        if (maxConnections < activeConnections.size())
+                        // Check if we're out of connections
+                        //
+                        if(maxConnections < activeConnections.size())
                         {
-                            refuseSession(socket);
-                        } else
-                        {
-            				Logger.info(this, "Incoming connection from " 
-            				        + socket.getInetAddress().getHostAddress() + ".");
-                            TransportProtocolServer transport = createSession(socket);
-                            synchronized (activeConnections)
-                            {
-                                activeConnections.add(transport);
-                            }
-
-                            transport.addEventHandler(eventHandler);
+                            Logger.info(this, "Refusing connection because maximum number of connections has been exceeded. Client: " + client);
+                            socket.close();
+                            continue;
                         }
+                        
+                        // We're not blacklisted, go on and accept the connection!
+                        //
+        				Logger.info(this, "Incoming connection from " 
+        				        + socket.getInetAddress().getHostAddress() + ".");
+                        TransportProtocolServer transport = createSession(socket);
+                        synchronized (activeConnections)
+                        {
+                            activeConnections.add(transport);
+                        }
+
+                        transport.addEventHandler(eventHandler);
                     }
                 } catch (IOException ex)
                 {
@@ -350,10 +276,16 @@ public class SSHServer implements Module
 
                 listener = null;
                 Logger.info(this, "Exiting server thread");
-            } catch (IOException ex)
+            } 
+            catch (IOException ex)
             {
                 Logger.error(this, "The server thread failed", ex);
-            } finally
+            }
+            catch (NoSuchModuleException ex)
+            {
+                Logger.error(this, "PANIC! Could not resolve server backend", ex);
+            }
+            finally
             {
                 thread = null;
             }
@@ -380,24 +312,13 @@ public class SSHServer implements Module
             {
                 Logger.warn(this, 
                         "The listening socket reported an error during shutdown", ioe);
-            }
-            
-            try
-            {
-                if (null != victor)
-                {
-                    victor.interrupt();
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.warn(this, "Exception shutting down the cleanup thread", e);
-            }
+            }            
         }
     }
 
     public void start(Map<String, String> parameters)
     {
+        this.parameters = parameters;
         // Setup J2SSH dummy configuration classes.
         //
         try
@@ -463,19 +384,6 @@ public class SSHServer implements Module
             Logger.warn(this, "Allowed attempts parameter unparsable or missing from module parameters, defaulting to 3x3.");
         }
         
-        IntrusionAttempt.setLimit(allowedAttempts);
-        
-        try
-        {
-            victor = new LoginAttemptCleaner(lockoutTime);
-            victor.start();
-            Logger.info(this, "Cleanup thread started - blocked hosts removed after " + lockoutTime + " ms.");
-        }
-        catch (Exception e)
-        {
-            Logger.error(this, "Exception trying to start the cleanup thread", e);
-        }
-    
     }
 
     public void stop()

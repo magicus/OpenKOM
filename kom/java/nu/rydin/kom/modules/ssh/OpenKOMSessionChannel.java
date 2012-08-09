@@ -60,11 +60,13 @@ public class OpenKOMSessionChannel extends IOChannel
     private int ptyColumns = 80;
     private int ptyRows = 25;
     private final SSHServer server;
+    private final String clientName;
     
-    public OpenKOMSessionChannel(final SSHServer server)
+    public OpenKOMSessionChannel(final SSHServer server, String clientName)
     {
         super();
         this.server = server;
+        this.clientName = clientName;
     }
     public byte[] getChannelOpenData()
     {
@@ -191,7 +193,7 @@ public class OpenKOMSessionChannel extends IOChannel
             {
                 String ticket = OpenKOMAuthenticationProvider.claimTicket();
                 Logger.debug(this, "Ticket: " + ticket);
-                ClientSession client = new ClientSession(getInputStream(), getOutputStream(), true, server.allowsSelfRegister());
+                ClientSession client = new ClientSession(getInputStream(), getOutputStream(), true, false, clientName, server.getParameters());
                 addSizeListener(client);
                 client.setTicket(ticket);
                 Thread clientThread = new Thread(client, "Session (not logged in)");

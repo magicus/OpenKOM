@@ -11,6 +11,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 
+import nu.rydin.kom.backend.ServerSessionFactory;
+import nu.rydin.kom.exceptions.NoSuchModuleException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.ClientSession;
 import nu.rydin.kom.frontend.text.TelnetInputStream;
@@ -95,9 +97,12 @@ public class TelnetServer implements Module, Runnable
 	private Thread m_thread;
 	private boolean m_useTicket;
 	private boolean m_selfRegister;
+	private Map<String, String> parameters;
 		
 	public void start(Map<String, String> parameters)
 	{
+	    this.parameters = parameters;
+	    
 	    // Perform checks before start.
 	    //
 		int port = Integer.parseInt((String) parameters.get("port"));
@@ -148,6 +153,15 @@ public class TelnetServer implements Module, Runnable
 	
 	public void run()
 	{   
+	    ServerSessionFactory ssf = null;
+	    try
+	    {
+	        ssf = (ServerSessionFactory) Modules.getModule("Backend");
+	    }
+	    catch(NoSuchModuleException e)
+	    {
+	        throw new RuntimeException("PANIC: Backend not found", e);
+	    }
 		for(;;)
 		{
 			try
@@ -156,15 +170,22 @@ public class TelnetServer implements Module, Runnable
 				//
 				Socket incoming = m_socket.accept();
 				incoming.setKeepAlive(true);
-				Logger.info(this, "Incoming connection from " + incoming.getInetAddress().getHostAddress() +
-				        ". Buffer size=" + incoming.getReceiveBufferSize());
+				String clientName = incoming.getInetAddress().getHostAddress();
+				
+				// Check if connection is blacklisted
+				//
+				if(ssf.isBlacklisted(clientName))
+				{
+				    Logger.info("Rejecting blackisted client: " + clientName);
+				}
+				Logger.info(this, "Incoming connection from " + clientName + ". Buffer size=" + incoming.getReceiveBufferSize());
 				try
 				{
 					// Create session
 					//
 					TelnetInputStream eis = new TelnetInputStream(incoming.getInputStream(), 
 						incoming.getOutputStream());
-					ClientSession client = new ClientSession(eis, incoming.getOutputStream(), m_useTicket, m_selfRegister);
+					ClientSession client = new ClientSession(eis, incoming.getOutputStream(), m_useTicket, m_selfRegister, clientName, parameters);
 					eis.addSizeListener(client);
 					eis.addEnvironmentListener(client);
 					

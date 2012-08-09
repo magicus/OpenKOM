@@ -9,62 +9,71 @@ import nu.rydin.kom.utils.Logger;
 
 public class IntrusionAttempt
 {
-    private final String m_host;
-    private final Date m_firstAttempt;
-    private Date m_lastAttempt;
-    private int m_count;
-    private boolean m_isBlocked;
-    private static int m_limit = 9;
+    private final String host;
+    private final long firstAttempt;
+    private long lastAttempt;
+    private int count;
+    private boolean isBlocked;
+    private final int limit;
+    private final long lockout;
     
-    public IntrusionAttempt (String host)
+    public long getLockout()
     {
-        Logger.debug(this, "New player: " + host);
-        this.m_host = host;
-        this.m_count = 1;
-        this.m_isBlocked = false;
-        this.m_firstAttempt = new Date();
-        this.m_lastAttempt = new Date(m_firstAttempt.getTime());
+        return lockout;
+    }
+
+    public IntrusionAttempt(String host, int limit, long lockout)
+    {
+        this.host = host;
+        this.limit = limit;
+        this.lockout = lockout;
+        this.isBlocked = false;
+        this.firstAttempt = System.currentTimeMillis();
+        this.lastAttempt = this.firstAttempt;
+        this.addAttempt();
     }
     
     public String getHost()
     {
-        return m_host;
+        return host;
     }
     
-    public Date getFirstAttempt()
+    public long getFirstAttempt()
     {
-        return m_firstAttempt;
+        return firstAttempt;
     }
     
-    public Date getLastAttempt()
+    public long getLastAttempt()
     {
-        return m_lastAttempt;
+        return lastAttempt;
     }
     
     public boolean isBlocked()
     {
-        return m_isBlocked;
+        return isBlocked;
     }
 
     public void addAttempt()
     {
-        ++this.m_count;
-        m_lastAttempt.setTime(System.currentTimeMillis()); 
-        if (m_limit <= this.m_count)
+        ++this.count;
+        Logger.debug(this, "Login failed for host: " + host + ". Number of attempts: " + count);
+        lastAttempt = System.currentTimeMillis(); 
+        if (limit <= this.count)
         {
-            m_isBlocked = true;
+            isBlocked = true;
+            Logger.info(this, "Blacklisted host: " + host + " for " + (lockout / 1000) + " seconds");
         }
     }
-
-    public static void setLimit (int limit)
+    
+    public int expireAttempt()
     {
-        m_limit = limit;
+        return --count;
     }
     
     // debug method
     //
     public int getCurrentCount()
     {
-        return m_count;
+        return count;
     }
 }

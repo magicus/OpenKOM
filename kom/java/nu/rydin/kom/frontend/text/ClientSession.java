@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import nu.rydin.kom.backend.NameUtils;
@@ -131,6 +132,10 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 	private final boolean m_useTicket;
 	private SessionState m_state;
 	private String m_ticket;
+	private String clientName;
+	private int retriesBeforeLockout = 9;
+	private long lockout = 900000;
+	private long failedLoginDelay = 3000;
 
 	private Parser m_parser;
     private boolean m_loggedIn;	
@@ -310,13 +315,38 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 		}
 	}
 	
-	public ClientSession(InputStream in, OutputStream out, boolean useTicket, boolean selfRegister)
+	public ClientSession(InputStream in, OutputStream out, boolean useTicket, boolean selfRegister, String clientName, Map<String, String> parameters)
 	throws UnexpectedException, InternalException
 	{
+	    // Unpack properties
+	    //
+	    
+	   try
+	   {
+	       retriesBeforeLockout = Integer.parseInt(parameters.get("attempts"));
+	   }
+	   catch(NullPointerException e) {  } // Just keep default
+	   catch(NumberFormatException e) 
+	   {  
+	       Logger.warn(this, "Error parsing 'attempts' parameter, using default");
+	   }
+	   
+       try
+       {
+           lockout = Long.parseLong(parameters.get("lockout"));
+       }
+       catch(NullPointerException e) {  } // Just keep default
+       catch(NumberFormatException e) 
+       {  
+           Logger.warn(this, "Error parsing 'lockout' parameter, using default");
+       }
+
+
 		// Set up I/O
 		//
 		m_rawIn = in;
 		m_rawOut = out;
+		this.clientName = clientName;
 		eventPrinter = new EventPrinter (this);
 		
 		// Set up authentication method
@@ -734,7 +764,25 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
 			m_session = m_useTicket
                 ? ssf.login(ticket, ClientTypes.TTY, false) 
                 : ssf.login(userid, password, ClientTypes.TTY, false);
+            ssf.notifySuccessfulLogin(clientName);
 		}
+        catch(AuthenticationException e)
+        {
+            // For ticket-based logins, this will be handles elsewhere
+            //
+            if(!m_useTicket)
+            {
+                ssf.notifyFailedLogin(clientName, retriesBeforeLockout, lockout);
+                
+                // Sleep for a while to make brute force attacks a bit harder...
+                //
+                Thread.sleep(failedLoginDelay);
+                
+                // Rethrow, we will handle this in the mainloop of the shell
+                //
+                throw e;
+            }
+        }
 		catch(AlreadyLoggedInException e)
 		{
 			// Already logged in. Ask if they want to create another session
@@ -810,7 +858,7 @@ public class ClientSession implements Runnable, Context, ClientEventTarget, Term
                     {
                         // Huh? We DID allow this!
                         //
-                        Logger.error(this, "This cannot happen!", e);
+                        Logger.error(this, "This cannot happen!", e1);
                     }
                     Logger.info(this, "Allowed multiple login.");
                 }			

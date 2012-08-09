@@ -44,6 +44,7 @@ import nu.rydin.kom.exceptions.ObjectNotFoundException;
 import nu.rydin.kom.exceptions.UnexpectedException;
 import nu.rydin.kom.frontend.text.ClientSettings;
 import nu.rydin.kom.modules.Module;
+import nu.rydin.kom.structs.IntrusionAttempt;
 import nu.rydin.kom.structs.SessionListItem;
 import nu.rydin.kom.structs.UserInfo;
 import nu.rydin.kom.utils.Base64;
@@ -57,6 +58,8 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 {
     private int m_nextSessionId = 0;
     
+    private Map<String, IntrusionAttempt> intrusionAttempts = Collections.synchronizedMap(new HashMap<String, IntrusionAttempt>());
+    
 	private SessionManager m_sessionManager;
 	
 	/**
@@ -65,9 +68,9 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	private Map<String, Long> m_validTickets = Collections.synchronizedMap(new HashMap<String, Long>());
 
 	/**
-	 * Ticket expiration timer
+	 * General purpose timer for ticket expirations and intrusion attempt clearing
 	 */
-	private Timer m_ticketExpirations = new Timer(true);
+	private Timer timer = new Timer(true);
 	
 	private class TicketKiller extends TimerTask
 	{
@@ -84,6 +87,35 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	            Logger.info(this, "Discarded unused ticket");
 	    }
 	}
+	
+	private class IntrusionKiller extends TimerTask
+	{
+        private String client;
+        
+        public IntrusionKiller(String client)
+        {
+            this.client = client;
+        }
+        
+        public void run()
+        {
+            synchronized(ServerSessionFactoryImpl.this.intrusionAttempts)
+            {
+                IntrusionAttempt ia = ServerSessionFactoryImpl.this.intrusionAttempts.get(client);
+                if(ia != null)
+                {
+                    // Decrease attempt count and remove if it reached zero
+                    //
+                    if(ia.expireAttempt() == 0)
+                    {
+                        intrusionAttempts.remove(client);
+                        Logger.info(this, "Discarded expired intrusion attempt for: " + client);
+                    }
+                }
+	        }
+	    }
+	 }
+
     
     private class ContextCleaner extends Thread
     {
@@ -245,8 +277,42 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	{
 
 	}	
+	
+    public void notifySuccessfulLogin(String client)
+    {
+        intrusionAttempts.remove(client);
+    }
     
+    public void notifyFailedLogin(String client, int limit, long lockout)
+    {
+        synchronized(intrusionAttempts)
+        {
+            IntrusionAttempt ia = intrusionAttempts.get(client);
+            if(ia == null)
+            {
+                ia = new IntrusionAttempt(client, limit, lockout);
+                intrusionAttempts.put(client, ia);
+            }
+            else
+                ia.addAttempt();
+            
+            // We schedule a timer for every attempt. When they expire, they will decrease the
+            // counter, resulting in the lockout to run from the last attempt
+            //
+            timer.schedule(new IntrusionKiller(client), lockout);
+        }   
+    }
     
+    public boolean isBlacklisted(String client)
+    {
+        synchronized(intrusionAttempts)
+        {
+            IntrusionAttempt ia = intrusionAttempts.get(client);
+            if(ia == null)
+                return false;
+            return ia.isBlocked();
+        }
+    }
 	
 	public ServerSession login(String ticket, short clientType, boolean allowMulti)
 	throws AuthenticationException, LoginProhibitedException, AlreadyLoggedInException, UnexpectedException
@@ -387,7 +453,7 @@ public class ServerSessionFactoryImpl implements ServerSessionFactory, Module
 	        // Have a valid ticket! Now register it.
 	        //
             m_validTickets.put(ticket, userId);
-            m_ticketExpirations.schedule(new TicketKiller(ticket), ServerSettings.getTicketLifetime()); 
+            timer.schedule(new TicketKiller(ticket), ServerSettings.getTicketLifetime()); 
             return ticket;
 	    }
 	    catch(NoSuchAlgorithmException e)
