@@ -123,8 +123,10 @@ public class SSHServer implements Module
         Logger.debug(this, "Initializing connection");
 
         InetAddress address = socket.getInetAddress();
-        Logger.debug(this, "Remote Hostname: " + address.getHostName());
-        Logger.debug(this, "Remote IP: " + address.getHostAddress());
+        // The reverse lookup here can cause problems. We're disabling it for now.
+        //
+//        Logger.debug(this, "Remote Hostname: " + address.getHostName());
+        Logger.info(this, "Attempting to create SSH session. Remote IP: " + address.getHostAddress());
 
         Logger.debug(this, "Socket keepalive: " + socket.getKeepAlive());        
         socket.setKeepAlive(true);
@@ -248,6 +250,7 @@ public class SSHServer implements Module
         				Logger.info(this, "Incoming connection from " 
         				        + socket.getInetAddress().getHostAddress() + ".");
                         TransportProtocolServer transport = createSession(socket);
+                        
                         synchronized (activeConnections)
                         {
                             activeConnections.add(transport);

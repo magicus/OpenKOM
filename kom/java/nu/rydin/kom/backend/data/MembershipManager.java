@@ -618,13 +618,15 @@ public class MembershipManager
 			}
 			finally
 			{
-                // Invalidate cache
-                //
-                CacheManager.instance().getPermissionCache().registerInvalidation(new PermissionKey(conference, user));
 				if(rs != null)
 					rs.close();
-			}
-			
+			}			
+		}
+		finally
+		{
+            // Invalidate cache
+            //
+            CacheManager.instance().getPermissionCache().registerInvalidation(new PermissionKey(conference, user));
 		}
 	}
 	
