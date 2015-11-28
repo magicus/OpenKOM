@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS names
 	keywords VARCHAR(100),	
 	PRIMARY KEY(id),
 	UNIQUE INDEX norm_name_ix(norm_name)
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS users 
 (
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS users
 	PRIMARY KEY(id),
 	FOREIGN KEY (id) REFERENCES names(id) ON DELETE CASCADE,
 	INDEX userid_ix(userid)
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS conferences 
 (
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS conferences
 	INDEX replyConf_ix(replyConf),
 	FOREIGN KEY (replyConf) REFERENCES conferences(id) ON DELETE SET NULL,
     INDEX lasttext_ix(lasttext)
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS memberships
 (
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS memberships
 	FOREIGN KEY (conference) REFERENCES conferences(id) ON DELETE CASCADE,
 	INDEX mbruser_ix(user),
 	FOREIGN KEY (user) REFERENCES users(id) ON DELETE CASCADE		
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messages
 (
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS messages
 	FOREIGN KEY (reply_to) REFERENCES messages(id) ON DELETE SET NULL,
 	INDEX thread_ix(thread),
 	INDEX msg_author_created(author, created)
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messagesearch 
 (
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS messagesearch
 	body LONGTEXT NOT NULL,
 	PRIMARY KEY (id),
 	FULLTEXT KEY search_ix (subject,body)
-) TYPE=MyISAM; 
+) ENGINE=MyISAM; 
 
 CREATE TABLE IF NOT EXISTS messageoccurrences
 (
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS messageoccurrences
 	FOREIGN KEY (user) REFERENCES users(id) ON DELETE SET NULL,
 	INDEX occmessage_ix(message),
 	FOREIGN KEY (message) REFERENCES messages(id) ON DELETE CASCADE
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messageattributes
 (
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS messageattributes
 	INDEX message_ix(message),
 	FOREIGN KEY (message) REFERENCES messages(id) ON DELETE CASCADE,
 	INDEX messagekind_ix(message, kind)
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS bookmarks
 (
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS bookmarks
 	PRIMARY KEY(user, message),
 	FOREIGN KEY(message) REFERENCES messages(id) ON DELETE CASCADE,
 	INDEX(user, created)
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS magicconferences
 (
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS magicconferences
 	PRIMARY KEY(conference, kind),
 	FOREIGN KEY(conference) REFERENCES conferences(id) ON DELETE CASCADE,
 	FOREIGN KEY(user) REFERENCES users(id) ON DELETE CASCADE
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messagelog
 (
@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS messagelog
 	PRIMARY KEY(id),
 	INDEX mlauthor(author),
 	FOREIGN KEY (author) REFERENCES users(id) ON DELETE SET NULL
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS messagelogpointers
 (
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS messagelogpointers
 	FOREIGN KEY (recipient) REFERENCES names(id) ON DELETE CASCADE,
 	INDEX logitem(logid),
 	FOREIGN KEY (logid) REFERENCES messagelog(id) ON DELETE CASCADE
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS userlog
 (
@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS userlog
 	INDEX userlog_user(user),
 	FOREIGN KEY (user) REFERENCES users(id) ON DELETE CASCADE,
 	INDEX userlog_date(logged_in)
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS files
 (
@@ -214,7 +214,7 @@ CREATE TABLE IF NOT EXISTS files
 	PRIMARY KEY(parent, name),
 	INDEX file_parentix(parent), 
 	FOREIGN KEY (parent) REFERENCES names(id) ON DELETE CASCADE
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS settings
 (
@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS settings
 	string_value VARCHAR(100),
 	numeric_value BIGINT,
 	PRIMARY KEY(name)
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS relationships
 (
@@ -236,7 +236,7 @@ CREATE TABLE IF NOT EXISTS relationships
 	FOREIGN KEY (referer) REFERENCES names(id) ON DELETE CASCADE,
 	INDEX referee_ix(referee),
 	FOREIGN KEY (referee) REFERENCES names(id) ON DELETE CASCADE
-) TYPE=INNODB;
+) ENGINE=INNODB;
 
 -- Create sysop
 --

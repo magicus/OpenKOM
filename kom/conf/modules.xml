@@ -4,7 +4,10 @@
 		<!-- Name of the JDBC driver class. -->
 		<parameter name="server.jdbc.driver.class" value="com.mysql.jdbc.Driver"/>
 		<!-- JDBC connection string. Change this to reflect your database configuration. -->
-		<parameter name="server.jdbc.connect" value="jdbc:mysql://192.168.1.200/kom?user=kom&amp;password=kom"/>
+		<!-- Default value assumes local installation for easy first-time deployment. -->
+                <parameter name="server.jdbc.connect" value="jdbc:mysql://localhost/kom?user=kom&amp;password=kom"/>
+                <!-- Old OpenKOM example values -->
+		<!-- <parameter name="server.jdbc.connect" value="jdbc:mysql://192.168.1.200/kom?user=kom&amp;password=kom"/> -->
 		<!-- parameter name="server.jdbc.connect" value="jdbc:mysql://mozart/sklommon?user=sklommon&amp;password=sklommon"/ -->
 		<!-- Alternate connection string with trusted login -->
 		<!-- <parameter name="server.jdbc.connect" value="server.jdbc.connect=jdbc:mysql://localhost/kom"/> -->

@@ -7,7 +7,9 @@ Prerequirements:
 Database initialization:
 
 Apply the script sql/initmysql.sql to your database. It creates a database 
-named "kom", and creates a user "kom" with password "kom" with access to this.
+named "kom". On MySQL 5.1 or later, user initmysql-5.1.sql. Then, if needed, 
+run sql/createuser.sql, which creates a user "kom" with password "kom" with 
+access to this. 
 
 SSH2:
 
