@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="distr/jasper-runtime.jar"/>
 	<classpathentry kind="lib" path="distr/jasper-compiler.jar"/>
 	<classpathentry kind="lib" path="distr/commons-el.jar"/>
+	<classpathentry kind="lib" path="distr/tomcat-catalina-7.0.0.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
