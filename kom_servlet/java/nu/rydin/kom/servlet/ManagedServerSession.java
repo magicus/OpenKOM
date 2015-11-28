@@ -2,12 +2,14 @@ package nu.rydin.kom.servlet;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import nu.rydin.kom.backend.EventSource;
 import nu.rydin.kom.backend.HeartbeatListener;
+import nu.rydin.kom.backend.SelectedMessages;
 import nu.rydin.kom.backend.ServerSession;
 import nu.rydin.kom.events.Event;
 import nu.rydin.kom.exceptions.AllRecipientsNotReachedException;
@@ -16,6 +18,9 @@ import nu.rydin.kom.exceptions.AmbiguousNameException;
 import nu.rydin.kom.exceptions.AuthorizationException;
 import nu.rydin.kom.exceptions.BadPasswordException;
 import nu.rydin.kom.exceptions.DuplicateNameException;
+import nu.rydin.kom.exceptions.EmailRecipientNotRecognizedException;
+import nu.rydin.kom.exceptions.EmailSenderNotRecognizedException;
+import nu.rydin.kom.exceptions.MessageNotFoundException;
 import nu.rydin.kom.exceptions.NoCurrentMessageException;
 import nu.rydin.kom.exceptions.NoMoreMessagesException;
 import nu.rydin.kom.exceptions.NoMoreNewsException;
@@ -36,6 +41,7 @@ import nu.rydin.kom.structs.GlobalMessageSearchResult;
 import nu.rydin.kom.structs.LocalMessageSearchResult;
 import nu.rydin.kom.structs.MembershipInfo;
 import nu.rydin.kom.structs.MembershipListItem;
+import nu.rydin.kom.structs.MessageAttribute;
 import nu.rydin.kom.structs.MessageHeader;
 import nu.rydin.kom.structs.MessageLocator;
 import nu.rydin.kom.structs.MessageLogItem;
@@ -405,12 +411,12 @@ public class ManagedServerSession implements HttpSessionBindingListener, ServerS
         return underlying.getLastMessageHeader();
     }
 
-    public Envelope getLastRulePosting() throws ObjectNotFoundException, NoRulesException, UnexpectedException
+    public Envelope getLastRulePosting() throws ObjectNotFoundException, NoRulesException, UnexpectedException, AuthorizationException
     {
         return underlying.getLastRulePosting();
     }
 
-    public Envelope getLastRulePostingInConference(long conference) throws ObjectNotFoundException, NoRulesException, UnexpectedException
+    public Envelope getLastRulePostingInConference(long conference) throws ObjectNotFoundException, NoRulesException, UnexpectedException, AuthorizationException
     {
         return underlying.getLastRulePostingInConference(conference);
     }
@@ -700,22 +706,22 @@ public class ManagedServerSession implements HttpSessionBindingListener, ServerS
         return underlying.readFile(parent, name);
     }
 
-    public Envelope readLastMessage() throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
+    public Envelope readLastMessage() throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException, AuthorizationException
     {
         return underlying.readLastMessage();
     }
 
-    public Envelope readNextMessage(long conf) throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
+    public Envelope readNextMessage(long conf) throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException
     {
         return underlying.readNextMessage(conf);
     }
 
-    public Envelope readNextMessageInCurrentConference() throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
+    public Envelope readNextMessageInCurrentConference() throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException
     {
         return underlying.readNextMessageInCurrentConference();
     }
 
-    public Envelope readNextReply() throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException
+    public Envelope readNextReply() throws NoMoreMessagesException, ObjectNotFoundException, UnexpectedException, AuthorizationException
     {
         return underlying.readNextReply();
     }
@@ -730,7 +736,7 @@ public class ManagedServerSession implements HttpSessionBindingListener, ServerS
         return underlying.readSystemFile(name);
     }
 
-    public Envelope readTaggedMessage(short tag, long object) throws UnexpectedException, ObjectNotFoundException
+    public Envelope readTaggedMessage(short tag, long object) throws UnexpectedException, ObjectNotFoundException, AuthorizationException
     {
         return underlying.readTaggedMessage(tag, object);
     }
@@ -820,7 +826,7 @@ public class ManagedServerSession implements HttpSessionBindingListener, ServerS
         underlying.storeFile(parent, name, content, permissions);
     }
 
-    public MessageOccurrence storeMail(long recipient, UnstoredMessage msg) throws ObjectNotFoundException, UnexpectedException
+    public MessageOccurrence storeMail(long recipient, UnstoredMessage msg) throws ObjectNotFoundException, UnexpectedException, AuthorizationException
     {
         return underlying.storeMail(recipient, msg);
     }
@@ -895,7 +901,7 @@ public class ManagedServerSession implements HttpSessionBindingListener, ServerS
         underlying.changeEmailAlias(id, emailAlias);
     }    
     
-    public Envelope readMessage(MessageLocator message) throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
+    public Envelope readMessage(MessageLocator message) throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException, AuthorizationException
     {
         return underlying.readMessage(message);
     }
@@ -920,7 +926,7 @@ public class ManagedServerSession implements HttpSessionBindingListener, ServerS
         return underlying.storeReplyAsMessage(conference, msg, replyTo);
     }
 
-    public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg, MessageLocator replyTo) throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException
+    public MessageOccurrence storeReplyAsMail(long recipient, UnstoredMessage msg, MessageLocator replyTo) throws ObjectNotFoundException, UnexpectedException, NoCurrentMessageException, AuthorizationException
     {
         return underlying.storeReplyAsMail(recipient, msg, replyTo);
     }
@@ -928,5 +934,163 @@ public class ManagedServerSession implements HttpSessionBindingListener, ServerS
     public MessageLocator resolveLocator(MessageLocator message) throws ObjectNotFoundException, NoCurrentMessageException, UnexpectedException
     {
         return underlying.resolveLocator(message);
+    }
+
+    @Override
+    public long getThreadIdForMessage(MessageLocator ml)
+            throws MessageNotFoundException, UnexpectedException {
+        return underlying.getThreadIdForMessage(ml);
+    }
+
+    @Override
+    public Name[] signupForAllConferences() throws UnexpectedException,
+            ObjectNotFoundException {
+        return underlying.signupForAllConferences();
+    }
+
+    @Override
+    public int signoffAllConferences() throws ObjectNotFoundException,
+            UnexpectedException {
+        return underlying.signoffAllConferences();
+    }
+
+    @Override
+    public void autoPrioritizeConferences() throws UnexpectedException {
+        underlying.autoPrioritizeConferences();
+    }
+
+    @Override
+    public int markThreadAsUnread(long root, boolean immediate)
+            throws ObjectNotFoundException, UnexpectedException,
+            NoCurrentMessageException {
+        return underlying.markThreadAsUnread(root, immediate);
+    }
+
+    @Override
+    public int markSubjectAsUnread(String subject, boolean localOnly,
+            boolean immediate) throws ObjectNotFoundException,
+            UnexpectedException {
+        return underlying.markSubjectAsUnread(subject, localOnly, immediate);
+    }
+
+    @Override
+    public void changeUnread(int nUnread, long conference)
+            throws ObjectNotFoundException, UnexpectedException {
+        underlying.changeUnread(nUnread, conference);
+    }
+
+    @Override
+    public void changeUnreadInAllConfs(int nUnread)
+            throws ObjectNotFoundException, UnexpectedException {
+        underlying.changeUnreadInAllConfs(nUnread);
+    }
+
+    @Override
+    public MessageAttribute[] getMessageAttributes(long message)
+            throws UnexpectedException {
+        return underlying.getMessageAttributes(message);
+    }
+
+    @Override
+    public MessageAttribute[] getMatchingMessageAttributes(long message,
+            short kind) throws UnexpectedException {
+        return underlying.getMatchingMessageAttributes(message, kind);
+    }
+
+    @Override
+    public boolean selectMessagesLocallyByAuthor(long conference, long user)
+            throws UnexpectedException {
+        return underlying.selectMessagesLocallyByAuthor(conference, user);
+    }
+
+    @Override
+    public boolean selectMessagesGloballyByAuthor(long user)
+            throws UnexpectedException {
+        return underlying.selectMessagesGloballyByAuthor(user);
+    }
+
+    @Override
+    public boolean selectMessagesGlobally(String searchterm)
+            throws UnexpectedException {
+        return underlying.selectMessagesGlobally(searchterm);
+    }
+
+    @Override
+    public boolean selectGrepMessagesLocally(long conference, String searchterm)
+            throws UnexpectedException {
+        return underlying.selectGrepMessagesLocally(conference, searchterm);
+    }
+
+    @Override
+    public boolean selectMessagesLocally(long conference, String searchterm)
+            throws UnexpectedException {
+        return underlying.selectMessagesLocally(conference, searchterm);
+    }
+
+    @Override
+    public NameAssociation[] listReaders(MessageLocator ml)
+            throws UnexpectedException, NoCurrentMessageException {
+        return underlying.listReaders(ml);
+    }
+
+    @Override
+    public boolean selectCommentsGloballyToAuthor(long user, Timestamp startDate)
+            throws UnexpectedException {
+        return underlying.selectCommentsGloballyToAuthor(user, startDate);
+    }
+
+    @Override
+    public MessageOccurrence postIncomingEmail(String sender, String receiver,
+            Date sent, Date received, String subject, String content)
+            throws EmailRecipientNotRecognizedException,
+            EmailSenderNotRecognizedException, AuthorizationException,
+            UnexpectedException {
+        return underlying.postIncomingEmail(sender, receiver, sent, received,
+                subject, content);
+    }
+
+    @Override
+    public SelectedMessages getSelectedMessages() {
+        return underlying.getSelectedMessages();
+    }
+
+    @Override
+    public void setActivity(short activity, boolean keepState) {
+        underlying.setActivity(activity, keepState);
+    }
+
+    @Override
+    public void restoreState() {
+        underlying.restoreState();
+    }
+
+    @Override
+    public void clearStates() {
+        underlying.clearStates();
+    }
+
+    @Override
+    public short getActivity() {
+        return underlying.getActivity();
+    }
+
+    @Override
+    public void setActivityString(String text) {
+        underlying.setActivityString(text);
+    }
+
+    @Override
+    public String getActivityString() {
+        return underlying.getActivityString();
+    }
+
+    @Override
+    public long getLastObject() {
+        return underlying.getLastObject();
+    }
+
+    @Override
+    public void setLastObject(long ID) {
+        underlying.setLastObject(ID);
     }
 }
